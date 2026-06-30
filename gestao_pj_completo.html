@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Gestão de Contratos e Folha PJ</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        .tab-active { border-bottom: 3px solid #1d4ed8; color: #1e3a8a; font-weight: 700; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-blue-900 text-white shadow-lg px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+            <div class="bg-blue-600 p-2 rounded-lg font-black text-xl tracking-wider">PJ</div>
+            <div>
+                <h1 class="text-xl font-bold tracking-tight">ConnectPJ</h1>
+                <p class="text-xs text-blue-200">Central de Contratos, Automação de NFs & Folha</p>
+            </div>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="bg-blue-950 p-1 rounded-lg flex gap-1 text-xs font-semibold">
+                <button id="perfilAdmin" onclick="mudarPerfil('admin')" class="px-3 py-1.5 rounded bg-blue-600 text-white transition-all cursor-pointer">Painel Corporativo (RH/Fin)</button>
+                <button id="perfilPj" onclick="mudarPerfil('pj')" class="px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer">Área do Prestador (PJ)</button>
+            </div>
+        </div>
+    </header>
+
+    <nav id="menuCorporativo" class="bg-white border-b border-slate-200 px-6 flex gap-6 text-sm text-slate-600 font-medium">
+        <button onclick="mudarAba('visao-geral')" id="tab-visao-geral" class="py-3 px-1 tab-active cursor-pointer transition-all">Dashboard & Folha Mensal</button>
+        <button onclick="mudarAba('contratos')" id="tab-contratos" class="py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all">Contratos Cadastrados</button>
+        <button onclick="mudarAba('relatorios')" id="tab-relatorios" class="py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all">Relatórios & Centro de Custos</button>
+    </nav>
+
+    <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
+
+        <section id="aba-visao-geral" class="space-y-6 block section-corporativa">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Folha de Competência</p>
+                        <p class="text-2xl font-black text-blue-900">Junho/2026</p>
+                    </div>
+                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">📅</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bruto Processado</p>
+                        <p class="text-2xl font-black text-emerald-600" id="kpiTotalBruto">R$ 38.000,00</p>
+                    </div>
+                    <div class="text-emerald-600 bg-emerald-50 p-3 rounded-xl text-xl">💰</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Notas Fiscais Validadas</p>
+                        <p class="text-2xl font-black text-blue-900" id="kpiNfsValidadas">0 / 3</p>
+                    </div>
+                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">🛡️</div>
+                </div>
+                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Contratos Ativos</p>
+                        <p class="text-2xl font-black text-blue-900">3 Empresas</p>
+                    </div>
+                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">💼</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="border-b border-slate-100 pb-3 mb-4">
+                    <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">⚙️ Motor Financeiro: Ajustes e Lançamentos Especiais</h3>
+                    <p class="text-xs text-slate-500">Adicione bônus, comissões ou crie uma Folha Complementar caso o valor fixo contratual já tenha sido pago.</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end text-sm">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">1. Selecionar Contrato PJ</label>
+                        <select id="motorContrato" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="0">Tech Solutions LTDA (TI)</option>
+                            <option value="1">Alpha Marketing S.A. (MKT)</option>
+                            <option value="2">Consultoria RH Forte (RH)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">2. Tipo de Lançamento</label>
+                        <select id="motorTipoFolha" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="regular">Folha Regular (Soma ao Fixo Mensal)</option>
+                            <option value="complementar">Folha Complementar (Bônus/Extra Isolado)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">3. Evento Financeiro</label>
+                        <select id="motorEvento" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
+                            <option value="Bônus">Bônus por Performance</option>
+                            <option value="Comissão">Comissão de Vendas</option>
+                            <option value="Hora Extra">Horas Extras Atendidas</option>
+                            <option value="Desconto">Descontos / Glosas Contractuais</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">4. Valor do Evento (R$)</label>
+                        <input type="number" id="motorValor" class="w-full p-2 rounded border border-slate-300" placeholder="0.00" value="1500">
+                    </div>
+                    <div>
+                        <button onclick="processarLancamentoMotor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all cursor-pointer shadow">
+                            Aplicar e Atualizar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div class="p-4 bg-slate-50 border-b border-slate-200">
+                    <h3 class="font-bold text-blue-900">Consolidação de Folha e Status de Recebimento de Notas Fiscais</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-xs font-bold uppercase text-slate-600 border-b border-slate-200">
+                                <th class="p-4">Razão Social / CNPJ / Tipo</th>
+                                <th class="p-4">Centro de Custo</th>
+                                <th class="p-4">Memória de Cálculo</th>
+                                <th class="p-4">Líquido Calculado</th>
+                                <th class="p-4">Status Validação</th>
+                                <th class="p-4 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaFolhaCorpo" class="text-sm divide-y divide-slate-100">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="aba-contratos" class="space-y-6 hidden section-corporativa">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
+                    <div>
+                        <h3 class="text-lg font-bold text-blue-900">Repositório de Contratos PJ Vigentes</h3>
+                        <p class="text-xs text-slate-500">Centralização documental e dados estruturais de contratação de pessoas jurídicas.</p>
+                    </div>
+                    <button onclick="alert('Funcionalidade de abertura de formulário de cadastro simulada no protótipo.')" class="bg-blue-600 text-white font-bold text-xs py-2 px-4 rounded-lg hover:bg-blue-700 cursor-pointer">+ Novo Contrato</button>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-bold uppercase">
+                                <th class="p-3">Prestador / CNPJ</th>
+                                <th class="p-3">Vigência</th>
+                                <th class="p-3">Valor Fixo Mensal</th>
+                                <th class="p-3">Centro de Custo</th>
+                                <th class="p-3">Responsável Interno</th>
+                                <th class="p-3">Documentos Anexados</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaContratosCorpo" class="divide-y divide-slate-100 text-slate-700">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section id="aba-relatorios" class="space-y-6 hidden section-corporativa">
+            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <div class="border-b border-slate-100 pb-3 mb-4">
+                    <h3 class="text-lg font-bold text-blue-900">📊 Gerador de Relatórios e Auditoria</h3>
+                    <p class="text-xs text-slate-500">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-bold mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                    <div>
+                        <label class="block text-slate-600 mb-1">Filtrar por Centro de Custo</label>
+                        <select id="filtroCc" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
+                            <option value="todos">-- Todos os Centros de Custo --</option>
+                            <option value="TI - Desenvolvimento">TI - Desenvolvimento</option>
+                            <option value="Marketing & Growth">Marketing & Growth</option>
+                            <option value="Recursos Humanos">Recursos Humanos</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 mb-1">Filtrar por Prestador PJ</label>
+                        <select id="filtroPj" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
+                            <option value="todos">-- Todos os Contratados --</option>
+                            <option value="Tech Solutions LTDA">Tech Solutions LTDA</option>
+                            <option value="Alpha Marketing S.A.">Alpha Marketing S.A.</option>
+                            <option value="Consultoria RH Forte">Consultoria RH Forte</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-slate-600 mb-1">Filtrar por Tipo de Folha</label>
+                        <select id="filtroTipo" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
+                            <option value="todos">-- Todas as Folhas --</option>
+                            <option value="Regular">Apenas Regulares</option>
+                            <option value="Complementar">Apenas Complementares (Prêmios/Extras)</option>
+                        </select>
+                    </div>
+                    <div class="flex items-end">
+                        <button onclick="exportarDadosSimulados()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded text-sm transition-all cursor-pointer text-center">
+                            ⬇️ Exportar Relatório (CSV/Excel)
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm border-collapse">
+                        <thead>
+                            <tr class="bg-blue-900 text-white text-xs font-bold uppercase">
+                                <th class="p-3 rounded-tl">Prestador</th>
+                                <th class="p-3">Centro de Custo</th>
+                                <th class="p-3">Tipo de Folha</th>
+                                <th class="p-3">Composição / Detalhe</th>
+                                <th class="p-3 rounded-tr text-right">Líquido Pago/Aprovado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaRelatorioCorpo" class="divide-y divide-slate-200">
+                            </tbody>
+                        <tfoot>
+                            <tr class="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
+                                <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO NA CONSULTA:</td>
+                                <td id="totalRelatorioSoma" class="p-3 text-right text-blue-900 font-black text-base">R$ 0,00</td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+
+        <section id="painelPjContainer" class="space-y-6 hidden">
+            <div class="bg-blue-50 border-l-4 border-blue-600 p-5 rounded-r-xl shadow-sm">
+                <h3 class="font-bold text-blue-900 text-lg">Ambiente Restrito do Prestador PJ</h3>
+                <p class="text-sm text-blue-700">Selecione sua empresa abaixo para simular a visão do seu painel e efetuar a subida mandatória de Notas Fiscais e arquivos XML.</p>
+                
+                <div class="mt-3 max-w-xs">
+                    <select id="seletorLoginPj" onchange="atualizarInterfacePortalPj()" class="w-full p-2 bg-white rounded border border-blue-300 font-semibold text-sm text-blue-900">
+                        <option value="0">Tech Solutions LTDA</option>
+                        <option value="1">Alpha Marketing S.A.</option>
+                        <option value="2">Consultoria RH Forte</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="gridPjAcoes" class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
+                    <div>
+                        <span id="pjBadgeTipo" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wide">Folha Regular</span>
+                        <h4 class="font-black text-slate-800 text-base mt-2" id="pjNomeFicha">Tech Solutions LTDA</h4>
+                        <p class="text-xs text-slate-400 mb-4" id="pjCnpjFicha">CNPJ: 12.345.678/0001-99</p>
+                        
+                        <div class="space-y-3 text-sm">
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Valor Base Contratual:</span>
+                                <span class="font-bold text-slate-800" id="pjValorBaseTxt">R$ 12.000,00</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-slate-500">Variáveis / Adicionais:</span>
+                                <span class="font-bold text-emerald-600" id="pjVariavelTxt">+ R$ 1.500,00</span>
+                            </div>
+                            <div class="flex justify-between border-b border-slate-100 pb-3">
+                                <span class="text-slate-500">Eventos Desconto:</span>
+                                <span class="font-bold text-rose-600" id="pjDescontoTxt">- R$ 500,00</span>
+                            </div>
+                            <div class="flex justify-between items-center pt-1">
+                                <span class="font-bold text-slate-900 uppercase text-xs tracking-wider">Líquido Calculado:</span>
+                                <span class="text-xl font-black text-blue-700" id="pjLiquidoTxt">R$ 13.000,00</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-4 font-medium">
+                        ⚠️ Atenção: A sua Nota Fiscal deve possuir exatamente o valor líquido acima especificado para ser aprovada pelo robô fiscal.
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm md:col-span-2 space-y-4">
+                    <h3 class="font-bold text-blue-900 text-lg flex items-center gap-2">📤 Central de Upload de Faturamento</h3>
+                    <p class="text-xs text-slate-500">Insira a NF (PDF) e o arquivo correspondente emitido na prefeitura (XML).</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="border-2 border-dashed border-slate-200 p-5 rounded-xl text-center bg-slate-50 hover:border-blue-400 transition-all">
+                            <span class="text-3xl block mb-2">📄</span>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Nota Fiscal Eletrônica (PDF)</label>
+                            <input type="file" id="inputPjPdf" accept=".pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                        <div class="border-2 border-dashed border-slate-200 p-5 rounded-xl text-center bg-slate-50 hover:border-blue-400 transition-all">
+                            <span class="text-3xl block mb-2">💾</span>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Arquivo Integrador (XML)</label>
+                            <input type="file" id="inputPjXml" accept=".xml" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
+                        </div>
+                    </div>
+
+                    <div id="respostaValidacaoPj" class="hidden p-4 rounded-lg text-sm border"></div>
+
+                    <div class="flex justify-end">
+                        <button onclick="executarValidadorPj()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow text-sm transition-all cursor-pointer">
+                            Submeter Documentos para Validação Fiscal
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
+            <h3 class="font-bold text-xs text-blue-900 uppercase tracking-wider mb-2">🛡️ Histórico de Auditoria e Logs do Sistema (Rastreabilidade Completa)</h3>
+            <div id="caixaLogsAuditoria" class="bg-slate-900 text-slate-300 p-4 rounded-lg font-mono text-xs space-y-1 max-h-36 overflow-y-auto">
+                <p class="text-slate-500">[30/06/2026 18:00:00] - Banco de dados PostgreSQL conectado com sucesso.</p>
+                <p class="text-slate-500">[30/06/2026 18:01:05] - Contratos importados do módulo ERP.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="bg-slate-900 text-slate-400 text-xs py-4 px-6 text-center border-t border-slate-800 mt-auto">
+        Plataforma ConnectPJ S.A. v2.4 - Ambiente Demonstrativo de Engenharia de Software. Ano 2026.
+    </footer>
+
+    <script>
+        // BANCO DE DADOS EM MEMÓRIA PARA TESTES DO PROTÓTIPO
+        let bancoContratos = [
+            { id: 0, razaoSocial: "Tech Solutions LTDA", cnpj: "12.345.678/0001-99", gestor: "Carlos Silva", centroCusto: "TI - Desenvolvimento", fixo: 12000.00, vigencia: "01/01/2026 a 31/12/2027", documentos: ["Contrato_Assinado.pdf", "Aditivo_01.pdf"] },
+            { id: 1, razaoSocial: "Alpha Marketing S.A.", cnpj: "98.765.432/0001-11", gestor: "Mariana Costa", centroCusto: "Marketing & Growth", fixo: 15000.00, vigencia: "15/03/2025 a 14/03/2027", documentos: ["Contrato_Digital.pdf"] },
+            { id: 2, razaoSocial: "Consultoria RH Forte", cnpj: "44.555.666/0001-22", gestor: "Roberto Souza", centroCusto: "Recursos Humanos", fixo: 8000.00, vigencia: "10/10/2025 a 09/10/2026", documentos: ["Contrato_Prestacao.pdf"] }
+        ];
+
+        let bancoFolhaMensal = [
+            { id: 0, contratoId: 0, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 12000.00, adicional: 1500.00, desconto: 500.00, liquido: 13000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
+            { id: 1, contratoId: 1, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 15000.00, adicional: 0.00, desconto: 0.00, liquido: 15000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
+            { id: 2, contratoId: 2, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 8000.00, adicional: 2000.00, desconto: 0.00, liquido: 10000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" }
+        ];
+
+        // INICIALIZADOR DO SISTEMA
+        window.onload = function() {
+            renderizarFolhaMensal();
+            renderizarContratos();
+            aplicarFiltrosRelatorio();
+            atualizarInterfacePortalPj();
+        };
+
+        // ALTERNADORES DE INTERFACE (PERFIS E ABAS)
+        function mudarPerfil(perfil) {
+            const menuCorp = document.getElementById('menuCorporativo');
+            const secoesCorp = document.querySelectorAll('.section-corporativa');
+            const painelPj = document.getElementById('painelPjContainer');
+            
+            document.getElementById('perfilAdmin').className = "px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer";
+            document.getElementById('perfilPj').className = "px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer";
+
+            if(perfil === 'admin') {
+                document.getElementById('perfilAdmin').classList.add('bg-blue-600', 'text-white');
+                menuCorp.classList.remove('hidden');
+                menuCorp.classList.add('flex');
+                painelPj.classList.add('hidden');
+                mudarAba('visao-geral');
+                gravarLog("Usuário alterou nível de acesso para: ADMINISTRATIVO/RH.");
+            } else {
+                document.getElementById('perfilPj').classList.add('bg-blue-600', 'text-white');
+                menuCorp.classList.add('hidden');
+                menuCorp.classList.remove('flex');
+                secoesCorp.forEach(s => s.classList.add('hidden'));
+                painelPj.classList.remove('hidden');
+                atualizarInterfacePortalPj();
+                gravarLog("Acesso restrito simulado iniciado pelo portal do CONTRATADO.");
+            }
+        }
+
+        function mudarAba(abaId) {
+            document.querySelectorAll('.section-corporativa').forEach(s => s.classList.add('hidden'));
+            document.getElementById('aba-' + abaId).classList.remove('hidden');
+            
+            document.querySelectorAll('#menuCorporativo button').forEach(b => b.className = "py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all");
+            document.getElementById('tab-' + abaId).className = "py-3 px-1 tab-active cursor-pointer transition-all";
+            
+            if(abaId === 'relatorios') aplicarFiltrosRelatorio();
+        }
+
+        // RENDERIZADORES DE TABELAS DINÂMICAS
+        function renderizarFolhaMensal() {
+            const corpo = document.getElementById('tabelaFolhaCorpo');
+            corpo.innerHTML = "";
+            let somaBruta = 0;
+            let totalNfs = 0;
+
+            bancoFolhaMensal.forEach((item, index) => {
+                const pj = bancoContratos.find(c => c.id === item.contratoId);
+                somaBruta += item.liquido;
+                if(item.status === 'Aprovado') totalNfs++;
+
+                let statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded font-bold">Aguardando Envio</span>`;
+                if(item.status === 'Enviado') statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">Nota Recebida (Análise)</span><br><span class="text-[10px] text-slate-500 font-mono">${item.xmlNome}</span>`;
+                if(item.status === 'Aprovado') statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">✓ Aprovado e Liquidado</span><br><span class="text-[10px] text-slate-400 font-mono">${item.dataAprovacao}</span>`;
+
+                let acaoBotao = `<button disabled class="bg-slate-200 text-slate-400 text-xs font-bold py-1.5 px-3 rounded cursor-not-allowed">Liberar Pagamento</button>`;
+                if(item.status === 'Enviado') acaoBotao = `<button onclick="aprovarPagamentoAdmin(${index})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded cursor-pointer transition-all shadow">Aprovar Pagto</button>`;
+                if(item.status === 'Aprovado') acaoBotao = `<span class="text-emerald-600 font-bold text-xs">💸 Pago</span>`;
+
+                corpo.innerHTML += `
+                    <tr>
+                        <td class="p-4">
+                            <p class="font-bold text-slate-900">${pj.razaoSocial}</p>
+                            <p class="text-xs text-slate-400">CNPJ: ${pj.cnpj} | <span class="italic text-blue-700">${item.tipo}</span></p>
+                        </td>
+                        <td class="p-4"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-medium">${pj.centroCusto}</span></td>
+                        <td class="p-4 text-xs font-mono text-slate-500">
+                            Base: ${formatarMoeda(item.base)}<br>
+                            <span class="text-emerald-600">+ Var: ${formatarMoeda(item.adicional)}</span><br>
+                            <span class="text-rose-600">- Desc: ${formatarMoeda(item.desconto)}</span>
+                        </td>
+                        <td class="p-4 font-black text-blue-900 text-base">${formatarMoeda(item.liquido)}</td>
+                        <td class="p-4">${statusBadge}</td>
+                        <td class="p-4 text-center">${acaoBotao}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('kpiTotalBruto').innerText = formatarMoeda(somaBruta);
+            document.getElementById('kpiNfsValidadas').innerText = `${totalNfs} / ${bancoFolhaMensal.length}`;
+        }
+
+        function renderizarContratos() {
+            const corpo = document.getElementById('tabelaContratosCorpo');
+            corpo.innerHTML = "";
+            bancoContratos.forEach(c => {
+                let docsHtml = c.documentos.map(d => `<a href="#" onclick="alert('Baixando arquivo criptografado do AWS S3 do protótipo')" class="text-blue-600 hover:underline block text-xs">📁 ${d}</a>`).join('');
+                corpo.innerHTML += `
+                    <tr class="hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-900">${c.razaoSocial}<br><span class="text-xs text-slate-400">CNPJ: ${c.cnpj}</span></td>
+                        <td class="p-3 text-xs">${c.vigencia}</td>
+                        <td class="p-3 font-semibold text-slate-800">${formatarMoeda(c.fixo)}</td>
+                        <td class="p-3"><span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-semibold">${c.centroCusto}</span></td>
+                        <td class="p-3 text-xs text-slate-600">${c.gestor}</td>
+                        <td class="p-3">${docsHtml}</td>
+                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-bold">Ativo</span></td>
+                    </tr>
+                `;
+            });
+        }
+
+        // MOTOR FINANCEIRO: APLICAÇÃO DE REGRAS DE NEGÓCIO E ADIÇÃO DE FOLHA COMPLEMENTAR
+        function processarLancamentoMotor() {
+            const contratoId = parseInt(document.getElementById('motorContrato').value);
+            const tipoFolha = document.getElementById('motorTipoFolha').value;
+            const evento = document.getElementById('motorEvento').value;
+            const valor = parseFloat(document.getElementById('motorValor').value) || 0;
+
+            const pjAlvo = bancoContratos.find(c => c.id === contratoId);
+
+            if(tipoFolha === 'regular') {
+                // Modifica a folha base/regular existente
+                let folha = bancoFolhaMensal.find(f => f.contratoId === contratoId && f.tipo === "Regular");
+                if(evento === 'Desconto') {
+                    folha.desconto = valor;
+                } else {
+                    folha.adicional = valor;
+                }
+                folha.liquido = folha.base + folha.adicional - folha.desconto;
+                gravarLog(`Alterada Folha Regular de ${pjAlvo.razaoSocial}: Evento [${evento}] de R$ ${valor} aplicado.`);
+            } else {
+                // Criação de uma Folha Complementar Isolada (Caso o fixo já tenha sido fechado ou pago)
+                let novaFolhaComp = {
+                    id: bancoFolhaMensal.length,
+                    contratoId: contratoId,
+                    tipo: "Complementar",
+                    descricao: `Folha Extra: ${evento}`,
+                    base: 0.00,
+                    adicional: valor,
+                    desconto: 0.00,
+                    liquido: valor,
+                    status: "Aguardando Envio",
+                    xmlNome: "",
+                    dataAprovacao: ""
+                };
+                bancoFolhaMensal.push(novaFolhaComp);
+                gravarLog(`⚠️ EMISSÃO EXTRA: Gerada Folha Complementar para ${pjAlvo.razaoSocial} referente a ${evento} no valor de ${formatarMoeda(valor)}.`);
+            }
+
+            renderizarFolhaMensal();
+            alert("Operação financeira executada! O portal do contratado correspondente já foi atualizado em tempo real.");
+        }
+
+        // VISÃO DO CONTRATADO PJ (SIMULADOR DE ENVIO)
+        function atualizarInterfacePortalPj() {
+            const idxContratoSelecionado = parseInt(document.getElementById('seletorLoginPj').value);
+            
+            // Busca a folha mais recente pendente desse prestador
+            let folha = bancoFolhaMensal.slice().reverse().find(f => f.contratoId === idxContratoSelecionado);
+            let pj = bancoContratos.find(c => c.id === idxContratoSelecionado);
+
+            if(!folha) return;
+
+            document.getElementById('pjNomeFicha').innerText = pj.razaoSocial;
+            document.getElementById('pjCnpjFicha').innerText = `CNPJ: ${pj.cnpj}`;
+            document.getElementById('pjBadgeTipo').innerText = `Folha ${folha.type || folha.tipo}`;
+            document.getElementById('pjValorBaseTxt').innerText = formatarMoeda(folha.base);
+            document.getElementById('pjVariavelTxt').innerText = "+ " + formatarMoeda(folha.adicional);
+            document.getElementById('pjDescontoTxt').innerText = "- " + formatarMoeda(folha.desconto);
+            document.getElementById('pjLiquidoTxt').innerText = formatarMoeda(folha.liquido);
+
+            // Reseta feedback visual de upload
+            const box = document.getElementById('respostaValidacaoPj');
+            box.classList.add('hidden');
+        }
+
+        function executarValidadorPj() {
+            const filePdf = document.getElementById('inputPjPdf').files[0];
+            const fileXml = document.getElementById('inputPjXml').files[0];
+            const box = document.getElementById('respostaValidacaoPj');
+            
+            box.className = "p-4 rounded-lg text-sm border block";
+
+            if (!filePdf || !fileXml) {
+                box.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-200');
+                box.innerHTML = "❌ <strong>Erro Fiscal SRE:</strong> Sistema exige obrigatoriamente a subida do binário da Nota (.PDF) e do arquivo de estruturação XML da prefeitura.";
+                return;
+            }
+
+            const idxContratoSelecionado = parseInt(document.getElementById('seletorLoginPj').value);
+            let folha = bancoFolhaMensal.slice().reverse().find(f => f.contratoId === idxContratoSelecionado);
+
+            box.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
+            box.innerHTML = `
+                <p>⚙️ <strong>Robô XML ConnectPJ:</strong> Arquivo lido com sucesso!</p>
+                <ul class="list-disc list-inside text-xs mt-1 space-y-0.5">
+                    <li>CNPJ do Prestador bate com o cadastro corporativo.</li>
+                    <li>Valor Líquido do XML bate com o cálculo do sistema: <strong>${formatarMoeda(folha.liquido)}</strong>.</li>
+                    <li>Status da Folha alterado para: Aguardando Aprovação do Financeiro.</li>
+                </ul>
+            `;
+
+            folha.status = "Enviado";
+            folha.xmlNome = fileXml.name;
+
+            renderizarFolhaMensal();
+            gravarLog(`Prestador [${bancoContratos[idxContratoSelecionado].razaoSocial}] efetuou o upload de ${fileXml.name}. Validação automática com 100% de match.`);
+        }
+
+        // LIBERAÇÃO FINANCEIRA ADMIN
+        function aprovarPagamentoAdmin(index) {
+            const f = bancoFolhaMensal[index];
+            const data = new Date();
+            f.status = "Aprovado";
+            f.dataAprovacao = `${data.toLocaleDateString('pt-BR')} às ${data.toLocaleTimeString('pt-BR')}`;
+            
+            renderizarFolhaMensal();
+            gravarLog(`💸 PAGAMENTO LIQUIDADO: Ordem bancária aprovada e disparada para a folha ID #${f.id}. Nota Fiscal arquivada.`);
+            alert("Sucesso! Pagamento liquidado e arquivado para auditoria.");
+        }
+
+        // MÓDULO DE CONSULTAS E FILTROS DE RELATÓRIO
+        function aplicarFiltrosRelatorio() {
+            const cc = document.getElementById('filtroCc').value;
+            const pjNome = document.getElementById('filtroPj').value;
+            const tipo = document.getElementById('filtroTipo').value;
+            const corpo = document.getElementById('tabelaRelatorioCorpo');
+            
+            corpo.innerHTML = "";
+            let somaFiltro = 0;
+
+            bancoFolhaMensal.forEach(f => {
+                const pj = bancoContratos.find(c => c.id === f.contratoId);
+
+                // Regras de filtragem cascata
+                if (cc !== 'todos' && pj.centroCusto !== cc) return;
+                if (pjNome !== 'todos' && pj.razaoSocial !== pjNome) return;
+                if (tipo !== 'todos' && f.tipo !== tipo) return;
+
+                somaFiltro += f.liquido;
+
+                corpo.innerHTML += `
+                    <tr class="hover:bg-slate-50 text-slate-700">
+                        <td class="p-3 font-bold">${pj.razaoSocial}</td>
+                        <td class="p-3"><span class="text-xs bg-slate-100 p-1 rounded">${pj.centroCusto}</span></td>
+                        <td class="p-3 text-xs font-semibold">${f.tipo}</td>
+                        <td class="p-3 text-xs italic text-slate-500">${f.descricao || 'Folha Regular'} (Fixo: ${f.base} + Adic: ${f.adicional})</td>
+                        <td class="p-3 text-right font-bold text-slate-900">${formatarMoeda(f.liquido)}</td>
+                    </tr>
+                `;
+            });
+
+            document.getElementById('totalRelatorioSoma').innerText = formatarMoeda(somaFiltro);
+        }
+
+        function exportarDadosSimulados() {
+            alert("Ação do Protótipo: Relatório estruturado convertido em formato CSV e enviado para a pasta de downloads do seu computador.");
+            gravarLog("Exportação de dados em lote realizada pelo usuário de Gestão.");
+        }
+
+        // FERRAMENTAS AUXILIARES
+        function formatarMoeda(v) {
+            return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
+        }
+
+        function gravarLog(texto) {
+            const box = document.getElementById('caixaLogsAuditoria');
+            const agora = new Date();
+            const timeStr = agora.toLocaleTimeString('pt-BR');
+            box.innerHTML += `<p class="text-blue-400">[30/06/2026 ${timeStr}] - ${texto}</p>`;
+            box.scrollTop = box.scrollHeight;
+        }
+    </script>
+</body>
+</html>
