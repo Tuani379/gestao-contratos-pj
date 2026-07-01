@@ -601,5 +601,34 @@
             box.scrollTop = box.scrollHeight;
         }
     </script>
+<!-- O resto do seu código gigante vai estar aqui para cima... -->
+
+    <!-- COLE A PARTIR DAQUI: -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+        authDomain: "connectpj-15532.firebaseapp.com",
+        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+        projectId: "connectpj-15532",
+        storageBucket: "connectpj-15532.firebasestorage.app",
+        messagingSenderId: "658474420007",
+        appId: "1:658474420007:web:94f3331b69b2a298af4b02",
+        measurementId: "G-F57NPNB1EJ"
+      };
+
+      // Inicializa o Firebase, Analytics e Banco de Dados
+      const app = initializeApp(firebaseConfig);
+      const analytics = getAnalytics(app);
+      const db = getDatabase(app);
+
+      // O banco já está conectado! 
+      console.log("Firebase conectado com sucesso!");
+    </script>
+</body>
+</html>
 </body>
 </html>
