@@ -318,7 +318,7 @@
         Plataforma ConnectPJ S.A. v2.4 - Ambiente Demonstrativo de Engenharia de Software. Ano 2026.
     </footer>
 
-    <script type="module">
+    <script <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
@@ -340,7 +340,7 @@
 
         console.log("Firebase conectado com sucesso!");
 
-        // Variaveis de dados locais sincronizadas com a nuvem
+        // Variáveis de dados locais sincronizadas com a nuvem
         let bancoContratos = [];
         let bancoFolhaMensal = [];
 
@@ -354,7 +354,7 @@
         const folhaInicial = [
             { id: 0, contratoId: 0, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 12000.00, adicional: 1500.00, desconto: 500.00, liquido: 13000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
             { id: 1, contratoId: 1, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 15000.00, adicional: 0.00, desconto: 0.00, liquido: 15000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
-            { id: 2, contratoId: 2, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 8000.00, adicional: 2000.00, discount: 0.00, liquido: 10000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" }
+            { id: 2, contratoId: 2, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 8000.00, adicional: 2000.00, desconto: 0.00, liquido: 10000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" }
         ];
 
         // --- SINCRONIZAÇÃO EM TEMPO REAL ---
@@ -436,194 +436,4 @@
                 corpo.innerHTML += `
                     <tr>
                         <td class="p-4">
-                            <p class="font-bold text-slate-900">${pj.razaoSocial}</p>
-                            <p class="text-xs text-slate-400">CNPJ: ${pj.cnpj} | <span class="italic text-blue-700">${item.tipo}</span></p>
-                        </td>
-                        <td class="p-4"><span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-xs font-medium">${pj.centroCusto}</span></td>
-                        <td class="p-4 text-xs font-mono text-slate-500">
-                            Base: ${formatarMoeda(item.base)}<br>
-                            <span class="text-emerald-600">+ Var: ${formatarMoeda(item.adicional)}</span><br>
-                            <span class="text-rose-600">- Desc: ${formatarMoeda(item.desconto)}</span>
-                        </td>
-                        <td class="p-4 font-black text-blue-900 text-base">${formatarMoeda(item.liquido)}</td>
-                        <td class="p-4">${statusBadge}</td>
-                        <td class="p-4 text-center">${acaoBotao}</td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('kpiTotalBruto').innerText = formatarMoeda(somaBruta);
-            document.getElementById('kpiNfsValidadas').innerText = `${totalNfs} / ${bancoFolhaMensal.length}`;
-        }
-
-        function renderizarContratos() {
-            const corpo = document.getElementById('tabelaContratosCorpo');
-            if(!corpo) return;
-            corpo.innerHTML = "";
-            bancoContratos.forEach(c => {
-                let docsHtml = c.documentos.map(d => `<a href="#" onclick="alert('Baixando arquivo criptografado')" class="text-blue-600 hover:underline block text-xs">📁 ${d}</a>`).join('');
-                corpo.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-slate-900">${c.razaoSocial}<br><span class="text-xs text-slate-400">CNPJ: ${c.cnpj}</span></td>
-                        <td class="p-3 text-xs">${c.vigencia}</td>
-                        <td class="p-3 font-semibold text-slate-800">${formatarMoeda(c.fixo)}</td>
-                        <td class="p-3"><span class="bg-blue-50 text-blue-800 px-2 py-0.5 rounded text-xs font-semibold">${c.centroCusto}</span></td>
-                        <td class="p-3 text-xs text-slate-600">${c.gestor}</td>
-                        <td class="p-3">${docsHtml}</td>
-                        <td class="p-3"><span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-0.5 rounded-full font-bold">Ativo</span></td>
-                    </tr>
-                `;
-            });
-        }
-
-        function processarLancamentoMotor() {
-            const contratoId = parseInt(document.getElementById('motorContrato').value);
-            const tipoFolha = document.getElementById('motorTipoFolha').value;
-            const evento = document.getElementById('motorEvento').value;
-            const valor = parseFloat(document.getElementById('motorValor').value) || 0;
-
-            const pjAlvo = bancoContratos.find(c => c.id === contratoId);
-            if(!pjAlvo) return;
-
-            if(tipoFolha === 'regular') {
-                let folha = bancoFolhaMensal.find(f => f.contratoId === contratoId && f.tipo === "Regular");
-                if(folha) {
-                    if(evento === 'Desconto') { folha.desconto = valor; } 
-                    else { folha.adicional = valor; }
-                    folha.liquido = folha.base + folha.adicional - folha.desconto;
-                    gravarLog(`Alterada Folha Regular de ${pjAlvo.razaoSocial}: Evento [${evento}] de R$ ${valor} aplicado.`);
-                }
-            } else {
-                let novaFolhaComp = {
-                    id: bancoFolhaMensal.length,
-                    contratoId: contratoId,
-                    tipo: "Complementar",
-                    descricao: `Folha Extra: ${evento}`,
-                    base: 0.00,
-                    adicional: valor,
-                    desconto: 0.00,
-                    liquido: valor,
-                    status: "Aguardando Envio",
-                    xmlNome: "",
-                    dataAprovacao: ""
-                };
-                bancoFolhaMensal.push(novaFolhaComp);
-                gravarLog(`⚠️ EMISSÃO EXTRA: Gerada Folha Complementar para ${pjAlvo.razaoSocial} de ${formatarMoeda(valor)}.`);
-            }
-
-            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
-            alert("Operação financeira enviada para o Firebase na nuvem!");
-        }
-
-        function atualizarInterfacePortalPj() {
-            const seletor = document.getElementById('seletorLoginPj');
-            if(!seletor) return;
-            const idx = parseInt(seletor.value);
-            
-            let folha = bancoFolhaMensal.slice().reverse().find(f => f.contratoId === idx);
-            let pj = bancoContratos.find(c => c.id === idx);
-            if(!folha || !pj) return;
-
-            document.getElementById('pjNomeFicha').innerText = pj.razaoSocial;
-            document.getElementById('pjCnpjFicha').innerText = `CNPJ: ${pj.cnpj}`;
-            document.getElementById('pjBadgeTipo').innerText = `Folha ${folha.tipo}`;
-            document.getElementById('pjValorBaseTxt').innerText = formatarMoeda(folha.base);
-            document.getElementById('pjVariavelTxt').innerText = "+ " + formatarMoeda(folha.adicional);
-            document.getElementById('pjDescontoTxt').innerText = "- " + formatarMoeda(folha.desconto);
-            document.getElementById('pjLiquidoTxt').innerText = formatarMoeda(folha.liquido);
-
-            document.getElementById('respostaValidacaoPj').classList.add('hidden');
-        }
-
-        function executarValidadorPj() {
-            const filePdf = document.getElementById('inputPjPdf').files[0];
-            const fileXml = document.getElementById('inputPjXml').files[0];
-            const box = document.getElementById('respostaValidacaoPj');
-            box.className = "p-4 rounded-lg text-sm border block";
-
-            if (!filePdf || !fileXml) {
-                box.classList.add('bg-rose-50', 'text-rose-800', 'border-rose-200');
-                box.innerHTML = "❌ <strong>Erro Fiscal SRE:</strong> É obrigatório subir o PDF e o XML da Nota.";
-                return;
-            }
-
-            const idx = parseInt(document.getElementById('seletorLoginPj').value);
-            let folha = bancoFolhaMensal.slice().reverse().find(f => f.contratoId === idx);
-
-            box.classList.add('bg-emerald-50', 'text-emerald-800', 'border-emerald-200');
-            box.innerHTML = `💸 <strong>Robô XML:</strong> Match de 100%! Valor validado: <strong>${formatarMoeda(folha.liquido)}</strong>. Enviado para aprovação do RH.`;
-
-            folha.status = "Enviado";
-            folha.xmlNome = fileXml.name;
-
-            gravarLog(`Prestador [${bancoContratos[idx].razaoSocial}] enviou a NF ${fileXml.name}.`);
-            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
-        }
-
-        function aprovarPagamentoAdmin(index) {
-            const f = bancoFolhaMensal[index];
-            const data = new Date();
-            f.status = "Aprovado";
-            f.dataAprovacao = `${data.toLocaleDateString('pt-BR')} às ${data.toLocaleTimeString('pt-BR')}`;
-            
-            gravarLog(`💸 PAGAMENTO LIQUIDADO: Aprovado para o ID #${f.id}.`);
-            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
-            alert("Pagamento aprovado!");
-        }
-
-        function aplicarFiltrosRelatorio() {
-            const cc = document.getElementById('filtroCc').value;
-            const pjNome = document.getElementById('filtroPj').value;
-            const tipo = document.getElementById('filtroTipo').value;
-            const corpo = document.getElementById('tabelaRelatorioCorpo');
-            if(!corpo) return;
-            corpo.innerHTML = "";
-            let somaFiltro = 0;
-
-            bancoFolhaMensal.forEach(f => {
-                const pj = bancoContratos.find(c => c.id === f.contratoId);
-                if(!pj) return;
-                if (cc !== 'todos' && pj.centroCusto !== cc) return;
-                if (pjNome !== 'todos' && pj.razaoSocial !== pjNome) return;
-                if (tipo !== 'todos' && f.tipo !== tipo) return;
-
-                somaFiltro += f.liquido;
-                corpo.innerHTML += `
-                    <tr class="hover:bg-slate-50 text-slate-700">
-                        <td class="p-3 font-bold">${pj.razaoSocial}</td>
-                        <td class="p-3"><span class="text-xs bg-slate-100 p-1 rounded">${pj.centroCusto}</span></td>
-                        <td class="p-3 text-xs font-semibold">${f.tipo}</td>
-                        <td class="p-3 text-xs italic text-slate-500">${f.descricao || 'Folha Regular'}</td>
-                        <td class="p-3 text-right font-bold text-slate-900">${formatarMoeda(f.liquido)}</td>
-                    </tr>
-                `;
-            });
-            document.getElementById('totalRelatorioSoma').innerText = formatarMoeda(somaFiltro);
-        }
-
-        function exportarDadosSimulados() {
-            alert("Relatório CSV baixado!");
-        }
-
-        function formatarMoeda(v) {
-            return v.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' });
-        }
-
-        function gravarLog(texto) {
-            const box = document.getElementById('caixaLogsAuditoria');
-            if(!box) return;
-            const agora = new Date();
-            box.innerHTML += `<p class="text-blue-400">[${agora.toLocaleTimeString('pt-BR')}] - ${texto}</p>`;
-            box.scrollTop = box.scrollHeight;
-        }
-
-        // --- MAPEAR PARA O ESCOPO GLOBAL ---
-        window.mudarPerfil = mudarPerfil;
-        window.mudarAba = mudarAba;
-        window.processarLancamentoMotor = processarLancamentoMotor;
-        window.atualizarInterfacePortalPj = atualizarInterfacePortalPj;
-        window.executarValidadorPj = ejecutarValidadorPj;
-        window.aprovarPagamentoAdmin = aprovarPagamentoAdmin;
-        window.aplicarFiltrosRelatorio = aplicarFiltrosRelatorio;
-        window.exportarDadosSimulados = exportarDadosSimulados;
-    </script>
+                            <p class="font-bold text-slate-900">${pj.
