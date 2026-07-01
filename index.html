@@ -28,106 +28,83 @@
     <main class="max-w-7xl mx-auto p-6">
         
         <section id="dashboard" class="space-y-6">
-            <div class="grid grid-cols-4 gap-4">
-                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Folha de Competência</p><p class="text-xl font-black">Junho/2026</p></div>
-                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Total Bruto</p><p class="text-xl font-black text-emerald-600">R$ 45.500,00</p></div>
-                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Notas Fiscais</p><p class="text-xl font-black">0 / 0</p></div>
-                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Contratos Ativos</p><p class="text-xl font-black">0 Empresas</p></div>
+            </section>
+
+        <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold text-blue-900">Gestão de Colaboradores</h2>
+                <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
+                        class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
+                    + Novo Cadastro
+                </button>
             </div>
-            <div class="bg-white p-6 rounded-xl border shadow-sm">
-                <h2 class="font-bold text-blue-900 mb-4">⚙️ Motor Financeiro</h2>
-                <input type="number" class="p-2 border rounded w-full" placeholder="ID do Contrato">
+
+            <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+                <div class="bg-white rounded-xl w-full max-w-lg p-6">
+                    <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
+                    <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded mb-2">
+                    <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded mb-2">
+                    <input id="campoEmail" type="text" placeholder="E-mail" class="w-full p-2 border rounded mb-2">
+                    <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded mb-4">
+                    <input id="inputArquivo" type="file" class="w-full mb-4">
+                    <div class="flex justify-end gap-2">
+                        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
+                        <button onclick="salvarCadastro()" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
+                    </div>
+                </div>
             </div>
         </section>
 
-        <!-- Seção de Contratos Atualizada -->
-    // Importações necessárias do Firebase
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-
-    // Configuração do seu projeto (a mesma que você já deve ter)
-    const firebaseConfig = {
-        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-        authDomain: "connectpj-15532.firebaseapp.com",
-        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-        projectId: "connectpj-15532",
-        storageBucket: "connectpj-15532.firebasestorage.app",
-        messagingSenderId: "658474420007",
-        appId: "1:658474420007:web:94f3331b69b2a298af4b02"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const db = getDatabase(app);
-    const storage = getStorage(app);
-
-    // Função que "dá vida" ao botão
-    window.salvarCadastro = async () => {
-        try {
-            const nome = document.getElementById('campoNome').value;
-            const cpf = document.getElementById('campoCpf').value;
-            const email = document.getElementById('campoEmail').value;
-            const cargo = document.getElementById('campoCargo').value;
-            const fileInput = document.getElementById('inputArquivo');
-            
-            let urlArquivo = "";
-
-            // Se um arquivo foi selecionado, faz o upload
-            if (fileInput && fileInput.files.length > 0) {
-                const arquivo = fileInput.files[0];
-                const storageRef = sRef(storage, 'documentos/' + arquivo.name);
-                const snapshot = await uploadBytes(storageRef, arquivo);
-                urlArquivo = await getDownloadURL(snapshot.ref);
-            }
-
-            // Envia para o banco de dados
-            await push(ref(db, 'contratos'), {
-                nome: nome,
-                cpf: cpf,
-                email: email,
-                cargo: cargo,
-                urlArquivo: urlArquivo,
-                dataCadastro: new Date().toLocaleDateString()
-            });
-
-            alert("Cadastro salvo com sucesso!");
-            document.getElementById('modalCadastro').classList.add('hidden');
-        } catch (error) {
-            console.error("Erro:", error);
-            alert("Erro ao salvar. Verifique o console do navegador.");
-        }
-    };
-</script>
-
-<script>
-function abrirTab(evt, tabId) {
-    // Esconder conteúdo e resetar estilo dos botões
-    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-    document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6");
-    
-    // Mostrar aba e marcar botão ativo
-    document.getElementById(tabId).classList.remove('hidden');
-    evt.currentTarget.className = "tab-btn py-4 border-b-2 border-blue-600 font-bold text-sm ml-6";
-}
-</script>
-
         <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm">
-            <h2 class="text-xl font-bold">Relatórios & Centro de Custos</h2>
-            <p class="text-slate-500">Área em construção para visualização de indicadores financeiros.</p>
+            <h2 class="text-xl font-bold">Relatórios</h2>
         </section>
     </main>
 
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+            authDomain: "connectpj-15532.firebaseapp.com",
+            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+            projectId: "connectpj-15532",
+            storageBucket: "connectpj-15532.firebasestorage.app",
+            messagingSenderId: "658474420007",
+            appId: "1:658474420007:web:94f3331b69b2a298af4b02"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        const storage = getStorage(app);
+
+        window.salvarCadastro = async () => {
+            const dados = {
+                nome: document.getElementById('campoNome').value,
+                cpf: document.getElementById('campoCpf').value,
+                email: document.getElementById('campoEmail').value,
+                cargo: document.getElementById('campoCargo').value,
+                data: new Date().toLocaleDateString()
+            };
+
+            const file = document.getElementById('inputArquivo').files[0];
+            if (file) {
+                const snapshot = await uploadBytes(sRef(storage, 'documentos/' + file.name), file);
+                dados.urlArquivo = await getDownloadURL(snapshot.ref);
+            }
+
+            await push(ref(db, 'contratos'), dados);
+            alert("Sucesso!");
+            location.reload(); // Recarrega para limpar o form
+        };
+    </script>
+
     <script>
         function mostrar(id) {
-            // Esconde todas as seções
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
             document.getElementById('relatorios').classList.add('hidden');
-            
-            // Mostra a seção desejada
             document.getElementById(id).classList.remove('hidden');
         }
     </script>
-<script type="module">
-</body>
-</html>
