@@ -40,10 +40,37 @@
             </div>
         </section>
 
-        <section id="contratos" class="hidden bg-white p-6 rounded-xl border shadow-sm">
-            <h2 class="text-xl font-bold">Gestão de Contratos Cadastrados</h2>
-            <p class="text-slate-500">Área em construção para listagem de empresas e contratos.</p>
-        </section>
+        <!-- Seção de Contratos Atualizada -->
+<section id="contratos" class="hidden space-y-6">
+    <div class="flex justify-between items-center bg-white p-6 rounded-xl border shadow-sm">
+        <h2 class="text-xl font-bold">Gestão de Contratos Cadastrados</h2>
+        <!-- Botão que ativa o formulário -->
+        <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
+                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">
+            + Novo Contrato
+        </button>
+    </div>
+
+    <!-- Modal de Cadastro (Escondido por padrão) -->
+    <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+        <div class="bg-white p-8 rounded-xl w-full max-w-lg shadow-2xl">
+            <h3 class="text-lg font-bold mb-4">Cadastrar Novo Contrato</h3>
+            <div class="space-y-4">
+                <input type="text" placeholder="Razão Social ou Nome Completo" class="w-full p-2 border rounded">
+                <input type="text" placeholder="CNPJ ou CPF" class="w-full p-2 border rounded">
+                <select class="w-full p-2 border rounded">
+                    <option>Tipo de Contrato: PJ</option>
+                    <option>Tipo de Contrato: PF</option>
+                </select>
+                <input type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded">
+                <div class="flex gap-2 justify-end mt-6">
+                    <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
+                    <button class="px-4 py-2 bg-blue-600 text-white rounded">Salvar Contrato</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
 
         <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm">
             <h2 class="text-xl font-bold">Relatórios & Centro de Custos</h2>
