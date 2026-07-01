@@ -41,65 +41,64 @@
         </section>
 
         <!-- Seção de Contratos Atualizada -->
-<section id="contratos" class="hidden p-6">
-    <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-blue-900">Gestão de Colaboradores</h2>
-        <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
-                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 shadow-md">
-            + Novo Cadastro
-        </button>
-    </div>
+<script type="module">
+    // Importações necessárias do Firebase
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-    <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl w-full max-w-5xl shadow-2xl h-[90vh] flex flex-col">
+    // Configuração do seu projeto (a mesma que você já deve ter)
+    const firebaseConfig = {
+        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+        authDomain: "connectpj-15532.firebaseapp.com",
+        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+        projectId: "connectpj-15532",
+        storageBucket: "connectpj-15532.firebasestorage.app",
+        messagingSenderId: "658474420007",
+        appId: "1:658474420007:web:94f3331b69b2a298af4b02"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
+
+    // Função que "dá vida" ao botão
+    window.salvarCadastro = async () => {
+        try {
+            const nome = document.getElementById('campoNome').value;
+            const cpf = document.getElementById('campoCpf').value;
+            const email = document.getElementById('campoEmail').value;
+            const cargo = document.getElementById('campoCargo').value;
+            const fileInput = document.getElementById('inputArquivo');
             
-            <div class="p-6 border-b flex justify-between">
-                <h3 class="text-xl font-bold">Editar/Novo Cadastro</h3>
-                <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="font-bold">X</button>
-            </div>
+            let urlArquivo = "";
 
-            <div class="flex border-b px-6 bg-slate-50">
-                <button onclick="abrirTab(event, 'tabIdentificacao')" class="tab-btn py-4 border-b-2 border-blue-600 font-bold text-sm">Identificação</button>
-                <button onclick="abrirTab(event, 'tabContratacao')" class="tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6">Contratação</button>
-                <button onclick="abrirTab(event, 'tabDocumentos')" class="tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6">Documentos</button>
-            </div>
+            // Se um arquivo foi selecionado, faz o upload
+            if (fileInput && fileInput.files.length > 0) {
+                const arquivo = fileInput.files[0];
+                const storageRef = sRef(storage, 'documentos/' + arquivo.name);
+                const snapshot = await uploadBytes(storageRef, arquivo);
+                urlArquivo = await getDownloadURL(snapshot.ref);
+            }
 
-            <div class="flex-grow p-8 overflow-y-auto">
-                <div id="tabIdentificacao" class="tab-content space-y-6">
-                    <div class="grid grid-cols-3 gap-6">
-                        <input type="text" placeholder="Nome Completo *" class="p-2 border rounded">
-                        <input type="text" placeholder="Nome visível *" class="p-2 border rounded">
-                        <input type="text" placeholder="E-mail Pessoal" class="p-2 border rounded">
-                        <input type="text" placeholder="CPF" class="p-2 border rounded">
-                        <input type="text" placeholder="CEP" class="p-2 border rounded">
-                        <input type="text" placeholder="Município" class="p-2 border rounded">
-                    </div>
-                </div>
+            // Envia para o banco de dados
+            await push(ref(db, 'contratos'), {
+                nome: nome,
+                cpf: cpf,
+                email: email,
+                cargo: cargo,
+                urlArquivo: urlArquivo,
+                dataCadastro: new Date().toLocaleDateString()
+            });
 
-                <div id="tabContratacao" class="tab-content hidden space-y-6">
-                    <div class="grid grid-cols-3 gap-6">
-                        <input type="text" placeholder="E-mail Corporativo" class="p-2 border rounded">
-                        <select class="p-2 border rounded"><option>Tipo de Vínculo: PJ</option><option>PF</option></select>
-                        <input type="text" placeholder="Data de Admissão" class="p-2 border rounded">
-                        <input type="text" placeholder="Cargo" class="p-2 border rounded">
-                        <input type="text" placeholder="Remuneração" class="p-2 border rounded">
-                        <input type="text" placeholder="Departamento" class="p-2 border rounded">
-                    </div>
-                </div>
-
-                <div id="tabDocumentos" class="tab-content hidden">
-                    <button class="bg-blue-600 text-white px-4 py-2 rounded font-bold">+ Adicionar Arquivo</button>
-                    <p class="mt-4 text-slate-400">Nenhum documento anexado.</p>
-                </div>
-            </div>
-
-            <div class="p-6 border-t flex justify-end gap-3">
-                <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-6 py-2 border rounded">Cancelar</button>
-                <button class="px-6 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
-            </div>
-        </div>
-    </div>
-</section>
+            alert("Cadastro salvo com sucesso!");
+            document.getElementById('modalCadastro').classList.add('hidden');
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Erro ao salvar. Verifique o console do navegador.");
+        }
+    };
+</script>
 
 <script>
 function abrirTab(evt, tabId) {
