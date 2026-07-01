@@ -3,486 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestão de Contratos e Folha PJ</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <style>
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
-        .tab-active { border-bottom: 3px solid #1d4ed8; color: #1e3a8a; font-weight: 700; }
-    </style>
+    <title>Portal de Folha Mensal PJ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
-
-    <header class="bg-blue-900 text-white shadow-lg px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div class="flex items-center gap-3">
-            <div class="bg-blue-600 p-2 rounded-lg font-black text-xl tracking-wider">PJ</div>
-            <div>
-                <h1 class="text-xl font-bold tracking-tight">ConnectPJ</h1>
-                <p class="text-xs text-blue-200">Central de Contratos, Automação de NFs & Folha</p>
-            </div>
-        </div>
-        
-        <div class="flex flex-wrap items-center gap-4">
-            <div class="bg-blue-950 p-1 rounded-lg flex gap-1 text-xs font-semibold">
-                <button id="perfilAdmin" onclick="mudarPerfil('admin')" class="px-3 py-1.5 rounded bg-blue-600 text-white transition-all cursor-pointer">Painel Corporativo (RH/Fin)</button>
-                <button id="perfilPj" onclick="mudarPerfil('pj')" class="px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer">Área do Prestador (PJ)</button>
-            </div>
-        </div>
-    </header>
-
-    <nav id="menuCorporativo" class="bg-white border-b border-slate-200 px-6 flex gap-6 text-sm text-slate-600 font-medium">
-        <button onclick="mudarAba('visao-geral')" id="tab-visao-geral" class="py-3 px-1 tab-active cursor-pointer transition-all">Dashboard & Folha Mensal</button>
-        <button onclick="mudarAba('contratos')" id="tab-contratos" class="py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all">Contratos Cadastrados</button>
-        <button onclick="mudarAba('relatorios')" id="tab-relatorios" class="py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all">Relatórios & Centro de Custos</button>
-    </nav>
-
-    <main class="flex-1 p-6 max-w-7xl w-full mx-auto space-y-6">
-
-        <section id="aba-visao-geral" class="space-y-6 block section-corporativa">
-            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Folha de Competência</p>
-                        <p class="text-2xl font-black text-blue-900">Junho/2026</p>
-                    </div>
-                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">📅</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bruto Processado</p>
-                        <p class="text-2xl font-black text-emerald-600" id="kpiTotalBruto">R$ 0,00</p>
-                    </div>
-                    <div class="text-emerald-600 bg-emerald-50 p-3 rounded-xl text-xl">💰</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Notas Fiscais Validadas</p>
-                        <p class="text-2xl font-black text-blue-900" id="kpiNfsValidadas">0 / 0</p>
-                    </div>
-                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">🛡️</div>
-                </div>
-                <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm flex items-center justify-between">
-                    <div>
-                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Contratos Ativos</p>
-                        <p class="text-2xl font-black text-blue-900" id="kpiContratosAtivos">0 Empresas</p>
-                    </div>
-                    <div class="text-blue-600 bg-blue-50 p-3 rounded-xl text-xl">💼</div>
-                </div>
-            </div>
-
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <div class="border-b border-slate-100 pb-3 mb-4">
-                    <h3 class="text-lg font-bold text-blue-900 flex items-center gap-2">⚙️ Motor Financeiro: Ajustes e Lançamentos Especiais</h3>
-                    <p class="text-xs text-slate-500">Adicione bônus, comissões ou crie uma Folha Complementar caso o valor fixo contratual já tenha sido pago.</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 items-end text-sm">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">1. Selecionar Contrato PJ</label>
-                        <select id="motorContrato" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
-                            </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">2. Tipo de Lançamento</label>
-                        <select id="motorTipoFolha" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
-                            <option value="Regular">Folha Regular (Soma ao Fixo Mensal)</option>
-                            <option value="Complementar">Folha Complementar (Bônus/Extra Isolado)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">3. Evento Financeiro</label>
-                        <select id="motorEvento" class="w-full p-2 rounded border border-slate-300 bg-white focus:ring-2 focus:ring-blue-500">
-                            <option value="Bônus">Bônus por Performance</option>
-                            <option value="Comissão">Comissão de Vendas</option>
-                            <option value="Hora Extra">Horas Extras Atendidas</option>
-                            <option value="Desconto">Descontos / Glosas Contratuais</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">4. Valor do Evento (R$)</label>
-                        <input type="number" id="motorValor" class="w-full p-2 rounded border border-slate-300" placeholder="0.00" value="1500">
-                    </div>
-                    <div>
-                        <button onclick="processarLancamentoMotor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-all cursor-pointer shadow">
-                            Aplicar e Atualizar
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-                <div class="p-4 bg-slate-50 border-b border-slate-200">
-                    <h3 class="font-bold text-blue-900">Consolidação de Folha e Status de Recebimento de Notas Fiscais</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead>
-                            <tr class="bg-slate-100 text-xs font-bold uppercase text-slate-600 border-b border-slate-200">
-                                <th class="p-4">Razão Social / CNPJ / Tipo</th>
-                                <th class="p-4">Centro de Custo</th>
-                                <th class="p-4">Memória de Cálculo</th>
-                                <th class="p-4">Líquido Calculado</th>
-                                <th class="p-4">Status Validação</th>
-                                <th class="p-4 text-center">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaFolhaCorpo" class="text-sm divide-y divide-slate-100">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="aba-contratos" class="space-y-6 hidden section-corporativa">
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <div class="flex justify-between items-center border-b border-slate-100 pb-4 mb-4">
-                    <div>
-                        <h3 class="text-lg font-bold text-blue-900">Repositório de Contratos PJ Vigentes</h3>
-                        <p class="text-xs text-slate-500">Centralização documental e dados estruturais de contratação de pessoas jurídicas.</p>
-                    </div>
-                    <button onclick="alert('Funcionalidade de abertura de formulário de cadastro simulada no protótipo.')" class="bg-blue-600 text-white font-bold text-xs py-2 px-4 rounded-lg hover:bg-blue-700 cursor-pointer">+ Novo Contrato</button>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="bg-slate-50 border-b border-slate-200 text-xs text-slate-500 font-bold uppercase">
-                                <th class="p-3">Prestador / CNPJ</th>
-                                <th class="p-3">Vigência</th>
-                                <th class="p-3">Valor Fixo Mensal</th>
-                                <th class="p-3">Centro de Custo</th>
-                                <th class="p-3">Responsável Interno</th>
-                                <th class="p-3">Documentos Anexados</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaContratosCorpo" class="divide-y divide-slate-100 text-slate-700">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="aba-relatorios" class="space-y-6 hidden section-corporativa">
-            <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <div class="border-b border-slate-100 pb-3 mb-4">
-                    <h3 class="text-lg font-bold text-blue-900">📊 Gerador de Relatórios e Auditoria</h3>
-                    <p class="text-xs text-slate-500">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 text-xs font-bold mb-6 bg-slate-50 p-4 rounded-xl border border-slate-200">
-                    <div>
-                        <label class="block text-slate-600 mb-1">Filtrar por Centro de Custo</label>
-                        <select id="filtroCc" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
-                            <option value="todos">-- Todos os Centros de Custo --</option>
-                            <option value="TI - Desenvolvimento">TI - Desenvolvimento</option>
-                            <option value="Marketing & Growth">Marketing & Growth</option>
-                            <option value="Recursos Humanos">Recursos Humanos</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-600 mb-1">Filtrar por Prestador PJ</label>
-                        <select id="filtroPj" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
-                            <option value="todos">-- Todos os Contratados --</option>
-                            <option value="Tech Solutions LTDA">Tech Solutions LTDA</option>
-                            <option value="Alpha Marketing S.A.">Alpha Marketing S.A.</option>
-                            <option value="Consultoria RH Forte">Consultoria RH Forte</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-slate-600 mb-1">Filtrar por Tipo de Folha</label>
-                        <select id="filtroTipo" onchange="aplicarFiltrosRelatorio()" class="w-full p-2 bg-white rounded border border-slate-300 font-medium">
-                            <option value="todos">-- Todas as Folhas --</option>
-                            <option value="Regular">Apenas Regulares</option>
-                            <option value="Complementar">Apenas Complementares (Prêmios/Extras)</option>
-                        </select>
-                    </div>
-                    <div class="flex items-end">
-                        <button onclick="alert('Exportação simulada com sucesso!')" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-2 rounded text-sm transition-all cursor-pointer text-center">
-                            ⬇️ Exportar Relatório (CSV/Excel)
-                        </button>
-                    </div>
-                </div>
-
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm border-collapse">
-                        <thead>
-                            <tr class="bg-blue-900 text-white text-xs font-bold uppercase">
-                                <th class="p-3 rounded-tl">Prestador</th>
-                                <th class="p-3">Centro de Custo</th>
-                                <th class="p-3">Tipo de Folha</th>
-                                <th class="p-3">Composição / Detalhe</th>
-                                <th class="p-3 rounded-tr text-right">Líquido Pago/Aprovado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabelaRelatorioCorpo" class="divide-y divide-slate-200">
-                            </tbody>
-                        <tfoot>
-                            <tr class="bg-slate-100 font-bold text-slate-900 border-t-2 border-slate-300">
-                                <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO NA CONSULTA:</td>
-                                <td id="totalRelatorioSoma" class="p-3 text-right text-blue-900 font-black text-base">R$ 0,00</td>
-                            </tr>
-                        </tfoot>
-                    </table>
-                </div>
-            </div>
-        </section>
-
-        <section id="painelPjContainer" class="space-y-6 hidden">
-            <div class="bg-blue-50 border-l-4 border-blue-600 p-5 rounded-r-xl shadow-sm">
-                <h3 class="font-bold text-blue-900 text-lg">Ambiente Restrito do Prestador PJ</h3>
-                <p class="text-sm text-blue-700">Selecione sua empresa abaixo para simular a visão do seu painel e efetuar a subida mandatória de Notas Fiscais e arquivos XML.</p>
-                
-                <div class="mt-3 max-w-xs">
-                    <select id="seletorLoginPj" onchange="atualizarInterfacePortalPj()" class="w-full p-2 bg-white rounded border border-blue-300 font-semibold text-sm text-blue-900">
-                        <option value="0">Tech Solutions LTDA</option>
-                        <option value="1">Alpha Marketing S.A.</option>
-                        <option value="2">Consultoria RH Forte</option>
-                    </select>
-                </div>
-            </div>
-
-            <div id="gridPjAcoes" class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm flex flex-col justify-between">
-                    <div>
-                        <span id="pjBadgeTipo" class="bg-blue-600 text-white text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wide">Folha Regular</span>
-                        <h4 class="font-black text-slate-800 text-base mt-2" id="pjNomeFicha">Tech Solutions LTDA</h4>
-                        <p class="text-xs text-slate-400 mb-4" id="pjCnpjFicha">CNPJ: 12.345.678/0001-99</p>
-                        
-                        <div class="space-y-3 text-sm">
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Valor Base Contratual:</span>
-                                <span class="font-bold text-slate-800" id="pjValorBaseTxt">R$ 12.000,00</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-slate-500">Variáveis / Adicionais:</span>
-                                <span class="font-bold text-emerald-600" id="pjVariavelTxt">+ R$ 1.500,00</span>
-                            </div>
-                            <div class="flex justify-between border-b border-slate-100 pb-3">
-                                <span class="text-slate-500">Eventos Desconto:</span>
-                                <span class="font-bold text-rose-600" id="pjDescontoTxt">- R$ 500,00</span>
-                            </div>
-                            <div class="flex justify-between items-center pt-1">
-                                <span class="font-bold text-slate-900 uppercase text-xs tracking-wider">Líquido Calculado:</span>
-                                <span class="text-xl font-black text-blue-700" id="pjLiquidoTxt">R$ 13.000,00</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="text-xs text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mt-4 font-medium">
-                        ⚠️ Atenção: A sua Nota Fiscal deve possuir exatamente o valor líquido acima especificado para ser aprovada pelo robô fiscal.
-                    </div>
-                </div>
-
-                <div class="bg-white p-6 rounded-xl border border-slate-200 shadow-sm md:col-span-2 space-y-4">
-                    <h3 class="font-bold text-blue-900 text-lg flex items-center gap-2">📤 Central de Upload de Faturamento</h3>
-                    <p class="text-xs text-slate-500">Insira a NF (PDF) e o arquivo correspondente emitido na prefeitura (XML).</p>
-                    
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div class="border-2 border-dashed border-slate-200 p-5 rounded-xl text-center bg-slate-50 hover:border-blue-400 transition-all">
-                            <span class="text-3xl block mb-2">📄</span>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Nota Fiscal Eletrônica (PDF)</label>
-                            <input type="file" id="inputPjPdf" accept=".pdf" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        </div>
-                        <div class="border-2 border-dashed border-slate-200 p-5 rounded-xl text-center bg-slate-50 hover:border-blue-400 transition-all">
-                            <span class="text-3xl block mb-2">💾</span>
-                            <label class="block text-xs font-bold text-slate-700 mb-1">Arquivo Integrador (XML)</label>
-                            <input type="file" id="inputPjXml" accept=".xml" class="block w-full text-xs text-slate-500 file:mr-4 file:py-2 file:px-3 file:rounded file:border-0 file:text-xs file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100">
-                        </div>
-                    </div>
-
-                    <div id="respostaValidacaoPj" class="hidden p-4 rounded-lg text-sm border"></div>
-
-                    <div class="flex justify-end">
-                        <button onclick="executarValidadorPj()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2.5 px-6 rounded-lg shadow text-sm transition-all cursor-pointer">
-                            Submeter Documentos para Validação Fiscal
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <section class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm">
-            <h3 class="font-bold text-xs text-blue-900 uppercase tracking-wider mb-2">🛡️ Histórico de Auditoria e Logs do Sistema (Rastreabilidade Completa)</h3>
-            <div id="caixaLogsAuditoria" class="bg-slate-900 text-slate-300 p-4 rounded-lg font-mono text-xs space-y-1 max-h-36 overflow-y-auto">
-                <p class="text-slate-500">[30/06/2026 18:00:00] - Banco de dados PostgreSQL conectado com sucesso.</p>
-                <p class="text-slate-500">[30/06/2026 18:01:05] - Contratos importados do módulo ERP.</p>
-            </div>
-        </section>
-
-    </main>
-
-    <footer class="bg-slate-900 text-slate-400 text-xs py-4 px-6 text-center border-t border-slate-800 mt-auto">
-        Plataforma ConnectPJ S.A. v2.4 - Ambiente Demonstrativo de Engenharia de Software. Ano 2026.
-    </footer>
+<body class="bg-slate-100 text-slate-800 antialiased">
 
     <script type="module">
+        // Importações do Firebase (Ajuste a inicialização conforme o seu projeto)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // Configuração do seu Firebase (Substitua pelos seus dados reais)
         const firebaseConfig = {
-            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-            authDomain: "connectpj-15532.firebaseapp.com",
-            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-            projectId: "connectpj-15532",
-            storageBucket: "connectpj-15532.firebasestorage.app",
-            messagingSenderId: "658474420007",
-            appId: "1:658474420007:web:94f3331b69b2a298af4b02",
-            measurementId: "G-F57NPNB1EJ"
+            apiKey: "SUA_API_KEY",
+            authDomain: "SEU_AUTH_DOMAIN",
+            databaseURL: "SUA_DATABASE_URL",
+            projectId: "SEU_PROJECT_ID",
+            storageBucket: "SEU_STORAGE_BUCKET",
+            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
+            appId: "SUA_APP_ID"
         };
 
         const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
         const db = getDatabase(app);
 
-        console.log("Firebase conectado com sucesso!");
-
+        // Bancos de dados locais (Exemplos de estruturas que seu código consome)
         let bancoContratos = [];
         let bancoFolhaMensal = [];
 
-        const contratosIniciais = [
-            { id: 0, razaoSocial: "Tech Solutions LTDA", cnpj: "12.345.678/0001-99", gestor: "Carlos Silva", centroCusto: "TI - Desenvolvimento", fixo: 12000.00, vigencia: "01/01/2026 a 31/12/2027", documentos: ["Contrato_Assinado.pdf"] },
-            { id: 1, razaoSocial: "Alpha Marketing S.A.", cnpj: "98.765.432/0001-11", gestor: "Mariana Costa", centroCusto: "Marketing & Growth", fixo: 15000.00, vigencia: "15/03/2025 a 14/03/2027", documentos: ["Contrato_Digital.pdf"] },
-            { id: 2, razaoSocial: "Consultoria RH Forte", cnpj: "44.555.666/0001-22", gestor: "Roberto Souza", centroCusto: "Recursos Humanos", fixo: 8000.00, vigencia: "10/10/2025 a 09/10/2026", documentos: ["Contrato_Prestacao.pdf"] }
-        ];
-
-        const folhaInicial = [
-            { id: 0, contratoId: 0, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 12000.00, adicional: 1500.00, desconto: 500.00, liquido: 13000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
-            { id: 1, contratoId: 1, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 15000.00, adicional: 0.00, desconto: 0.00, liquido: 15000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
-            { id: 2, contratoId: 2, tipo: "Regular", descricao: "Honorário Mensal Regular", base: 8000.00, adicional: 2000.00, desconto: 0.00, liquido: 10000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" }
-        ];
-
+        // Ouvintes do Firebase para sincronização em tempo real
         onValue(ref(db, 'contratos'), (snapshot) => {
-            const dados = snapshot.val();
-            if (dados) { bancoContratos = dados; } 
-            else { set(ref(db, 'contratos'), contratosIniciais); bancoContratos = contratosIniciais; }
-            renderizarContratos();
-            popularSeletorContratos();
-            atualizarInterfacePortalPj();
+            if (snapshot.exists()) {
+                bancoContratos = snapshot.val();
+            }
         });
 
         onValue(ref(db, 'folhaMensal'), (snapshot) => {
-            const dados = snapshot.val();
-            if (dados) { bancoFolhaMensal = dados; } 
-            else { set(ref(db, 'folhaMensal'), folhaInicial); bancoFolhaMensal = folhaInicial; }
-            renderizarFolhaMensal();
-            aplicarFiltrosRelatorio();
-            atualizarInterfacePortalPj();
+            if (snapshot.exists()) {
+                bancoFolhaMensal = snapshot.val();
+                // Atualiza a tabela ou relatórios automaticamente ao mudar dados na nuvem
+                if (typeof renderizarRelatorio === "function") renderizarRelatorio();
+            }
         });
 
-        // --- EXPOSIÇÃO GLOBAL PARA COMPATIBILIDADE COM ONCLICK HTML ---
-        window.mudarPerfil = function(perfil) {
-            const menuCorp = document.getElementById('menuCorporativo');
-            const secoesCorp = document.querySelectorAll('.section-corporativa');
-            const painelPj = document.getElementById('painelPjContainer');
-            
-            document.getElementById('perfilAdmin').className = "px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer";
-            document.getElementById('perfilPj').className = "px-3 py-1.5 rounded text-slate-400 hover:text-white transition-all cursor-pointer";
+        // ==========================================
+        // ENGENHARIA DE FUNÇÕES E LÓGICA DO MOTOR
+        // ==========================================
 
-            if(perfil === 'admin') {
-                document.getElementById('perfilAdmin').classList.add('bg-blue-600', 'text-white');
-                menuCorp.classList.remove('hidden');
-                menuCorp.classList.add('flex');
-                painelPj.classList.add('hidden');
-                window.mudarAba('visao-geral');
-                gravarLog("Usuário alterou nível de acesso para: ADMINISTRATIVO/RH.");
-            } else {
-                document.getElementById('perfilPj').classList.add('bg-blue-600', 'text-white');
-                menuCorp.classList.add('hidden');
-                menuCorp.classList.remove('flex');
-                secoesCorp.forEach(s => s.classList.add('hidden'));
-                painelPj.classList.remove('hidden');
-                window.atualizarInterfacePortalPj();
-                gravarLog("Acesso restrito simulado iniciado pelo portal do CONTRATADO.");
-            }
-        }
-
-        window.mudarAba = function(abaId) {
-            document.querySelectorAll('.section-corporativa').forEach(s => s.classList.add('hidden'));
-            document.getElementById('aba-' + abaId).classList.remove('hidden');
-            
-            document.querySelectorAll('#menuCorporativo button').forEach(b => b.className = "py-3 px-1 border-b-3 border-transparent hover:text-blue-700 cursor-pointer transition-all");
-            document.getElementById('tab-' + abaId).className = "py-3 px-1 tab-active cursor-pointer transition-all";
-            
-            if(abaId === 'relatorios') window.aplicarFiltrosRelatorio();
-        }
-
-        function popularSeletorContratos() {
-            const select = document.getElementById('motorContrato');
-            if(!select) return;
-            select.innerHTML = "";
-            bancoContratos.forEach(c => {
-                select.innerHTML += `<option value="${c.id}">${c.razaoSocial}</option>`;
-            });
-        }
-
-        function renderizarFolhaMensal() {
-            const corpo = document.getElementById('tabelaFolhaCorpo');
+        function renderizarRelatorio() {
+            const corpo = document.getElementById('corpoTabelaRelatorio');
             if(!corpo) return;
-            corpo.innerHTML = "";
-            let somaBruta = 0;
-            let totalNfs = 0;
-
-            bancoFolhaMensal.forEach((item, index) => {
-                const pj = bancoContratos.find(c => c.id === item.contratoId);
-                if(!pj) return;
-                somaBruta += item.liquido;
-                if(item.status === 'Aprovado') totalNfs++;
-
-                let statusBadge = `<span class="bg-amber-100 text-amber-800 text-xs px-2 py-1 rounded font-bold">Aguardando Envio</span>`;
-                if(item.status === 'Enviado') statusBadge = `<span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded font-bold">Nota Recebida (Análise)</span><br><span class="text-[10px] text-slate-500 font-mono">${item.xmlNome}</span>`;
-                if(item.status === 'Aprovado') statusBadge = `<span class="bg-emerald-100 text-emerald-800 text-xs px-2 py-1 rounded font-bold">✓ Aprovado e Liquidado</span><br><span class="text-[10px] text-slate-400 font-mono">${item.dataAprovacao}</span>`;
-
-                let acaoBotao = `<button disabled class="bg-slate-200 text-slate-400 text-xs font-bold py-1.5 px-3 rounded cursor-not-allowed">Liberar Pagamento</button>`;
-                if(item.status === 'Enviado') acaoBotao = `<button onclick="aprovarPagamentoAdmin(${index})" class="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold py-1.5 px-3 rounded cursor-pointer transition-all shadow">Aprovar Pagto</button>`;
-                if(item.status === 'Aprovado') acaoBotao = `<span class="text-emerald-600 font-bold text-xs">💸 Pago</span>`;
-
-                corpo.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-4">
-                            <p class="font-bold text-slate-900">${pj.razaoSocial}</p>
-                            <p class="text-xs text-slate-400">${pj.cnpj} • <span class="font-semibold">${item.tipo}</span></p>
-                        </td>
-                        <td class="p-4 text-slate-600">${pj.centroCusto}</td>
-                        <td class="p-4 font-mono text-xs text-slate-500">Base: R$ ${item.base.toFixed(2)} | Adic: +${item.adicional.toFixed(2)} | Desc: -${item.desconto.toFixed(2)}</td>
-                        <td class="p-4 font-bold text-blue-950">R$ ${item.liquido.toFixed(2)}</td>
-                        <td class="p-4">${statusBadge}</td>
-                        <td class="p-4 text-center">${acaoBotao}</td>
-                    </tr>
-                `;
-            });
-
-            document.getElementById('kpiTotalBruto').innerText = `R$ ${somaBruta.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
-            document.getElementById('kpiNfsValidadas').innerText = `${totalNfs} / ${bancoFolhaMensal.length}`;
-            document.getElementById('kpiContratosAtivos').innerText = `${bancoContratos.length} Empresas`;
-        }
-
-        function renderizarContratos() {
-            const corpo = document.getElementById('tabelaContratosCorpo');
-            if(!corpo) return;
-            corpo.innerHTML = "";
-            bancoContratos.forEach(c => {
-                corpo.innerHTML += `
-                    <tr>
-                        <td class="p-3 font-bold">${c.razaoSocial}<br><span class="text-xs text-slate-400">${c.cnpj}</span></td>
-                        <td class="p-3 text-xs">${c.vigencia}</td>
-                        <td class="p-3 font-semibold">R$ ${c.fixo.toFixed(2)}</td>
-                        <td class="p-3">${c.centroCusto}</td>
-                        <td class="p-3">${c.gestor}</td>
-                        <td class="p-3 text-xs text-blue-600 underline cursor-pointer">${c.documentos.join(', ')}</td>
-                    </tr>
-                `;
-            });
-        }
-
-        window.aplicarFiltrosRelatorio = function() {
-            const cc = document.getElementById('filtroCc').value;
-            const pjFiltro = document.getElementById('filtroPj').value;
-            const tipo = document.getElementById('filtroTipo').value;
             
-            const corpo = document.getElementById('tabelaRelatorioCorpo');
-            if(!corpo) return;
             corpo.innerHTML = "";
-            
             let totalConsolidado = 0;
+            const cc = document.getElementById('filtroCentroCusto')?.value || 'todos';
+            const pjFiltro = document.getElementById('filtroPrestador')?.value || 'todos';
+            const tipo = document.getElementById('filtroTipoFolha')?.value || 'todos';
 
             bancoFolhaMensal.forEach(item => {
                 const pj = bancoContratos.find(c => c.id === item.contratoId);
@@ -492,7 +68,7 @@
                 if(pjFiltro !== 'todos' && pj.razaoSocial !== pjFiltro) return;
                 if(tipo !== 'todos' && item.tipo !== tipo) return;
 
-                totalConsolidado += item.liquido;
+                totalConsolidated += item.liquido;
 
                 corpo.innerHTML += `
                     <tr class="hover:bg-slate-50 text-slate-700">
@@ -505,58 +81,48 @@
                 `;
             });
 
-            document.getElementById('totalRelatorioSoma').innerText = `R$ ${totalConsolidado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            const totalTxt = document.getElementById('totalRelatorioSoma');
+            if(totalTxt) {
+                totalTxt.innerText = `R$ ${totalConsolidado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            }
         }
 
         window.processarLancamentoMotor = function() {
-    const contratoId = parseInt(document.getElementById('motorContrato').value);
-    const tipo = document.getElementById('motorTipoFolha').value;
-    const evento = document.getElementById('motorEvento').value;
-    const valor = parseFloat(document.getElementById('motorValor').value) || 0;
+            const contratoId = parseInt(document.getElementById('motorContrato').value);
+            const tipo = document.getElementById('motorTipoFolha').value;
+            const evento = document.getElementById('motorEvento').value;
+            const valor = parseFloat(document.getElementById('motorValor').value) || 0;
 
-    const pj = bancoContratos.find(c => c.id === contratoId);
-    if (!pj) return;
-    
-    if (tipo === 'Regular') {
-        const index = bancoFolhaMensal.findIndex(f => f.contratoId === contratoId && f.tipo === 'Regular');
-        if (index !== -1) {
-            // Correção da validação: verifica se a palavra contém 'Desconto' ou 'Glosa'
-            if (evento.includes('Desconto') || evento.includes('Glosa')) {
-                bancoFolhaMensal[index].desconto += valor;
+            const pj = bancoContratos.find(c => c.id === contratoId);
+            
+            if(tipo === 'Regular') {
+                const index = bancoFolhaMensal.findIndex(f => f.contratoId === contratoId && f.tipo === 'Regular');
+                if(index !== -1) {
+                    if(evento === 'Desconto') bancoFolhaMensal[index].desconto += valor;
+                    else bancoFolhaMensal[index].adicional += valor;
+                    
+                    bancoFolhaMensal[index].liquido = bancoFolhaMensal[index].base + bancoFolhaMensal[index].adicional - bancoFolhaMensal[index].desconto;
+                }
             } else {
-                bancoFolhaMensal[index].adicional += valor;
+                bancoFolhaMensal.push({
+                    id: bancoFolhaMensal.length,
+                    contratoId: contratoId,
+                    tipo: "Complementar",
+                    descricao: `Folha complementar - ${evento}`,
+                    base: 0,
+                    adicional: valor,
+                    desconto: 0,
+                    liquido: valor,
+                    status: "Aguardando Envio",
+                    xmlNome: "",
+                    dataAprovacao: ""
+                });
             }
-            bancoFolhaMensal[index].liquido = bancoFolhaMensal[index].base + bancoFolhaMensal[index].adicional - bancoFolhaMensal[index].desconto;
-        }
-    } else {
-        // Garante a geração de um ID incremental correto para folhas complementares
-        const novoId = bancoFolhaMensal.length > 0 ? Math.max(...bancoFolhaMensal.map(f => f.id)) + 1 : 1;
-        bancoFolhaMensal.push({
-            id: novoId,
-            contratoId: contratoId,
-            tipo: "Complementar",
-            descricao: `Folha complementar - ${evento}`,
-            base: 0,
-            adicional: valor,
-            desconto: 0,
-            liquido: valor,
-            status: "Aguardando Envio",
-            xmlNome: "",
-            dataAprovacao: ""
-        });
-    }
 
-    // Envia a atualização para o Firebase Realtime Database
-    set(ref(db, 'folhaMensal'), bancoFolhaMensal)
-        .then(() => {
-            gravarLog(`Motor: Processado ${evento} para ${pj.razaoSocial} no valor de R$ ${valor.toFixed(2)}`);
-            alert("Motor recalculado e sincronizado com o Firebase!");
-            document.getElementById('motorValor').value = 0;
-        })
-        .catch((error) => {
-            console.error("Erro ao salvar no Firebase:", error);
-        });
-}
+            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
+            gravarLog(`Ajuste executado no motor para ${pj.razaoSocial}: Evento ${evento} de R$ ${valor.toFixed(2)}`);
+            alert("Motor recalculado e sincronizado na nuvem com sucesso!");
+        }
 
         window.atualizarInterfacePortalPj = function() {
             const seletor = document.getElementById('seletorLoginPj');
@@ -576,7 +142,7 @@
             document.getElementById('pjLiquidoTxt').innerText = `R$ ${folha.liquido.toFixed(2)}`;
 
             const boxResp = document.getElementById('respostaValidacaoPj');
-            boxResp.className = "hidden p-4 rounded-lg text-sm border";
+            if(boxResp) boxResp.className = "hidden p-4 rounded-lg text-sm border";
         }
 
         window.executarValidadorPj = function() {
@@ -590,9 +156,11 @@
                 return;
             }
 
-            boxResp.classList.remove('hidden');
-            boxResp.className = "p-4 rounded-lg text-sm border bg-blue-50 text-blue-800 border-blue-200 animate-pulse";
-            boxResp.innerText = "Analisando tags do XML e confrontando integridade matemática do PDF...";
+            if(boxResp) {
+                boxResp.classList.remove('hidden');
+                boxResp.className = "p-4 rounded-lg text-sm border bg-blue-50 text-blue-800 border-blue-200 animate-pulse";
+                boxResp.innerText = "Analisando tags do XML e confrontando integridade matemática do PDF...";
+            }
 
             setTimeout(() => {
                 const index = bancoFolhaMensal.findIndex(f => f.contratoId === id);
@@ -601,8 +169,10 @@
                     bancoFolhaMensal[index].xmlNome = fileXml.name;
                     set(ref(db, 'folhaMensal'), bancoFolhaMensal);
                 }
-                boxResp.className = "p-4 rounded-lg text-sm border bg-emerald-50 text-emerald-800 border-emerald-200";
-                boxResp.innerHTML = "<strong>✓ Sucesso!</strong> Assinatura da prefeitura verificada e compatível com o líquido calculado. Enviado ao RH para liberação financeira.";
+                if(boxResp) {
+                    boxResp.className = "p-4 rounded-lg text-sm border bg-emerald-50 text-emerald-800 border-emerald-200";
+                    boxResp.innerHTML = "<strong>✓ Sucesso!</strong> Assinatura da prefeitura verificada e compatível com o líquido calculado. Enviado ao RH para liberação financeira.";
+                }
                 gravarLog(`Prestador ID ${id} realizou upload com sucesso dos arquivos fiscais.`);
             }, 1500);
         }
