@@ -2,12 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ConnectPJ - Central de Folha</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-50 font-sans text-slate-900">
+<body class="bg-slate-50 font-sans">
 
+    <!-- Header Azul (Como solicitado) -->
     <header class="bg-blue-900 text-white p-4 shadow-lg">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div>
@@ -21,6 +21,7 @@
         </div>
     </header>
 
+    <!-- Navegação de Abas -->
     <nav class="bg-white border-b shadow-sm">
         <div class="max-w-7xl mx-auto flex gap-8 px-6">
             <button class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900">Dashboard & Folha Mensal</button>
@@ -29,41 +30,52 @@
         </div>
     </nav>
 
+    <!-- Main Content -->
     <main class="max-w-7xl mx-auto p-6 space-y-6">
+        <!-- Cards de Métricas -->
         <section class="grid grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-xl border shadow-sm">
-                <p class="text-[10px] uppercase font-bold text-slate-400">Folha de Competência</p>
-                <p class="text-xl font-black">Junho/2026</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm">
-                <p class="text-[10px] uppercase font-bold text-slate-400">Total Bruto Processado</p>
-                <p class="text-xl font-black text-emerald-600">R$ 0,00</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm">
-                <p class="text-[10px] uppercase font-bold text-slate-400">Notas Fiscais Validadas</p>
-                <p class="text-xl font-black">0 / 0</p>
-            </div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm">
-                <p class="text-[10px] uppercase font-bold text-slate-400">Contratos Ativos</p>
-                <p class="text-xl font-black">0 Empresas</p>
-            </div>
+            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Folha de Competência</p><p class="text-xl font-black">Junho/2026</p></div>
+            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Total Bruto</p><p class="text-xl font-black text-emerald-600">R$ 45.500,00</p></div>
+            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Notas Fiscais</p><p class="text-xl font-black">0 / 0</p></div>
+            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Contratos Ativos</p><p class="text-xl font-black">0 Empresas</p></div>
         </section>
 
-        <section class="bg-white p-6 rounded-xl border shadow-sm">
-            <h2 class="font-bold text-blue-900 mb-4">⚙️ Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
-            <div class="grid grid-cols-4 gap-4">
-                <select class="p-2 border rounded text-sm"><option>Alpha Marketing S.A.</option></select>
-                <select class="p-2 border rounded text-sm"><option>Folha Complementar</option></select>
-                <select class="p-2 border rounded text-sm"><option>Bônus por Performance</option></select>
-                <input type="number" class="p-2 border rounded text-sm" placeholder="Valor (R$)">
+        <!-- Motor Financeiro e Tabela -->
+        <section class="grid grid-cols-3 gap-6">
+            <div class="col-span-1 bg-white p-6 rounded-xl border shadow-sm h-fit">
+                <h2 class="font-bold text-blue-900 mb-4">⚙️ Motor Financeiro</h2>
+                <div class="space-y-4">
+                    <input type="number" class="w-full p-2 border rounded text-sm" placeholder="ID do Contrato">
+                    <button class="w-full bg-blue-600 text-white font-bold py-2 rounded">Aplicar e Atualizar</button>
+                </div>
             </div>
-            <button class="mt-4 w-full bg-blue-600 text-white font-bold py-2 rounded shadow hover:bg-blue-700">Aplicar e Atualizar</button>
+            <div class="col-span-2 bg-white rounded-xl border shadow-sm overflow-hidden">
+                <table class="w-full text-left text-sm">
+                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400">
+                        <tr><th class="p-4">Razão Social</th><th class="p-4">Tipo</th><th class="p-4 text-right">Líquido</th></tr>
+                    </thead>
+                    <tbody id="corpoTabela">
+                        <!-- Os dados do Firebase aparecerão aqui -->
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
     <script type="module">
-        // Sua lógica de conexão com Firebase vai aqui
-        console.log("Sistema ConnectPJ carregado com sucesso!");
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+            authDomain: "connectpj-15532.firebaseapp.com",
+            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+            projectId: "connectpj-15532",
+            storageBucket: "connectpj-15532.firebasestorage.app",
+            messagingSenderId: "658474420007",
+            appId: "1:658474420007:web:94f3331b69b2a298af4b02"
+        };
+        initializeApp(firebaseConfig);
     </script>
 </body>
 </html>
