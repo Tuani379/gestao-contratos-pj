@@ -41,36 +41,77 @@
         </section>
 
         <!-- Seção de Contratos Atualizada -->
-<section id="contratos" class="hidden space-y-6">
-    <div class="flex justify-between items-center bg-white p-6 rounded-xl border shadow-sm">
-        <h2 class="text-xl font-bold">Gestão de Contratos Cadastrados</h2>
-        <!-- Botão que ativa o formulário -->
+<section id="contratos" class="hidden p-6">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold text-blue-900">Gestão de Colaboradores</h2>
         <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-blue-700">
-            + Novo Contrato
+                class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 shadow-md">
+            + Novo Cadastro
         </button>
     </div>
 
-    <!-- Modal de Cadastro (Escondido por padrão) -->
-    <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-        <div class="bg-white p-8 rounded-xl w-full max-w-lg shadow-2xl">
-            <h3 class="text-lg font-bold mb-4">Cadastrar Novo Contrato</h3>
-            <div class="space-y-4">
-                <input type="text" placeholder="Razão Social ou Nome Completo" class="w-full p-2 border rounded">
-                <input type="text" placeholder="CNPJ ou CPF" class="w-full p-2 border rounded">
-                <select class="w-full p-2 border rounded">
-                    <option>Tipo de Contrato: PJ</option>
-                    <option>Tipo de Contrato: PF</option>
-                </select>
-                <input type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded">
-                <div class="flex gap-2 justify-end mt-6">
-                    <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
-                    <button class="px-4 py-2 bg-blue-600 text-white rounded">Salvar Contrato</button>
+    <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl w-full max-w-5xl shadow-2xl h-[90vh] flex flex-col">
+            
+            <div class="p-6 border-b flex justify-between">
+                <h3 class="text-xl font-bold">Editar/Novo Cadastro</h3>
+                <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="font-bold">X</button>
+            </div>
+
+            <div class="flex border-b px-6 bg-slate-50">
+                <button onclick="abrirTab(event, 'tabIdentificacao')" class="tab-btn py-4 border-b-2 border-blue-600 font-bold text-sm">Identificação</button>
+                <button onclick="abrirTab(event, 'tabContratacao')" class="tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6">Contratação</button>
+                <button onclick="abrirTab(event, 'tabDocumentos')" class="tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6">Documentos</button>
+            </div>
+
+            <div class="flex-grow p-8 overflow-y-auto">
+                <div id="tabIdentificacao" class="tab-content space-y-6">
+                    <div class="grid grid-cols-3 gap-6">
+                        <input type="text" placeholder="Nome Completo *" class="p-2 border rounded">
+                        <input type="text" placeholder="Nome visível *" class="p-2 border rounded">
+                        <input type="text" placeholder="E-mail Pessoal" class="p-2 border rounded">
+                        <input type="text" placeholder="CPF" class="p-2 border rounded">
+                        <input type="text" placeholder="CEP" class="p-2 border rounded">
+                        <input type="text" placeholder="Município" class="p-2 border rounded">
+                    </div>
                 </div>
+
+                <div id="tabContratacao" class="tab-content hidden space-y-6">
+                    <div class="grid grid-cols-3 gap-6">
+                        <input type="text" placeholder="E-mail Corporativo" class="p-2 border rounded">
+                        <select class="p-2 border rounded"><option>Tipo de Vínculo: PJ</option><option>PF</option></select>
+                        <input type="text" placeholder="Data de Admissão" class="p-2 border rounded">
+                        <input type="text" placeholder="Cargo" class="p-2 border rounded">
+                        <input type="text" placeholder="Remuneração" class="p-2 border rounded">
+                        <input type="text" placeholder="Departamento" class="p-2 border rounded">
+                    </div>
+                </div>
+
+                <div id="tabDocumentos" class="tab-content hidden">
+                    <button class="bg-blue-600 text-white px-4 py-2 rounded font-bold">+ Adicionar Arquivo</button>
+                    <p class="mt-4 text-slate-400">Nenhum documento anexado.</p>
+                </div>
+            </div>
+
+            <div class="p-6 border-t flex justify-end gap-3">
+                <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-6 py-2 border rounded">Cancelar</button>
+                <button class="px-6 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+function abrirTab(evt, tabId) {
+    // Esconder conteúdo e resetar estilo dos botões
+    document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+    document.querySelectorAll('.tab-btn').forEach(b => b.className = "tab-btn py-4 border-b-2 border-transparent text-slate-500 font-bold text-sm ml-6");
+    
+    // Mostrar aba e marcar botão ativo
+    document.getElementById(tabId).classList.remove('hidden');
+    evt.currentTarget.className = "tab-btn py-4 border-b-2 border-blue-600 font-bold text-sm ml-6";
+}
+</script>
 
         <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm">
             <h2 class="text-xl font-bold">Relatórios & Centro de Custos</h2>
