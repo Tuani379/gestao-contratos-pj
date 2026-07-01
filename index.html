@@ -72,50 +72,58 @@
     </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+    import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-            authDomain: "connectpj-15532.firebaseapp.com",
-            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-            projectId: "connectpj-15532",
-            storageBucket: "connectpj-15532.firebasestorage.app",
-            messagingSenderId: "658474420007",
-            appId: "1:658474420007:web:94f3331b69b2a298af4b02"
-        };
+    const firebaseConfig = {
+        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+        authDomain: "connectpj-15532.firebaseapp.com",
+        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+        projectId: "connectpj-15532",
+        storageBucket: "connectpj-15532.firebasestorage.app",
+        messagingSenderId: "658474420007",
+        appId: "1:658474420007:web:94f3331b69b2a298af4b02"
+    };
 
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        const storage = getStorage(app);
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+    const storage = getStorage(app);
 
-        window.salvarCadastro = async () => {
+    window.salvarCadastro = async () => {
+        try {
+            // Coletando TODOS os campos que adicionamos no HTML
             const dados = {
                 nome: document.getElementById('campoNome').value,
                 cpf: document.getElementById('campoCpf').value,
-                email: document.getElementById('campoEmail').value,
+                emailPessoal: document.getElementById('campoEmail').value,
+                cep: document.getElementById('campoCep').value,
+                municipio: document.getElementById('campoMunicipio').value,
+                emailCorp: document.getElementById('campoEmailCorp').value,
                 cargo: document.getElementById('campoCargo').value,
-                data: new Date().toLocaleDateString()
+                remuneracao: document.getElementById('campoRemuneracao').value,
+                departamento: document.getElementById('campoDepartamento').value,
+                dataCadastro: new Date().toLocaleDateString()
             };
 
-            const file = document.getElementById('inputArquivo').files[0];
-            if (file) {
-                const snapshot = await uploadBytes(sRef(storage, 'documentos/' + file.name), file);
+            // Upload de arquivo
+            const fileInput = document.getElementById('inputArquivo');
+            if (fileInput && fileInput.files.length > 0) {
+                const file = fileInput.files[0];
+                const storageRef = sRef(storage, 'documentos/' + file.name);
+                const snapshot = await uploadBytes(storageRef, file);
                 dados.urlArquivo = await getDownloadURL(snapshot.ref);
             }
 
+            // Enviando ao Firebase
             await push(ref(db, 'contratos'), dados);
-            alert("Sucesso!");
-            location.reload(); // Recarrega para limpar o form
-        };
-    </script>
-
-    <script>
-        function mostrar(id) {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('contratos').classList.add('hidden');
-            document.getElementById('relatorios').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
+            
+            alert("Cadastro salvo com sucesso!");
+            document.getElementById('modalCadastro').classList.add('hidden');
+            location.reload(); // Atualiza a página para limpar os campos
+        } catch (error) {
+            console.error("Erro:", error);
+            alert("Erro ao salvar: " + error.message);
         }
-    </script>
+    };
+</script>
