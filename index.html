@@ -509,41 +509,54 @@
         }
 
         window.processarLancamentoMotor = function() {
-            const contratoId = parseInt(document.getElementById('motorContrato').value);
-            const tipo = document.getElementById('motorTipoFolha').value;
-            const evento = document.getElementById('motorEvento').value;
-            const valor = parseFloat(document.getElementById('motorValor').value) || 0;
+    const contratoId = parseInt(document.getElementById('motorContrato').value);
+    const tipo = document.getElementById('motorTipoFolha').value;
+    const evento = document.getElementById('motorEvento').value;
+    const valor = parseFloat(document.getElementById('motorValor').value) || 0;
 
-            const pj = bancoContratos.find(c => c.id === contratoId);
-            
-            if(tipo === 'Regular') {
-                const index = bancoFolhaMensal.findIndex(f => f.contratoId === contratoId && f.tipo === 'Regular');
-                if(index !== -1) {
-                    if(evento === 'Desconto') bancoFolhaMensal[index].desconto += valor;
-                    else bancoFolhaMensal[index].adicional += valor;
-                    
-                    bancoFolhaMensal[index].liquido = bancoFolhaMensal[index].base + bancoFolhaMensal[index].adicional - bancoFolhaMensal[index].desconto;
-                }
+    const pj = bancoContratos.find(c => c.id === contratoId);
+    if (!pj) return;
+    
+    if (tipo === 'Regular') {
+        const index = bancoFolhaMensal.findIndex(f => f.contratoId === contratoId && f.tipo === 'Regular');
+        if (index !== -1) {
+            // Correção da validação: verifica se a palavra contém 'Desconto' ou 'Glosa'
+            if (evento.includes('Desconto') || evento.includes('Glosa')) {
+                bancoFolhaMensal[index].desconto += valor;
             } else {
-                bancoFolhaMensal.push({
-                    id: bancoFolhaMensal.length,
-                    contratoId: contratoId,
-                    tipo: "Complementar",
-                    descricao: `Folha complementar - ${evento}`,
-                    base: 0,
-                    adicional: valor,
-                    desconto: 0,
-                    liquido: valor,
-                    status: "Aguardando Envio",
-                    xmlNome: "",
-                    dataAprovacao: ""
-                });
+                bancoFolhaMensal[index].adicional += valor;
             }
-
-            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
-            gravarLog(`Ajuste executado no motor para ${pj.razaoSocial}: Evento ${evento} de R$ ${valor.toFixed(2)}`);
-            alert("Motor recalculado e sincronizado na nuvem com sucesso!");
+            bancoFolhaMensal[index].liquido = bancoFolhaMensal[index].base + bancoFolhaMensal[index].adicional - bancoFolhaMensal[index].desconto;
         }
+    } else {
+        // Garante a geração de um ID incremental correto para folhas complementares
+        const novoId = bancoFolhaMensal.length > 0 ? Math.max(...bancoFolhaMensal.map(f => f.id)) + 1 : 1;
+        bancoFolhaMensal.push({
+            id: novoId,
+            contratoId: contratoId,
+            tipo: "Complementar",
+            descricao: `Folha complementar - ${evento}`,
+            base: 0,
+            adicional: valor,
+            desconto: 0,
+            liquido: valor,
+            status: "Aguardando Envio",
+            xmlNome: "",
+            dataAprovacao: ""
+        });
+    }
+
+    // Envia a atualização para o Firebase Realtime Database
+    set(ref(db, 'folhaMensal'), bancoFolhaMensal)
+        .then(() => {
+            gravarLog(`Motor: Processado ${evento} para ${pj.razaoSocial} no valor de R$ ${valor.toFixed(2)}`);
+            alert("Motor recalculado e sincronizado com o Firebase!");
+            document.getElementById('motorValor').value = 0;
+        })
+        .catch((error) => {
+            console.error("Erro ao salvar no Firebase:", error);
+        });
+}
 
         window.atualizarInterfacePortalPj = function() {
             const seletor = document.getElementById('seletorLoginPj');
