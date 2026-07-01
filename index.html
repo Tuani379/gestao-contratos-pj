@@ -319,59 +319,52 @@
     </footer>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
+        import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-      const firebaseConfig = {
-        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-        authDomain: "connectpj-15532.firebaseapp.com",
-        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-        projectId: "connectpj-15532",
-        storageBucket: "connectpj-15532.firebasestorage.app",
-        messagingSenderId: "658474420007",
-        appId: "1:658474420007:web:94f3331b69b2a298af4b02",
-        measurementId: "G-F57NPNB1EJ"
-      };
+        const firebaseConfig = {
+            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+            authDomain: "connectpj-15532.firebaseapp.com",
+            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+            projectId: "connectpj-15532",
+            storageBucket: "connectpj-15532.firebasestorage.app",
+            messagingSenderId: "658474420007",
+            appId: "1:658474420007:web:94f3331b69b2a298af4b02",
+            measurementId: "G-F57NPNB1EJ"
+        };
 
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const db = getDatabase(app);
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const db = getDatabase(app);
 
-      console.log("Firebase conectado com sucesso!");
+        console.log("Firebase conectado com sucesso!");
 
-      // Cole aqui dentro as funções que mandei na resposta anterior (mudarPerfil, renderizarFolhaMensal, etc.) para que elas usem o 'db' do Firebase!
+        // --- AS SUAS FUNÇÕES LOGIC CORREM AQUI DENTRO ---
+        
+        function mudarPerfil(perfil) {
+            console.log("Mudando para o perfil:", perfil);
+            // Lógica para alternar painel corporativo / prestador
+        }
+
+        function mudarAba(aba) {
+            console.log("Mudando para a aba:", aba);
+            // Lógica para esconder/mostrar as <section>
+        }
+
+        function processarLancamentoMotor() {
+            // Lógica do motor financeiro para gravar no Firebase
+        }
+
+        // ... adicione as outras funções aqui dentro ...
+
+
+        // --- OBRIGATÓRIO: Expor as funções para o escopo global (para os botões HTML funcionarem) ---
+        window.mudarPerfil = mudarPerfil;
+        window.mudarAba = mudarAba;
+        window.processarLancamentoMotor = processarLancamentoMotor;
+        // Faça o mesmo mapeamento "window.nomeDaFuncao = nomeDaFuncao" para as restantes.
+
     </script>
-</body>
-</html>
-<!-- O resto do seu código gigante vai estar aqui para cima... -->
-
-    <!-- COLE A PARTIR DAQUI: -->
-    <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
-      import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-
-      const firebaseConfig = {
-        apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-        authDomain: "connectpj-15532.firebaseapp.com",
-        databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-        projectId: "connectpj-15532",
-        storageBucket: "connectpj-15532.firebasestorage.app",
-        messagingSenderId: "658474420007",
-        appId: "1:658474420007:web:94f3331b69b2a298af4b02",
-        measurementId: "G-F57NPNB1EJ"
-      };
-
-      // Inicializa o Firebase, Analytics e Banco de Dados
-      const app = initializeApp(firebaseConfig);
-      const analytics = getAnalytics(app);
-      const db = getDatabase(app);
-
-      // O banco já está conectado! 
-      console.log("Firebase conectado com sucesso!");
-    </script>
-</body>
-</html>
 </body>
 </html>
