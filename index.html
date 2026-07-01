@@ -121,9 +121,25 @@
             alert("Cadastro salvo com sucesso!");
             document.getElementById('modalCadastro').classList.add('hidden');
             location.reload(); // Atualiza a página para limpar os campos
-        } catch (error) {
-            console.error("Erro:", error);
-            alert("Erro ao salvar: " + error.message);
+       } catch (error) {
+                console.error("Erro:", error);
+                alert("Erro ao salvar: " + error.message);
+            }
+        };
+    </script>
+
+    <script>
+        function mostrar(id) {
+            // 1. Esconde todas as seções
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('contratos').classList.add('hidden');
+            document.getElementById('relatorios').classList.add('hidden');
+            
+            // 2. Mostra apenas a seção solicitada
+            const secao = document.getElementById(id);
+            if (secao) {
+                secao.classList.remove('hidden');
+            }
         }
-    };
-</script>
+    </script>
+</body>
