@@ -2,18 +2,14 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <title>ConnectPJ - Central de Folha</title>
+    <title>ConnectPJ - Sistema Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-50 font-sans">
 
-    <!-- Header Azul (Como solicitado) -->
     <header class="bg-blue-900 text-white p-4 shadow-lg">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div>
-                <h1 class="text-2xl font-bold">ConnectPJ</h1>
-                <p class="text-xs opacity-75">Central de Contratos, Automação de NFs & Folha</p>
-            </div>
+            <h1 class="text-2xl font-bold">ConnectPJ</h1>
             <div class="bg-blue-800 p-1 rounded-lg flex gap-1">
                 <button class="bg-blue-600 px-4 py-2 rounded text-sm font-bold">Painel Corporativo (RH/Fin)</button>
                 <button class="px-4 py-2 text-sm opacity-75 hover:bg-blue-700 rounded transition">Área do Prestador (PJ)</button>
@@ -21,61 +17,50 @@
         </div>
     </header>
 
-    <!-- Navegação de Abas -->
     <nav class="bg-white border-b shadow-sm">
         <div class="max-w-7xl mx-auto flex gap-8 px-6">
-            <button class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900">Dashboard & Folha Mensal</button>
-            <button class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900">Contratos Cadastrados</button>
-            <button class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900">Relatórios & Centro de Custos</button>
+            <button onclick="mostrar('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900">Dashboard & Folha Mensal</button>
+            <button onclick="mostrar('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900">Contratos Cadastrados</button>
+            <button onclick="mostrar('relatorios')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900">Relatórios & Centro de Custos</button>
         </div>
     </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto p-6 space-y-6">
-        <!-- Cards de Métricas -->
-        <section class="grid grid-cols-4 gap-4">
-            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Folha de Competência</p><p class="text-xl font-black">Junho/2026</p></div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Total Bruto</p><p class="text-xl font-black text-emerald-600">R$ 45.500,00</p></div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Notas Fiscais</p><p class="text-xl font-black">0 / 0</p></div>
-            <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Contratos Ativos</p><p class="text-xl font-black">0 Empresas</p></div>
+    <main class="max-w-7xl mx-auto p-6">
+        
+        <section id="dashboard" class="space-y-6">
+            <div class="grid grid-cols-4 gap-4">
+                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Folha de Competência</p><p class="text-xl font-black">Junho/2026</p></div>
+                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Total Bruto</p><p class="text-xl font-black text-emerald-600">R$ 45.500,00</p></div>
+                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Notas Fiscais</p><p class="text-xl font-black">0 / 0</p></div>
+                <div class="bg-white p-4 rounded-xl border shadow-sm"><p class="text-[10px] uppercase font-bold text-slate-400">Contratos Ativos</p><p class="text-xl font-black">0 Empresas</p></div>
+            </div>
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <h2 class="font-bold text-blue-900 mb-4">⚙️ Motor Financeiro</h2>
+                <input type="number" class="p-2 border rounded w-full" placeholder="ID do Contrato">
+            </div>
         </section>
 
-        <!-- Motor Financeiro e Tabela -->
-        <section class="grid grid-cols-3 gap-6">
-            <div class="col-span-1 bg-white p-6 rounded-xl border shadow-sm h-fit">
-                <h2 class="font-bold text-blue-900 mb-4">⚙️ Motor Financeiro</h2>
-                <div class="space-y-4">
-                    <input type="number" class="w-full p-2 border rounded text-sm" placeholder="ID do Contrato">
-                    <button class="w-full bg-blue-600 text-white font-bold py-2 rounded">Aplicar e Atualizar</button>
-                </div>
-            </div>
-            <div class="col-span-2 bg-white rounded-xl border shadow-sm overflow-hidden">
-                <table class="w-full text-left text-sm">
-                    <thead class="bg-slate-50 border-b text-[10px] uppercase text-slate-400">
-                        <tr><th class="p-4">Razão Social</th><th class="p-4">Tipo</th><th class="p-4 text-right">Líquido</th></tr>
-                    </thead>
-                    <tbody id="corpoTabela">
-                        <!-- Os dados do Firebase aparecerão aqui -->
-                    </tbody>
-                </table>
-            </div>
+        <section id="contratos" class="hidden bg-white p-6 rounded-xl border shadow-sm">
+            <h2 class="text-xl font-bold">Gestão de Contratos Cadastrados</h2>
+            <p class="text-slate-500">Área em construção para listagem de empresas e contratos.</p>
+        </section>
+
+        <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm">
+            <h2 class="text-xl font-bold">Relatórios & Centro de Custos</h2>
+            <p class="text-slate-500">Área em construção para visualização de indicadores financeiros.</p>
         </section>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
-            authDomain: "connectpj-15532.firebaseapp.com",
-            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
-            projectId: "connectpj-15532",
-            storageBucket: "connectpj-15532.firebasestorage.app",
-            messagingSenderId: "658474420007",
-            appId: "1:658474420007:web:94f3331b69b2a298af4b02"
-        };
-        initializeApp(firebaseConfig);
+    <script>
+        function mostrar(id) {
+            // Esconde todas as seções
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('contratos').classList.add('hidden');
+            document.getElementById('relatorios').classList.add('hidden');
+            
+            // Mostra a seção desejada
+            document.getElementById(id).classList.remove('hidden');
+        }
     </script>
 </body>
 </html>
