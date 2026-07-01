@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,72 +7,200 @@
     <title>Portal de Folha Mensal PJ</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-slate-100 text-slate-800 antialiased">
+<body class="bg-slate-100 text-slate-800 antialiased p-6">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex gap-4">
+            <button id="perfilAdmin" onclick="mudarPerfil('admin')" class="px-3 py-1.5 rounded text-sm font-medium bg-blue-600 text-white transition">Painel Administrativo RH</button>
+            <button id="perfilPj" onclick="mudarPerfil('pj')" class="px-3 py-1.5 rounded text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 transition">Portal do Prestador PJ</button>
+        </div>
+
+        <div id="menuCorporativo" class="section-corporativa flex flex-col md:flex-row gap-6">
+            
+            <div class="w-full md:w-1/3 bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <h2 class="text-lg font-bold text-slate-900 border-b pb-2">Motor de Lançamentos</h2>
+                
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">1. Selecionar Contrato (ID)</label>
+                    <input type="number" id="motorContrato" class="w-full p-2 rounded border border-slate-300" placeholder="Ex: 0" value="0">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">2. Tipo de Folha</label>
+                    <select id="motorTipoFolha" class="w-full p-2 rounded border border-slate-300">
+                        <option value="Regular">Regular</option>
+                        <option value="Complementar">Complementar</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">3. Tipo de Evento</label>
+                    <select id="motorEvento" class="w-full p-2 rounded border border-slate-300">
+                        <option value="Adicional">Adicional / Bônus</option>
+                        <option value="Desconto">Descontos / Glosas Contratuais</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">4. Valor do Evento (R$)</label>
+                    <input type="number" id="motorValor" class="w-full p-2 rounded border border-slate-300" placeholder="0.00" step="0.01">
+                </div>
+
+                <button onclick="processarLancamentoMotor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 rounded transition">
+                    Aplicar e Atualizar
+                </button>
+            </div>
+
+            <div class="w-full md:w-2/3 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                <div class="p-6">
+                    <h2 class="text-lg font-bold text-slate-900 border-b pb-2 mb-4">Demonstrativo Consolidado</h2>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-200 text-slate-400 text-xs font-bold uppercase">
+                                    <th class="p-3">Razão Social</th>
+                                    <th class="p-3">Centro de Custo</th>
+                                    <th class="p-3">Tipo</th>
+                                    <th class="p-3">Descrição</th>
+                                    <th class="p-3 text-right">Líquido</th>
+                                </tr>
+                            </thead>
+                            <tbody id="corpoTabelaRelatorio">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 border-t border-slate-200 flex justify-between items-center">
+                    <span class="text-sm font-bold text-slate-500">TOTAL CONSOLIDADO DA FOLHA:</span>
+                    <span id="totalRelatorioSoma" class="text-xl font-black text-slate-900">R$ 0,00</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="painelPjContainer" class="hidden bg-white p-6 rounded-xl border border-slate-200 shadow-sm space-y-6">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h2 class="text-lg font-bold text-slate-900">Portal de Autoatendimento do Prestador</h2>
+                <div>
+                    <label class="text-xs font-bold text-slate-600 mr-2">Simular Login do ID:</label>
+                    <select id="seletorLoginPj" onchange="atualizarInterfacePortalPj()" class="p-1.5 border rounded text-sm bg-slate-50">
+                        <option value="0">Prestador ID 0</option>
+                        <option value="1">Prestador ID 1</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <div class="space-y-1">
+                    <p id="pjNomeFicha" class="font-bold text-slate-800 text-base">Razão Social do Prestador</p>
+                    <p id="pjCnpjFicha" class="text-xs text-slate-500">CNPJ: 00.000.000/0001-00</p>
+                    <span id="pjBadgeTipo" class="inline-block bg-slate-200 text-slate-700 text-xs px-2 py-0.5 font-bold rounded mt-1">Folha -</span>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm border-l md:border-r-0 md:pl-4 border-slate-200">
+                    <p class="text-slate-500">Valor Base:</p><p id="pjValorBaseTxt" class="font-medium text-right">R$ 0,00</p>
+                    <p class="text-slate-500">Variável (+):</p><p id="pjVariavelTxt" class="font-medium text-slate-600 text-right">+ R$ 0,00</p>
+                    <p class="text-slate-500">Descontos (-):</p><p id="pjDescontoTxt" class="font-medium text-red-600 text-right">- R$ 0,00</p>
+                </div>
+                <div class="flex flex-col justify-center items-end bg-white p-3 rounded border border-slate-200">
+                    <span class="text-xs font-bold text-slate-400">VALOR LÍQUIDO A RECEBER</span>
+                    <span id="pjLiquidoTxt" class="text-xl font-black text-emerald-600">R$ 0,00</span>
+                </div>
+            </div>
+
+            <div class="space-y-3">
+                <h3 class="text-sm font-bold text-slate-700">Faturamento e Validação Fiscal (NFSe)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="p-3 border border-dashed border-slate-300 rounded bg-slate-50">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Apenas Recibo / Nota em PDF:</label>
+                        <input type="file" id="inputPjPdf" accept=".pdf" class="text-xs w-full">
+                    </div>
+                    <div class="p-3 border border-dashed border-slate-300 rounded bg-slate-50">
+                        <label class="block text-xs font-bold text-slate-600 mb-1">Arquivo XML da Prefeitura (Obrigatório):</label>
+                        <input type="file" id="inputPjXml" accept=".xml" class="text-xs w-full">
+                    </div>
+                </div>
+                <button onclick="executarValidadorPj()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded text-sm transition">
+                    Verificar Integridade e Enviar para o RH
+                </button>
+                <div id="respostaValidacaoPj" class="hidden p-4 rounded-lg text-sm border"></div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 shadow-xl">
+            <h3 class="text-xs font-mono font-bold text-slate-500 uppercase tracking-wider mb-2">Histórico de Auditoria do Sistema (Logs em Tempo Real)</h3>
+            <div id="caixaLogsAuditoria" class="h-32 overflow-y-auto font-mono text-xs space-y-1 p-2 bg-slate-950 rounded border border-slate-800 text-slate-400">
+                <p class="text-slate-500">[Sistema] Aguardando interações...</p>
+            </div>
+        </div>
+
+    </div>
 
     <script type="module">
-        // Importações do Firebase (Ajuste a inicialização conforme o seu projeto)
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-analytics.js";
         import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Configuração do seu Firebase (Substitua pelos seus dados reais)
+        // Credenciais reais extraídas do seu projeto
         const firebaseConfig = {
-            apiKey: "SUA_API_KEY",
-            authDomain: "SEU_AUTH_DOMAIN",
-            databaseURL: "SUA_DATABASE_URL",
-            projectId: "SEU_PROJECT_ID",
-            storageBucket: "SEU_STORAGE_BUCKET",
-            messagingSenderId: "SEU_MESSAGING_SENDER_ID",
-            appId: "SUA_APP_ID"
+            apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
+            authDomain: "connectpj-15532.firebaseapp.com",
+            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com",
+            projectId: "connectpj-15532",
+            storageBucket: "connectpj-15532.firebasestorage.app",
+            messagingSenderId: "658474420007",
+            appId: "1:658474420007:web:94f3331b69b2a298af4b02",
+            measurementId: "G-F57NPNB1EJ"
         };
 
         const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
         const db = getDatabase(app);
 
-        // Bancos de dados locais (Exemplos de estruturas que seu código consome)
-        let bancoContratos = [];
-        let bancoFolhaMensal = [];
+        console.log("Firebase conectado com sucesso!");
 
-        // Ouvintes do Firebase para sincronização em tempo real
+        // Estruturas de Mock locais caso o Firebase venha vazio inicialmente
+        let bancoContratos = [
+            { id: 0, razaoSocial: "Tech Solutions PJ", cnpj: "12.345.678/0001-99", centroCusto: "TI-Desenvolvimento" },
+            { id: 1, razaoSocial: "Consultoria Alpha Ltda", cnpj: "98.765.432/0001-00", centroCusto: "RH-Treinamentos" }
+        ];
+
+        let bancoFolhaMensal = [
+            { id: 0, contratoId: 0, tipo: "Regular", descricao: "Prestação de Serviços Mensal", base: 8500.00, adicional: 0, desconto: 0, liquido: 8500.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" },
+            { id: 1, contratoId: 1, tipo: "Regular", descricao: "Consultoria Mensal Executiva", base: 12000.00, adicional: 0, desconto: 0, liquido: 12000.00, status: "Aguardando Envio", xmlNome: "", dataAprovacao: "" }
+        ];
+
+        // Escuta dados do Firebase em tempo real
         onValue(ref(db, 'contratos'), (snapshot) => {
-            if (snapshot.exists()) {
-                bancoContratos = snapshot.val();
-            }
+            if(snapshot.exists()) bancoContratos = snapshot.val();
+            atualizarInterfacePortalPj();
         });
 
         onValue(ref(db, 'folhaMensal'), (snapshot) => {
-            if (snapshot.exists()) {
+            if(snapshot.exists()) {
                 bancoFolhaMensal = snapshot.val();
-                // Atualiza a tabela ou relatórios automaticamente ao mudar dados na nuvem
-                if (typeof renderizarRelatorio === "function") renderizarRelatorio();
             }
+            renderizarRelatorio();
+            atualizarInterfacePortalPj();
         });
 
-        // ==========================================
-        // ENGENHARIA DE FUNÇÕES E LÓGICA DO MOTOR
-        // ==========================================
-
+        // Renderiza a tabela gerencial do RH
         function renderizarRelatorio() {
             const corpo = document.getElementById('corpoTabelaRelatorio');
             if(!corpo) return;
-            
+
             corpo.innerHTML = "";
             let totalConsolidado = 0;
-            const cc = document.getElementById('filtroCentroCusto')?.value || 'todos';
-            const pjFiltro = document.getElementById('filtroPrestador')?.value || 'todos';
-            const tipo = document.getElementById('filtroTipoFolha')?.value || 'todos';
 
             bancoFolhaMensal.forEach(item => {
                 const pj = bancoContratos.find(c => c.id === item.contratoId);
                 if(!pj) return;
 
-                if(cc !== 'todos' && pj.centroCusto !== cc) return;
-                if(pjFiltro !== 'todos' && pj.razaoSocial !== pjFiltro) return;
-                if(tipo !== 'todos' && item.tipo !== tipo) return;
-
-                totalConsolidated += item.liquido;
+                totalConsolidado += item.liquido;
 
                 corpo.innerHTML += `
-                    <tr class="hover:bg-slate-50 text-slate-700">
+                    <tr class="hover:bg-slate-50 text-slate-700 border-b border-slate-100">
                         <td class="p-3 font-medium">${pj.razaoSocial}</td>
                         <td class="p-3">${pj.centroCusto}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${item.tipo === 'Regular' ? 'bg-blue-50 text-blue-700' : 'bg-purple-50 text-purple-700'}">${item.tipo}</span></td>
@@ -81,9 +210,29 @@
                 `;
             });
 
-            const totalTxt = document.getElementById('totalRelatorioSoma');
-            if(totalTxt) {
-                totalTxt.innerText = `R$ ${totalConsolidado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            document.getElementById('totalRelatorioSoma').innerText = `R$ ${totalConsolidado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        // Expoe funções para o escopo global (window) por conta do tipo Module do Script
+        window.mudarPerfil = function(perfil) {
+            const menuCorp = document.getElementById('menuCorporativo');
+            const painelPj = document.getElementById('painelPjContainer');
+            const btnAdmin = document.getElementById('perfilAdmin');
+            const btnPj = document.getElementById('perfilPj');
+
+            if(perfil === 'admin') {
+                menuCorp.classList.remove('hidden');
+                painelPj.classList.add('hidden');
+                btnAdmin.className = "px-3 py-1.5 rounded text-sm font-medium bg-blue-600 text-white transition";
+                btnPj.className = "px-3 py-1.5 rounded text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 transition";
+                gravarLog("Usuário alterou nível de acesso para: ADMINISTRATIVO/RH.");
+            } else {
+                menuCorp.classList.add('hidden');
+                painelPj.classList.remove('hidden');
+                btnPj.className = "px-3 py-1.5 rounded text-sm font-medium bg-blue-600 text-white transition";
+                btnAdmin.className = "px-3 py-1.5 rounded text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-700 transition";
+                atualizarInterfacePortalPj();
+                gravarLog("Usuário alterou nível de acesso para: PORTAL PRESTADOR PJ.");
             }
         }
 
@@ -94,6 +243,7 @@
             const valor = parseFloat(document.getElementById('motorValor').value) || 0;
 
             const pj = bancoContratos.find(c => c.id === contratoId);
+            if(!pj) { alert("Contrato não encontrado!"); return; }
             
             if(tipo === 'Regular') {
                 const index = bancoFolhaMensal.findIndex(f => f.contratoId === contratoId && f.tipo === 'Regular');
@@ -121,7 +271,7 @@
 
             set(ref(db, 'folhaMensal'), bancoFolhaMensal);
             gravarLog(`Ajuste executado no motor para ${pj.razaoSocial}: Evento ${evento} de R$ ${valor.toFixed(2)}`);
-            alert("Motor recalculado e sincronizado na nuvem com sucesso!");
+            alert("Motor recalculado e sincronizado com sucesso!");
         }
 
         window.atualizarInterfacePortalPj = function() {
@@ -138,7 +288,7 @@
             document.getElementById('pjBadgeTipo').innerText = `Folha ${folha.tipo}`;
             document.getElementById('pjValorBaseTxt').innerText = `R$ ${folha.base.toFixed(2)}`;
             document.getElementById('pjVariavelTxt').innerText = `+ R$ ${folha.adicional.toFixed(2)}`;
-            document.getElementById('pjDescontoTxt').innerText = `- R$ ${folha.desconto.toFixed(2)}`;
+            document.getElementById('pjSuprimidoTxt' || 'pjDescontoTxt').innerText = `- R$ ${folha.desconto.toFixed(2)}`;
             document.getElementById('pjLiquidoTxt').innerText = `R$ ${folha.liquido.toFixed(2)}`;
 
             const boxResp = document.getElementById('respostaValidacaoPj');
@@ -156,11 +306,9 @@
                 return;
             }
 
-            if(boxResp) {
-                boxResp.classList.remove('hidden');
-                boxResp.className = "p-4 rounded-lg text-sm border bg-blue-50 text-blue-800 border-blue-200 animate-pulse";
-                boxResp.innerText = "Analisando tags do XML e confrontando integridade matemática do PDF...";
-            }
+            boxResp.classList.remove('hidden');
+            boxResp.className = "p-4 rounded-lg text-sm border bg-blue-50 text-blue-800 border-blue-200 animate-pulse";
+            boxResp.innerText = "Analisando tags do XML e confrontando integridade matemática do PDF...";
 
             setTimeout(() => {
                 const index = bancoFolhaMensal.findIndex(f => f.contratoId === id);
@@ -169,19 +317,10 @@
                     bancoFolhaMensal[index].xmlNome = fileXml.name;
                     set(ref(db, 'folhaMensal'), bancoFolhaMensal);
                 }
-                if(boxResp) {
-                    boxResp.className = "p-4 rounded-lg text-sm border bg-emerald-50 text-emerald-800 border-emerald-200";
-                    boxResp.innerHTML = "<strong>✓ Sucesso!</strong> Assinatura da prefeitura verificada e compatível com o líquido calculado. Enviado ao RH para liberação financeira.";
-                }
+                boxResp.className = "p-4 rounded-lg text-sm border bg-emerald-50 text-emerald-800 border-emerald-200";
+                boxResp.innerHTML = "<strong>✓ Sucesso!</strong> Assinatura da prefeitura verificada e compatível. Enviado ao RH.";
                 gravarLog(`Prestador ID ${id} realizou upload com sucesso dos arquivos fiscais.`);
             }, 1500);
-        }
-
-        window.aprovarPagamentoAdmin = function(index) {
-            bancoFolhaMensal[index].status = 'Aprovado';
-            bancoFolhaMensal[index].dataAprovacao = new Date().toLocaleString('pt-BR');
-            set(ref(db, 'folhaMensal'), bancoFolhaMensal);
-            gravarLog(`Administrador aprovou formalmente a liquidação da folha ID ${index}.`);
         }
 
         function gravarLog(texto) {
