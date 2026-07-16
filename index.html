@@ -32,7 +32,7 @@
 
         <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm">
     <div class="flex justify-between items-center mb-6">
-        <h2 class="text-xl font-bold text-blue-900">Gestão de Colaboradores</h2>
+        <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
         <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
                 class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
             + Novo Cadastro
@@ -49,10 +49,18 @@
                 <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded">
                 <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded">
                 <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded">
+                <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded">
+                <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded">
                 <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded">
+                <input id="campoVigencia" type="text" placeholder="Vigência" class="w-full p-2 border rounded">
+                <input id="campoCentrodeCusto" type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded">
                 <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded">
-                <input id="campoRemuneracao" type="text" placeholder="Remuneração" class="w-full p-2 border rounded">
+                <input id="campoValorFixoMensal" type="text" placeholder="Valor Fixo Mensal" class="w-full p-2 border rounded">
                 <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded">
+                <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded">
+                <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded">
+                <input id="campoStatus" type="text" placeholder="Status" class="w-full p-2 border rounded">
+                <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded">
             </div>
 
             <label class="block mt-4 mb-2 font-bold text-sm">Anexar Documento:</label>
@@ -99,10 +107,18 @@
                 emailPessoal: document.getElementById('campoEmail').value,
                 cep: document.getElementById('campoCep').value,
                 municipio: document.getElementById('campoMunicipio').value,
+                razaoSocial: document.getElementById('campoRzaoSocial').value,
+                CNPJ: document.getElementById('campoCNPJ').value,
                 emailCorp: document.getElementById('campoEmailCorp').value,
+                vigencia: document.getElementById('campoVigencia').value,
+                centrodeCusto: document.getElementById('campoCentrodeCusto').value,
                 cargo: document.getElementById('campoCargo').value,
-                remuneracao: document.getElementById('campoRemuneracao').value,
+                valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
                 departamento: document.getElementById('campoDepartamento').value,
+                gestorDireto: document.getElementById('campoGestorDireto').value,
+                papel: document.getElementById('campoPapel').value,
+                status: document.getElementById('campoStatus').value,
+                unidade: document.getElementById('campoUnidade').value,
                 dataCadastro: new Date().toLocaleDateString()
             };
 
@@ -121,25 +137,21 @@
             alert("Cadastro salvo com sucesso!");
             document.getElementById('modalCadastro').classList.add('hidden');
             location.reload(); // Atualiza a página para limpar os campos
-       } catch (error) {
-                console.error("Erro:", error);
-                alert("Erro ao salvar: " + error.message);
-            }
-        };
-    </script>
-
-    <script>
-        function mostrar(id) {
-            // 1. Esconde todas as seções
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('contratos').classList.add('hidden');
-            document.getElementById('relatorios').classList.add('hidden');
-            
-            // 2. Mostra apenas a seção solicitada
-            const secao = document.getElementById(id);
-            if (secao) {
-                secao.classList.remove('hidden');
-            }
+      } catch (error) {
+            console.error("Erro:", error);
+            alert("Erro ao salvar: " + error.message);
         }
-    </script>
+    }
+
+    function mostrar(id) {
+        document.getElementById('dashboard').classList.add('hidden');
+        document.getElementById('contratos').classList.add('hidden');
+        document.getElementById('relatorios').classList.add('hidden');
+
+        const secao = document.getElementById(id);
+        if (secao) {
+            secao.classList.remove('hidden');
+        }
+    }
+</script>
 </body>
