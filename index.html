@@ -189,15 +189,39 @@
             }
         });
 
-        // Navegação das abas
+        // Função de navegação global com atualização visual das abas
         window.mostrar = function(id) {
+            // 1. Esconde as seções de conteúdo
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
             document.getElementById('relatorios').classList.add('hidden');
 
+            // 2. Mostra a seção selecionada
             const secao = document.getElementById(id);
             if (secao) {
                 secao.classList.remove('hidden');
+            }
+
+            // 3. Reseta o estilo visual de todos os botões do menu superior
+            const botoes = {
+                dashboard: document.getElementById('btn-dashboard'),
+                contratos: document.getElementById('btn-contratos'),
+                relatorios: document.getElementById('btn-relatorios')
+            };
+
+            // Remove o estilo ativo de todos
+            Object.values(botoes).forEach(btn => {
+                if (btn) {
+                    btn.classList.remove('border-blue-600', 'text-blue-900');
+                    btn.classList.add('border-transparent', 'text-slate-500');
+                }
+            });
+
+            // Aplica o estilo ativo (azul) apenas no botão que foi clicado
+            const btnAtivo = botoes[id];
+            if (btnAtivo) {
+                btnAtivo.classList.remove('border-transparent', 'text-slate-500');
+                btnAtivo.classList.add('border-blue-600', 'text-blue-900');
             }
         };
     </script>
