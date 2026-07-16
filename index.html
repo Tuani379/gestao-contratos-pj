@@ -64,11 +64,8 @@
                         <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded">
                         <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded">
                         <input id="campoStatus" type="text" placeholder="Status" class="w-full p-2 border rounded">
-                        <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded">
+                        <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded border-slate-350 mb-4">
                     </div>
-
-                    <label class="block mt-4 mb-2 font-bold text-sm">Anexar Documento:</label>
-                    <input id="inputArquivo" type="file" class="w-full mb-6">
 
                     <div class="flex justify-end gap-2">
                         <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
@@ -86,7 +83,6 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getStorage, ref as sRef, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
@@ -100,9 +96,8 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
-        const storage = getStorage(app);
 
-        // Tornando a função de salvar disponível publicamente
+        // Função de salvar simplificada e sem o upload de arquivos
         window.salvarCadastro = async () => {
             try {
                 const dados = {
@@ -111,7 +106,7 @@
                     emailPessoal: document.getElementById('campoEmail').value,
                     cep: document.getElementById('campoCep').value,
                     municipio: document.getElementById('campoMunicipio').value,
-                    razaoSocial: document.getElementById('campoRazaoSocial').value, // 🔍 Corrigido ID aqui!
+                    razaoSocial: document.getElementById('campoRazaoSocial').value,
                     CNPJ: document.getElementById('campoCNPJ').value,
                     emailCorp: document.getElementById('campoEmailCorp').value,
                     vigencia: document.getElementById('campoVigencia').value,
@@ -126,16 +121,7 @@
                     dataCadastro: new Date().toLocaleDateString()
                 };
 
-                // Upload de arquivo
-                const fileInput = document.getElementById('inputArquivo');
-                if (fileInput && fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    const storageRef = sRef(storage, 'documentos/' + file.name);
-                    const snapshot = await uploadBytes(storageRef, file);
-                    dados.urlArquivo = await getDownloadURL(snapshot.ref);
-                }
-
-                // Enviando ao Firebase
+                // Enviando ao Firebase Realtime Database direto
                 await push(ref(db, 'contratos'), dados);
                 
                 alert("Cadastro salvo com sucesso!");
@@ -147,7 +133,7 @@
             }
         };
 
-        // 🔍 Tornando a função de navegação disponível globalmente (Fix para o onclick)
+        // Função de navegação global
         window.mostrar = function(id) {
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
