@@ -43,6 +43,27 @@
                 </button>
             </div>
 
+            <!-- NOVA TABELA DE CONTRATOS REAIS -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="border-b bg-slate-100">
+                            <th class="p-3 text-sm font-bold text-slate-600">Razão Social / Nome</th>
+                            <th class="p-3 text-sm font-bold text-slate-600">CNPJ / CPF</th>
+                            <th class="p-3 text-sm font-bold text-slate-600">Cargo / Função</th>
+                            <th class="p-3 text-sm font-bold text-slate-600">Valor Fixo Mensal</th>
+                            <th class="p-3 text-sm font-bold text-slate-600">Centro de Custo</th>
+                            <th class="p-3 text-sm font-bold text-slate-600">Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaContratos">
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-slate-400">Carregando contratos...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                     <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
@@ -82,7 +103,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        // Adicionado "onValue" para monitorar mudanças no banco em tempo real
+        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
@@ -97,7 +119,7 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Função de salvar simplificada e sem o upload de arquivos
+        // Salva os dados no banco
         window.salvarCadastro = async () => {
             try {
                 const dados = {
@@ -121,19 +143,53 @@
                     dataCadastro: new Date().toLocaleDateString()
                 };
 
-                // Enviando ao Firebase Realtime Database direto
                 await push(ref(db, 'contratos'), dados);
                 
                 alert("Cadastro salvo com sucesso!");
                 document.getElementById('modalCadastro').classList.add('hidden');
-                location.reload(); 
+                
+                // Limpa o formulário
+                const inputs = document.querySelectorAll('#modalCadastro input');
+                inputs.forEach(input => input.value = '');
             } catch (error) {
                 console.error("Erro:", error);
                 alert("Erro ao salvar: " + error.message);
             }
         };
 
-        // Função de navegação global
+        // ESCUTA O BANCO DE DADOS EM TEMPO REAL E MOSTRA NA TABELA
+        const contratosRef = ref(db, 'contratos');
+        onValue(contratosRef, (snapshot) => {
+            const listaContratos = document.getElementById('listaContratos');
+            listaContratos.innerHTML = ''; // Limpa a tabela
+            
+            const data = snapshot.val();
+            if (data) {
+                // Loop para carregar cada contrato cadastrado
+                Object.keys(data).forEach(key => {
+                    const contrato = data[key];
+                    const tr = document.createElement('tr');
+                    tr.className = 'border-b hover:bg-slate-50 transition';
+                    tr.innerHTML = `
+                        <td class="p-3 text-sm font-semibold text-slate-700">${contrato.razaoSocial || contrato.nome || '-'}</td>
+                        <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
+                        <td class="p-3 text-sm text-slate-600">${contrato.cargo || '-'}</td>
+                        <td class="p-3 text-sm text-slate-600 font-medium">R$ ${contrato.valorFixoMensal || '-'}</td>
+                        <td class="p-3 text-sm text-slate-600">${contrato.centrodeCusto || '-'}</td>
+                        <td class="p-3 text-sm"><span class="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">${contrato.status || 'Ativo'}</span></td>
+                    `;
+                    listaContratos.appendChild(tr);
+                });
+            } else {
+                listaContratos.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td>
+                    </tr>
+                `;
+            }
+        });
+
+        // Navegação das abas
         window.mostrar = function(id) {
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
@@ -143,6 +199,10 @@
             if (secao) {
                 secao.classList.remove('hidden');
             }
+        };
+    </script>
+</body>
+</html>
         };
     </script>
 </body>
