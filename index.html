@@ -11,13 +11,14 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">ConnectPJ</h1>
             <div class="bg-blue-800 p-1 rounded-lg flex gap-1">
-                <button class="bg-blue-600 px-4 py-2 rounded text-sm font-bold">Painel Corporativo (RH/Fin)</button>
-                <button class="px-4 py-2 text-sm opacity-75 hover:bg-blue-700 rounded transition">Área do Prestador (PJ)</button>
+                <button id="btn-modo-rh" onclick="mudarModo('rh')" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold transition">Painel Corporativo (RH/Fin)</button>
+                <button id="btn-modo-pj" onclick="mudarModo('pj')" class="px-4 py-2 text-sm opacity-75 hover:bg-blue-700 rounded transition font-bold">Área do Prestador (PJ)</button>
             </div>
         </div>
     </header>
 
-    <nav class="bg-white border-b shadow-sm">
+    <!-- MENU DO RH (Só aparece no modo RH) -->
+    <nav id="menu-rh" class="bg-white border-b shadow-sm">
         <div class="max-w-7xl mx-auto flex gap-8 px-6">
             <button id="btn-dashboard" onclick="mostrar('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900 transition">Dashboard & Folha Mensal</button>
             <button id="btn-contratos" onclick="mostrar('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Contratos Cadastrados</button>
@@ -27,9 +28,8 @@
 
     <main class="max-w-7xl mx-auto p-6">
         
-        <!-- DASHBOARD & FOLHA MENSAL -->
-        <section id="dashboard" class="space-y-6">
-            <!-- Cards de Resumo -->
+        <!-- MODO RH: DASHBOARD & FOLHA MENSAL -->
+        <section id="dashboard" class="space-y-6 modo-rh-secao">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
                     <p class="text-sm font-bold text-slate-500 uppercase">Contratos Ativos</p>
@@ -45,13 +45,10 @@
                 </div>
             </div>
 
-            <!-- Tabela de Controle de Pagamentos da Folha -->
             <div class="p-6 bg-white rounded-xl border shadow-sm">
-                <div class="flex justify-between items-center mb-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
-                        <p class="text-sm text-slate-500">Monitore o status e controle os lançamentos financeiros dos seus prestadores.</p>
-                    </div>
+                <div class="mb-6">
+                    <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
+                    <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais dos prestadores e mude os status de pagamento.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -62,12 +59,13 @@
                                 <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
                                 <th class="p-3 text-sm font-bold text-slate-600">Valor Contratual</th>
                                 <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
+                                <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
                                 <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
                             </tr>
                         </thead>
                         <tbody id="listaFolha">
                             <tr>
-                                <td colspan="5" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td>
+                                <td colspan="6" class="p-4 text-center text-slate-400">Carregando dados...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -75,8 +73,8 @@
             </div>
         </section>
 
-        <!-- CONTRATOS -->
-        <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm">
+        <!-- MODO RH: CONTRATOS -->
+        <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
                 <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
@@ -105,10 +103,10 @@
                 </table>
             </div>
 
+            <!-- MODAL CADASTRO -->
             <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                     <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
-                    
                     <div class="grid grid-cols-2 gap-4">
                         <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded">
                         <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded">
@@ -128,7 +126,6 @@
                         <input id="campoStatus" type="text" placeholder="Status" class="w-full p-2 border rounded">
                         <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded border-slate-350 mb-4">
                     </div>
-
                     <div class="flex justify-end gap-2">
                         <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
                         <button onclick="salvarCadastro()" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
@@ -137,15 +134,43 @@
             </div>
         </section>
 
-        <!-- RELATÓRIOS -->
-        <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm">
+        <!-- MODO RH: RELATÓRIOS -->
+        <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
             <h2 class="text-xl font-bold">Relatórios</h2>
         </section>
+
+        <!-- AREA DO PRESTADOR (PJ) -->
+        <section id="area-prestador" class="hidden max-w-xl mx-auto p-6 bg-white rounded-xl border shadow-sm space-y-6">
+            <div class="border-b pb-4">
+                <h2 class="text-2xl font-bold text-blue-900">Portal do Prestador PJ</h2>
+                <p class="text-sm text-slate-500 mt-1">Selecione seu contrato e envie sua Nota Fiscal de Prestação de Serviços.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Identifique sua Empresa/Nome:</label>
+                    <select id="selectPrestadorPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold">
+                        <option value="">Selecione sua empresa...</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">Selecione o Arquivo da Nota Fiscal (PDF ou Imagem):</label>
+                    <input id="arquivoNFPJ" type="file" accept="application/pdf,image/*" class="w-full p-2 border rounded-lg bg-slate-50">
+                    <p class="text-xs text-slate-400 mt-1">Tamanho máximo recomendado: 2MB</p>
+                </div>
+
+                <button onclick="enviarNotaPrestador()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">
+                    📤 Enviar Nota Fiscal
+                </button>
+            </div>
+        </section>
+
     </main>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
@@ -160,7 +185,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // Salvar cadastro no Realtime Database
+        // Armazenamento local dos contratos em tempo real
+        let contratosLocais = {};
+
+        // Salvar Cadastro de Contrato
         window.salvarCadastro = async () => {
             try {
                 const dados = {
@@ -181,32 +209,56 @@
                     papel: document.getElementById('campoPapel').value,
                     status: document.getElementById('campoStatus').value,
                     unidade: document.getElementById('campoUnidade').value,
-                    dataCadastro: new Date().toLocaleDateString()
+                    dataCadastro: new Date().toLocaleDateString(),
+                    nfStatus: "Pendente",         // Status padrão da NF
+                    nfArquivoBase64: "",          // Onde guardamos a NF convertida
+                    statusPagamento: "Aguardando NF" // Status do pagamento
                 };
 
                 await push(ref(db, 'contratos'), dados);
-                
                 alert("Cadastro salvo com sucesso!");
                 document.getElementById('modalCadastro').classList.add('hidden');
                 
                 const inputs = document.querySelectorAll('#modalCadastro input');
                 inputs.forEach(input => input.value = '');
             } catch (error) {
-                console.error("Erro:", error);
+                console.error(error);
                 alert("Erro ao salvar: " + error.message);
             }
         };
 
-        // ESCUTA O BANCO EM TEMPO REAL E CARREGA AMBAS AS TELAS (CONTRATOS E FOLHA)
+        // Função do RH para alterar manualmente os status da folha
+        window.alterarStatusNF = async (idContrato, novoStatus) => {
+            let statusPagamento = "Aguardando NF";
+            if (novoStatus === "Recebida ✔") {
+                statusPagamento = "Pronto para Pagar";
+            } else if (novoStatus === "Recusada ❌") {
+                statusPagamento = "NF Recusada / Corrigir";
+            }
+
+            try {
+                await update(ref(db, `contratos/${idContrato}`), {
+                    nfStatus: novoStatus,
+                    statusPagamento: statusPagamento
+                });
+            } catch (error) {
+                alert("Erro ao atualizar status: " + error.message);
+            }
+        };
+
+        // Escuta os contratos do Firebase e monta as telas
         const contratosRef = ref(db, 'contratos');
         onValue(contratosRef, (snapshot) => {
             const listaContratos = document.getElementById('listaContratos');
             const listaFolha = document.getElementById('listaFolha');
+            const selectPJ = document.getElementById('selectPrestadorPJ');
             
             listaContratos.innerHTML = ''; 
             listaFolha.innerHTML = ''; 
+            selectPJ.innerHTML = '<option value="">Selecione sua empresa...</option>';
             
             const data = snapshot.val();
+            contratosLocais = data || {};
             
             if (data) {
                 let totalContratos = 0;
@@ -216,13 +268,12 @@
                     const contrato = data[key];
                     totalContratos++;
                     
-                    // Limpa formatação para somar o valor da folha
                     const valorLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                     if (!isNaN(valorLimpo)) {
                         valorTotalFolha += valorLimpo;
                     }
 
-                    // 1. Alimenta a Tabela de Gestão de Contratos
+                    // 1. Preenche a tabela do RH de Gestão de Contratos
                     const trContrato = document.createElement('tr');
                     trContrato.className = 'border-b hover:bg-slate-50 transition';
                     trContrato.innerHTML = `
@@ -235,9 +286,11 @@
                     `;
                     listaContratos.appendChild(trContrato);
 
-                    // 2. Alimenta a Tabela de Folha Mensal de Pagamentos
+                    // 2. Preenche a tabela do RH da Folha Mensal
+                    const temNota = contrato.nfArquivoBase64 ? true : false;
                     const trFolha = document.createElement('tr');
                     trFolha.className = 'border-b hover:bg-slate-50 transition';
+                    
                     trFolha.innerHTML = `
                         <td class="p-3 text-sm font-semibold text-slate-700">
                             <div>${contrato.razaoSocial || contrato.nome || '-'}</div>
@@ -246,49 +299,106 @@
                         <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
                         <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${contrato.valorFixoMensal || '-'}</td>
                         <td class="p-3 text-center">
-                            <select class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
-                                <option>Pendente</option>
-                                <option class="text-green-600">Recebida ✔</option>
-                                <option class="text-red-600">Recusada ❌</option>
+                            <select onchange="alterarStatusNF('${key}', this.value)" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
+                                <option value="Pendente" ${contrato.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                <option value="Recebida ✔" ${contrato.nfStatus === 'Recebida ✔' ? 'selected' : ''} class="text-green-600">Recebida ✔</option>
+                                <option value="Recusada ❌" ${contrato.nfStatus === 'Recusada ❌' ? 'selected' : ''} class="text-red-600">Recusada ❌</option>
                             </select>
                         </td>
                         <td class="p-3 text-center">
-                            <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-yellow-100 text-yellow-800">Aguardando NF</span>
+                            ${temNota ? `
+                                <button onclick="visualizarNota('${key}')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-xs font-bold transition">
+                                    📄 Ver Nota
+                                </button>
+                            ` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}
+                        </td>
+                        <td class="p-3 text-center">
+                            <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full 
+                                ${contrato.statusPagamento === 'Pronto para Pagar' ? 'bg-green-100 text-green-800' : 
+                                  contrato.statusPagamento === 'NF Recusada / Corrigir' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}">
+                                ${contrato.statusPagamento || 'Aguardando NF'}
+                            </span>
                         </td>
                     `;
                     listaFolha.appendChild(trFolha);
+
+                    // 3. Alimenta o Select da Área do Prestador PJ
+                    const opt = document.createElement('option');
+                    opt.value = key;
+                    opt.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (CNPJ: ${contrato.CNPJ})` : `${contrato.nome} (CPF: ${contrato.cpf})`;
+                    selectPJ.appendChild(opt);
                 });
 
-                // Atualiza os Cards do Topo
                 document.getElementById('cardContratosAtivos').innerText = totalContratos;
                 document.getElementById('cardTotalFolha').innerText = valorTotalFolha.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             } else {
-                listaContratos.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td>
-                    </tr>
-                `;
-                listaFolha.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td>
-                    </tr>
-                `;
+                listaContratos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td></tr>`;
+                listaFolha.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td></tr>`;
                 document.getElementById('cardContratosAtivos').innerText = '0';
                 document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
             }
         });
 
-        // Navegação das abas com atualização de botões ativos
+        // Função executada pelo Prestador para enviar a NF
+        window.enviarNotaPrestador = async () => {
+            const idContrato = document.getElementById('selectPrestadorPJ').value;
+            const arquivoInput = document.getElementById('arquivoNFPJ');
+
+            if (!idContrato) {
+                alert("Por favor, selecione a sua Empresa/Nome.");
+                return;
+            }
+
+            if (!arquivoInput.files || arquivoInput.files.length === 0) {
+                alert("Por favor, selecione um arquivo de Nota Fiscal.");
+                return;
+            }
+
+            const arquivo = arquivoInput.files[0];
+            
+            // Leitor de arquivo para converter em texto Base64
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                const base64Data = e.target.result; // Contém o arquivo convertido em texto plano
+
+                try {
+                    // Atualiza o banco do prestador enviando a NF e mudando status
+                    await update(ref(db, `contratos/${idContrato}`), {
+                        nfArquivoBase64: base64Data,
+                        nfStatus: "Recebida ✔",
+                        statusPagamento: "Pronto para Pagar"
+                    });
+
+                    alert("Nota Fiscal enviada com sucesso! O Financeiro já foi notificado.");
+                    arquivoInput.value = ''; // Limpa o campo de arquivo
+                    document.getElementById('selectPrestadorPJ').value = '';
+                } catch (error) {
+                    alert("Erro ao enviar arquivo: " + error.message);
+                }
+            };
+            reader.readAsDataURL(arquivo);
+        };
+
+        // Função executada pelo RH para abrir a nota fiscal salva
+        window.visualizarNota = (key) => {
+            const contrato = contratosLocais[key];
+            if (contrato && contrato.nfArquivoBase64) {
+                const novaJanela = window.open();
+                novaJanela.document.write(`<iframe src="${contrato.nfArquivoBase64}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
+            } else {
+                alert("Nota fiscal não encontrada.");
+            }
+        };
+
+        // Navegação de Abas do RH
         window.mostrar = function(id) {
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
             document.getElementById('relatorios').classList.add('hidden');
 
             const secao = document.getElementById(id);
-            if (secao) {
-                secao.classList.remove('hidden');
-            }
+            if (secao) secao.classList.remove('hidden');
 
             const botoes = {
                 dashboard: document.getElementById('btn-dashboard'),
@@ -307,6 +417,35 @@
             if (btnAtivo) {
                 btnAtivo.classList.remove('border-transparent', 'text-slate-500');
                 btnAtivo.classList.add('border-blue-600', 'text-blue-900');
+            }
+        };
+
+        // Alterna entre o Modo RH e o Modo Prestador
+        window.mudarModo = function(modo) {
+            const btnRh = document.getElementById('btn-modo-rh');
+            const btnPj = document.getElementById('btn-modo-pj');
+            const menuRh = document.getElementById('menu-rh');
+            const areaPrestador = document.getElementById('area-prestador');
+            const secoesRh = document.querySelectorAll('.modo-rh-secao');
+
+            if (modo === 'rh') {
+                btnRh.classList.add('bg-blue-600');
+                btnRh.classList.remove('opacity-75');
+                btnPj.classList.remove('bg-blue-600');
+                btnPj.classList.add('opacity-75');
+
+                menuRh.classList.remove('hidden');
+                areaPrestador.classList.add('hidden');
+                mostrar('dashboard'); // Volta por padrão ao dashboard
+            } else {
+                btnPj.classList.add('bg-blue-600');
+                btnPj.classList.remove('opacity-75');
+                btnRh.classList.remove('bg-blue-600');
+                btnRh.classList.add('opacity-75');
+
+                menuRh.classList.add('hidden');
+                secoesRh.forEach(sec => sec.classList.add('hidden'));
+                areaPrestador.classList.remove('hidden');
             }
         };
     </script>
