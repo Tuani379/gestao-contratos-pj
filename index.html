@@ -32,14 +32,20 @@
         
         <!-- MODO RH: DASHBOARD & FOLHA MENSAL -->
         <section id="dashboard" class="space-y-6 modo-rh-secao">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Grid atualizado para 4 colunas em telas médias/grandes -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
                     <p class="text-sm font-bold text-slate-500 uppercase">Contratos Ativos</p>
                     <h3 id="cardContratosAtivos" class="text-3xl font-extrabold text-blue-900 mt-2">0</h3>
                 </div>
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
-                    <p class="text-sm font-bold text-slate-500 uppercase">Total da Folha Regular (Mensal)</p>
+                    <p class="text-sm font-bold text-slate-500 uppercase">Total da Folha Regular</p>
                     <h3 id="cardTotalFolha" class="text-3xl font-extrabold text-blue-900 mt-2">R$ 0,00</h3>
+                </div>
+                <!-- NOVO CARD: TOTAL DA FOLHA COMPLEMENTAR -->
+                <div class="bg-white p-6 rounded-xl border border-amber-200 bg-amber-50/20 shadow-sm">
+                    <p class="text-sm font-bold text-amber-700 uppercase">Total Folha Complementar</p>
+                    <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
                 </div>
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
                     <p class="text-sm font-bold text-slate-500 uppercase">Mês de Referência</p>
@@ -239,7 +245,7 @@
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
         // ==========================================
-        // CONFIGURAÇÕES OFICIAIS DO EMAILJS (ATUALIZADO!)
+        // CONFIGURAÇÕES OFICIAIS DO EMAILJS
         // ==========================================
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
@@ -376,7 +382,9 @@
                     atualizacoes.nfArquivoBase64Complementar = "";
                 }
                 
-                await update(ref(db, `contratos/${key}`), atualizacoes);
+                await update(ref(db, `contratos/${key}`), {
+                    ...atualizacoes
+                });
 
                 alert("Lançamento Aplicado com Sucesso!");
                 
@@ -473,12 +481,13 @@
             if (data) {
                 let totalContratos = 0;
                 let valorTotalFolhaRegular = 0;
+                let valorTotalFolhaComplementar = 0; // Nova variável somatória
 
                 Object.keys(data).forEach(key => {
                     const contrato = data[key];
                     totalContratos++;
                     
-                    // 1. GESTÃO DE CONTRATOS (Lista de Pessoas)
+                    // 1. GESTÃO DE CONTRATOS
                     const trContrato = document.createElement('tr');
                     trContrato.className = 'border-b hover:bg-slate-50 transition';
                     trContrato.innerHTML = `
@@ -491,7 +500,7 @@
                     `;
                     listaContratos.appendChild(trContrato);
 
-                    // 2. FOLHA DE PAGAMENTO (Tabela Mensal e Lançamentos)
+                    // 2. CÁLCULO DE VALORES
                     let valorFixoLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                     if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
@@ -504,7 +513,7 @@
                     }
 
                     const valorFinalRegular = valorFixoLimpo + valorMotorRegular;
-                    valorTotalFolhaRegular += valorFinalRegular; // Apenas soma o regular no card do Dashboard
+                    valorTotalFolhaRegular += valorFinalRegular;
 
                     // LINHA 1: FOLHA REGULAR
                     const trRegular = document.createElement('tr');
@@ -562,9 +571,11 @@
                     `;
                     listaFolha.appendChild(trRegular);
 
-                    // LINHA 2: FOLHA COMPLEMENTAR SEPARADA (Só renderiza se existir bônus/complemento com tipo "complementar")
+                    // LINHA 2: FOLHA COMPLEMENTAR SEPARADA
                     if (contrato.motorTipo === 'complementar' && (parseFloat(contrato.motorValor) || 0) > 0) {
                         const valorComplementar = parseFloat(contrato.motorValor);
+                        valorTotalFolhaComplementar += valorComplementar; // Incrementa a soma da complementar
+
                         const trComplementar = document.createElement('tr');
                         trComplementar.className = 'border-b bg-amber-50/50 hover:bg-amber-50 transition border-l-4 border-l-amber-500';
 
@@ -594,7 +605,7 @@
 
                         trComplementar.innerHTML = `
                             <td class="p-3 text-sm font-semibold text-slate-700">
-                                <div class="text-amber-800">${contrato.razaoSocial || contrato.nome || '-'}</div>
+                                <div class="text-amber-800 font-bold">${contrato.razaoSocial || contrato.nome || '-'}</div>
                                 <div class="text-[10px] text-amber-700 font-extrabold uppercase tracking-wide mt-0.5">⚡ Folha Complementar (${contrato.motorEvento})</div>
                             </td>
                             <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
@@ -622,13 +633,12 @@
                         listaFolha.appendChild(trComplementar);
                     }
 
-                    // 3. Alimenta o Select da Área do Prestador PJ
+                    // 3. Alimenta Selects
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (CNPJ: ${contrato.CNPJ})` : `${contrato.nome} (CPF: ${contrato.cpf})`;
                     selectPJ.appendChild(opt);
 
-                    // 4. Alimenta o Select do Motor Financeiro
                     const optMotor = document.createElement('option');
                     optMotor.value = key;
                     optMotor.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (${contrato.cargo || 'PJ'})` : `${contrato.nome} (${contrato.cargo || 'PJ'})`;
@@ -639,18 +649,21 @@
                     motorContratoSelect.value = motorSelectedVal;
                 }
 
+                // Atualiza os painéis/cards superiores
                 document.getElementById('cardContratosAtivos').innerText = totalContratos;
                 document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+                document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
             } else {
                 listaContratos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td></tr>`;
                 listaFolha.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td></tr>`;
                 document.getElementById('cardContratosAtivos').innerText = '0';
                 document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
+                document.getElementById('cardTotalFolhaComplementar').innerText = 'R$ 0,00';
             }
         });
 
-        // Evento para mostrar o quadro financeiro detalhado e ativar o seletor de folha no painel do PJ
+        // Evento para mostrar o quadro financeiro detalhado do PJ
         document.getElementById('selectPrestadorPJ').addEventListener('change', function() {
             const key = this.value;
             const quadro = document.getElementById('quadroResumoPJ');
@@ -672,7 +685,6 @@
 
             let html = `<p>• <b>Folha Regular (Mensal):</b> R$ ${(valorFixo + (contrato.motorTipo === 'regular' ? motorValor : 0)).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>`;
             
-            // Se tiver complementar ativa, revela o seletor para ele escolher qual Nota está subindo
             if (contrato.motorTipo === 'complementar' && motorValor > 0) {
                 seletorDiv.classList.remove('hidden');
                 html += `<p class="text-amber-700">• <b>Folha Complementar (${contrato.motorEvento}):</b> R$ ${motorValor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>`;
@@ -685,7 +697,7 @@
             detalhes.innerHTML = html;
         });
 
-        // Enviar Nota Fiscal do Prestador (Regular ou Complementar)
+        // Enviar Nota Fiscal do Prestador (Corrigido nó de envio de 'contracts' para 'contratos')
         window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
             const arquivoInput = document.getElementById('arquivoNFPJ');
@@ -703,7 +715,6 @@
             const contrato = contratosLocais[idContrato];
             let tipoFolha = "regular";
             
-            // Se o seletor de tipo de folha estiver visível, verifica qual está marcado
             if (contrato.motorTipo === 'complementar' && (parseFloat(contrato.motorValor) || 0) > 0) {
                 tipoFolha = document.querySelector('input[name="tipoFolhaUpload"]:checked').value;
             }
@@ -715,7 +726,7 @@
 
                 try {
                     if (tipoFolha === "regular") {
-                        await update(ref(db, `contracts/${idContrato}`), { // Se seu nó no banco for 'contratos'
+                        await update(ref(db, `contratos/${idContrato}`), {
                             nfArquivoBase64: base64Data,
                             nfStatus: "Recebida ✔",
                             statusPagamento: "Pronto para Pagar",
