@@ -32,7 +32,6 @@
         
         <!-- MODO RH: DASHBOARD & FOLHA MENSAL -->
         <section id="dashboard" class="space-y-6 modo-rh-secao">
-            <!-- Grid atualizado para 4 colunas em telas médias/grandes -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
                     <p class="text-sm font-bold text-slate-500 uppercase">Contratos Ativos</p>
@@ -42,7 +41,6 @@
                     <p class="text-sm font-bold text-slate-500 uppercase">Total da Folha Regular</p>
                     <h3 id="cardTotalFolha" class="text-3xl font-extrabold text-blue-900 mt-2">R$ 0,00</h3>
                 </div>
-                <!-- NOVO CARD: TOTAL DA FOLHA COMPLEMENTAR -->
                 <div class="bg-white p-6 rounded-xl border border-amber-200 bg-amber-50/20 shadow-sm">
                     <p class="text-sm font-bold text-amber-700 uppercase">Total Folha Complementar</p>
                     <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
@@ -96,10 +94,11 @@
                 </div>
             </div>
 
+            <!-- TABELA 1: FOLHA REGULAR -->
             <div class="p-6 bg-white rounded-xl border shadow-sm">
                 <div class="mb-6">
                     <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
-                    <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais dos prestadores e mude os status de pagamento.</p>
+                    <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais regulares dos prestadores.</p>
                 </div>
 
                 <div class="overflow-x-auto">
@@ -118,6 +117,32 @@
                             <tr>
                                 <td colspan="6" class="p-4 text-center text-slate-400">Carregando dados...</td>
                             </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- TABELA 2: FOLHA COMPLEMENTAR (Fica oculta se não houver dados complementares) -->
+            <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
+                <div>
+                    <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
+                    <p class="text-sm text-slate-500">Controle de bônus, comissões e horas extras independentes com fluxos de notas separados.</p>
+                </div>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b bg-amber-100/50">
+                                <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
+                                <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
+                                <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
+                                <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
+                                <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
+                                <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaFolhaComplementar">
+                            <!-- Injetado dinamicamente -->
                         </tbody>
                     </table>
                 </div>
@@ -251,7 +276,6 @@
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
         const EMAILJS_TEMPLATE_ID = "template_bvvnbfs";
 
-        // Inicializa o EmailJS utilizando a Chave Pública fornecida
         if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
@@ -271,7 +295,6 @@
 
         let contratosLocais = {};
 
-        // Função auxiliar para enviar e-mails de notificação via EmailJS
         async function enviarNotificacaoEmail(destinatarioEmail, nomePrestador, dadosLancamento) {
             if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === "SUA_PUBLIC_KEY") {
                 console.warn("E-mail não enviado: Chaves do EmailJS não configuradas.");
@@ -315,18 +338,15 @@
                     unidade: document.getElementById('campoUnidade').value,
                     dataCadastro: new Date().toLocaleDateString(),
                     
-                    // Folha Regular
                     nfStatus: "Pendente",
                     nfArquivoBase64: "",
                     statusPagamento: "Aguardando NF",
                     dataPagamento: "",
 
-                    // Motor Lançamento Comum (Regular)
                     motorTipo: "",
                     motorEvento: "",
                     motorValor: 0,
 
-                    // Folha Complementar (100% Separada)
                     nfStatusComplementar: "Pendente",
                     statusPagamentoComplementar: "Aguardando NF",
                     dataPagamentoComplementar: "",
@@ -369,26 +389,21 @@
                     motorValor: valor
                 };
 
-                // Reseta os fluxos dependendo do tipo de lançamento
                 if (tipo === 'regular') {
                     atualizacoes.nfStatus = "Pendente";
                     atualizacoes.statusPagamento = "Aguardando NF";
                     atualizacoes.dataPagamento = "";
                 } else {
-                    // Se for complementar, atualiza o fluxo específico da complementar
                     atualizacoes.nfStatusComplementar = "Pendente";
                     atualizacoes.statusPagamentoComplementar = "Aguardando NF";
                     atualizacoes.dataPagamentoComplementar = "";
                     atualizacoes.nfArquivoBase64Complementar = "";
                 }
                 
-                await update(ref(db, `contratos/${key}`), {
-                    ...atualizacoes
-                });
+                await update(ref(db, `contratos/${key}`), atualizacoes);
 
                 alert("Lançamento Aplicado com Sucesso!");
                 
-                // Dispara o e-mail de notificação para o E-mail Profissional
                 if (contrato.emailCorp) {
                     const dadosEmail = {
                         tipo: tipo === 'regular' ? "Folha Regular (Ajuste/Soma)" : "Folha Complementar (Separada)",
@@ -398,7 +413,6 @@
                     await enviarNotificacaoEmail(contrato.emailCorp, contrato.razaoSocial || contrato.nome, dadosEmail);
                 }
 
-                // Limpa campos
                 document.getElementById('motorValor').value = '';
                 document.getElementById('motorContrato').value = '';
 
@@ -460,11 +474,13 @@
             }
         };
 
-        // Escuta os contratos do Firebase e monta as telas
+        // Escuta os contratos do Firebase e monta as tabelas de forma separada
         const contratosRef = ref(db, 'contratos');
         onValue(contratosRef, (snapshot) => {
             const listaContratos = document.getElementById('listaContratos');
             const listaFolha = document.getElementById('listaFolha');
+            const listaFolhaComplementar = document.getElementById('listaFolhaComplementar');
+            const containerFolhaComplementar = document.getElementById('containerFolhaComplementar');
             const selectPJ = document.getElementById('selectPrestadorPJ');
             const motorContratoSelect = document.getElementById('motorContrato');
             
@@ -472,6 +488,7 @@
 
             listaContratos.innerHTML = ''; 
             listaFolha.innerHTML = ''; 
+            listaFolhaComplementar.innerHTML = '';
             selectPJ.innerHTML = '<option value="">Selecione sua empresa...</option>';
             motorContratoSelect.innerHTML = '<option value="">Selecione...</option>';
             
@@ -481,7 +498,8 @@
             if (data) {
                 let totalContratos = 0;
                 let valorTotalFolhaRegular = 0;
-                let valorTotalFolhaComplementar = 0; // Nova variável somatória
+                let valorTotalFolhaComplementar = 0;
+                let temComplementarAtiva = false;
 
                 Object.keys(data).forEach(key => {
                     const contrato = data[key];
@@ -500,7 +518,7 @@
                     `;
                     listaContratos.appendChild(trContrato);
 
-                    // 2. CÁLCULO DE VALORES
+                    // 2. CÁLCULO DA FOLHA REGULAR
                     let valorFixoLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                     if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
@@ -515,10 +533,7 @@
                     const valorFinalRegular = valorFixoLimpo + valorMotorRegular;
                     valorTotalFolhaRegular += valorFinalRegular;
 
-                    // LINHA 1: FOLHA REGULAR
-                    const trRegular = document.createElement('tr');
-                    trRegular.className = 'border-b hover:bg-slate-50 transition';
-                    
+                    // CONSTRUÇÃO DO STATUS REGULAR
                     let statusRegularHTML = '';
                     if (contrato.statusPagamento === 'Pago') {
                         statusRegularHTML = `
@@ -541,6 +556,9 @@
                         statusRegularHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${contrato.statusPagamento || 'Aguardando NF'}</span>`;
                     }
 
+                    // MONTA LINHA NA TABELA REGULAR
+                    const trRegular = document.createElement('tr');
+                    trRegular.className = 'border-b hover:bg-slate-50 transition';
                     trRegular.innerHTML = `
                         <td class="p-3 text-sm font-semibold text-slate-700">
                             <div>${contrato.razaoSocial || contrato.nome || '-'}</div>
@@ -565,19 +583,15 @@
                                 </button>
                             ` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}
                         </td>
-                        <td class="p-3 text-center">
-                            ${statusRegularHTML}
-                        </td>
+                        <td class="p-3 text-center">${statusRegularHTML}</td>
                     `;
                     listaFolha.appendChild(trRegular);
 
-                    // LINHA 2: FOLHA COMPLEMENTAR SEPARADA
+                    // 3. SEPARAÇÃO PARA A TABELA COMPLEMENTAR (SEPARADA)
                     if (contrato.motorTipo === 'complementar' && (parseFloat(contrato.motorValor) || 0) > 0) {
+                        temComplementarAtiva = true;
                         const valorComplementar = parseFloat(contrato.motorValor);
-                        valorTotalFolhaComplementar += valorComplementar; // Incrementa a soma da complementar
-
-                        const trComplementar = document.createElement('tr');
-                        trComplementar.className = 'border-b bg-amber-50/50 hover:bg-amber-50 transition border-l-4 border-l-amber-500';
+                        valorTotalFolhaComplementar += valorComplementar;
 
                         let statusCompHTML = '';
                         const statusCompValue = contrato.statusPagamentoComplementar || 'Aguardando NF';
@@ -603,9 +617,12 @@
                             statusCompHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${statusCompValue}</span>`;
                         }
 
+                        // INJETA NA TABELA EXCLUSIVA COMPLEMENTAR
+                        const trComplementar = document.createElement('tr');
+                        trComplementar.className = 'border-b hover:bg-amber-50/40 transition border-l-4 border-l-amber-500';
                         trComplementar.innerHTML = `
                             <td class="p-3 text-sm font-semibold text-slate-700">
-                                <div class="text-amber-800 font-bold">${contrato.razaoSocial || contrato.nome || '-'}</div>
+                                <div class="text-amber-900 font-bold">${contrato.razaoSocial || contrato.nome || '-'}</div>
                                 <div class="text-[10px] text-amber-700 font-extrabold uppercase tracking-wide mt-0.5">⚡ Folha Complementar (${contrato.motorEvento})</div>
                             </td>
                             <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
@@ -626,14 +643,12 @@
                                     </button>
                                 ` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}
                             </td>
-                            <td class="p-3 text-center">
-                                ${statusCompHTML}
-                            </td>
+                            <td class="p-3 text-center">${statusCompHTML}</td>
                         `;
-                        listaFolha.appendChild(trComplementar);
+                        listaFolhaComplementar.appendChild(trComplementar);
                     }
 
-                    // 3. Alimenta Selects
+                    // ALIMENTA SELECTS
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (CNPJ: ${contrato.CNPJ})` : `${contrato.nome} (CPF: ${contrato.cpf})`;
@@ -649,7 +664,14 @@
                     motorContratoSelect.value = motorSelectedVal;
                 }
 
-                // Atualiza os painéis/cards superiores
+                // Controla a exibição da tabela complementar na interface
+                if (temComplementarAtiva) {
+                    containerFolhaComplementar.classList.remove('hidden');
+                } else {
+                    containerFolhaComplementar.classList.add('hidden');
+                }
+
+                // Atualiza Cards Informativos superiores
                 document.getElementById('cardContratosAtivos').innerText = totalContratos;
                 document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -657,6 +679,7 @@
             } else {
                 listaContratos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td></tr>`;
                 listaFolha.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td></tr>`;
+                containerFolhaComplementar.classList.add('hidden');
                 document.getElementById('cardContratosAtivos').innerText = '0';
                 document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
                 document.getElementById('cardTotalFolhaComplementar').innerText = 'R$ 0,00';
@@ -697,7 +720,7 @@
             detalhes.innerHTML = html;
         });
 
-        // Enviar Nota Fiscal do Prestador (Corrigido nó de envio de 'contracts' para 'contratos')
+        // Enviar Nota Fiscal do Prestador
         window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
             const arquivoInput = document.getElementById('arquivoNFPJ');
