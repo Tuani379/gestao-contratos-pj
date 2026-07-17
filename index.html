@@ -9,6 +9,18 @@
 </head>
 <body class="bg-slate-50 font-sans">
 
+    <!-- BARRA TOP COMPACTA (Oficial: ConnectPJ com Data Automática) -->
+    <div class="bg-white border-b border-slate-200 px-6 py-2 flex justify-between items-center text-sm">
+        <div class="flex items-center gap-2">
+            <span class="font-extrabold text-blue-950 tracking-tight text-base">ConnectPJ</span>
+            <span class="text-slate-300">|</span>
+            <span id="data-atual-sistema" class="text-slate-600 font-medium">Carregando data...</span>
+        </div>
+        <div class="text-xs text-slate-400 font-semibold">Conecta. Organiza. Simplifica.</div>
+    </div>
+        <div class="text-xs text-slate-400 font-semibold">Sistema de Gestão ConnectPJ</div>
+    </div>
+
     <header class="bg-blue-900 text-white p-4 shadow-lg">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">ConnectPJ</h1>
@@ -45,15 +57,12 @@
                     <p class="text-sm font-bold text-amber-700 uppercase">Total Folha Complementar</p>
                     <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
                 </div>
-                <!-- MES DE REFERÊNCIA INTERATIVO COM GERADOR DE FOLHA -->
+                <!-- MES DE REFERÊNCIA INTERATIVO COM GERADOR DE FOLHA AUTOMÁTICO -->
                 <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm flex flex-col justify-between">
                     <div>
                         <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
                         <select id="filtroCompetencia" onchange="atualizarCompetenciaFiltro(this.value)" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer w-full">
-                            <option value="07/2026">Julho / 2026</option>
-                            <option value="08/2026">Agosto / 2026</option>
-                            <option value="09/2026">Setembro / 2026</option>
-                            <option value="10/2026">Outubro / 2026</option>
+                            <!-- Injetado via Javascript baseado no ano atual -->
                         </select>
                     </div>
                     <button onclick="gerarFolhaCompetencia()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
@@ -242,10 +251,7 @@
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Mês de Referência:</label>
                         <select id="selectCompetenciaPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold focus:outline-none">
-                            <option value="07/2026">Julho / 2026</option>
-                            <option value="08/2026">Agosto / 2026</option>
-                            <option value="09/2026">Setembro / 2026</option>
-                            <option value="10/2026">Outubro / 2026</option>
+                            <!-- Injetado dinamicamente via Javascript -->
                         </select>
                     </div>
                     <div>
@@ -290,6 +296,52 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
+        // ROTINA PARA ATUALIZAÇÃO AUTOMÁTICA DE DATAS E SELETORES DE MESES
+        const dataHojeObj = new Date();
+        const anoAtualSistema = dataHojeObj.getFullYear();
+        const mesAtualSistema = String(dataHojeObj.getMonth() + 1).padStart(2, '0');
+        
+        // Exibe a string "Hoje, DD/MM/AAAA" no topo estilo Managefy
+        document.getElementById('data-atual-sistema').innerText = `Hoje, ${dataHojeObj.toLocaleDateString('pt-BR')}`;
+
+        // Lista de todos os meses de forma organizada
+        const nomeMeses = [
+            "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
+            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+        ];
+
+        // Alimenta dinamicamente os dois seletores de meses de referência do sistema baseado no Ano Atual
+        const filtroCompetencia = document.getElementById('filtroCompetencia');
+        const selectCompetenciaPJ = document.getElementById('selectCompetenciaPJ');
+        
+        filtroCompetencia.innerHTML = '';
+        selectCompetenciaPJ.innerHTML = '';
+
+        nomeMeses.forEach((nome, index) => {
+            const numeroMes = String(index + 1).padStart(2, '0');
+            const valorCompetencia = `${numeroMes}/${anoAtualSistema}`;
+            
+            const opt1 = document.createElement('option');
+            opt1.value = valorCompetencia;
+            opt1.innerText = `${nome} / ${anoAtualSistema}`;
+            
+            const opt2 = document.createElement('option');
+            opt2.value = valorCompetencia;
+            opt2.innerText = `${nome} / ${anoAtualSistema}`;
+
+            // Deixa marcado por padrão o mês atual do calendário rodando no PC
+            if (numeroMes === mesAtualSistema) {
+                opt1.selected = true;
+                opt2.selected = true;
+            }
+
+            filtroCompetencia.appendChild(opt1);
+            selectCompetenciaPJ.appendChild(opt2);
+        });
+
+        // Configura a variável de controle inicial com o mês/ano vigente capturado
+        let competenciaSelecionada = `${mesAtualSistema}/${anoAtualSistema}`;
+
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
         const EMAILJS_TEMPLATE_ID = "template_bvvnbfs";
@@ -313,7 +365,6 @@
 
         let contratosLocais = {};
         let folhasLocais = {};
-        let competenciaSelecionada = "07/2026"; 
 
         async function enviarNotificacaoEmail(destinatarioEmail, nomePrestador, dadosLancamento) {
             if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === "SUA_PUBLIC_KEY") {
@@ -355,7 +406,6 @@
                 Object.keys(contratosLocais).forEach(key => {
                     const contrato = contratosLocais[key];
                     
-                    // Contratos inativos não devem gerar novas folhas de pagamento mensais
                     if (contrato.status === "Inativo") return;
                     
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
@@ -434,7 +484,6 @@
             }
         };
 
-        // FUNÇÃO PARA DESATIVAR CONTRATO (SOLICITA DATA E MOTIVO)
         window.desativarContrato = async (key) => {
             const contrato = contratosLocais[key];
             if (!contrato) return;
@@ -614,7 +663,6 @@
             }
         };
 
-        // ESCUTADOR DE CONTRATOS MODIFICADO
         onValue(ref(db, 'contratos'), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             const listaContratos = document.getElementById('listaContratos');
@@ -631,7 +679,6 @@
                 const c = contratosLocais[key];
                 totalContratos++;
 
-                // Definição visual do badge de status
                 let statusBadge = '';
                 let acaoBotao = '';
 
@@ -642,14 +689,12 @@
                     statusBadge = `<span class="inline-block px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">Ativo</span>`;
                     acaoBotao = `<button onclick="desativarContrato('${key}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md transition shadow-sm">🛑 Desativar</button>`;
                     
-                    // Prestador só aparece para lançamentos no motor se estiver ativo
                     const optMotor = document.createElement('option');
                     optMotor.value = key;
                     optMotor.innerText = c.razaoSocial || c.nome;
                     motorContratoSelect.appendChild(optMotor);
                 }
 
-                // Linha da tabela de contratos cadastrados
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50 transition';
                 tr.innerHTML = `
@@ -663,7 +708,6 @@
                 `;
                 listaContratos.appendChild(tr);
 
-                // No portal do PJ, lista todas as empresas cadastradas para permitir anexos retroativos
                 const opt = document.createElement('option');
                 opt.value = key;
                 opt.innerText = c.razaoSocial ? `${c.razaoSocial} (CNPJ: ${c.CNPJ})` : `${c.nome} (CPF: ${c.cpf})`;
@@ -676,7 +720,6 @@
             renderizarTabelasEstatísticas();
         });
 
-        // ESCUTADOR DE FOLHAS DE PAGAMENTO
         onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
             folhasLocais = snapshot.val() || {};
             renderizarTabelasEstatísticas();
