@@ -51,7 +51,7 @@
                 </div>
             </div>
 
-            <!-- MOTOR FINANCEIRO (AJUSTES E LANÇAMENTOS) -->
+            <!-- MOTOR FINANCEIRO -->
             <div class="bg-white p-6 rounded-xl border shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
                     <span class="text-lg">⚙️</span>
@@ -122,7 +122,7 @@
                 </div>
             </div>
 
-            <!-- TABELA 2: FOLHA COMPLEMENTAR (Fica oculta se não houver dados complementares) -->
+            <!-- TABELA 2: FOLHA COMPLEMENTAR -->
             <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
@@ -153,8 +153,7 @@
         <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
-                <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" 
-                        class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
+                <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
                     + Novo Cadastro
                 </button>
             </div>
@@ -230,7 +229,6 @@
                     </select>
                 </div>
 
-                <!-- Seletor de Tipo de Folha para o Prestador -->
                 <div id="wrapperSeletorTipoFolha" class="hidden space-y-2">
                     <label class="block text-sm font-bold text-slate-700">2. Selecione para qual Folha você está enviando a NF:</label>
                     <div class="flex gap-4">
@@ -243,18 +241,14 @@
                     </div>
                 </div>
 
-                <!-- Quadro resumo para o PJ ver se tem bônus/extras aplicados -->
                 <div id="quadroResumoPJ" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
                     <p class="text-sm font-bold text-blue-900">Detalhamento Financeiro:</p>
-                    <div class="text-xs text-slate-700 mt-2 space-y-1" id="detalhesValoresPJ">
-                        <!-- Gerado dinamicamente -->
-                    </div>
+                    <div class="text-xs text-slate-700 mt-2 space-y-1" id="detalhesValoresPJ"></div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">Selecione o Arquivo da Nota Fiscal (PDF ou Imagem):</label>
                     <input id="arquivoNFPJ" type="file" accept="application/pdf,image/*" class="w-full p-2 border rounded-lg bg-slate-50">
-                    <p class="text-xs text-slate-400 mt-1">Tamanho máximo recomendado: 2MB</p>
                 </div>
 
                 <button onclick="enviarNotaPrestador()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">
@@ -269,9 +263,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // ==========================================
-        // CONFIGURAÇÕES OFICIAIS DO EMAILJS
-        // ==========================================
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
         const EMAILJS_TEMPLATE_ID = "template_bvvnbfs";
@@ -295,6 +286,7 @@
 
         let contratosLocais = {};
 
+        // Nova função unificada para enviar e-mails de notificação e também de recusa
         async function enviarNotificacaoEmail(destinatarioEmail, nomePrestador, dadosLancamento) {
             if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === "SUA_PUBLIC_KEY") {
                 console.warn("E-mail não enviado: Chaves do EmailJS não configuradas.");
@@ -306,16 +298,16 @@
                     to_name: nomePrestador,
                     tipo_lancamento: dadosLancamento.tipo,
                     evento_financeiro: dadosLancamento.evento,
-                    valor_evento: dadosLancamento.valor
+                    valor_evento: dadosLancamento.valor,
+                    motivo_recusa: dadosLancamento.motivo_recusa || "Nenhum informado"
                 };
                 await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-                console.log("Notificação enviada para " + destinatarioEmail);
+                console.log("Notificação enviada com sucesso para " + destinatarioEmail);
             } catch (error) {
                 console.error("Erro ao enviar e-mail via EmailJS:", error);
             }
         }
 
-        // Salvar Cadastro de Contrato
         window.salvarCadastro = async () => {
             try {
                 const dados = {
@@ -342,6 +334,7 @@
                     nfArquivoBase64: "",
                     statusPagamento: "Aguardando NF",
                     dataPagamento: "",
+                    motivoRecusaRegular: "",
 
                     motorTipo: "",
                     motorEvento: "",
@@ -350,34 +343,27 @@
                     nfStatusComplementar: "Pendente",
                     statusPagamentoComplementar: "Aguardando NF",
                     dataPagamentoComplementar: "",
-                    nfArquivoBase64Complementar: ""
+                    nfArquivoBase64Complementar: "",
+                    motivoRecusaComplementar: ""
                 };
 
                 await push(ref(db, 'contratos'), dados);
                 alert("Cadastro salvo com sucesso!");
                 document.getElementById('modalCadastro').classList.add('hidden');
-                
-                const inputs = document.querySelectorAll('#modalCadastro input');
-                inputs.forEach(input => input.value = '');
+                document.querySelectorAll('#modalCadastro input').forEach(input => input.value = '');
             } catch (error) {
-                console.error(error);
                 alert("Erro ao salvar: " + error.message);
             }
         };
 
-        // Aplicar Lançamento do Motor Financeiro
         window.aplicarLancamentoMotor = async () => {
             const key = document.getElementById('motorContrato').value;
             const tipo = document.getElementById('motorTipo').value;
             const evento = document.getElementById('motorEvento').value;
             const valor = parseFloat(document.getElementById('motorValor').value) || 0;
 
-            if (!key) {
-                alert("Por favor, selecione um contrato!");
-                return;
-            }
-            if (valor <= 0) {
-                alert("O valor do lançamento deve ser maior que zero!");
+            if (!key || valor <= 0) {
+                alert("Selecione um contrato e informe um valor válido superior a zero!");
                 return;
             }
 
@@ -393,88 +379,121 @@
                     atualizacoes.nfStatus = "Pendente";
                     atualizacoes.statusPagamento = "Aguardando NF";
                     atualizacoes.dataPagamento = "";
+                    atualizacoes.motivoRecusaRegular = "";
                 } else {
                     atualizacoes.nfStatusComplementar = "Pendente";
                     atualizacoes.statusPagamentoComplementar = "Aguardando NF";
                     atualizacoes.dataPagamentoComplementar = "";
                     atualizacoes.nfArquivoBase64Complementar = "";
+                    atualizacoes.motivoRecusaComplementar = "";
                 }
                 
                 await update(ref(db, `contratos/${key}`), atualizacoes);
-
                 alert("Lançamento Aplicado com Sucesso!");
                 
                 if (contrato.emailCorp) {
-                    const dadosEmail = {
-                        tipo: tipo === 'regular' ? "Folha Regular (Ajuste/Soma)" : "Folha Complementar (Separada)",
+                    await enviarNotificacaoEmail(contrato.emailCorp, contrato.razaoSocial || contrato.nome, {
+                        tipo: tipo === 'regular' ? "Folha Regular" : "Folha Complementar",
                         evento: evento,
                         valor: valor.toLocaleString('pt-BR', { minimumFractionDigits: 2 })
-                    };
-                    await enviarNotificacaoEmail(contrato.emailCorp, contrato.razaoSocial || contrato.nome, dadosEmail);
+                    });
                 }
 
                 document.getElementById('motorValor').value = '';
                 document.getElementById('motorContrato').value = '';
-
             } catch (error) {
                 alert("Erro ao aplicar lançamento: " + error.message);
             }
         };
 
-        // Altera status da NF de qualquer uma das duas folhas
+        // LÓGICA DE RECUSA COM PROMPT DE TEXTO E ENVIO DE E-MAIL AUTOMÁTICO
         window.alterarStatusNF = async (idContrato, novoStatus, tipoFolha) => {
             let statusPagamento = "Aguardando NF";
+            let motivoPrompt = "";
+
             if (novoStatus === "Recebida ✔") {
                 statusPagamento = "Pronto para Pagar";
             } else if (novoStatus === "Recusada ❌") {
                 statusPagamento = "NF Recusada / Corrigir";
+                
+                // Abre o prompt solicitando a justificativa técnica para o PJ
+                motivoPrompt = prompt("Por favor, digite o motivo da recusa desta Nota Fiscal (Isso será enviado por e-mail ao colaborador):");
+                if (motivoPrompt === null) {
+                    // Se o usuário clicar em cancelar, cancela a operação e recarrega a tabela anterior
+                    alert("Operação cancelada. O status não foi alterado.");
+                    location.reload();
+                    return;
+                }
+                if (motivoPrompt.trim() === "") {
+                    alert("Você precisa digitar um motivo para recusar a nota!");
+                    location.reload();
+                    return;
+                }
             }
 
             try {
+                const contrato = contratosLocais[idContrato];
+                const atualizacoes = {};
+
                 if (tipoFolha === 'regular') {
-                    await update(ref(db, `contratos/${idContrato}`), {
-                        nfStatus: novoStatus,
-                        statusPagamento: statusPagamento,
-                        dataPagamento: ""
-                    });
+                    atualizacoes.nfStatus = novoStatus;
+                    atualizacoes.statusPagamento = statusPagamento;
+                    atualizacoes.dataPagamento = "";
+                    atualizacoes.motivoRecusaRegular = motivoPrompt;
                 } else {
-                    await update(ref(db, `contratos/${idContrato}`), {
-                        nfStatusComplementar: novoStatus,
-                        statusPagamentoComplementar: statusPagamento,
-                        dataPagamentoComplementar: ""
+                    atualizacoes.nfStatusComplementar = novoStatus;
+                    atualizacoes.statusPagamentoComplementar = statusPagamento;
+                    atualizacoes.dataPagamentoComplementar = "";
+                    atualizacoes.motivoRecusaComplementar = motivoPrompt;
+                }
+
+                await update(ref(db, `contratos/${idContrato}`), atualizacoes);
+
+                // Se o status for Recusada, dispara o e-mail imediatamente para o colaborador
+                if (novoStatus === "Recusada ❌" && contrato.emailCorp) {
+                    let valorEmail = "0,00";
+                    let eventoEmail = "Mensal Regular";
+
+                    if (tipoFolha === 'regular') {
+                        let fixo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
+                        let extra = contrato.motorTipo === 'regular' ? parseFloat(contrato.motorValor || 0) : 0;
+                        valorEmail = (fixo + extra).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                    } else {
+                        valorEmail = parseFloat(contrato.motorValor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 });
+                        eventoEmail = contrato.motorEvento || "Complementar";
+                    }
+
+                    await enviarNotificacaoEmail(contrato.emailCorp, contrato.razaoSocial || contrato.nome, {
+                        tipo: `RECUSA DE NOTA FISCAL - Folha ${tipoFolha === 'regular' ? 'Regular' : 'Complementar'}`,
+                        evento: eventoEmail,
+                        valor: valorEmail,
+                        motivo_recusa: `⚠️ A sua Nota Fiscal foi RECUSADA pelo seguinte motivo: "${motivoPrompt}". Por favor, providencie o cancelamento, a correção ou a emissão de uma nova nota e reenvie pelo Portal ConnectPJ o quanto antes para evitar atrasos no pagamento.`
                     });
+                    alert("E-mail de contestação enviado ao colaborador com sucesso!");
                 }
             } catch (error) {
                 alert("Erro ao atualizar status: " + error.message);
             }
         };
 
-        // Confirmar Pagamento com Data
         window.marcarComoPago = async (idContrato, tipoFolha) => {
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             const dataEscolhida = prompt("Confirme a data de pagamento:", dataHoje);
-
             if (dataEscolhida === null) return;
 
             try {
                 if (tipoFolha === 'regular') {
-                    await update(ref(db, `contratos/${idContrato}`), {
-                        statusPagamento: "Pago",
-                        dataPagamento: dataEscolhida
-                    });
+                    await update(ref(db, `contratos/${idContrato}`), { statusPagamento: "Pago", dataPagamento: dataEscolhida });
                 } else {
-                    await update(ref(db, `contratos/${idContrato}`), {
-                        statusPagamentoComplementar: "Pago",
-                        dataPagamentoComplementar: dataEscolhida
-                    });
+                    await update(ref(db, `contratos/${idContrato}`), { statusPagamentoComplementar: "Pago", dataPagamentoComplementar: dataEscolhida });
                 }
                 alert("Pagamento registrado com sucesso!");
             } catch (error) {
-                alert("Erro ao registrar pagamento: " + error.message);
+                alert("Erro ao registrar: " + error.message);
             }
         };
 
-        // Escuta os contratos do Firebase e monta as tabelas de forma separada
+        // ESCUTADOR DO FIREBASE E RENDERIZADOR DAS DUAS TABELAS SEPARADAS
         const contratosRef = ref(db, 'contratos');
         onValue(contratosRef, (snapshot) => {
             const listaContratos = document.getElementById('listaContratos');
@@ -483,7 +502,6 @@
             const containerFolhaComplementar = document.getElementById('containerFolhaComplementar');
             const selectPJ = document.getElementById('selectPrestadorPJ');
             const motorContratoSelect = document.getElementById('motorContrato');
-            
             const motorSelectedVal = motorContratoSelect.value;
 
             listaContratos.innerHTML = ''; 
@@ -505,7 +523,7 @@
                     const contrato = data[key];
                     totalContratos++;
                     
-                    // 1. GESTÃO DE CONTRATOS
+                    // Contratos
                     const trContrato = document.createElement('tr');
                     trContrato.className = 'border-b hover:bg-slate-50 transition';
                     trContrato.innerHTML = `
@@ -518,76 +536,45 @@
                     `;
                     listaContratos.appendChild(trContrato);
 
-                    // 2. CÁLCULO DA FOLHA REGULAR
+                    // Folha Regular
                     let valorFixoLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                     if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
-
-                    let valorMotorRegular = 0;
-                    let badgeAjusteRegular = "";
-
-                    if (contrato.motorTipo === 'regular' && (parseFloat(contrato.motorValor) || 0) > 0) {
-                        valorMotorRegular = parseFloat(contrato.motorValor);
-                        badgeAjusteRegular = `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${valorMotorRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${contrato.motorEvento})</span>`;
-                    }
-
+                    let valorMotorRegular = (contrato.motorTipo === 'regular') ? parseFloat(contrato.motorValor || 0) : 0;
+                    let badgeAjusteRegular = valorMotorRegular > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${valorMotorRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${contrato.motorEvento})</span>` : "";
                     const valorFinalRegular = valorFixoLimpo + valorMotorRegular;
                     valorTotalFolhaRegular += valorFinalRegular;
 
-                    // CONSTRUÇÃO DO STATUS REGULAR
                     let statusRegularHTML = '';
                     if (contrato.statusPagamento === 'Pago') {
-                        statusRegularHTML = `
-                            <div class="flex flex-col items-center gap-0.5">
-                                <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span>
-                                <span class="text-[10px] text-slate-500 font-bold">${contrato.dataPagamento || ''}</span>
-                            </div>
-                        `;
+                        statusRegularHTML = `<div class="flex flex-col items-center gap-0.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span><span class="text-[10px] text-slate-500 font-bold">${contrato.dataPagamento || ''}</span></div>`;
                     } else if (contrato.statusPagamento === 'Pronto para Pagar') {
-                        statusRegularHTML = `
-                            <div class="flex flex-col items-center gap-1.5">
-                                <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span>
-                                <button onclick="marcarComoPago('${key}', 'regular')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">
-                                    💸 Confirmar Pago
-                                </button>
-                            </div>
-                        `;
+                        statusRegularHTML = `<div class="flex flex-col items-center gap-1.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span><button onclick="marcarComoPago('${key}', 'regular')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">💸 Confirmar Pago</button></div>`;
                     } else {
                         const classeBadge = contrato.statusPagamento === 'NF Recusada / Corrigir' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
-                        statusRegularHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${contrato.statusPagamento || 'Aguardando NF'}</span>`;
+                        const exibicaoStatus = contrato.statusPagamento || 'Aguardando NF';
+                        const motivoTooltip = (contrato.statusPagamento === 'NF Recusada / Corrigir' && contrato.motivoRecusaRegular) ? `<br><span class="text-[9px] text-red-600 block max-w-[150px] truncate" title="${contrato.motivoRecusaRegular}">Motivo: ${contrato.motivoRecusaRegular}</span>` : "";
+                        statusRegularHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${exibicaoStatus}</span>${motivoTooltip}`;
                     }
 
-                    // MONTA LINHA NA TABELA REGULAR
                     const trRegular = document.createElement('tr');
                     trRegular.className = 'border-b hover:bg-slate-50 transition';
                     trRegular.innerHTML = `
-                        <td class="p-3 text-sm font-semibold text-slate-700">
-                            <div>${contrato.razaoSocial || contrato.nome || '-'}</div>
-                            <div class="text-[10px] text-blue-600 font-extrabold uppercase tracking-wide mt-0.5">Folha Regular</div>
-                        </td>
+                        <td class="p-3 text-sm font-semibold text-slate-700"><div>${contrato.razaoSocial || contrato.nome || '-'}</div><div class="text-[10px] text-blue-600 font-extrabold uppercase mt-0.5">Folha Regular</div></td>
                         <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
-                        <td class="p-3 text-sm text-slate-600 font-semibold">
-                            R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                            ${badgeAjusteRegular}
-                        </td>
+                        <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} ${badgeAjusteRegular}</td>
                         <td class="p-3 text-center">
                             <select onchange="alterarStatusNF('${key}', this.value, 'regular')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
                                 <option value="Pendente" ${contrato.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                <option value="Recebida ✔" ${contrato.nfStatus === 'Recebida ✔' ? 'selected' : ''} class="text-green-600">Recebida ✔</option>
-                                <option value="Recusada ❌" ${contrato.nfStatus === 'Recusada ❌' ? 'selected' : ''} class="text-red-600">Recusada ❌</option>
+                                <option value="Recebida ✔" ${contrato.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                <option value="Recusada ❌" ${contrato.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                             </select>
                         </td>
-                        <td class="p-3 text-center">
-                            ${contrato.nfArquivoBase64 ? `
-                                <button onclick="visualizarNota('${key}', 'regular')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-xs font-bold transition">
-                                    📄 Ver Nota
-                                </button>
-                            ` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}
-                        </td>
+                        <td class="p-3 text-center">${contrato.nfArquivoBase64 ? `<button onclick="visualizarNota('${key}', 'regular')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
                         <td class="p-3 text-center">${statusRegularHTML}</td>
                     `;
                     listaFolha.appendChild(trRegular);
 
-                    // 3. SEPARAÇÃO PARA A TABELA COMPLEMENTAR (SEPARADA)
+                    // Folha Complementar
                     if (contrato.motorTipo === 'complementar' && (parseFloat(contrato.motorValor) || 0) > 0) {
                         temComplementarAtiva = true;
                         const valorComplementar = parseFloat(contrato.motorValor);
@@ -597,58 +584,34 @@
                         const statusCompValue = contrato.statusPagamentoComplementar || 'Aguardando NF';
 
                         if (statusCompValue === 'Pago') {
-                            statusCompHTML = `
-                                <div class="flex flex-col items-center gap-0.5">
-                                    <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span>
-                                    <span class="text-[10px] text-slate-500 font-bold">${contrato.dataPagamentoComplementar || ''}</span>
-                                </div>
-                            `;
+                            statusCompHTML = `<div class="flex flex-col items-center gap-0.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span><span class="text-[10px] text-slate-500 font-bold">${contrato.dataPagamentoComplementar || ''}</span></div>`;
                         } else if (statusCompValue === 'Pronto para Pagar') {
-                            statusCompHTML = `
-                                <div class="flex flex-col items-center gap-1.5">
-                                    <span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span>
-                                    <button onclick="marcarComoPago('${key}', 'complementar')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">
-                                        💸 Confirmar Pago
-                                    </button>
-                                </div>
-                            `;
+                            statusCompHTML = `<div class="flex flex-col items-center gap-1.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span><button onclick="marcarComoPago('${key}', 'complementar')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">💸 Confirmar Pago</button></div>`;
                         } else {
                             const classeBadge = statusCompValue === 'NF Recusada / Corrigir' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800';
-                            statusCompHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${statusCompValue}</span>`;
+                            const motivoTooltipComp = (statusCompValue === 'NF Recusada / Corrigir' && contrato.motivoRecusaComplementar) ? `<br><span class="text-[9px] text-red-600 block max-w-[150px] truncate" title="${contrato.motivoRecusaComplementar}">Motivo: ${contrato.motivoRecusaComplementar}</span>` : "";
+                            statusCompHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${statusCompValue}</span>${motivoTooltipComp}`;
                         }
 
-                        // INJETA NA TABELA EXCLUSIVA COMPLEMENTAR
                         const trComplementar = document.createElement('tr');
                         trComplementar.className = 'border-b hover:bg-amber-50/40 transition border-l-4 border-l-amber-500';
                         trComplementar.innerHTML = `
-                            <td class="p-3 text-sm font-semibold text-slate-700">
-                                <div class="text-amber-900 font-bold">${contrato.razaoSocial || contrato.nome || '-'}</div>
-                                <div class="text-[10px] text-amber-700 font-extrabold uppercase tracking-wide mt-0.5">⚡ Folha Complementar (${contrato.motorEvento})</div>
-                            </td>
+                            <td class="p-3 text-sm font-semibold text-slate-700"><div class="text-amber-900 font-bold">${contrato.razaoSocial || contrato.nome || '-'}</div><div class="text-[10px] text-amber-700 font-extrabold uppercase mt-0.5">⚡ Folha Complementar (${contrato.motorEvento})</div></td>
                             <td class="p-3 text-sm text-slate-600">${contrato.CNPJ || contrato.cpf || '-'}</td>
-                            <td class="p-3 text-sm text-amber-800 font-bold">
-                                R$ ${valorComplementar.toLocaleString('pt-BR', {minimumFractionDigits: 2})}
-                            </td>
+                            <td class="p-3 text-sm text-amber-800 font-bold">R$ ${valorComplementar.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                             <td class="p-3 text-center">
                                 <select onchange="alterarStatusNF('${key}', this.value, 'complementar')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
                                     <option value="Pendente" ${contrato.nfStatusComplementar === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                    <option value="Recebida ✔" ${contrato.nfStatusComplementar === 'Recebida ✔' ? 'selected' : ''} class="text-green-600">Recebida ✔</option>
-                                    <option value="Recusada ❌" ${contrato.nfStatusComplementar === 'Recusada ❌' ? 'selected' : ''} class="text-red-600">Recusada ❌</option>
+                                    <option value="Recebida ✔" ${contrato.nfStatusComplementar === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                    <option value="Recusada ❌" ${contrato.nfStatusComplementar === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                                 </select>
                             </td>
-                            <td class="p-3 text-center">
-                                ${contrato.nfArquivoBase64Complementar ? `
-                                    <button onclick="visualizarNota('${key}', 'complementar')" class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-xs font-bold transition">
-                                        📄 Ver Nota
-                                    </button>
-                                ` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}
-                            </td>
+                            <td class="p-3 text-center">${contrato.nfArquivoBase64Complementar ? `<button onclick="visualizarNota('${key}', 'complementar')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
                             <td class="p-3 text-center">${statusCompHTML}</td>
                         `;
                         listaFolhaComplementar.appendChild(trComplementar);
                     }
 
-                    // ALIMENTA SELECTS
                     const opt = document.createElement('option');
                     opt.value = key;
                     opt.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (CNPJ: ${contrato.CNPJ})` : `${contrato.nome} (CPF: ${contrato.cpf})`;
@@ -656,196 +619,95 @@
 
                     const optMotor = document.createElement('option');
                     optMotor.value = key;
-                    optMotor.innerText = contrato.razaoSocial ? `${contrato.razaoSocial} (${contrato.cargo || 'PJ'})` : `${contrato.nome} (${contrato.cargo || 'PJ'})`;
+                    optMotor.innerText = contrato.razaoSocial ? `${contrato.razaoSocial}` : `${contrato.nome}`;
                     motorContratoSelect.appendChild(optMotor);
                 });
 
-                if (motorSelectedVal) {
-                    motorContratoSelect.value = motorSelectedVal;
-                }
+                if (motorSelectedVal) motorContratoSelect.value = motorSelectedVal;
+                if (temComplementarAtiva) containerFolhaComplementar.classList.remove('hidden');
+                else containerFolhaComplementar.classList.add('hidden');
 
-                // Controla a exibição da tabela complementar na interface
-                if (temComplementarAtiva) {
-                    containerFolhaComplementar.classList.remove('hidden');
-                } else {
-                    containerFolhaComplementar.classList.add('hidden');
-                }
-
-                // Atualiza Cards Informativos superiores
                 document.getElementById('cardContratosAtivos').innerText = totalContratos;
                 document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
                 document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-
-            } else {
-                listaContratos.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum contrato encontrado.</td></tr>`;
-                listaFolha.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum prestador encontrado para gerar a folha.</td></tr>`;
-                containerFolhaComplementar.classList.add('hidden');
-                document.getElementById('cardContratosAtivos').innerText = '0';
-                document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
-                document.getElementById('cardTotalFolhaComplementar').innerText = 'R$ 0,00';
             }
         });
 
-        // Evento para mostrar o quadro financeiro detalhado do PJ
         document.getElementById('selectPrestadorPJ').addEventListener('change', function() {
             const key = this.value;
             const quadro = document.getElementById('quadroResumoPJ');
             const detalhes = document.getElementById('detalhesValoresPJ');
             const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
-            
-            if(!key || !contratosLocais[key]) {
-                quadro.classList.add('hidden');
-                seletorDiv.classList.add('hidden');
-                return;
-            }
+            if(!key || !contratosLocais[key]) { quadro.classList.add('hidden'); seletorDiv.classList.add('hidden'); return; }
 
             const contrato = contratosLocais[key];
-            
             let valorFixo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
             if(isNaN(valorFixo)) valorFixo = 0;
-
             let motorValor = parseFloat(contrato.motorValor) || 0;
 
             let html = `<p>• <b>Folha Regular (Mensal):</b> R$ ${(valorFixo + (contrato.motorTipo === 'regular' ? motorValor : 0)).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>`;
-            
             if (contrato.motorTipo === 'complementar' && motorValor > 0) {
                 seletorDiv.classList.remove('hidden');
                 html += `<p class="text-amber-700">• <b>Folha Complementar (${contrato.motorEvento}):</b> R$ ${motorValor.toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>`;
-                html += `<p class="text-xs text-slate-400 mt-2 font-medium">⚠️ Envie cada Nota Fiscal individualmente selecionando o tipo correto acima.</p>`;
-            } else {
-                seletorDiv.classList.add('hidden');
-            }
-
-            quadro.classList.remove('hidden');
-            detalhes.innerHTML = html;
+            } else { seletorDiv.classList.add('hidden'); }
+            quadro.classList.remove('hidden'); detalhes.innerHTML = html;
         });
 
-        // Enviar Nota Fiscal do Prestador
         window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
             const arquivoInput = document.getElementById('arquivoNFPJ');
-
-            if (!idContrato) {
-                alert("Por favor, selecione a sua Empresa/Nome.");
-                return;
-            }
-
-            if (!arquivoInput.files || arquivoInput.files.length === 0) {
-                alert("Por favor, selecione um arquivo de Nota Fiscal.");
-                return;
-            }
+            if (!idContrato || !arquivoInput.files || arquivoInput.files.length === 0) { alert("Preencha todos os campos e selecione um arquivo!"); return; }
 
             const contrato = contratosLocais[idContrato];
             let tipoFolha = "regular";
-            
             if (contrato.motorTipo === 'complementar' && (parseFloat(contrato.motorValor) || 0) > 0) {
                 tipoFolha = document.querySelector('input[name="tipoFolhaUpload"]:checked').value;
             }
 
-            const arquivo = arquivoInput.files[0];
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const base64Data = e.target.result;
-
                 try {
                     if (tipoFolha === "regular") {
-                        await update(ref(db, `contratos/${idContrato}`), {
-                            nfArquivoBase64: base64Data,
-                            nfStatus: "Recebida ✔",
-                            statusPagamento: "Pronto para Pagar",
-                            dataPagamento: ""
-                        });
+                        await update(ref(db, `contracts/${idContrato}`), { nfArquivoBase64: base64Data, nfStatus: "Recebida ✔", statusPagamento: "Pronto para Pagar", motivoRecusaRegular: "" });
                     } else {
-                        await update(ref(db, `contratos/${idContrato}`), {
-                            nfArquivoBase64Complementar: base64Data,
-                            nfStatusComplementar: "Recebida ✔",
-                            statusPagamentoComplementar: "Pronto para Pagar",
-                            dataPagamentoComplementar: ""
-                        });
+                        await update(ref(db, `contratos/${idContrato}`), { nfArquivoBase64Complementar: base64Data, nfStatusComplementar: "Recebida ✔", statusPagamentoComplementar: "Pronto para Pagar", motivoRecusaComplementar: "" });
                     }
-
-                    alert(`Nota Fiscal da ${tipoFolha === 'regular' ? 'Folha Regular' : 'Folha Complementar'} enviada com sucesso!`);
-                    arquivoInput.value = '';
-                    document.getElementById('selectPrestadorPJ').value = '';
-                    document.getElementById('quadroResumoPJ').classList.add('hidden');
-                    document.getElementById('wrapperSeletorTipoFolha').classList.add('hidden');
-                } catch (error) {
-                    alert("Erro ao enviar arquivo: " + error.message);
-                }
+                    alert("Nota Fiscal enviada com sucesso!");
+                    arquivoInput.value = ''; document.getElementById('selectPrestadorPJ').value = '';
+                    document.getElementById('quadroResumoPJ').classList.add('hidden'); document.getElementById('wrapperSeletorTipoFolha').classList.add('hidden');
+                } catch (error) { alert("Erro: " + error.message); }
             };
-            reader.readAsDataURL(arquivo);
+            reader.readAsDataURL(arquivoInput.files[0]);
         };
 
-        // Visualizar Nota Fiscal
         window.visualizarNota = (key, tipoFolha) => {
-            const contrato = contratosLocais[key];
-            if (!contrato) return;
-
+            const contrato = contratosLocais[key]; if (!contrato) return;
             const arquivo = tipoFolha === 'regular' ? contrato.nfArquivoBase64 : contrato.nfArquivoBase64Complementar;
-
             if (arquivo) {
                 const novaJanela = window.open();
-                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0px; left:0px; bottom:0px; right:0px; width:100%; height:100%;" allowfullscreen></iframe>`);
-            } else {
-                alert("Nota fiscal não encontrada.");
-            }
+                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
+            } else { alert("Nota fiscal não encontrada."); }
         };
 
-        // Navegação de Abas do RH
         window.mostrar = function(id) {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('contratos').classList.add('hidden');
-            document.getElementById('relatorios').classList.add('hidden');
-
-            const secao = document.getElementById(id);
-            if (secao) secao.classList.remove('hidden');
-
-            const botoes = {
-                dashboard: document.getElementById('btn-dashboard'),
-                contratos: document.getElementById('btn-contratos'),
-                relatorios: document.getElementById('btn-relatorios')
-            };
-
-            Object.values(botoes).forEach(btn => {
-                if (btn) {
-                    btn.classList.remove('border-blue-600', 'text-blue-900');
-                    btn.classList.add('border-transparent', 'text-slate-500');
-                }
-            });
-
-            const btnAtivo = botoes[id];
-            if (btnAtivo) {
-                btnAtivo.classList.remove('border-transparent', 'text-slate-500');
-                btnAtivo.classList.add('border-blue-600', 'text-blue-900');
-            }
+            document.getElementById('dashboard').classList.add('hidden'); document.getElementById('contratos').classList.add('hidden'); document.getElementById('relatorios').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+            const botoes = { dashboard: document.getElementById('btn-dashboard'), contratos: document.getElementById('btn-contratos'), relatorios: document.getElementById('btn-relatorios') };
+            Object.values(botoes).forEach(btn => { if(btn){ btn.classList.remove('border-blue-600', 'text-blue-900'); btn.classList.add('border-transparent', 'text-slate-500'); } });
+            if(botoes[id]){ botoes[id].classList.add('border-blue-600', 'text-blue-900'); }
         };
 
-        // Alternar entre RH e Prestador
         window.mudarModo = function(modo) {
-            const btnRh = document.getElementById('btn-modo-rh');
-            const btnPj = document.getElementById('btn-modo-pj');
-            const menuRh = document.getElementById('menu-rh');
-            const areaPrestador = document.getElementById('area-prestador');
+            const btnRh = document.getElementById('btn-modo-rh'); const btnPj = document.getElementById('btn-modo-pj');
+            const menuRh = document.getElementById('menu-rh'); const areaPrestador = document.getElementById('area-prestador');
             const secoesRh = document.querySelectorAll('.modo-rh-secao');
-
             if (modo === 'rh') {
-                btnRh.classList.add('bg-blue-600');
-                btnRh.classList.remove('opacity-75');
-                btnPj.classList.remove('bg-blue-600');
-                btnPj.classList.add('opacity-75');
-
-                menuRh.classList.remove('hidden');
-                areaPrestador.classList.add('hidden');
-                mostrar('dashboard');
+                btnRh.classList.add('bg-blue-600'); btnRh.classList.remove('opacity-75'); btnPj.classList.remove('bg-blue-600'); btnPj.classList.add('opacity-75');
+                menuRh.classList.remove('hidden'); areaPrestador.classList.add('hidden'); mostrar('dashboard');
             } else {
-                btnPj.classList.add('bg-blue-600');
-                btnPj.classList.remove('opacity-75');
-                btnRh.classList.remove('bg-blue-600');
-                btnRh.classList.add('opacity-75');
-
-                menuRh.classList.add('hidden');
-                secoesRh.forEach(sec => sec.classList.add('hidden'));
-                areaPrestador.classList.remove('hidden');
+                btnPj.classList.add('bg-blue-600'); btnPj.classList.remove('opacity-75'); btnRh.classList.remove('bg-blue-600'); btnRh.classList.add('opacity-75');
+                menuRh.classList.add('hidden'); secoesRh.forEach(sec => sec.classList.add('hidden')); areaPrestador.classList.remove('hidden');
             }
         };
     </script>
