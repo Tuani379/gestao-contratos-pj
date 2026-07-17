@@ -179,11 +179,12 @@
                             <th class="p-3 text-sm font-bold text-slate-600">Valor Fixo Mensal</th>
                             <th class="p-3 text-sm font-bold text-slate-600">Centro de Custo</th>
                             <th class="p-3 text-sm font-bold text-slate-600">Status</th>
+                            <th class="p-3 text-sm font-bold text-slate-600 text-center">Ações</th>
                         </tr>
                     </thead>
                     <tbody id="listaContratos">
                         <tr>
-                            <td colspan="6" class="p-4 text-center text-slate-400">Carregando contratos...</td>
+                            <td colspan="7" class="p-4 text-center text-slate-400">Carregando contratos...</td>
                         </tr>
                     </tbody>
                 </table>
@@ -209,7 +210,10 @@
                         <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded">
                         <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded">
                         <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded">
-                        <input id="campoStatus" type="text" placeholder="Status" class="w-full p-2 border rounded">
+                        <select id="campoStatus" class="w-full p-2 border rounded bg-white">
+                            <option value="Ativo">Ativo</option>
+                            <option value="Inativo">Inativo</option>
+                        </select>
                         <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded border-slate-350 mb-4">
                     </div>
                     <div class="flex justify-end gap-2">
@@ -309,7 +313,7 @@
 
         let contratosLocais = {};
         let folhasLocais = {};
-        let competenciaSelecionada = "07/2026"; // Competência padrão inicial
+        let competenciaSelecionada = "07/2026"; 
 
         async function enviarNotificacaoEmail(destinatarioEmail, nomePrestador, dadosLancamento) {
             if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === "SUA_PUBLIC_KEY") {
@@ -332,13 +336,11 @@
             }
         }
 
-        // Evento que escuta a mudança de competência no filtro principal (RH)
         window.atualizarCompetenciaFiltro = (novaCompetencia) => {
             competenciaSelecionada = novaCompetencia;
             renderizarTabelasEstatísticas();
         };
 
-        // GERAÇÃO DE FOLHA EM LOTE POR COMPETÊNCIA
         window.gerarFolhaCompetencia = async () => {
             if (Object.keys(contratosLocais).length === 0) {
                 alert("Nenhum contrato cadastrado no sistema para gerar folhas.");
@@ -353,7 +355,9 @@
                 Object.keys(contratosLocais).forEach(key => {
                     const contrato = contratosLocais[key];
                     
-                    // Se o contrato já tiver folha iniciada nessa competência, preservamos seus dados
+                    // Contratos inativos não devem gerar novas folhas de pagamento mensais
+                    if (contrato.status === "Inativo") return;
+                    
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
                     
                     if (!folhaExistente) {
@@ -389,16 +393,15 @@
 
                 if (Object.keys(updates).length > 0) {
                     await update(ref(db), updates);
-                    alert(`Folha da competência ${competenciaSelecionada} gerada com sucesso para os contratos cadastrados.`);
+                    alert(`Folha da competência ${competenciaSelecionada} gerada com sucesso para os contratos ativos.`);
                 } else {
-                    alert("A folha para todos os contratos deste mês já estava criada.");
+                    alert("A folha para todos os contratos ativos deste mês já estava criada.");
                 }
             } catch (error) {
                 alert("Erro ao criar folha do mês: " + error.message);
             }
         };
 
-        // SALVAR CADASTRO DO CONTRATO
         window.salvarCadastro = async () => {
             try {
                 const dados = {
@@ -431,7 +434,42 @@
             }
         };
 
-        // APLICAR LANÇAMENTO NO MOTOR FINANCEIRO
+        // FUNÇÃO PARA DESATIVAR CONTRATO (SOLICITA DATA E MOTIVO)
+        window.desativarContrato = async (key) => {
+            const contrato = contratosLocais[key];
+            if (!contrato) return;
+
+            const confirmacao = confirm(`Deseja realmente desativar o contrato de "${contrato.razaoSocial || contrato.nome}"?`);
+            if (!confirmacao) return;
+
+            const motivo = prompt("Digite o motivo do encerramento do contrato:");
+            if (motivo === null) return;
+            if (motivo.trim() === "") {
+                alert("O motivo do encerramento é obrigatório!");
+                return;
+            }
+
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+            const dataEncerramento = prompt("Confirme a data de encerramento do contrato:", dataHoje);
+            if (dataEncerramento === null) return;
+            if (dataEncerramento.trim() === "") {
+                alert("A data de encerramento é obrigatória!");
+                return;
+            }
+
+            try {
+                const atualizacoes = {};
+                atualizacoes[`contratos/${key}/status`] = "Inativo";
+                atualizacoes[`contratos/${key}/motivoEncerramento`] = motivo;
+                atualizacoes[`contratos/${key}/dataEncerramento`] = dataEncerramento;
+
+                await update(ref(db), atualizacoes);
+                alert("Contrato desativado com sucesso!");
+            } catch (error) {
+                alert("Erro ao desativar o contrato: " + error.message);
+            }
+        };
+
         window.aplicarLancamentoMotor = async () => {
             const key = document.getElementById('motorContrato').value;
             const tipo = document.getElementById('motorTipo').value;
@@ -447,7 +485,6 @@
                 return;
             }
 
-            // Garante que a folha da competência existe antes de lançar bônus/adicionais
             const folhaRef = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
             if (!folhaRef) {
                 alert(`A folha do contrato selecionado para a competência ${competenciaSelecionada} ainda não foi gerada. Por favor, clique no botão "Criar Folha do Mês" primeiro.`);
@@ -492,7 +529,6 @@
             }
         };
 
-        // ALTERAR STATUS DA NF (COM LÓGICA DE RECUSA)
         window.alterarStatusNF = async (idContrato, novoStatus, tipoFolha) => {
             let statusPagamento = "Aguardando NF";
             let motivoPrompt = "";
@@ -556,7 +592,6 @@
             }
         };
 
-        // CONFIRMAR PAGAMENTO DA COMPETÊNCIA
         window.marcarComoPago = async (idContrato, tipoFolha) => {
             const dataHoje = new Date().toLocaleDateString('pt-BR');
             const dataEscolhida = prompt("Confirme a data de pagamento:", dataHoje);
@@ -579,7 +614,7 @@
             }
         };
 
-        // ESCUTADOR DE CONTRATOS
+        // ESCUTADOR DE CONTRATOS MODIFICADO
         onValue(ref(db, 'contratos'), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             const listaContratos = document.getElementById('listaContratos');
@@ -596,7 +631,25 @@
                 const c = contratosLocais[key];
                 totalContratos++;
 
-                // Lista de contratos cadastrados
+                // Definição visual do badge de status
+                let statusBadge = '';
+                let acaoBotao = '';
+
+                if (c.status === "Inativo") {
+                    statusBadge = `<span class="inline-block px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800 cursor-help" title="Encerrado em: ${c.dataEncerramento || '-'}\nMotivo: ${c.motivoEncerramento || '-'}">Inativo ℹ️</span>`;
+                    acaoBotao = `<span class="text-xs text-slate-400 italic font-semibold">Sem Ações</span>`;
+                } else {
+                    statusBadge = `<span class="inline-block px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">Ativo</span>`;
+                    acaoBotao = `<button onclick="desativarContrato('${key}')" class="bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md transition shadow-sm">🛑 Desativar</button>`;
+                    
+                    // Prestador só aparece para lançamentos no motor se estiver ativo
+                    const optMotor = document.createElement('option');
+                    optMotor.value = key;
+                    optMotor.innerText = c.razaoSocial || c.nome;
+                    motorContratoSelect.appendChild(optMotor);
+                }
+
+                // Linha da tabela de contratos cadastrados
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50 transition';
                 tr.innerHTML = `
@@ -605,21 +658,16 @@
                     <td class="p-3 text-sm text-slate-600">${c.cargo || '-'}</td>
                     <td class="p-3 text-sm text-slate-600 font-medium">R$ ${c.valorFixoMensal || '-'}</td>
                     <td class="p-3 text-sm text-slate-600">${c.centrodeCusto || '-'}</td>
-                    <td class="p-3 text-sm"><span class="px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">${c.status || 'Ativo'}</span></td>
+                    <td class="p-3 text-sm">${statusBadge}</td>
+                    <td class="p-3 text-center">${acaoBotao}</td>
                 `;
                 listaContratos.appendChild(tr);
 
-                // Option select PJ
+                // No portal do PJ, lista todas as empresas cadastradas para permitir anexos retroativos
                 const opt = document.createElement('option');
                 opt.value = key;
                 opt.innerText = c.razaoSocial ? `${c.razaoSocial} (CNPJ: ${c.CNPJ})` : `${c.nome} (CPF: ${c.cpf})`;
                 selectPJ.appendChild(opt);
-
-                // Option select Motor
-                const optMotor = document.createElement('option');
-                optMotor.value = key;
-                optMotor.innerText = c.razaoSocial || c.nome;
-                motorContratoSelect.appendChild(optMotor);
             });
 
             if (motorSelectedVal) motorContratoSelect.value = motorSelectedVal;
@@ -634,7 +682,6 @@
             renderizarTabelasEstatísticas();
         });
 
-        // RENDERIZAÇÃO DADOS DE ACORDO COM A COMPETÊNCIA ATUAL
         function renderizarTabelasEstatísticas() {
             const listaFolha = document.getElementById('listaFolha');
             const listaFolhaComplementar = document.getElementById('listaFolhaComplementar');
@@ -666,7 +713,6 @@
             Object.keys(folhaCompetencia).forEach(key => {
                 const f = folhaCompetencia[key];
 
-                // --- 1. RENDERIZAR TABELA REGULAR ---
                 let totalFixo = parseFloat(f.regular.valorFixo || 0);
                 let motorReg = parseFloat(f.regular.motorValor || 0);
                 let valorFinalRegular = totalFixo + motorReg;
@@ -703,7 +749,6 @@
                 `;
                 listaFolha.appendChild(trRegular);
 
-                // --- 2. RENDERIZAR TABELA COMPLEMENTAR (CASO EXISTA LANÇAMENTO COMPLEMENTAR ATIVO) ---
                 let motorComp = parseFloat(f.complementar.motorValor || 0);
                 if (f.complementar.statusPagamento !== "Sem Lançamento" || motorComp > 0) {
                     temComplementarAtiva = true;
@@ -747,7 +792,6 @@
             document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // MOSTRAR DETALHES FINANCEIROS DO PRESTADOR NO PORTAL PJ (DE ACORDO COM A COMPETÊNCIA SELECIONADA POR ELE)
         function atualizarResumoPainelPJ() {
             const key = document.getElementById('selectPrestadorPJ').value;
             const compPJ = document.getElementById('selectCompetenciaPJ').value;
@@ -781,11 +825,9 @@
             detalhes.innerHTML = html;
         }
 
-        // Gatilhos de escuta no painel PJ
         document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
         document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
 
-        // ENVIAR NOTA FISCAL DO PRESTADOR
         window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
             const compPJ = document.getElementById('selectCompetenciaPJ').value;
@@ -835,7 +877,6 @@
             reader.readAsDataURL(arquivoInput.files[0]);
         };
 
-        // VISUALIZAR ARQUIVO DE NOTA FISCAL
         window.visualizarNota = (key, tipoFolha) => {
             const fContrato = folhasLocais[competenciaSelecionada][key];
             if (!fContrato) return;
@@ -850,7 +891,6 @@
             }
         };
 
-        // ABAS DO RH
         window.mostrar = function(id) {
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
@@ -875,7 +915,6 @@
             }
         };
 
-        // NAVEGAÇÃO ENTRE RH E PJ
         window.mudarModo = function(modo) {
             const btnRh = document.getElementById('btn-modo-rh');
             const btnPj = document.getElementById('btn-modo-pj');
