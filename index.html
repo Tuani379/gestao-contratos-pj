@@ -2,7 +2,6 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; script-src * 'unsafe-inline' 'unsafe-eval'; connect-src * 'unsafe-inline'; img-src * data: blob:; style-src * 'unsafe-inline';">
     <title>ConnectPJ - Sistema Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Script Oficial do EmailJS -->
@@ -24,8 +23,8 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <h1 class="text-2xl font-bold">ConnectPJ</h1>
             <div class="bg-blue-800 p-1 rounded-lg flex gap-1">
-                <button id="btn-modo-rh" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold transition">Painel Corporativo (RH/Fin)</button>
-                <button id="btn-modo-pj" class="px-4 py-2 text-sm opacity-75 hover:bg-blue-700 rounded transition font-bold">Área do Prestador (PJ)</button>
+                <button id="btn-modo-rh" onclick="mudarModo('rh')" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold transition">Painel Corporativo (RH/Fin)</button>
+                <button id="btn-modo-pj" onclick="mudarModo('pj')" class="px-4 py-2 text-sm opacity-75 hover:bg-blue-700 rounded transition font-bold">Área do Prestador (PJ)</button>
             </div>
         </div>
     </header>
@@ -33,9 +32,9 @@
     <!-- MENU DO RH -->
     <nav id="menu-rh" class="bg-white border-b shadow-sm">
         <div class="max-w-7xl mx-auto flex gap-8 px-6">
-            <button id="btn-dashboard" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900 transition">Dashboard & Folha Mensal</button>
-            <button id="btn-contratos" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Contratos Cadastrados</button>
-            <button id="btn-relatorios" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Relatórios & Centro de Custos</button>
+            <button id="btn-dashboard" onclick="mostrar('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900 transition">Dashboard & Folha Mensal</button>
+            <button id="btn-contratos" onclick="mostrar('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Contratos Cadastrados</button>
+            <button id="btn-relatorios" onclick="mostrar('relatorios')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Relatórios & Centro de Custos</button>
         </div>
     </nav>
 
@@ -56,13 +55,14 @@
                     <p class="text-sm font-bold text-amber-700 uppercase">Total Folha Complementar</p>
                     <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
                 </div>
+                <!-- MES DE REFERÊNCIA INTERATIVO COM GERADOR DE FOLHA AUTOMÁTICO -->
                 <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm flex flex-col justify-between">
                     <div>
                         <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
-                        <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer w-full">
+                        <select id="filtroCompetencia" onchange="atualizarCompetenciaFiltro(this.value)" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer w-full">
                         </select>
                     </div>
-                    <button id="btn-criar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
+                    <button onclick="gerarFolhaCompetencia()" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
                         <span>🔄</span> Criar Folha do Mês
                     </button>
                 </div>
@@ -104,7 +104,7 @@
                         <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
                     </div>
                     <div>
-                        <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
+                        <button onclick="aplicarLancamentoMotor()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
                             Aplicar e Atualizar
                         </button>
                     </div>
@@ -169,7 +169,7 @@
         <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
-                <button id="btn-abrir-modal" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
+                <button onclick="document.getElementById('modalCadastro').classList.remove('hidden')" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
                     + Novo Cadastro
                 </button>
             </div>
@@ -195,88 +195,86 @@
                 </table>
             </div>
 
-            <!-- MODAL CADASTRO -->
+            <!-- MODAL CADASTRO (RETORNADO AO SEU LAYOUT ORIGINAL COM CORREÇÃO DE TAGS) -->
             <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                     <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
-                    
-                    <div class="grid grid-cols-2 gap-4 mb-6">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Nome Completo</label>
-                            <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded text-sm">
+                            <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">CPF</label>
-                            <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">E-mail Pessoal</label>
-                            <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded text-sm">
+                            <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">CEP</label>
-                            <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Município</label>
-                            <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded text-sm">
+                            <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Razão Social</label>
-                            <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded text-sm">
+                            <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">CNPJ</label>
-                            <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">E-mail Corporativo</label>
-                            <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded text-sm">
+                            <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Vigência</label>
-                            <input id="campoVigencia" type="text" placeholder="Vigência" class="w-full p-2 border rounded text-sm">
+                            <input id="campoVigencia" type="text" placeholder="Vigência" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Centro de Custo</label>
-                            <input id="campoCentroDeCusto" type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCentroDeCusto" type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Cargo</label>
-                            <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Valor Fixo Mensal</label>
-                            <input id="campoValorFixoMensal" type="text" placeholder="Valor Fixo Mensal" class="w-full p-2 border rounded text-sm">
+                            <input id="campoValorFixoMensal" type="text" placeholder="Valor Fixo Mensal" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Departamento</label>
-                            <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded text-sm">
+                            <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Gestor Direto</label>
-                            <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
+                            <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Papel</label>
-                            <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded text-sm">
+                            <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-500 mb-1">Status</label>
-                            <select id="campoStatus" class="w-full p-2 border rounded bg-white text-sm">
+                            <select id="campoStatus" class="w-full p-2 border rounded bg-white">
                                 <option value="Ativo">Ativo</option>
                                 <option value="Inativo">Inativo</option>
                             </select>
                         </div>
-                        <div class="col-span-2">
+                        <div class="col-span-2 mb-4">
                             <label class="block text-xs font-bold text-slate-500 mb-1">Unidade</label>
-                            <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded text-sm">
+                            <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded">
                         </div>
                     </div>
-
-                    <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
-                        <button id="btn-fechar-modal" class="px-4 py-2 border rounded hover:bg-slate-50 text-sm font-semibold transition">Cancelar</button>
-                        <button id="btn-salvar-cadastro" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm shadow-sm transition">Salvar Cadastro</button>
+                    <div class="flex justify-end gap-2 mt-4 pt-4 border-t">
+                        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
+                        <button onclick="salvarCadastro()" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
                     </div>
                 </div>
             </div>
@@ -331,7 +329,7 @@
                     <input id="arquivoNFPJ" type="file" accept="application/pdf,image/*" class="w-full p-2 border rounded-lg bg-slate-50">
                 </div>
 
-                <button id="btn-enviar-nota" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">
+                <button onclick="enviarNotaPrestador()" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">
                     📤 Enviar Nota Fiscal
                 </button>
             </div>
@@ -424,293 +422,12 @@
             }
         }
 
-        const renderizarTabelasEstatisticas = () => {
-            const listaFolha = document.getElementById('listaFolha');
-            const listaFolhaComplementar = document.getElementById('listaFolhaComplementar');
-            const containerFolhaComplementar = document.getElementById('containerFolhaComplementar');
-
-            if (!listaFolha || !listaFolhaComplementar || !containerFolhaComplementar) return;
-
-            listaFolha.innerHTML = '';
-            listaFolhaComplementar.innerHTML = '';
-
-            const folhaCompetencia = folhasLocais[competenciaSelecionada] || null;
-
-            if (!folhaCompetencia) {
-                listaFolha.innerHTML = `
-                    <tr>
-                        <td colspan="6" class="p-8 text-center text-slate-500 bg-slate-50/50 rounded-lg">
-                            <div class="font-bold text-base text-slate-700">Nenhuma folha iniciada para esta competência.</div>
-                            <div class="text-xs text-slate-400 mt-1">Selecione o mês desejado e clique em "Criar Folha do Mês" para processar a folha de todos os contratos em lote.</div>
-                        </td>
-                    </tr>`;
-                containerFolhaComplementar.classList.add('hidden');
-                document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
-                document.getElementById('cardTotalFolhaComplementar').innerText = 'R$ 0,00';
-                return;
-            }
-
-            let valorTotalFolhaRegular = 0;
-            let valorTotalFolhaComplementar = 0;
-            let temComplementarAtiva = false;
-
-            Object.keys(folhaCompetencia).forEach(key => {
-                const f = folhaCompetencia[key];
-                if (!f || !f.regular || !f.complementar) return;
-
-                let totalFixo = parseFloat(f.regular.valorFixo || 0);
-                let motorReg = parseFloat(f.regular.motorValor || 0);
-                let valorFinalRegular = totalFixo + motorReg;
-                valorTotalFolhaRegular += valorFinalRegular;
-
-                let badgeAjusteRegular = motorReg > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${motorReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${f.regular.motorEvento || 'Ajuste'})</span>` : "";
-
-                let statusRegularHTML = '';
-                if (f.regular.statusPagamento === 'Pago') {
-                    statusRegularHTML = `<div class="flex flex-col items-center gap-0.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span><span class="text-[10px] text-slate-500 font-bold">${f.regular.dataPagamento || ''}</span></div>`;
-                } else if (f.regular.statusPagamento === 'Pronto para Pagar') {
-                    statusRegularHTML = `<div class="flex flex-col items-center gap-1.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span><button data-id="${key}" data-tipo="regular" class="btn-confirmar-pago bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">💸 Confirmar Pago</button></div>`;
-                } else {
-                    const classeBadge = f.regular.statusPagamento === 'NF Recusada / Corrigir' ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800';
-                    const motivoTooltip = (f.regular.statusPagamento === 'NF Recusada / Corrigir' && f.regular.motivoRecusa) ? `<br><span class="text-[9px] text-red-600 block max-w-[150px] truncate" title="${f.regular.motivoRecusa}">Motivo: ${f.regular.motivoRecusa}</span>` : "";
-                    statusRegularHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${f.regular.statusPagamento || 'Aguardando NF'}</span>${motivoTooltip}`;
-                }
-
-                const trRegular = document.createElement('tr');
-                trRegular.className = 'border-b hover:bg-slate-50 transition';
-                trRegular.innerHTML = `
-                    <td class="p-3 text-sm font-semibold text-slate-700"><div>${f.nome || 'Prestador'}</div><div class="text-[10px] text-blue-600 font-extrabold uppercase mt-0.5">Folha Regular</div></td>
-                    <td class="p-3 text-sm text-slate-600">${f.CNPJ || '-'}</td>
-                    <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} ${badgeAjusteRegular}</td>
-                    <td class="p-3 text-center">
-                        <select data-id="${key}" data-tipo="regular" class="select-status-nf p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
-                            <option value="Pendente" ${f.regular.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                            <option value="Recebida ✔" ${f.regular.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
-                            <option value="Recusada ❌" ${f.regular.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
-                        </select>
-                    </td>
-                    <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="regular" class="btn-ver-nota bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold hover:bg-blue-200 transition">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
-                    <td class="p-3 text-center">${statusRegularHTML}</td>
-                `;
-                listaFolha.appendChild(trRegular);
-
-                let motorComp = parseFloat(f.complementar.motorValor || 0);
-                if (f.complementar.statusPagamento !== "Sem Lançamento" || motorComp > 0) {
-                    temComplementarAtiva = true;
-                    valorTotalFolhaComplementar += motorComp;
-
-                    let statusCompHTML = '';
-                    if (f.complementar.statusPagamento === 'Pago') {
-                        statusCompHTML = `<div class="flex flex-col items-center gap-0.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span><span class="text-[10px] text-slate-500 font-bold">${f.complementar.dataPagamento || ''}</span></div>`;
-                    } else if (f.complementar.statusPagamento === 'Pronto para Pagar') {
-                        statusCompHTML = `<div class="flex flex-col items-center gap-1.5"><span class="px-3 py-1 text-xs font-extrabold rounded-full bg-blue-100 text-blue-800">Pronto para Pagar</span><button data-id="${key}" data-tipo="complementar" class="btn-confirmar-pago bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-[10px] font-bold shadow-sm transition">💸 Confirmar Pago</button></div>`;
-                    } else {
-                        const classeBadge = f.complementar.statusPagamento === 'NF Recusada / Corrigir' ? 'bg-red-100 text-red-800' : 'bg-amber-100 text-amber-800';
-                        const motivoTooltipComp = (f.complementar.statusPagamento === 'NF Recusada / Corrigir' && f.complementar.motivoRecusa) ? `<br><span class="text-[9px] text-red-600 block max-w-[150px] truncate" title="${f.complementar.motivoRecusa}">Motivo: ${f.complementar.motivoRecusa}</span>` : "";
-                        statusCompHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full ${classeBadge}">${f.complementar.statusPagamento || 'Aguardando NF'}</span>${motivoTooltipComp}`;
-                    }
-
-                    const trComplementar = document.createElement('tr');
-                    trComplementar.className = 'border-b hover:bg-amber-50/40 transition border-l-4 border-l-amber-500';
-                    trComplementar.innerHTML = `
-                        <td class="p-3 text-sm font-semibold text-slate-700"><div class="text-amber-900 font-bold">${f.nome || 'Prestador'}</div><div class="text-[10px] text-amber-700 font-extrabold uppercase mt-0.5">⚡ Folha Complementar (${f.complementar.motorEvento || 'Lançamento'})</div></td>
-                        <td class="p-3 text-sm text-slate-600">${f.CNPJ || '-'}</td>
-                        <td class="p-3 text-sm text-amber-800 font-bold">R$ ${motorComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        <td class="p-3 text-center">
-                            <select onchange="alterarStatusNF('${key}', this.value, 'complementar')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
-                                <option value="Pendente" ${f.complementar.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                <option value="Recebida ✔" ${f.complementar.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
-                                <option value="Recusada ❌" ${f.complementar.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
-                            </select>
-                        </td>
-                        <td class="p-3 text-center">${f.complementar.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="complementar" class="btn-ver-nota bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold hover:bg-blue-200 transition">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
-                        <td class="p-3 text-center">${statusCompHTML}</td>
-                    `;
-                    listaFolhaComplementar.appendChild(trComplementar);
-                }
-            });
-
-            if (temComplementarAtiva) containerFolhaComplementar.classList.remove('hidden');
-            else containerFolhaComplementar.classList.add('hidden');
-
-            document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
-            
-            // Religa os cliques dinâmicos criados nas tabelas
-            atribuirEventosDinamicos();
-        };
-
-        function atualizarResumoPainelPJ() {
-            const key = document.getElementById('selectPrestadorPJ').value;
-            const compPJ = document.getElementById('selectCompetenciaPJ').value;
-            const cuadro = document.getElementById('quadroResumoPJ');
-            const detalhes = document.getElementById('detalhesValoresPJ');
-            const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
-
-            if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
-                quadro.classList.add('hidden');
-                seletorDiv.classList.add('hidden');
-                detalhes.innerHTML = "";
-                return;
-            }
-
-            const fContrato = folhasLocais[compPJ][key];
-            let fixo = parseFloat(fContrato.regular.valorFixo || 0);
-            let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
-            let complementarExtra = parseFloat(fContrato.complementar.motorValor || 0);
-
-            let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-            
-            if (fContrato.complementar.statusPagamento !== "Sem Lançamento" || complementarExtra > 0) {
-                seletorDiv.classList.remove('hidden');
-                html += `<p class="text-amber-700">• <b>Folha Complementar (${fContrato.complementar.motorEvento || 'Bônus'}):</b> R$ ${complementarExtra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-                html += `<p class="text-[10px] text-slate-400 mt-2">⚠️ Selecione o tipo de folha correspondente para realizar o anexo.</p>`;
-            } else {
-                seletorDiv.classList.add('hidden');
-            }
-
-            quadro.classList.remove('hidden');
-            detalhes.innerHTML = html;
-        }
-
-        // EVENTOS GLOBAIS DE ATIVAÇÃO DE COMPONENTES INTERNOS E SEGUROS
-        const mostrar = (id) => {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('contratos').classList.add('hidden');
-            document.getElementById('relatorios').classList.add('hidden');
-            document.getElementById(id).classList.remove('hidden');
-
-            const botoes = {
-                dashboard: document.getElementById('btn-dashboard'),
-                contratos: document.getElementById('btn-contratos'),
-                relatorios: document.getElementById('btn-relatorios')
-            };
-
-            Object.values(botoes).forEach(btn => {
-                if (btn) {
-                    btn.classList.remove('border-blue-600', 'text-blue-900');
-                    btn.classList.add('border-transparent', 'text-slate-500');
-                }
-            });
-
-            if (botoes[id]) {
-                botoes[id].classList.remove('border-transparent', 'text-slate-500');
-                botoes[id].classList.add('border-blue-600', 'text-blue-900');
-            }
-        };
-
-        const mudarModo = (modo) => {
-            const btnRh = document.getElementById('btn-modo-rh');
-            const btnPj = document.getElementById('btn-modo-pj');
-            const menuRh = document.getElementById('menu-rh');
-            const areaPrestador = document.getElementById('area-prestador');
-            const secoesRh = document.querySelectorAll('.modo-rh-secao');
-
-            if (modo === 'rh') {
-                btnRh.classList.add('bg-blue-600');
-                btnRh.classList.remove('opacity-75');
-                btnPj.classList.remove('bg-blue-600');
-                btnPj.classList.add('opacity-75');
-
-                menuRh.classList.remove('hidden');
-                areaPrestador.classList.add('hidden');
-                mostrar('dashboard');
-            } else {
-                btnPj.classList.add('bg-blue-600');
-                btnPj.classList.remove('opacity-75');
-                btnRh.classList.remove('bg-blue-600');
-                btnRh.classList.add('opacity-75');
-
-                menuRh.classList.add('hidden');
-                secoesRh.forEach(sec => sec.classList.add('hidden'));
-                areaPrestador.classList.remove('hidden');
-            }
-        };
-
-        // Ouvintes de clique sem usar inline onclick (Impedindo o bloqueio do CSP)
-        document.getElementById('btn-modo-rh').addEventListener('click', () => mudarModo('rh'));
-        document.getElementById('btn-modo-pj').addEventListener('click', () => mudarModo('pj'));
-        document.getElementById('btn-dashboard').addEventListener('click', () => mostrar('dashboard'));
-        document.getElementById('btn-contratos').addEventListener('click', () => mostrar('contratos'));
-        document.getElementById('btn-relatorios').addEventListener('click', () => mostrar('relatorios'));
-        
-        document.getElementById('btn-abrir-modal').addEventListener('click', () => {
-            document.getElementById('modalCadastro').classList.remove('hidden');
-        });
-        document.getElementById('btn-fechar-modal').addEventListener('click', () => {
-            document.getElementById('modalCadastro').classList.add('hidden');
-        });
-
-        document.getElementById('filtroCompetencia').addEventListener('change', (e) => {
-            competenciaSelecionada = e.target.value;
+        window.atualizarCompetenciaFiltro = (novaCompetencia) => {
+            competenciaSelecionada = novaCompetencia;
             renderizarTabelasEstatisticas();
-        });
+        };
 
-        document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
-        document.getElementById('selectCompetenciaPJ').addEventListener('change', (e) => {
-            competenciaSelecionada = e.target.value;
-            atualizarResumoPainelPJ();
-        });
-
-        // ROTINA TOTALMENTE INTERNA PARA SALVAR CADASTRO (À PROVA DE TRAVAMENTO)
-        document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
-            try {
-                const inputValor = document.getElementById('campoValorFixoMensal');
-                const valorRaw = inputValor ? inputValor.value : "0";
-                const valorTexto = String(valorRaw).replace(/[^\d.,]/g, '');
-                
-                let valorLimpo = 0;
-                if (valorTexto.includes(',') && valorTexto.includes('.')) {
-                    valorLimpo = parseFloat(valorTexto.replace(/\./g, '').replace(',', '.')) || 0;
-                } else if (valorTexto.includes(',')) {
-                    valorLimpo = parseFloat(valorTexto.replace(',', '.')) || 0;
-                } else {
-                    valorLimpo = parseFloat(valorTexto) || 0;
-                }
-
-                const pegarValor = (idOriginal) => {
-                    let el = document.getElementById(idOriginal);
-                    if (!el) {
-                        const idVariacao = idOriginal.replace('de', 'De');
-                        el = document.getElementById(idVariacao);
-                    }
-                    return el ? el.value : "";
-                };
-
-                const dados = {
-                    nome: pegarValor('campoNome'),
-                    cpf: pegarValor('campoCpf'),
-                    emailPessoal: pegarValor('campoEmail'),
-                    cep: pegarValor('campoCep'),
-                    municipio: pegarValor('campoMunicipio'),
-                    razaoSocial: pegarValor('campoRazaoSocial'),
-                    CNPJ: pegarValor('campoCNPJ'),
-                    emailCorp: pegarValor('campoEmailCorp'),
-                    vigencia: pegarValor('campoVigencia'),
-                    centrodeCusto: pegarValor('campoCentroDeCusto'), 
-                    cargo: pegarValor('campoCargo'),
-                    valorFixoMensal: valorLimpo, 
-                    departamento: pegarValor('campoDepartamento'),
-                    gestorDireto: pegarValor('campoGestorDireto'),
-                    papel: pegarValor('campoPapel'),
-                    status: document.getElementById('campoStatus') ? document.getElementById('campoStatus').value : "Ativo",
-                    unidade: pegarValor('campoUnidade'),
-                    dataCadastro: new Date().toLocaleDateString('pt-BR')
-                };
-
-                await push(ref(db, 'contratos'), dados);
-                alert("Contrato cadastrado com sucesso!");
-                
-                document.getElementById('modalCadastro').classList.add('hidden');
-                document.querySelectorAll('#modalCadastro input').forEach(input => input.value = '');
-                
-            } catch (error) {
-                alert("Erro ao cadastrar: " + error.message);
-            }
-        });
-
-        // CRIAÇÃO DA FOLHA DE PAGAMENTO MENSAL
-        document.getElementById('btn-criar-folha').addEventListener('click', async () => {
+        window.gerarFolhaCompetencia = async () => {
             if (Object.keys(contratosLocais).length === 0) {
                 alert("Nenhum contrato cadastrado no sistema.");
                 return;
@@ -768,10 +485,101 @@
             } catch (error) {
                 alert("Erro: " + error.message);
             }
-        });
+        };
 
-        // ENTRADA DO MOTOR FINANCEIRO
-        document.getElementById('btn-aplicar-motor').addEventListener('click', async () => {
+        // FUNÇÃO DE SALVAMENTO COM MAPEAMENTO DUPLO E EXPOSIÇÃO GLOBAL COMPATÍVEL
+        window.salvarCadastro = async () => {
+            try {
+                const inputValor = document.getElementById('campoValorFixoMensal');
+                const valorRaw = inputValor ? inputValor.value : "0";
+                const valorTexto = String(valorRaw).replace(/[^\d.,]/g, '');
+                
+                let valorLimpo = 0;
+                if (valorTexto.includes(',') && valorTexto.includes('.')) {
+                    valorLimpo = parseFloat(valorTexto.replace(/\./g, '').replace(',', '.')) || 0;
+                } else if (valorTexto.includes(',')) {
+                    valorLimpo = parseFloat(valorTexto.replace(',', '.')) || 0;
+                } else {
+                    valorLimpo = parseFloat(valorTexto) || 0;
+                }
+
+                const pegarValor = (idOriginal) => {
+                    let el = document.getElementById(idOriginal);
+                    if (!el) {
+                        const idVariacao = idOriginal.replace('de', 'De');
+                        el = document.getElementById(idVariacao);
+                    }
+                    return el ? el.value : "";
+                };
+
+                const dados = {
+                    nome: pegarValor('campoNome'),
+                    cpf: pegarValor('campoCpf'),
+                    emailPessoal: pegarValor('campoEmail'),
+                    cep: pegarValor('campoCep'),
+                    municipio: pegarValor('campoMunicipio'),
+                    razaoSocial: pegarValor('campoRazaoSocial'),
+                    CNPJ: pegarValor('campoCNPJ'),
+                    emailCorp: pegarValor('campoEmailCorp'),
+                    vigencia: pegarValor('campoVigencia'),
+                    centrodeCusto: pegarValor('campoCentroDeCusto'), 
+                    cargo: pegarValor('campoCargo'),
+                    valorFixoMensal: valorLimpo, 
+                    departamento: pegarValor('campoDepartamento'),
+                    gestorDireto: pegarValor('campoGestorDireto'),
+                    papel: pegarValor('campoPapel'),
+                    status: document.getElementById('campoStatus') ? document.getElementById('campoStatus').value : "Ativo",
+                    unidade: pegarValor('campoUnidade'),
+                    dataCadastro: new Date().toLocaleDateString('pt-BR')
+                };
+
+                await push(ref(db, 'contratos'), dados);
+                alert("Contrato cadastrado com sucesso!");
+                
+                document.getElementById('modalCadastro').classList.add('hidden');
+                document.querySelectorAll('#modalCadastro input').forEach(input => input.value = '');
+                
+            } catch (error) {
+                alert("Erro ao cadastrar: " + error.message);
+            }
+        };
+
+        window.desativarContrato = async (key) => {
+            const contrato = contratosLocais[key];
+            if (!contrato) return;
+
+            const confirmacao = confirm(`Deseja realmente desativar o contrato de "${contrato.razaoSocial || contrato.nome}"?`);
+            if (!confirmacao) return;
+
+            const motivo = prompt("Digite o motivo do encerramento do contrato:");
+            if (motivo === null) return;
+            if (motivo.trim() === "") {
+                alert("O motivo do encerramento é obrigatório!");
+                return;
+            }
+
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+            const dataEncerramento = prompt("Confirme a data de encerramento do contrato:", dataHoje);
+            if (dataEncerramento === null) return;
+            if (dataEncerramento.trim() === "") {
+                alert("A data de encerramento é obrigatória!");
+                return;
+            }
+
+            try {
+                const atualizacoes = {};
+                atualizacoes[`contratos/${key}/status`] = "Inativo";
+                atualizacoes[`contratos/${key}/motivoEncerramento`] = motivo;
+                atualizacoes[`contratos/${key}/dataEncerramento`] = dataEncerramento;
+
+                await update(ref(db), atualizacoes);
+                alert("Contrato desativado com sucesso!");
+            } catch (error) {
+                alert("Erro ao desativar o contrato: " + error.message);
+            }
+        };
+
+        window.aplicarLancamentoMotor = async () => {
             const key = document.getElementById('motorContrato').value;
             const tipo = document.getElementById('motorTipo').value;
             const evento = document.getElementById('motorEvento').value;
@@ -803,7 +611,7 @@
                 }
 
                 await update(ref(db), atualizacoes);
-                alert("Lançamento aplicado com sucesso!");
+                alert("Lançamento applied com sucesso!");
 
                 if (folhaRef.emailCorp) {
                     await enviarNotificacaoEmail(folhaRef.emailCorp, folhaRef.nome, {
@@ -817,10 +625,64 @@
             } catch (error) {
                 alert("Erro ao lançar: " + error.message);
             }
-        });
+        };
 
-        // ENVIAR NOTA PRESTADOR (PORTAL PJ)
-        document.getElementById('btn-enviar-nota').addEventListener('click', async () => {
+        window.alterarStatusNF = async (idContrato, novoStatus, tipoFolha) => {
+            let statusPagamento = "Aguardando NF";
+            let motivoPrompt = "";
+
+            if (novoStatus === "Recebida ✔") {
+                statusPagamento = "Pronto para Pagar";
+            } else if (novoStatus === "Recusada ❌") {
+                statusPagamento = "NF Recusada / Corrigir";
+                motivoPrompt = prompt("Digite o motivo da recusa desta Nota Fiscal:");
+                if (motivoPrompt === null) return;
+            }
+
+            try {
+                const folhaContrato = folhasLocais[competenciaSelecionada][idContrato];
+                const atualizacoes = {};
+
+                if (tipoFolha === 'regular') {
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/regular/nfStatus`] = novoStatus;
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/regular/statusPagamento`] = statusPagamento;
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/regular/motivoRecusa`] = motivoPrompt;
+                } else {
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/complementar/nfStatus`] = novoStatus;
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/complementar/statusPagamento`] = statusPagamento;
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/complementar/motivoRecusa`] = motivoPrompt;
+                }
+
+                await update(ref(db), atualizacoes);
+                alert("Status atualizado!");
+            } catch (error) {
+                alert("Erro: " + error.message);
+            }
+        };
+
+        window.marcarComoPago = async (idContrato, tipoFolha) => {
+            const dataHoje = new Date().toLocaleDateString('pt-BR');
+            const dataEscolhida = prompt("Confirme a data de pagamento:", dataHoje);
+            if (dataEscolhida === null) return;
+
+            try {
+                const atualizacoes = {};
+                if (tipoFolha === 'regular') {
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/regular/statusPagamento`] = "Pago";
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/regular/dataPagamento`] = dataEscolhida;
+                } else {
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/complementar/statusPagamento`] = "Pago";
+                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/complementar/dataPagamento`] = dataEscolhida;
+                }
+
+                await update(ref(db), atualizacoes);
+                alert("Pagamento registrado!");
+            } catch (error) {
+                alert("Erro: " + error.message);
+            }
+        };
+
+        window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
             const compPJ = document.getElementById('selectCompetenciaPJ').value;
             const arquivoInput = document.getElementById('arquivoNFPJ');
@@ -853,73 +715,167 @@
                     }
 
                     await update(ref(db), atualizacoes);
-                    alert("Nota Fiscal enviada com sucesso!");
+                    alert("Nota Fiscal enviada!");
                     arquivoInput.value = '';
                 } catch (error) {
-                    alert("Erro ao enviar: " + error.message);
+                    alert("Erro: " + error.message);
                 }
             };
             reader.readAsDataURL(arquivoInput.files[0]);
-        });
+        };
 
-        // FUNÇÕES DE BOTÕES GERADOS DINAMICAMENTE (CONTRATOS E STATUS)
-        function atribuirEventosDinamicos() {
-            document.querySelectorAll('.btn-confirmar-pago').forEach(btn => {
-                btn.onclick = async (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const tipo = e.target.getAttribute('data-tipo');
-                    const dataHoje = new Date().toLocaleDateString('pt-BR');
-                    const dataEscolhida = prompt("Confirme a data de pagamento:", dataHoje);
-                    if (dataEscolhida === null) return;
+        window.visualizarNota = (key, tipoFolha) => {
+            const fContrato = folhasLocais[competenciaSelecionada][key];
+            if (!fContrato) return;
+            const arquivo = tipoFolha === 'regular' ? fContrato.regular.nfArquivoBase64 : fContrato.complementar.nfArquivoBase64;
+            if (arquivo) {
+                const novaJanela = window.open();
+                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
+            }
+        };
 
-                    const atualizacoes = {};
-                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${id}/${tipo}/statusPagamento`] = "Pago";
-                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${id}/${tipo}/dataPagamento`] = dataEscolhida;
+        function renderizarTabelasEstatisticas() {
+            const listaFolha = document.getElementById('listaFolha');
+            const listaFolhaComplementar = document.getElementById('listaFolhaComplementar');
+            const containerFolhaComplementar = document.getElementById('containerFolhaComplementar');
 
-                    await update(ref(db), atualizacoes);
-                    alert("Pagamento registrado!");
-                };
+            if (!listaFolha || !listaFolhaComplementar || !containerFolhaComplementar) return;
+
+            listaFolha.innerHTML = '';
+            listaFolhaComplementar.innerHTML = '';
+
+            const folhaCompetencia = folhasLocais[competenciaSelecionada] || null;
+
+            if (!folhaCompetencia) {
+                listaFolha.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="p-8 text-center text-slate-500 bg-slate-50/50 rounded-lg">
+                            <div class="font-bold text-base text-slate-700">Nenhuma folha iniciada para esta competência.</div>
+                        </td>
+                    </tr>`;
+                containerFolhaComplementar.classList.add('hidden');
+                document.getElementById('cardTotalFolha').innerText = 'R$ 0,00';
+                document.getElementById('cardTotalFolhaComplementar').innerText = 'R$ 0,00';
+                return;
+            }
+
+            let valorTotalFolhaRegular = 0;
+            let valorTotalFolhaComplementar = 0;
+            let temComplementarAtiva = false;
+
+            Object.keys(folhaCompetencia).forEach(key => {
+                const f = folhaCompetencia[key];
+                if (!f || !f.regular || !f.complementar) return;
+
+                let totalFixo = parseFloat(f.regular.valorFixo || 0);
+                let motorReg = parseFloat(f.regular.motorValor || 0);
+                let valorFinalRegular = totalFixo + motorReg;
+                valorTotalFolhaRegular += valorFinalRegular;
+
+                let badgeAjusteRegular = motorReg > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${motorReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>` : "";
+
+                let statusRegularHTML = '';
+                if (f.regular.statusPagamento === 'Pago') {
+                    statusRegularHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span>`;
+                } else if (f.regular.statusPagamento === 'Pronto para Pagar') {
+                    statusRegularHTML = `<button onclick="marcarComoPago('${key}', 'regular')" class="bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold">💸 Confirmar Pago</button>`;
+                } else {
+                    statusRegularHTML = `<span class="inline-block px-3 py-1 text-xs font-extrabold rounded-full bg-yellow-100 text-yellow-800">${f.regular.statusPagamento || 'Aguardando NF'}</span>`;
+                }
+
+                const trRegular = document.createElement('tr');
+                trRegular.className = 'border-b hover:bg-slate-50 transition';
+                trRegular.innerHTML = `
+                    <td class="p-3 text-sm font-semibold text-slate-700">${f.nome || 'Prestador'}</td>
+                    <td class="p-3 text-sm text-slate-600">${f.CNPJ || '-'}</td>
+                    <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} ${badgeAjusteRegular}</td>
+                    <td class="p-3 text-center">
+                        <select onchange="alterarStatusNF('${key}', this.value, 'regular')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
+                            <option value="Pendente" ${f.regular.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Recebida ✔" ${f.regular.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                            <option value="Recusada ❌" ${f.regular.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button onclick="visualizarNota('${key}', 'regular')" class="bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
+                    <td class="p-3 text-center">${statusRegularHTML}</td>
+                `;
+                listaFolha.appendChild(trRegular);
             });
 
-            document.querySelectorAll('.btn-ver-nota').forEach(btn => {
-                btn.onclick = (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const tipo = e.target.getAttribute('data-tipo');
-                    const fContrato = folhasLocais[competenciaSelecionada][id];
-                    const arquivo = tipo === 'regular' ? fContrato.regular.nfArquivoBase64 : fContrato.complementar.nfArquivoBase64;
-                    if (arquivo) {
-                        const novaJanela = window.open();
-                        novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
-                    }
-                };
-            });
-
-            document.querySelectorAll('.select-status-nf').forEach(select => {
-                select.onchange = async (e) => {
-                    const id = e.target.getAttribute('data-id');
-                    const tipo = e.target.getAttribute('data-tipo');
-                    const novoStatus = e.target.value;
-                    let statusPagamento = novoStatus === "Recebida ✔" ? "Pronto para Pagar" : "Aguardando NF";
-                    let motivo = "";
-
-                    if (novoStatus === "Recusada ❌") {
-                        statusPagamento = "NF Recusada / Corrigir";
-                        motivo = prompt("Motivo da recusa:");
-                        if (!motivo) return;
-                    }
-
-                    const atualizacoes = {};
-                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${id}/${tipo}/nfStatus`] = novoStatus;
-                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${id}/${tipo}/statusPagamento`] = statusPagamento;
-                    atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${id}/${tipo}/motivoRecusa`] = motivo;
-
-                    await update(ref(db), atualizacoes);
-                    alert("Status atualizado!");
-                };
-            });
+            if (temComplementarAtiva) containerFolhaComplementar.classList.remove('hidden');
+            document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
         }
 
-        // MONITORES DO DATABASE REALTIME (FIREBASE)
+        function atualizarResumoPainelPJ() {
+            const key = document.getElementById('selectPrestadorPJ').value;
+            const compPJ = document.getElementById('selectCompetenciaPJ').value;
+            const cuadro = document.getElementById('quadroResumoPJ');
+            const detalhes = document.getElementById('detalhesValoresPJ');
+
+            if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
+                quadro.classList.add('hidden');
+                return;
+            }
+
+            const fContrato = folhasLocais[compPJ][key];
+            let fixo = parseFloat(fContrato.regular.valorFixo || 0);
+            let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
+
+            quadro.classList.remove('hidden');
+            detalhes.innerHTML = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
+        }
+
+        window.mostrar = function(id) {
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('contratos').classList.add('hidden');
+            document.getElementById('relatorios').classList.add('hidden');
+            document.getElementById(id).classList.remove('hidden');
+
+            const botoes = {
+                dashboard: document.getElementById('btn-dashboard'),
+                contratos: document.getElementById('btn-contratos'),
+                relatorios: document.getElementById('btn-relatorios')
+            };
+
+            Object.values(botoes).forEach(btn => {
+                if (btn) {
+                    btn.classList.remove('border-blue-600', 'text-blue-900');
+                    btn.classList.add('border-transparent', 'text-slate-500');
+                }
+            });
+
+            if (botoes[id]) {
+                botoes[id].classList.remove('border-transparent', 'text-slate-500');
+                botoes[id].classList.add('border-blue-600', 'text-blue-900');
+            }
+        };
+
+        window.mudarModo = function(modo) {
+            const btnRh = document.getElementById('btn-modo-rh');
+            const btnPj = document.getElementById('btn-modo-pj');
+            const menuRh = document.getElementById('menu-rh');
+            const areaPrestador = document.getElementById('area-prestador');
+            const secoesRh = document.querySelectorAll('.modo-rh-secao');
+
+            if (modo === 'rh') {
+                btnRh.classList.add('bg-blue-600');
+                btnRh.classList.remove('opacity-75');
+                btnPj.classList.remove('bg-blue-600');
+                btnPj.classList.add('opacity-75');
+                menuRh.classList.remove('hidden');
+                areaPrestador.classList.add('hidden');
+                mostrar('dashboard');
+            } else {
+                btnPj.classList.add('bg-blue-600');
+                btnPj.classList.remove('opacity-75');
+                btnRh.classList.remove('bg-blue-600');
+                btnRh.classList.add('opacity-75');
+                menuRh.classList.add('hidden');
+                secoesRh.forEach(sec => sec.classList.add('hidden'));
+                areaPrestador.classList.remove('hidden');
+            }
+        };
+
         onValue(ref(db, 'contratos'), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             const listaContratos = document.getElementById('listaContratos');
@@ -946,9 +902,9 @@
                     <td class="p-3 text-sm text-slate-600">${c.CNPJ || c.cpf || '-'}</td>
                     <td class="p-3 text-sm text-slate-600">${c.cargo || '-'}</td>
                     <td class="p-3 text-sm text-slate-600 font-medium">R$ ${valorNumerico.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                    <td class="p-3 text-sm text-slate-600">${c.centrodeCusto || c.centroDeCusto || '-'}</td>
+                    <td class="p-3 text-sm text-slate-600">${c.centroDeCusto || c.centrodeCusto || '-'}</td>
                     <td class="p-3 text-sm">${statusBadge}</td>
-                    <td class="p-3 text-center"><span class="text-xs text-slate-400">Ativo</span></td>
+                    <td class="p-3 text-center"><button onclick="desativarContrato('${key}')" class="text-xs text-red-500 font-bold">Desativar</button></td>
                 `;
                 listaContratos.appendChild(tr);
 
@@ -972,7 +928,6 @@
         onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
             folhasLocais = snapshot.val() || {};
             renderizarTabelasEstatisticas();
-            atualizarResumoPainelPJ();
         });
 
     </script>
