@@ -278,31 +278,52 @@
     <p class="text-sm text-gray-500 mb-6">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
 
     <!-- Filtros -->
+
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 items-end">
+
         <div>
+
             <label class="block text-sm font-medium mb-1">Centro de Custo</label>
-            <select id="filtroCentroCusto" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-                <option value="todos">-- Todos --</option>
+
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+
+                <option>-- Todos --</option>
+
             </select>
+
         </div>
+
         <div>
+
             <label class="block text-sm font-medium mb-1">Prestador PJ</label>
-            <select id="filtroPrestador" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-                <option value="todos">-- Todos --</option>
+
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+
+                <option>-- Todos --</option>
+
             </select>
+
         </div>
+
         <div>
+
             <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
-            <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-                <option value="todos">-- Todas --</option>
-                <option value="Regular">Regular</option>
-                <option value="Complementar">Complementar</option>
+
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+
+                <option>-- Todas --</option>
+
             </select>
+
         </div>
-        <button id="btnExportar" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
+
+        <button class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
+
             ⬇ Exportar
+
         </button>
-    </div>
+
+    </div> 
 
     <!-- Tabela -->
     <div class="overflow-x-auto">
