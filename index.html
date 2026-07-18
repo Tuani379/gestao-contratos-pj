@@ -107,52 +107,7 @@
                     </div>
                 </div>
             </div>
-            <!-- COLE EXATAMENTE AQUI, LOGO ABAIXO DO FECHAMENTO DO MODAL GERAR FOLHA -->
-<!-- Modal para Editar Dados Cadastrais do Prestador -->
-<div id="modalEditarCadastro" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center">
-    <div class="relative p-6 border w-full max-w-lg shadow-lg rounded-md bg-white">
-        <div class="flex justify-between items-center border-b pb-3 mb-4">
-            <h3 class="text-lg font-bold text-gray-900">Editar Dados Cadastrais</h3>
-            <button id="btn-fechar-editar-cadastro" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
-        </div>
-        
-        <form id="form-editar-cadastro" class="space-y-4">
-            <input type="hidden" id="edit-cad-id">
             
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Nome / Razão Social</label>
-                <input type="text" id="edit-cad-nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-            </div>
-
-            <div class="grid grid-cols-2 gap-4">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">CNPJ</label>
-                    <input type="text" id="edit-cad-cnpj" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">CPF</label>
-                    <input type="text" id="edit-cad-cpf" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-                </div>
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">E-mail Corporativo</label>
-                <input type="email" id="edit-cad-email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-            </div>
-
-            <div>
-                <label class="block text-sm font-medium text-gray-700">Valor Fixo Mensal (R$)</label>
-                <input type="number" id="edit-cad-valor-fixo" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm border p-2">
-            </div>
-
-            <div class="flex justify-end space-x-3 pt-4 border-t">
-                <button type="button" id="btn-cancelar-editar-cadastro" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
-                <button type="button" id="btn-salvar-editar-cadastro" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar Alterações</button>
-            </div>
-        </form>
-    </div>
-</div>
-
             <!-- MOTOR FINANCEIRO -->
             <div class="bg-white p-6 rounded-xl border shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
@@ -1023,35 +978,7 @@
         alert("Erro ao instanciar competência: " + error.message);
     }
 });
-// --- EVENTOS DO MODAL DE ATUALIZAÇÃO CADASTRAL ---
-const fecharModalCadastro = () => {
-    document.getElementById('modalEditarCadastro').classList.add('hidden');
-};
-document.getElementById('btn-fechar-editar-cadastro').addEventListener('click', fecharModalCadastro);
-document.getElementById('btn-cancelar-editar-cadastro').addEventListener('click', fecharModalCadastro);
 
-document.getElementById('btn-salvar-editar-cadastro').addEventListener('click', async () => {
-    const idContrato = document.getElementById('edit-cad-id').value;
-    if (!idContrato) return;
-
-    const atualizacaoCadastro = {
-        nome: document.getElementById('edit-cad-nome').value.trim(),
-        razaoSocial: document.getElementById('edit-cad-nome').value.trim(),
-        cnpj: document.getElementById('edit-cad-cnpj').value.trim(),
-        cpf: document.getElementById('edit-cad-cpf').value.trim(),
-        emailCorp: document.getElementById('edit-cad-email').value.trim(),
-        valorFixoMensal: parseFloat(document.getElementById('edit-cad-valor-fixo').value) || 0
-    };
-
-    try {
-        // Envia as alterações direto para a raiz master de contratos
-        await update(ref(db, `contratos/${idContrato}`), atualizacaoCadastro);
-        alert("Dados cadastrais salvos com sucesso!");
-        fecharModalCadastro();
-    } catch (error) {
-        alert("Erro ao atualizar dados mestre: " + error.message);
-    }
-});
         document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
         document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
         document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
