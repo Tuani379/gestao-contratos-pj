@@ -409,7 +409,11 @@
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
                     
                     if (!folhaExistente) {
-                        let valorFixoLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
+                        // Garantia de fallback caso o valor fixo venha formatado ou puro
+                        let valorFixoLimpo = typeof contrato.valorFixoMensal === 'string' 
+                            ? parseFloat(contrato.valorFixoMensal.replace('.', '').replace(',', '.')) 
+                            : parseFloat(contrato.valorFixoMensal || 0);
+                        
                         if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
                         updates[`folhas_pagamento/${competenciaSelecionada}/${key}`] = {
@@ -452,6 +456,10 @@
 
         window.salvarCadastro = async () => {
             try {
+                const valorRaw = document.getElementById('campoValorFixoMensal').value;
+                // Limpa formatações de moeda antes de injetar no realtime database
+                const valorLimpo = parseFloat(valorRaw.replace(/[^\d.,]/g, '').replace(',', '.')) || 0;
+
                 const dados = {
                     nome: document.getElementById('campoNome').value,
                     cpf: document.getElementById('campoCpf').value,
@@ -464,7 +472,7 @@
                     vigencia: document.getElementById('campoVigencia').value,
                     centrodeCusto: document.getElementById('campoCentrodeCusto').value,
                     cargo: document.getElementById('campoCargo').value,
-                    valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
+                    valorFixoMensal: valorLimpo,
                     departamento: document.getElementById('campoDepartamento').value,
                     gestorDireto: document.getElementById('campoGestorDireto').value,
                     papel: document.getElementById('campoPapel').value,
@@ -729,12 +737,15 @@
         onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
             folhasLocais = snapshot.val() || {};
             renderizarTabelasEstatisticas();
+            atualizarResumoPainelPJ();
         });
 
         function renderizarTabelasEstatisticas() {
             const listaFolha = document.getElementById('listaFolha');
             const listaFolhaComplementar = document.getElementById('listaFolhaComplementar');
             const containerFolhaComplementar = document.getElementById('containerFolhaComplementar');
+
+            if (!listaFolha || !listaFolhaComplementar || !containerFolhaComplementar) return;
 
             listaFolha.innerHTML = '';
             listaFolhaComplementar.innerHTML = '';
@@ -762,12 +773,15 @@
             Object.keys(folhaCompetencia).forEach(key => {
                 const f = folhaCompetencia[key];
 
+                // PROTEÇÃO: Se o nó da folha ou a estrutura interna estiver ausente, pula para não travar
+                if (!f || !f.regular || !f.complementar) return;
+
                 let totalFixo = parseFloat(f.regular.valorFixo || 0);
                 let motorReg = parseFloat(f.regular.motorValor || 0);
                 let valorFinalRegular = totalFixo + motorReg;
                 valorTotalFolhaRegular += valorFinalRegular;
 
-                let badgeAjusteRegular = motorReg > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${motorReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${f.regular.motorEvento})</span>` : "";
+                let badgeAjusteRegular = motorReg > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${motorReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})} (${f.regular.motorEvento || 'Ajuste'})</span>` : "";
 
                 let statusRegularHTML = '';
                 if (f.regular.statusPagamento === 'Pago') {
@@ -783,8 +797,8 @@
                 const trRegular = document.createElement('tr');
                 trRegular.className = 'border-b hover:bg-slate-50 transition';
                 trRegular.innerHTML = `
-                    <td class="p-3 text-sm font-semibold text-slate-700"><div>${f.nome}</div><div class="text-[10px] text-blue-600 font-extrabold uppercase mt-0.5">Folha Regular</div></td>
-                    <td class="p-3 text-sm text-slate-600">${f.CNPJ}</td>
+                    <td class="p-3 text-sm font-semibold text-slate-700"><div>${f.nome || 'Prestador'}</div><div class="text-[10px] text-blue-600 font-extrabold uppercase mt-0.5">Folha Regular</div></td>
+                    <td class="p-3 text-sm text-slate-600">${f.CNPJ || '-'}</td>
                     <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} ${badgeAjusteRegular}</td>
                     <td class="p-3 text-center">
                         <select onchange="alterarStatusNF('${key}', this.value, 'regular')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
@@ -817,8 +831,8 @@
                     const trComplementar = document.createElement('tr');
                     trComplementar.className = 'border-b hover:bg-amber-50/40 transition border-l-4 border-l-amber-500';
                     trComplementar.innerHTML = `
-                        <td class="p-3 text-sm font-semibold text-slate-700"><div class="text-amber-900 font-bold">${f.nome}</div><div class="text-[10px] text-amber-700 font-extrabold uppercase mt-0.5">⚡ Folha Complementar (${f.complementar.motorEvento || 'Lançamento'})</div></td>
-                        <td class="p-3 text-sm text-slate-600">${f.CNPJ}</td>
+                        <td class="p-3 text-sm font-semibold text-slate-700"><div class="text-amber-900 font-bold">${f.nome || 'Prestador'}</div><div class="text-[10px] text-amber-700 font-extrabold uppercase mt-0.5">⚡ Folha Complementar (${f.complementar.motorEvento || 'Lançamento'})</div></td>
+                        <td class="p-3 text-sm text-slate-600">${f.CNPJ || '-'}</td>
                         <td class="p-3 text-sm text-amber-800 font-bold">R$ ${motorComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                         <td class="p-3 text-center">
                             <select onchange="alterarStatusNF('${key}', this.value, 'complementar')" class="p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
@@ -844,7 +858,7 @@
         function atualizarResumoPainelPJ() {
             const key = document.getElementById('selectPrestadorPJ').value;
             const compPJ = document.getElementById('selectCompetenciaPJ').value;
-            const quadro = document.getElementById('quadroResumoPJ');
+            const cuadro = document.getElementById('quadroResumoPJ');
             const detalhes = document.getElementById('detalhesValoresPJ');
             const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
 
@@ -875,7 +889,11 @@
         }
 
         document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
-        document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
+        document.getElementById('selectCompetenciaPJ').addEventListener('change', () => {
+            // Sincroniza a variável global com o mês que o prestador escolheu no portal
+            competenciaSelecionada = document.getElementById('selectCompetenciaPJ').value;
+            atualizarResumoPainelPJ();
+        });
 
         window.enviarNotaPrestador = async () => {
             const idContrato = document.getElementById('selectPrestadorPJ').value;
