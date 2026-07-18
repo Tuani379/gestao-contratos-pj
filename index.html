@@ -75,7 +75,7 @@
                     <span class="text-lg">⚙️</span>
                     <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
                 </div>
-                <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
+                <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione events extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
                 
                 <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
                     <div>
@@ -303,7 +303,7 @@
 
         const nomeMeses = [
             "Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho",
-            "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"
+            "Julho", "Agosto", "Setembro", "Octubro", "Novembro", "Dezembro"
         ];
 
         const filtroCompetencia = document.getElementById('filtroCompetencia');
@@ -581,7 +581,7 @@
 
             const folhaCompetencia = folhasLocais[competenciaSelecionada] || null;
 
-            if (!folhaCompetencia) {
+            if (!folhaCompetencia || Object.keys(folhaCompetencia).length === 0) {
                 listaFolha.innerHTML = `
                     <tr>
                         <td colspan="6" class="p-8 text-center text-slate-500 bg-slate-50/50 rounded-lg">
@@ -601,20 +601,20 @@
             Object.keys(folhaCompetencia).forEach(key => {
                 const f = folhaCompetencia[key];
 
-                let totalFixo = parseFloat(f.regular.valorFixo || 0);
-                let motorReg = parseFloat(f.regular.motorValor || 0);
+                let totalFixo = parseFloat(f.regular?.valorFixo || 0);
+                let motorReg = parseFloat(f.regular?.motorValor || 0);
                 let valorFinalRegular = totalFixo + motorReg;
                 valorTotalFolhaRegular += valorFinalRegular;
 
                 let badgeAjusteRegular = motorReg > 0 ? `<br><span class="text-[10px] text-emerald-600 font-bold">+ R$ ${motorReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</span>` : "";
 
                 let statusRegularHTML = '';
-                if (f.regular.statusPagamento === 'Pago') {
+                if (f.regular?.statusPagamento === 'Pago') {
                     statusRegularHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span>`;
-                } else if (f.regular.statusPagamento === 'Pronto para Pagar') {
+                } else if (f.regular?.statusPagamento === 'Pronto para Pagar') {
                     statusRegularHTML = `<button data-id="${key}" data-tipo="regular" class="btn-pagar bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold">💸 Confirmar Pago</button>`;
                 } else {
-                    statusRegularHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-yellow-100 text-yellow-800">${f.regular.statusPagamento || 'Aguardando'}</span>`;
+                    statusRegularHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-yellow-100 text-yellow-800">${f.regular?.statusPagamento || 'Aguardando'}</span>`;
                 }
 
                 const trRegular = document.createElement('tr');
@@ -625,28 +625,28 @@
                     <td class="p-3 text-sm text-slate-600 font-semibold">R$ ${valorFinalRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})} ${badgeAjusteRegular}</td>
                     <td class="p-3 text-center">
                         <select data-id="${key}" data-tipo="regular" class="select-nf-status p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
-                            <option value="Pendente" ${f.regular.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                            <option value="Recebida ✔" ${f.regular.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
-                            <option value="Recusada ❌" ${f.regular.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                            <option value="Pendente" ${f.regular?.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                            <option value="Recebida ✔" ${f.regular?.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                            <option value="Recusada ❌" ${f.regular?.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                         </select>
                     </td>
-                    <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="regular" class="btn-ver-nf bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
+                    <td class="p-3 text-center">${f.regular?.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="regular" class="btn-ver-nf bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
                     <td class="p-3 text-center">${statusRegularHTML}</td>
                 `;
                 listaFolha.appendChild(trRegular);
 
-                let motorComp = parseFloat(f.complementar.motorValor || 0);
-                if (f.complementar.statusPagamento !== "Sem Lançamento" || motorComp > 0) {
+                let motorComp = parseFloat(f.complementar?.motorValor || 0);
+                if (f.complementar?.statusPagamento !== "Sem Lançamento" || motorComp > 0) {
                     temComplementarAtiva = true;
                     valorTotalFolhaComplementar += motorComp;
 
                     let statusCompHTML = '';
-                    if (f.complementar.statusPagamento === 'Pago') {
+                    if (f.complementar?.statusPagamento === 'Pago') {
                         statusCompHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-green-100 text-green-800">Pago ✔</span>`;
-                    } else if (f.complementar.statusPagamento === 'Pronto para Pagar') {
+                    } else if (f.complementar?.statusPagamento === 'Pronto para Pagar') {
                         statusCompHTML = `<button data-id="${key}" data-tipo="complementar" class="btn-pagar bg-emerald-600 text-white px-2 py-1 rounded text-[10px] font-bold">💸 Confirmar Pago</button>`;
                     } else {
-                        statusCompHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-800">${f.complementar.statusPagamento || 'Aguardando'}</span>`;
+                        statusCompHTML = `<span class="px-3 py-1 text-xs font-extrabold rounded-full bg-amber-100 text-amber-800">${f.complementar?.statusPagamento || 'Aguardando'}</span>`;
                     }
 
                     const trComplementar = document.createElement('tr');
@@ -657,12 +657,12 @@
                         <td class="p-3 text-sm text-amber-800 font-bold">R$ ${motorComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                         <td class="p-3 text-center">
                             <select data-id="${key}" data-tipo="complementar" class="select-nf-status p-1 text-xs border rounded bg-slate-50 font-semibold text-slate-600">
-                                <option value="Pendente" ${f.complementar.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                <option value="Recebida ✔" ${f.complementar.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
-                                <option value="Recusada ❌" ${f.complementar.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                                <option value="Pendente" ${f.complementar?.nfStatus === 'Pendente' ? 'selected' : ''}>Pendente</option>
+                                <option value="Recebida ✔" ${f.complementar?.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                <option value="Recusada ❌" ${f.complementar?.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                             </select>
                         </td>
-                        <td class="p-3 text-center">${f.complementar.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="complementar" class="btn-ver-nf bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
+                        <td class="p-3 text-center">${f.complementar?.nfArquivoBase64 ? `<button data-id="${key}" data-tipo="complementar" class="btn-ver-nf bg-blue-100 text-blue-700 px-3 py-1 rounded text-xs font-bold">📄 Ver Nota</button>` : `<span class="text-xs text-slate-400 italic">Sem anexo</span>`}</td>
                         <td class="p-3 text-center">${statusCompHTML}</td>
                     `;
                     listaFolhaComplementar.appendChild(trComplementar);
@@ -751,31 +751,25 @@
                 const updates = {};
                 Object.keys(contratosLocais).forEach(key => {
                     const contrato = contratosLocais[key];
-                    // Proteção extra: ignora se for inativo, independente de maiúscula ou minúscula
                     const statusContrato = String(contrato.status || '').toLowerCase();
                     if (statusContrato === "inativo") return;
                     
-                    const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
-                    if (!folhaExistente) {
-                        let valorFixoLimpo = parseFloat(String(contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
-                        if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
+                    // Normalização estrutural direta para chaves alfanuméricas customizadas do Firebase
+                    let valorFixoLimpo = parseFloat(String(contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
+                    if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
-                        updates[`folhas_pagamento/${competenciaSelecionada}/${key}`] = {
-                            nome: contrato.razaoSocial || contrato.nome || "Prestador",
-                            CNPJ: contrato.CNPJ || contrato.cpf || "-",
-                            emailCorp: contrato.emailCorp || "",
-                            regular: { valorFixo: valorFixoLimpo, motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Aguardando NF", dataPagamento: "", nfArquivoBase64: "", motivoRecusa: "" },
-                            complementar: { motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Sem Lançamento", dataPagamento: "", nfArquivoBase64: "", motivoRecusa: "" }
-                        };
-                    }
+                    updates[`folhas_pagamento/${competenciaSelecionada}/${key}`] = {
+                        nome: contrato.razaoSocial || contrato.nome || "Prestador",
+                        CNPJ: contrato.CNPJ || contrato.cpf || "-",
+                        emailCorp: contrato.emailCorp || "",
+                        regular: { valorFixo: valorFixoLimpo, motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Aguardando NF", dataPagamento: "", nfArquivoBase64: "", motivoRecusa: "" },
+                        complementar: { motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Sem Lançamento", dataPagamento: "", nfArquivoBase64: "", motivoRecusa: "" }
+                    };
                 });
 
-                if (Object.keys(updates).length > 0) {
-                    await update(ref(db), updates);
-                    alert(`Folha ${competenciaSelecionada} gerada com sucesso!`);
-                } else {
-                    alert("A folha deste mês já estava criada.");
-                }
+                await update(ref(db), updates);
+                alert(`Folha ${competenciaSelecionada} gerada com sucesso!`);
+                renderizarTabelasEstatísticas();
             } catch (error) {
                 alert("Erro ao criar folha do mês: " + error.message);
             }
@@ -836,7 +830,7 @@
 
             const fContrato = folhasLocais[compPJ][idContrato];
             let tipoFolha = "regular";
-            if (fContrato.complementar.statusPagamento !== "Sem Lançamento" || parseFloat(fContrato.complementar.motorValor || 0) > 0) {
+            if (fContrato.complementar?.statusPagamento !== "Sem Lançamento" || parseFloat(fContrato.complementar?.motorValor || 0) > 0) {
                 tipoFolha = document.querySelector('input[name="tipoFolhaUpload"]:checked').value;
             }
 
