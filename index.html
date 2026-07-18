@@ -508,7 +508,7 @@
 
         window.salvarCadastro = async () => {
             try {
-                // 1. Captação e Tratamento Seguro do Valor Fixo Mensal (Aceita 8900,00 ou 8900)
+                // 1. Tratamento robusto e seguro do Valor Fixo Mensal
                 const inputValor = document.getElementById('campoValorFixoMensal');
                 const valorRaw = inputValor ? inputValor.value : "0";
                 const valorTexto = String(valorRaw).replace(/[^\d.,]/g, '');
@@ -522,43 +522,54 @@
                     valorLimpo = parseFloat(valorTexto) || 0;
                 }
 
-                // 2. Coleta estruturada dos dados respeitando os IDs exatos do HTML do Modal
+                // Função auxiliar interna para buscar elementos testando variações de IDs (Evita travar por Letras Maiúsculas)
+                const pegarValor = (idOriginal) => {
+                    let el = document.getElementById(idOriginal);
+                    if (!el) {
+                        // Tenta variações comuns de camelCase (ex: campoCentrodeCusto -> campoCentroDeCusto)
+                        const idVariacao = idOriginal.replace('de', 'De');
+                        el = document.getElementById(idVariacao);
+                    }
+                    return el ? el.value : "";
+                };
+
+                // 2. Coleta dos dados usando a função auxiliar de segurança contra conflitos de ID
                 const dados = {
-                    nome: document.getElementById('campoNome') ? document.getElementById('campoNome').value : "",
-                    cpf: document.getElementById('campoCpf') ? document.getElementById('campoCpf').value : "",
-                    emailPessoal: document.getElementById('campoEmail') ? document.getElementById('campoEmail').value : "",
-                    cep: document.getElementById('campoCep') ? document.getElementById('campoCep').value : "",
-                    municipio: document.getElementById('campoMunicipio') ? document.getElementById('campoMunicipio').value : "",
-                    razaoSocial: document.getElementById('campoRazaoSocial') ? document.getElementById('campoRazaoSocial').value : "",
-                    CNPJ: document.getElementById('campoCNPJ') ? document.getElementById('campoCNPJ').value : "",
-                    emailCorp: document.getElementById('campoEmailCorp') ? document.getElementById('campoEmailCorp').value : "",
-                    vigencia: document.getElementById('campoVigencia') ? document.getElementById('campoVigencia').value : "",
-                    centrodeCusto: document.getElementById('campoCentrodeCusto') ? document.getElementById('campoCentrodeCusto').value : "",
-                    cargo: document.getElementById('campoCargo') ? document.getElementById('campoCargo').value : "",
+                    nome: pegarValor('campoNome'),
+                    cpf: pegarValor('campoCpf'),
+                    emailPessoal: pegarValor('campoEmail'),
+                    cep: pegarValor('campoCep'),
+                    municipio: pegarValor('campoMunicipio'),
+                    razaoSocial: pegarValor('campoRazaoSocial'),
+                    CNPJ: pegarValor('campoCNPJ'),
+                    emailCorp: pegarValor('campoEmailCorp'),
+                    vigencia: pegarValor('campoVigencia'),
+                    centrodeCusto: pegarValor('campoCentrodeCusto'), 
+                    cargo: pegarValor('campoCargo'),
                     valorFixoMensal: valorLimpo, 
-                    departamento: document.getElementById('campoDepartamento') ? document.getElementById('campoDepartamento').value : "",
-                    gestorDireto: document.getElementById('campoGestorDireto') ? document.getElementById('campoGestorDireto').value : "",
-                    papel: document.getElementById('campoPapel') ? document.getElementById('campoPapel').value : "",
+                    departamento: pegarValor('campoDepartamento'),
+                    gestorDireto: pegarValor('campoGestorDireto'),
+                    papel: pegarValor('campoPapel'),
                     status: document.getElementById('campoStatus') ? document.getElementById('campoStatus').value : "Ativo",
-                    unidade: document.getElementById('campoUnidade') ? document.getElementById('campoUnidade').value : "",
+                    unidade: pegarValor('campoUnidade'),
                     dataCadastro: new Date().toLocaleDateString('pt-BR')
                 };
 
-                // 3. Envio para a rota contratos no Realtime Database
+                // 3. Envio direto para o banco
                 await push(ref(db, 'contratos'), dados);
                 alert("Contrato cadastrado com sucesso!");
                 
-                // Fecha o modal e limpa os campos
+                // Fecha o modal e limpa os inputs
                 if (document.getElementById('modalCadastro')) {
                     document.getElementById('modalCadastro').classList.add('hidden');
                 }
                 document.querySelectorAll('#modalCadastro input').forEach(input => input.value = '');
                 
             } catch (error) {
-                alert("Erro crítico ao processar o cadastro: " + error.message);
+                alert("Erro ao processar os campos: " + error.message);
+                console.error(error);
             }
         };
-
         window.desativarContrato = async (key) => {
             const contrato = contratosLocais[key];
             if (!contrato) return;
