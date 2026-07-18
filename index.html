@@ -972,12 +972,15 @@
 
             Object.values(botoes).forEach(btn => {
                 if (btn) {
+                    // Remove os estados ativos e força o visual padrão/desativado
                     btn.classList.remove('border-blue-600', 'text-blue-900');
                     btn.classList.add('border-transparent', 'text-slate-500');
                 }
             });
 
             if (botoes[id]) {
+                // CORREÇÃO: Remove a transparência antes de aplicar a linha azul ativa
+                botoes[id].classList.remove('border-transparent', 'text-slate-500');
                 botoes[id].classList.add('border-blue-600', 'text-blue-900');
             }
         };
