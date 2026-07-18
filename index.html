@@ -351,28 +351,29 @@
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
 
-        let competenciaSelecionada = `${mesAtualSistema}/${anoAtualSistema}`;
+        let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
 
         nomeMeses.forEach((nome, index) => {
-            const numeroMes = String(index + 1).padStart(2, '0');
-            const valorCompetencia = `${numeroMes}/${anoAtualSistema}`;
-            
-            const opt1 = document.createElement('option');
-            opt1.value = valorCompetencia;
-            opt1.innerText = `${nome} / ${anoAtualSistema}`;
-            
-            const opt2 = document.createElement('option');
-            opt2.value = valorCompetencia;
-            opt2.innerText = `${nome} / ${anoAtualSistema}`;
+    const numeroMes = String(index + 1).padStart(2, '0');
+    const valorCompetencia = `${numeroMes}-${anoAtualSistema}`; // Mudado para hífen interno
+    const textoExibicao = `${numeroMes}/${anoAtualSistema}`;
+    
+    const opt1 = document.createElement('option');
+    opt1.value = valorCompetencia;
+    opt1.innerText = `${nome} / ${anoAtualSistema}`;
+    
+    const opt2 = document.createElement('option');
+    opt2.value = valorCompetencia;
+    opt2.innerText = `${nome} / ${anoAtualSistema}`;
 
-            if (numeroMes === mesAtualSistema) {
-                opt1.selected = true;
-                opt2.selected = true;
-            }
+    if (numeroMes === mesAtualSistema) {
+        opt1.selected = true;
+        opt2.selected = true;
+    }
 
-            filtroCompetencia.appendChild(opt1);
-            selectCompetenciaPJ.appendChild(opt2);
-        });
+    filtroCompetencia.appendChild(opt1);
+    selectCompetenciaPJ.appendChild(opt2);
+});
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
