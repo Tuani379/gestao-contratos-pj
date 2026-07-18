@@ -1140,22 +1140,32 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
         // Função para popular a tabela de Relatórios
 function carregarRelatorio() {
     const tbodyRelatorio = document.querySelector('#relatorios tbody');
-    tbodyRelatorio.innerHTML = ''; // Limpa antes de preencher
-
+    if (!tbodyRelatorio) return;
+    
+    tbodyRelatorio.innerHTML = ''; 
     let totalGeral = 0;
+    let encontrouDados = false;
 
-    // Percorre todas as competências e contratos
+    // Verificamos se existem dados carregados
+    if (!folhasLocais || Object.keys(folhasLocais).length === 0) {
+        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum dado de folha carregado.</td></tr>';
+        return;
+    }
+
     Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
         Object.entries(prestadores).forEach(([id, dados]) => {
+            encontrouDados = true;
             
-            // Exemplo: Soma valor fixo + ajustes da folha regular
+            // BUSCA SEGURA: Pega o centro de custo no objeto contratosLocais
+            const contrato = contratosLocais[id] || {};
+            const centroCusto = contrato.centroDeCusto || "Não definido";
+            
             let valorRegular = parseFloat(dados.regular.valorFixo || 0) + parseFloat(dados.regular.motorValor || 0);
             
-            // Adiciona linha na tabela
             tbodyRelatorio.innerHTML += `
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-semibold">${dados.nome}</td>
-                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border">N/A</span></td>
+                    <td class="p-3 font-semibold">${dados.nome || 'Prestador sem nome'}</td>
+                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
                     <td class="p-3">Regular</td>
                     <td class="p-3 italic text-gray-600 text-xs">Fixo: ${dados.regular.valorFixo} + Adic: ${dados.regular.motorValor || 0}</td>
                     <td class="p-3 text-right font-bold">R$ ${valorRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
@@ -1165,13 +1175,16 @@ function carregarRelatorio() {
         });
     });
 
-    // Adicionar linha de total (Opcional, pode ser fixada no HTML)
-    tbodyRelatorio.innerHTML += `
-        <tr class="bg-gray-100 font-bold">
-            <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
-            <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-        </tr>
-    `;
+    if (!encontrouDados) {
+        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum registro encontrado.</td></tr>';
+    } else {
+        tbodyRelatorio.innerHTML += `
+            <tr class="bg-gray-100 font-bold">
+                <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
+                <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            </tr>
+        `;
+    }
 }
     </script>
 </body></html>
