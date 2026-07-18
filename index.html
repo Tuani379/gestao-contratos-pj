@@ -299,7 +299,7 @@
         const anoAtualSistema = dataHojeObj.getFullYear();
         const mesAtualSistema = String(dataHojeObj.getMonth() + 1).padStart(2, '0');
         
-        // Exibe a string "Hoje, DD/MM/AAAA" no topo estilo Managefy
+        // Exibe a string oficial no topo com a data atualizada
         document.getElementById('data-atual-sistema').innerText = `Hoje, ${dataHojeObj.toLocaleDateString('pt-BR')}`;
 
         // Lista de todos os meses de forma organizada
@@ -314,6 +314,9 @@
         
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
+
+        // FIX: Força a variável global inicial a bater exatamente com o formato do laço abaixo
+        let competenciaSelecionada = `${mesAtualSistema}/${anoAtualSistema}`;
 
         nomeMeses.forEach((nome, index) => {
             const numeroMes = String(index + 1).padStart(2, '0');
@@ -336,9 +339,6 @@
             filtroCompetencia.appendChild(opt1);
             selectCompetenciaPJ.appendChild(opt2);
         });
-
-        // Configura a variável de controle inicial com o mês/ano vigente capturado
-        let competenciaSelecionada = `${mesAtualSistema}/${anoAtualSistema}`;
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
@@ -904,7 +904,7 @@
                         atualizacoes[`folhas_pagamento/${compPJ}/${idContrato}/complementar/motivoRecusa`] = "";
                     }
 
-                    await update(ref(db), atualizacoes);
+                    await update(ref(db), updates);
                     alert(`Nota Fiscal da ${tipoFolha === 'regular' ? 'Folha Regular' : 'Folha Complementar'} enviada com sucesso para a competência ${compPJ}!`);
                     
                     arquivoInput.value = '';
@@ -983,6 +983,3 @@
                 areaPrestador.classList.remove('hidden');
             }
         };
-    </script>
-</body>
-</html>
