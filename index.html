@@ -1259,32 +1259,6 @@ function carregarRelatorio() {
         `;
     }
 }
-        // Função que aplica o filtro na tabela existente
-function aplicarFiltro() {
-    const filtroCC = document.getElementById('filtroCentroCusto').value;
-    const filtroPrest = document.getElementById('filtroPrestador').value;
-    const linhas = document.querySelectorAll('#relatorios tbody tr');
-
-    linhas.forEach(linha => {
-        // Pega os dados das colunas (0=Nome, 1=CC)
-        const nomePrestador = linha.cells[0]?.innerText || "";
-        const centroCusto = linha.cells[1]?.innerText || "";
-
-        // Mostra ou esconde baseado na seleção
-        const ccMatch = (filtroCC === 'todos' || centroCusto.includes(filtroCC));
-        const prestMatch = (filtroPrest === 'todos' || nomePrestador.includes(filtroPrest));
-
-        if (ccMatch && prestMatch) {
-            linha.style.display = ""; // Mostra
-        } else {
-            linha.style.display = "none"; // Esconde
-        }
-    });
-}
-
-// Conecta os filtros ao evento de mudança
-document.getElementById('filtroCentroCusto').addEventListener('change', aplicarFiltro);
-document.getElementById('filtroPrestador').addEventListener('change', aplicarFiltro);
-    
+           
     </script>
 </body></html>
