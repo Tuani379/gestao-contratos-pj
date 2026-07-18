@@ -819,6 +819,36 @@
             });
         }
 
+        // --- FUNÇÃO DE FILTROS E EXPORTAÇÃO ---
+        function atualizarFiltros() {
+            const selectCC = document.getElementById('filtroCentroCusto');
+            const selectPrest = document.getElementById('filtroPrestador');
+            
+            selectCC.innerHTML = '<option value="todos">-- Todos --</option>';
+            selectPrest.innerHTML = '<option value="todos">-- Todos --</option>';
+
+            const centrosDeCustoUnicos = new Set();
+            const prestadoresUnicos = new Map();
+
+            Object.entries(contratosLocais).forEach(([id, c]) => {
+                if (c.centroDeCusto) centrosDeCustoUnicos.add(c.centroDeCusto);
+                prestadoresUnicos.set(id, c.razaoSocial || c.nome);
+            });
+
+            centrosDeCustoUnicos.forEach(cc => selectCC.innerHTML += `<option value="${cc}">${cc}</option>`);
+            prestadoresUnicos.forEach((nome, id) => selectPrest.innerHTML += `<option value="${id}">${nome}</option>`);
+        }
+
+        document.getElementById('btnExportar').addEventListener('click', () => {
+            let csv = "PRESTADOR,CENTRO DE CUSTO,TIPO,VALOR\n";
+            document.querySelectorAll('#relatorios tbody tr').forEach(row => {
+                const cols = row.querySelectorAll('td');
+                if (cols.length > 1) csv += `${cols[0].innerText},${cols[1].innerText},${cols[2].innerText},${cols[4].innerText}\n`;
+            });
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a'); a.href = url; a.download = 'relatorio.csv'; a.click();
+        });
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
         function abrirModalGerarFolha() {
             const modal = document.getElementById('modalGerarFolha');
