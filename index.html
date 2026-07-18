@@ -875,15 +875,16 @@
         });
 
         // --- COPIE E SUBSTITUA O BLOCO DO BOTÃO POR ESTE ---
-document.getElementById('btn-confirmar-generar-folha').addEventListener('click', async () => {
+// Substitua o bloco do "btn-confirmar-generar-folha" por este:
+document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
     const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
     if (checkboxes.length === 0) {
         alert("Por favor, selecione pelo menos um contrato para criar a folha!");
         return;
     }
 
-    const compDestino = filtroCompetencia.value; // Já virá com hífen (ex: 07-2026)
-    const compExibicao = compDestino.replace('-', '/'); // Para exibir com barra no alert
+    const compDestino = filtroCompetencia.value;
+    const compExibicao = compDestino.replace('-', '/');
     const pacotesAtualizacao = {};
     let deFatoCriados = 0;
 
@@ -891,11 +892,11 @@ document.getElementById('btn-confirmar-generar-folha').addEventListener('click',
         const idContrato = chk.value;
         const dadosOrigem = contratosLocais[idContrato];
 
+        // Verifica se já existe para não sobrescrever dados existentes
         if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
             return; 
         }
 
-        // Salvando com hífen garante que o Firebase não fragmente os nós
         pacotesAtualizacao[`folhas_pagamento/${compDestino}/${idContrato}`] = {
             nome: dadosOrigem.nome || "",
             razaoSocial: dadosOrigem.razaoSocial || "",
@@ -926,10 +927,11 @@ document.getElementById('btn-confirmar-generar-folha').addEventListener('click',
     try {
         if (Object.keys(pacotesAtualizacao).length > 0) {
             await update(ref(db), pacotesAtualizacao);
+            alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compExibicao}.`);
+        } else {
+            alert("Os contratos selecionados já possuem folha inicializada nesta competência.");
         }
-        alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compExibicao}.`);
-        
-        // Fecha o modal (certifique-se de que o ID confere com o seu HTML)
+
         const modal = document.getElementById('modalGerarFolha');
         if (modal) modal.classList.add('hidden');
     } catch (error) {
