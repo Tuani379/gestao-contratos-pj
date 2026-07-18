@@ -76,7 +76,7 @@
                     
                     <div class="mb-3 flex justify-between items-center bg-slate-50 p-2 rounded border text-sm">
                         <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                            <input id="chkSelecionarTodosContratos" type="checkbox" class="w-4 h-4 text-blue-600 rounded"> Selecionar Todos
+                            <input id="chkSelecionarTodosContratos" type="checkbox" checked class="w-4 h-4 text-blue-600 rounded"> Selecionar Todos
                         </label>
                     </div>
 
@@ -89,16 +89,13 @@
                                     <th class="p-2">CNPJ / CPF</th>
                                     <th class="p-2 text-right">Valor Fixo</th>
                                 </tr>
-                            </table>
-                            <div class="overflow-y-auto" style="max-height: 35vh;">
-                                <table class="w-full text-left border-collapse">
-                                    <tbody id="listaContratosParaFolha" class="text-sm">
-                                        <!-- Injetado dinamicamente via JS -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
+                            </thead>
+                            <tbody id="listaContratosParaFolha" class="text-sm">
+                                <!-- Injetado dinamicamente via JS -->
+                            </tbody>
+                        </table>
                     </div>
+                    
                     <div class="flex justify-end gap-2 border-t pt-3">
                         <button id="btn-cancelar-gerar-folha" class="px-4 py-2 border rounded text-sm font-semibold">Cancelar</button>
                         <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm">Processar e Criar Folha</button>
@@ -608,11 +605,10 @@
             quadro.classList.remove('hidden');
         }
 
-        // --- RENDERIZAÇÃO DAS TABELAS E INTEGRAÇÃO DO MODAL ---
+        // --- RENDERIZAÇÃO DAS TABELAS ---
         function renderizarTabelasEstatísticas() {
             competenciaSelecionada = filtroCompetencia.value;
 
-            // 1. Atualizar contagem de contratos ativos gerais
             let qtdAtivos = 0;
             Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo") qtdAtivos++; });
             document.getElementById('cardContratosAtivos').innerText = qtdAtivos;
@@ -642,7 +638,6 @@
             chavesFolha.forEach(key => {
                 const f = baseFolhaMes[key];
 
-                // --- CALCULAR E MONTAR TABELA REGULAR ---
                 let vFixo = parseFloat(f.regular.valorFixo || 0);
                 let vMotReg = parseFloat(f.regular.motorValor || 0);
                 let subTotalReg = vFixo + vMotReg;
@@ -684,7 +679,6 @@
                 `;
                 tbodyRegular.appendChild(trReg);
 
-                // --- CALCULAR E MONTAR TABELA COMPLEMENTAR (SE HOUVER LANÇAMENTO) ---
                 if (f.complementar && f.complementar.statusPagamento !== "Sem Lançamento") {
                     temComplementar = true;
                     let vComp = parseFloat(f.complementar.motorValor || 0);
@@ -756,7 +750,7 @@
             });
         }
 
-        // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL DE CRIAR FOLHA ---
+        // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
         function abrirModalGerarFolha() {
             const modal = document.getElementById('modalGerarFolha');
             const tbody = document.getElementById('listaContratosParaFolha');
@@ -794,11 +788,10 @@
             modal.classList.remove('hidden');
         }
 
-        // --- ENGENHARIA DE ESCUTAS COM INFRAESTRUTURA FIREBASE ---
+        // --- INTERAÇÃO COM FIREBASE ---
         onValue(ref(db, 'contratos'), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             
-            // Alimentar Motor Financeiro Select
             const motorSelect = document.getElementById('motorContrato');
             const pjPanelSelect = document.getElementById('selectPrestadorPJ');
             
@@ -814,7 +807,6 @@
             }
 
             entradas.forEach(([key, c]) => {
-                // Injetar nos seletores operacionais se ativo
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option');
                     optA.value = key;
@@ -827,7 +819,6 @@
                     pjPanelSelect.appendChild(optB);
                 }
 
-                // Renderizar linha da tabela principal de contratos
                 let vExibir = parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
                 let trC = document.createElement('tr');
                 trC.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
@@ -864,7 +855,7 @@
             atualizarResumoPainelPJ();
         });
 
-        // --- LOGICA DE CRIAÇÃO EFETIVA DA FOLHA COM BASE NOS SELECIONADOS ---
+        // --- BOTÕES E EVENTOS ---
         document.getElementById('btn-gerar-folha').addEventListener('click', abrirModalGerarFolha);
         
         document.getElementById('btn-cancelar-gerar-folha').addEventListener('click', () => {
@@ -892,7 +883,6 @@
                 const idContrato = chk.value;
                 const dadosOrigem = contratosLocais[idContrato];
 
-                // Evitar sobrescrever dados se já existirem registros manuais ou anexos salvos
                 if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
                     return; 
                 }
@@ -931,15 +921,12 @@
                 alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compDestino}.`);
                 document.getElementById('modalGerarFolha').classList.add('hidden');
             } catch (error) {
-                alert("Erro catastrófico no motor ao instanciar competência: " + error.message);
+                alert("Erro ao instanciar competência: " + error.message);
             }
         });
 
-        // Operações básicas de formulários e layouts
         document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
-        document.getElementById('selectCompetenciaPJ').addEventListener('change', () => {
-            atualizarResumoPainelPJ();
-        });
+        document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
         document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
 
         document.getElementById('btn-dashboard').addEventListener('click', () => mostrarSecao('dashboard'));
@@ -984,7 +971,6 @@
                 alert("Salvo com sucesso!");
                 document.getElementById('modalCadastro').classList.add('hidden');
                 
-                // Limpar campos
                 const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'];
                 campos.forEach(id => document.getElementById(id).value = "");
             } catch (error) {
