@@ -1143,12 +1143,14 @@ function carregarRelatorio() {
     if (!tbodyRelatorio) return;
     
     tbodyRelatorio.innerHTML = ''; 
+    console.log("Conteúdo de folhasLocais:", folhasLocais); // VERIFIQUE ISSO NO CONSOLE
+
     let totalGeral = 0;
     let encontrouDados = false;
 
-    // Verificamos se existem dados carregados
+    // Verificação de segurança
     if (!folhasLocais || Object.keys(folhasLocais).length === 0) {
-        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum dado de folha carregado.</td></tr>';
+        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum dado encontrado.</td></tr>';
         return;
     }
 
@@ -1156,18 +1158,18 @@ function carregarRelatorio() {
         Object.entries(prestadores).forEach(([id, dados]) => {
             encontrouDados = true;
             
-            // BUSCA SEGURA: Pega o centro de custo no objeto contratosLocais
+            // Tente buscar o contrato de duas formas diferentes para garantir:
             const contrato = contratosLocais[id] || {};
-            const centroCusto = contrato.centroDeCusto || "Não definido";
+            const centroCusto = contrato.centroDeCusto || "N/A";
             
-            let valorRegular = parseFloat(dados.regular.valorFixo || 0) + parseFloat(dados.regular.motorValor || 0);
+            let valorRegular = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
             
             tbodyRelatorio.innerHTML += `
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-semibold">${dados.nome || 'Prestador sem nome'}</td>
+                    <td class="p-3 font-semibold">${dados.nome || 'Sem Nome'}</td>
                     <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
                     <td class="p-3">Regular</td>
-                    <td class="p-3 italic text-gray-600 text-xs">Fixo: ${dados.regular.valorFixo} + Adic: ${dados.regular.motorValor || 0}</td>
+                    <td class="p-3 italic text-gray-600 text-xs">Fixo: ${dados.regular?.valorFixo || 0}</td>
                     <td class="p-3 text-right font-bold">R$ ${valorRegular.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
                 </tr>
             `;
