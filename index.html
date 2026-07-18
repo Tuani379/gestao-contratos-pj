@@ -751,11 +751,12 @@
                 const updates = {};
                 Object.keys(contratosLocais).forEach(key => {
                     const contrato = contratosLocais[key];
-                    if (contrato.status === "Inativo") return;
+                    // Proteção extra: ignora se for inativo, independente de maiúscula ou minúscula
+                    const statusContrato = String(contrato.status || '').toLowerCase();
+                    if (statusContrato === "inativo") return;
                     
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
                     if (!folhaExistente) {
-                        // Linha protegida com String(...) corrigindo o erro do .replace
                         let valorFixoLimpo = parseFloat(String(contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                         if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
@@ -875,7 +876,8 @@
                 const c = contratosLocais[key];
                 totalContratos++;
 
-                let statusBadge = c.status === "Inativo" 
+                const stat = String(c.status || '').toLowerCase();
+                let statusBadge = stat === "inativo" 
                     ? `<span class="inline-block px-2 py-1 text-xs font-bold rounded-full bg-red-100 text-red-800">Inativo</span>`
                     : `<span class="inline-block px-2 py-1 text-xs font-bold rounded-full bg-green-100 text-green-800">Ativo</span>`;
                 
@@ -888,11 +890,11 @@
                     <td class="p-3 text-sm text-slate-600 font-medium">R$ ${c.valorFixoMensal || '-'}</td>
                     <td class="p-3 text-sm text-slate-600">${c.centrodeCusto || '-'}</td>
                     <td class="p-3 text-sm">${statusBadge}</td>
-                    <td class="p-3 text-center">${c.status !== "Inativo" ? `<button data-id="${key}" class="btn-desativar bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md">🛑 Desativar</button>` : `<span class="text-xs text-slate-400 italic">Encerrado</span>`}</td>
+                    <td class="p-3 text-center">${stat !== "inativo" ? `<button data-id="${key}" class="btn-desativar bg-red-50 text-red-600 border border-red-200 text-xs font-bold px-2.5 py-1 rounded-md">🛑 Desativar</button>` : `<span class="text-xs text-slate-400 italic">Encerrado</span>`}</td>
                 `;
                 listaContratos.appendChild(tr);
 
-                if (c.status !== "Inativo") {
+                if (stat !== "inativo") {
                     const optMotor = document.createElement('option');
                     optMotor.value = key;
                     optMotor.innerText = c.razaoSocial || c.nome;
