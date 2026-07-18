@@ -4,83 +4,118 @@
     <meta charset="UTF-8">
     <title>ConnectPJ - Sistema Completo</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 </head>
 <body class="bg-slate-50 font-sans">
-    
-    <!-- MANTENHA O MESMO CABEÇALHO ANTERIOR... (Pulei o topo para o código ficar mais curto e focar na solução) -->
-    
-    <!-- BOTÃO QUE ABRE O MODAL AGORA -->
-    <button id="btn-abrir-seletor-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-3 rounded-lg">
-        🔄 Selecionar Contratos para Folha
-    </button>
 
-    <!-- MODAL DE SELEÇÃO DE CONTRATOS (NOVO) -->
-    <div id="modalSeletorFolha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl w-full max-w-lg p-6">
-            <h3 class="text-xl font-bold mb-4 text-blue-900">Selecione os contratos para a folha</h3>
-            <div id="listaContratosCheck" class="max-h-64 overflow-y-auto mb-4 space-y-2 border p-3 rounded">
-                <!-- Contratos injetados aqui -->
+    <!-- CABEÇALHO -->
+    <header class="bg-blue-900 text-white p-4 shadow-lg">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-bold">ConnectPJ</h1>
+            <div class="bg-blue-800 p-1 rounded-lg flex gap-1">
+                <button id="btn-modo-rh" class="bg-blue-600 px-4 py-2 rounded text-sm font-bold">Painel Corporativo</button>
+                <button id="btn-modo-pj" class="px-4 py-2 text-sm opacity-75">Área do Prestador</button>
             </div>
+        </div>
+    </header>
+
+    <!-- MENU RH -->
+    <nav id="menu-rh" class="bg-white border-b shadow-sm">
+        <div class="max-w-7xl mx-auto flex gap-8 px-6">
+            <button id="btn-dashboard" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-900">Dashboard & Folha</button>
+            <button id="btn-contratos" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500">Contratos</button>
+        </div>
+    </nav>
+
+    <main class="max-w-7xl mx-auto p-6">
+        <!-- SEÇÃO DASHBOARD COM MODAL DE SELEÇÃO -->
+        <section id="dashboard" class="space-y-6">
+            <div class="bg-white p-6 rounded-xl border shadow-sm flex justify-between items-center">
+                <div>
+                    <h2 class="text-lg font-bold text-blue-900">Gestão de Folha Mensal</h2>
+                    <p class="text-sm text-slate-500">Selecione os contratos para processar a competência.</p>
+                </div>
+                <button id="btn-abrir-seletor" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-6 rounded-lg transition">
+                    🔄 Criar Folha do Mês
+                </button>
+            </div>
+            <div class="bg-white p-6 rounded-xl border shadow-sm">
+                <table class="w-full text-left">
+                    <thead><tr class="border-b bg-slate-100"><th class="p-3">Prestador</th><th class="p-3">Valor</th><th class="p-3">Status</th></tr></thead>
+                    <tbody id="listaFolha"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- SEÇÃO CONTRATOS -->
+        <section id="contratos" class="hidden bg-white p-6 rounded-xl border shadow-sm">
+            <h2 class="text-xl font-bold mb-4">Gestão de Contratos</h2>
+            <button id="btn-abrir-cadastro" class="mb-4 bg-blue-600 text-white px-4 py-2 rounded">+ Novo Cadastro</button>
+            <table class="w-full">
+                <thead><tr class="border-b bg-slate-100"><th class="p-3">Razão Social</th><th class="p-3">Valor Fixo</th><th class="p-3">Ações</th></tr></thead>
+                <tbody id="listaContratos"></tbody>
+            </table>
+        </section>
+    </main>
+
+    <!-- MODAL DE SELEÇÃO (A MUDANÇA SOLICITADA) -->
+    <div id="modalSeletor" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl w-full max-w-lg p-6">
+            <h3 class="text-lg font-bold mb-4 text-blue-900">Selecione os contratos:</h3>
+            <div id="checkList" class="max-h-60 overflow-y-auto border p-2 mb-4 space-y-1"></div>
             <div class="flex justify-end gap-2">
-                <button id="btn-fechar-seletor" class="px-4 py-2 border rounded">Cancelar</button>
-                <button id="btn-confirmar-geracao" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Gerar Folha Selecionada</button>
+                <button id="btn-cancelar-modal" class="px-4 py-2 border rounded">Cancelar</button>
+                <button id="btn-confirmar-geracao" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Gerar Selecionados</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        // ... (Mantenha as importações e configurações iniciais igual ao código anterior)
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
 
-        // Lógica do Modal
-        const btnAbrir = document.getElementById('btn-abrir-seletor-folha');
-        const modal = document.getElementById('modalSeletorFolha');
-        const listaCheck = document.getElementById('listaContratosCheck');
+        const db = getDatabase(initializeApp({
+            databaseURL: "https://connectpj-15532-default-rtdb.firebaseio.com"
+        }));
 
-        btnAbrir.addEventListener('click', () => {
-            listaCheck.innerHTML = '';
-            Object.keys(contratosLocais).forEach(key => {
-                const c = contratosLocais[key];
-                if(String(c.status).toLowerCase() === "inativo") return;
-                
-                listaCheck.innerHTML += `
-                    <label class="flex items-center gap-3 p-2 hover:bg-slate-50 rounded">
-                        <input type="checkbox" value="${key}" class="check-contrato w-4 h-4">
-                        <span class="text-sm font-semibold">${c.razaoSocial || c.nome}</span>
-                    </label>
-                `;
+        let contratos = {};
+        const comp = "07/2026";
+
+        onValue(ref(db, 'contratos'), (snap) => { contratos = snap.val() || {}; });
+
+        // Gerar Folha com Seleção
+        document.getElementById('btn-abrir-seletor').addEventListener('click', () => {
+            const list = document.getElementById('checkList');
+            list.innerHTML = '';
+            Object.keys(contratos).forEach(key => {
+                const c = contratos[key];
+                if(String(c.status || '').toLowerCase() !== "inativo") {
+                    list.innerHTML += `<div class="p-1"><input type="checkbox" value="${key}" class="mr-2"> ${c.razaoSocial || c.nome}</div>`;
+                }
             });
-            modal.classList.remove('hidden');
+            document.getElementById('modalSeletor').classList.remove('hidden');
         });
-
-        document.getElementById('btn-fechar-seletor').addEventListener('click', () => modal.classList.add('hidden'));
 
         document.getElementById('btn-confirmar-geracao').addEventListener('click', async () => {
-            const selecionados = document.querySelectorAll('.check-contrato:checked');
-            if(selecionados.length === 0) { alert("Selecione ao menos um contrato!"); return; }
-
+            const checks = document.querySelectorAll('#checkList input:checked');
             const updates = {};
-            selecionados.forEach(chk => {
-                const key = chk.value;
-                const contrato = contratosLocais[key];
-                
-                let valorFixoLimpo = parseFloat(String(contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
-                if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
-
-                updates[`folhas_pagamento/${competenciaSelecionada}/${key}`] = {
-                    nome: contrato.razaoSocial || contrato.nome,
-                    CNPJ: contrato.CNPJ || contrato.cpf || "-",
-                    emailCorp: contrato.emailCorp || "",
-                    regular: { valorFixo: valorFixoLimpo, motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Aguardando NF" },
-                    complementar: { motorEvento: "", motorValor: 0, nfStatus: "Pendente", statusPagamento: "Sem Lançamento" }
+            checks.forEach(chk => {
+                const c = contratos[chk.value];
+                let v = parseFloat(String(c.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
+                updates[`folhas_pagamento/${comp}/${chk.value}`] = {
+                    nome: c.razaoSocial || c.nome,
+                    regular: { valorFixo: isNaN(v) ? 0 : v, statusPagamento: "Aguardando NF" }
                 };
             });
-
             await update(ref(db), updates);
-            modal.classList.add('hidden');
-            alert("Folha gerada para os contratos selecionados!");
+            document.getElementById('modalSeletor').classList.add('hidden');
+            alert("Folha gerada!");
         });
-        
-        // ... (O restante da lógica de onValue e renderização permanece igual)
+
+        // UI Helpers
+        document.getElementById('btn-cancelar-modal').addEventListener('click', () => document.getElementById('modalSeletor').classList.add('hidden'));
+        document.getElementById('btn-dashboard').addEventListener('click', () => { document.getElementById('dashboard').classList.remove('hidden'); document.getElementById('contratos').classList.add('hidden'); });
+        document.getElementById('btn-contratos').addEventListener('click', () => { document.getElementById('dashboard').classList.add('hidden'); document.getElementById('contratos').classList.remove('hidden'); });
     </script>
 </body>
 </html>
