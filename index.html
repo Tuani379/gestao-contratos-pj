@@ -904,7 +904,8 @@
                         atualizacoes[`folhas_pagamento/${compPJ}/${idContrato}/complementar/motivoRecusa`] = "";
                     }
 
-                    await update(ref(db), updates);
+                    // CORRIGIDO: mudado de "updates" para "atualizacoes"
+                    await update(ref(db), atualizacoes);
                     alert(`Nota Fiscal da ${tipoFolha === 'regular' ? 'Folha Regular' : 'Folha Complementar'} enviada com sucesso para a competência ${compPJ}!`);
                     
                     arquivoInput.value = '';
