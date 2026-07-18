@@ -197,35 +197,88 @@
                 </table>
             </div>
 
-            <!-- MODAL CADASTRO -->
+            <!-- MODAL CADASTRO (CORRIGIDO E BLINDADO) -->
             <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                 <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                     <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
-                    <div class="grid grid-cols-2 gap-4">
-                        <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded">
-                        <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded">
-                        <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded">
-                        <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded">
-                        <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded">
-                        <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded">
-                        <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded">
-                        <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded">
-                        <input id="campoVigencia" type="text" placeholder="Vigência" class="w-full p-2 border rounded">
-                        <input id="campoCentrodeCusto" type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded">
-                        <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded">
-                        <input id="campoValorFixoMensal" type="text" placeholder="Valor Fixo Mensal" class="w-full p-2 border rounded">
-                        <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded">
-                        <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded">
-                        <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded">
-                        <select id="campoStatus" class="w-full p-2 border rounded bg-white">
-                            <option value="Ativo">Ativo</option>
-                            <option value="Inativo">Inativo</option>
-                        </select>
-                        <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded border-slate-350 mb-4">
+                    
+                    <div class="grid grid-cols-2 gap-4 mb-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Nome Completo</label>
+                            <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">CPF</label>
+                            <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">E-mail Pessoal</label>
+                            <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">CEP</label>
+                            <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Município</label>
+                            <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Razão Social</label>
+                            <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">CNPJ</label>
+                            <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">E-mail Corporativo</label>
+                            <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Vigência</label>
+                            <input id="campoVigencia" type="text" placeholder="Vigência" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Centro de Custo</label>
+                            <input id="campoCentrodeCusto" type="text" placeholder="Centro de Custo" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Cargo</label>
+                            <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Valor Fixo Mensal</label>
+                            <input id="campoValorFixoMensal" type="text" placeholder="Valor Fixo Mensal" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Departamento</label>
+                            <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Gestor Direto</label>
+                            <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Papel</label>
+                            <input id="campoPapel" type="text" placeholder="Papel" class="w-full p-2 border rounded text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Status</label>
+                            <select id="campoStatus" class="w-full p-2 border rounded bg-white text-sm">
+                                <option value="Ativo">Ativo</option>
+                                <option value="Inativo">Inativo</option>
+                            </select>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs font-bold text-slate-500 mb-1">Unidade</label>
+                            <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded text-sm">
+                        </div>
                     </div>
-                    <div class="flex justify-end gap-2">
-                        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded">Cancelar</button>
-                        <button onclick="salvarCadastro()" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Salvar Cadastro</button>
+
+                    <div class="flex justify-end gap-2 pt-4 border-t border-slate-100">
+                        <button onclick="document.getElementById('modalCadastro').classList.add('hidden')" class="px-4 py-2 border rounded hover:bg-slate-50 text-sm font-semibold transition">Cancelar</button>
+                        <button onclick="salvarCadastro()" class="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold text-sm shadow-sm transition">Salvar Cadastro</button>
                     </div>
                 </div>
             </div>
@@ -409,7 +462,6 @@
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
                     
                     if (!folhaExistente) {
-                        // Garantia de fallback caso o valor fixo venha formatado ou puro
                         let valorFixoLimpo = typeof contrato.valorFixoMensal === 'string' 
                             ? parseFloat(contrato.valorFixoMensal.replace('.', '').replace(',', '.')) 
                             : parseFloat(contrato.valorFixoMensal || 0);
@@ -456,35 +508,57 @@
 
         window.salvarCadastro = async () => {
             try {
+                // 1. Captação e Tratamento Seguro do Valor Fixo Mensal (Aceita 8900,00 ou 8900)
+                const inputValor = document.getElementById('campoValorFixoMensal');
+                const valorRaw = inputValor ? inputValor.value : "0";
+                const valorTexto = String(valorRaw).replace(/[^\d.,]/g, '');
+                
+                let valorLimpo = 0;
+                if (valorTexto.includes(',') && valorTexto.includes('.')) {
+                    valorLimpo = parseFloat(valorTexto.replace(/\./g, '').replace(',', '.')) || 0;
+                } else if (valorTexto.includes(',')) {
+                    valorLimpo = parseFloat(valorTexto.replace(',', '.')) || 0;
+                } else {
+                    valorLimpo = parseFloat(valorTexto) || 0;
+                }
+
+                // 2. Coleta estruturada dos dados respeitando os IDs exatos do HTML do Modal
                 const dados = {
-                    nome: document.getElementById('campoNome').value,
-                    cpf: document.getElementById('campoCpf').value,
-                    emailPessoal: document.getElementById('campoEmail').value,
-                    cep: document.getElementById('campoCep').value,
-                    municipio: document.getElementById('campoMunicipio').value,
-                    razaoSocial: document.getElementById('campoRazaoSocial').value,
-                    CNPJ: document.getElementById('campoCNPJ').value,
-                    emailCorp: document.getElementById('campoEmailCorp').value,
-                    vigencia: document.getElementById('campoVigencia').value,
-                    centrodeCusto: document.getElementById('campoCentrodeCusto').value,
-                    cargo: document.getElementById('campoCargo').value,
-                    valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
-                    departamento: document.getElementById('campoDepartamento').value,
-                    gestorDireto: document.getElementById('campoGestorDireto').value,
-                    papel: document.getElementById('campoPapel').value,
-                    status: document.getElementById('campoStatus').value,
-                    unidade: document.getElementById('campoUnidade').value,
-                    dataCadastro: new Date().toLocaleDateString()
+                    nome: document.getElementById('campoNome') ? document.getElementById('campoNome').value : "",
+                    cpf: document.getElementById('campoCpf') ? document.getElementById('campoCpf').value : "",
+                    emailPessoal: document.getElementById('campoEmail') ? document.getElementById('campoEmail').value : "",
+                    cep: document.getElementById('campoCep') ? document.getElementById('campoCep').value : "",
+                    municipio: document.getElementById('campoMunicipio') ? document.getElementById('campoMunicipio').value : "",
+                    razaoSocial: document.getElementById('campoRazaoSocial') ? document.getElementById('campoRazaoSocial').value : "",
+                    CNPJ: document.getElementById('campoCNPJ') ? document.getElementById('campoCNPJ').value : "",
+                    emailCorp: document.getElementById('campoEmailCorp') ? document.getElementById('campoEmailCorp').value : "",
+                    vigencia: document.getElementById('campoVigencia') ? document.getElementById('campoVigencia').value : "",
+                    centrodeCusto: document.getElementById('campoCentrodeCusto') ? document.getElementById('campoCentrodeCusto').value : "",
+                    cargo: document.getElementById('campoCargo') ? document.getElementById('campoCargo').value : "",
+                    valorFixoMensal: valorLimpo, 
+                    departamento: document.getElementById('campoDepartamento') ? document.getElementById('campoDepartamento').value : "",
+                    gestorDireto: document.getElementById('campoGestorDireto') ? document.getElementById('campoGestorDireto').value : "",
+                    papel: document.getElementById('campoPapel') ? document.getElementById('campoPapel').value : "",
+                    status: document.getElementById('campoStatus') ? document.getElementById('campoStatus').value : "Ativo",
+                    unidade: document.getElementById('campoUnidade') ? document.getElementById('campoUnidade').value : "",
+                    dataCadastro: new Date().toLocaleDateString('pt-BR')
                 };
 
+                // 3. Envio para a rota contratos no Realtime Database
                 await push(ref(db, 'contratos'), dados);
                 alert("Contrato cadastrado com sucesso!");
-                document.getElementById('modalCadastro').classList.add('hidden');
+                
+                // Fecha o modal e limpa os campos
+                if (document.getElementById('modalCadastro')) {
+                    document.getElementById('modalCadastro').classList.add('hidden');
+                }
                 document.querySelectorAll('#modalCadastro input').forEach(input => input.value = '');
+                
             } catch (error) {
-                alert("Erro ao cadastrar: " + error.message);
+                alert("Erro crítico ao processar o cadastro: " + error.message);
             }
         };
+
         window.desativarContrato = async (key) => {
             const contrato = contratosLocais[key];
             if (!contrato) return;
@@ -679,7 +753,6 @@
             Object.keys(contratosLocais).forEach(key => {
                 const c = contratosLocais[key];
                 
-                // PROTEÇÃO: Ignora nós corrompidos ou vazios do banco para não quebrar o script
                 if (!c || typeof c !== 'object') return;
 
                 totalContratos++;
@@ -700,7 +773,6 @@
                     motorContratoSelect.appendChild(optMotor);
                 }
 
-                // PROTEÇÃO: Garante que o valor fixo não quebre o toLocaleString se for nulo/indefinido
                 let valorNumerico = parseFloat(c.valorFixoMensal) || 0;
                 let exibeValor = valorNumerico.toLocaleString('pt-BR', {minimumFractionDigits: 2});
 
@@ -768,7 +840,6 @@
             Object.keys(folhaCompetencia).forEach(key => {
                 const f = folhaCompetencia[key];
 
-                // PROTEÇÃO: Se o nó da folha ou a estrutura interna estiver ausente, pula para não travar
                 if (!f || !f.regular || !f.complementar) return;
 
                 let totalFixo = parseFloat(f.regular.valorFixo || 0);
@@ -885,7 +956,6 @@
 
         document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
         document.getElementById('selectCompetenciaPJ').addEventListener('change', () => {
-            // Sincroniza a variável global com o mês que o prestador escolheu no portal
             competenciaSelecionada = document.getElementById('selectCompetenciaPJ').value;
             atualizarResumoPainelPJ();
         });
@@ -967,14 +1037,12 @@
 
             Object.values(botoes).forEach(btn => {
                 if (btn) {
-                    // Remove os estados ativos e força o visual padrão/desativado
                     btn.classList.remove('border-blue-600', 'text-blue-900');
                     btn.classList.add('border-transparent', 'text-slate-500');
                 }
             });
 
             if (botoes[id]) {
-                // CORREÇÃO: Remove a transparência antes de aplicar a linha azul ativa
                 botoes[id].classList.remove('border-transparent', 'text-slate-500');
                 botoes[id].classList.add('border-blue-600', 'text-blue-900');
             }
