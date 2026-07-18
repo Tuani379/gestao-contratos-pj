@@ -1160,6 +1160,17 @@ function carregarRelatorio() {
         
         // Itera sobre os prestadores dentro daquela competência
         Object.entries(prestadores).forEach(([id, dados]) => {
+    
+    // --- FILTRO DE SEGURANÇA REFORÇADO ---
+    // 1. Verifica se tem nome e não é apenas um espaço em branco
+    // 2. Verifica se o valor fixo da folha é maior que zero (para ignorar registros vazios)
+    const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
+    
+    if (!dados.nome || dados.nome.trim() === "" || dados.nome === "Sem Nome" || valorParaValidar <= 0) {
+        return; // Pula esta linha se não tiver nome ou se o valor for zero
+    }
+    // --------------------------------------
+
     encontrouDados = true;
     
     // Filtro de segurança para não exibir registros sem nome ou contrato vinculado
