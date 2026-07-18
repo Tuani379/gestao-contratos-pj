@@ -874,62 +874,67 @@
             });
         });
 
-        document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
-            const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
-            if (checkboxes.length === 0) {
-                alert("Por favor, selecione pelo menos um contrato para criar a folha!");
-                return;
+        document.getElementById('btn-confirmar-generar-folha').addEventListener('click', async () => {
+    const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
+    if (checkboxes.length === 0) {
+        alert("Por favor, selecione pelo menos um contrato para criar a folha!");
+        return;
+    }
+
+    const compDestino = filtroCompetencia.value; // Pega o formato com hífen (ex: 07-2026)
+    const compExibicao = compDestino.replace('-', '/'); // Transforma em barra apenas para mostrar no alert
+    const pacotesAtualizacao = {};
+    let deFatoCriados = 0;
+
+    checkboxes.forEach(chk => {
+        const idContrato = chk.value;
+        const dadosOrigem = contratosLocais[idContrato];
+
+        if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
+            return; 
+        }
+
+        // AQUI ESTÁ A MUDANÇA: Salvando a rota usando o hífen da variável compDestino
+        pacotesAtualizacao[`folhas_pagamento/${compDestino}/${idContrato}`] = {
+            nome: dadosOrigem.nome || "",
+            razaoSocial: dadosOrigem.razaoSocial || "",
+            cnpj: dadosOrigem.cnpj || "",
+            cpf: dadosOrigem.cpf || "",
+            emailCorp: dadosOrigem.emailCorp || "",
+            regular: {
+                valorFixo: parseFloat(dadosOrigem.valorFixoMensal || 0),
+                motorValor: 0,
+                motorEvento: "",
+                nfStatus: "Aguardando",
+                nfArquivoBase64: "",
+                statusPagamento: "Aguardando NF",
+                dataPagamento: ""
+            },
+            complementar: {
+                motorValor: 0,
+                motorEvento: "",
+                nfStatus: "Aguardando",
+                nfArquivoBase64: "",
+                statusPagamento: "Sem Lançamento",
+                dataPagamento: ""
             }
+        };
+        deFatoCriados++;
+    });
 
-            const compDestino = filtroCompetencia.value;
-            const pacotesAtualizacao = {};
-            let deFatoCriados = 0;
-
-            checkboxes.forEach(chk => {
-                const idContrato = chk.value;
-                const dadosOrigem = contratosLocais[idContrato];
-
-                if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
-                    return; 
-                }
-
-                pacotesAtualizacao[`folhas_pagamento/${compDestino}/${idContrato}`] = {
-                    nome: dadosOrigem.nome || "",
-                    razaoSocial: dadosOrigem.razaoSocial || "",
-                    cnpj: dadosOrigem.cnpj || "",
-                    cpf: dadosOrigem.cpf || "",
-                    emailCorp: dadosOrigem.emailCorp || "",
-                    regular: {
-                        valorFixo: parseFloat(dadosOrigem.valorFixoMensal || 0),
-                        motorValor: 0,
-                        motorEvento: "",
-                        nfStatus: "Aguardando",
-                        nfArquivoBase64: "",
-                        statusPagamento: "Aguardando NF",
-                        dataPagamento: ""
-                    },
-                    complementar: {
-                        motorValor: 0,
-                        motorEvento: "",
-                        nfStatus: "Aguardando",
-                        nfArquivoBase64: "",
-                        statusPagamento: "Sem Lançamento",
-                        dataPagamento: ""
-                    }
-                };
-                deFatoCriados++;
-            });
-
-            try {
-                if (Object.keys(pacotesAtualizacao).length > 0) {
-                    await update(ref(db), pacotesAtualizacao);
-                }
-                alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compDestino}.`);
-                document.getElementById('modalGerarFolha').classList.add('hidden');
-            } catch (error) {
-                alert("Erro ao instanciar competência: " + error.message);
-            }
-        });
+    try {
+        if (Object.keys(pacotesAtualizacao).length > 0) {
+            // Envia as atualizações organizadas com hífen para o Firebase
+            await update(ref(db), pacotesAtualizacao);
+        }
+        alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compExibicao}.`);
+        
+        const modal = document.getElementById('modalGerarFolha');
+        if (modal) modal.classList.add('hidden');
+    } catch (error) {
+        alert("Erro ao instanciar competência: " + error.message);
+    }
+});
 
         document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
         document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
