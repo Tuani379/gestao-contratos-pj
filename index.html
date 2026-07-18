@@ -908,6 +908,177 @@
             document.querySelectorAll('.btn-desativar-c').forEach(btn => {
                 btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
             });
+            // --- MOTOR DE RELATÓRIOS & AUDITORIA (INTEGRAÇÃO COM FIREBASE) ---
+        function renderizarModuloRelatorios() {
+            const corpoTabela = document.getElementById('listaRelatorioCorpo');
+            const totalDisplay = document.getElementById('repTotalConsolidado');
+            
+            const filtroCC = document.getElementById('repFiltroCentroCusto').value;
+            const filtroPrestador = document.getElementById('repFiltroPrestador').value;
+            const filtroTipo = document.getElementById('repFiltroTipoFolha').value;
+
+            corpoTabela.innerHTML = "";
+            let totalGeralConsolidado = 0;
+
+            const baseFolhaMes = folhasLocais[competenciaSelecionada] || {};
+            const chavesFolha = Object.keys(baseFolhaMes);
+
+            if (document.getElementById('repFiltroPrestador').options.length <= 1) {
+                const repFiltroPrestador = document.getElementById('repFiltroPrestador');
+                const repFiltroCentroCusto = document.getElementById('repFiltroCentroCusto');
+                
+                let centrosVistos = new Set();
+                Object.values(contratosLocais).forEach(c => {
+                    if (c.centroDeCusto) centrosVistos.add(c.centroDeCusto);
+                });
+
+                centrosVistos.forEach(cc => {
+                    let opt = document.createElement('option');
+                    opt.value = cc; opt.innerText = cc;
+                    repFiltroCentroCusto.appendChild(opt);
+                });
+
+                Object.entries(contratosLocais).forEach(([id, c]) => {
+                    let opt = document.createElement('option');
+                    opt.value = id; opt.innerText = c.nome;
+                    repFiltroPrestador.appendChild(opt);
+                });
+            }
+
+            if (chavesFolha.length === 0) {
+                corpoTabela.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum dado financeiro encontrado para a competência ${competenciaSelecionada}.</td></tr>`;
+                totalDisplay.innerText = "R$ 0,00";
+                return;
+            }
+
+            chavesFolha.forEach(idContrato => {
+                const f = baseFolhaMes[idContrato];
+                const cad = contratosLocais[idContrato] || {};
+                const ccContrato = cad.centroDeCusto || "Não Informado";
+
+                if (filtroPrestador && filtroPrestador !== idContrato) return;
+                if (filtroCC && filtroCC !== ccContrato) return;
+
+                if (!filtroTipo || filtroTipo === "regular") {
+                    let vFixo = parseFloat(f.regular.valorFixo || 0);
+                    let vMotReg = parseFloat(f.regular.motorValor || 0);
+                    let liquidoReg = vFixo + vMotReg;
+
+                    if (liquidoReg > 0) {
+                        totalGeralConsolidado += liquidoReg;
+                        let tr = document.createElement('tr');
+                        tr.className = "border-b hover:bg-slate-50 transition-colors";
+                        tr.innerHTML = `
+                            <td class="p-3 font-semibold text-slate-900">${f.nome}</td>
+                            <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded text-xs border font-medium">${ccContrato}</span></td>
+                            <td class="p-3 text-xs font-bold text-slate-500 uppercase tracking-wider">Regular</td>
+                            <td class="p-3 text-xs italic text-slate-500">Honorário Mensal Regular (Fixo: ${vFixo} + Adic: ${vMotReg})</td>
+                            <td class="p-3 text-right font-bold text-blue-950">R$ ${liquidoReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        `;
+                        corpoTabela.appendChild(tr);
+                    }
+                }
+
+                if (!filtroTipo || filtroTipo === "complementar") {
+                    if (f.complementar && f.complementar.statusPagamento !== "Sem Lançamento") {
+                        let vComp = parseFloat(f.complementar.motorValor || 0);
+                        if (vComp > 0) {
+                            totalGeralConsolidado += vComp;
+                            let tr = document.createElement('tr');
+                            tr.className = "border-b hover:bg-slate-50 transition-colors";
+                            tr.innerHTML = `
+                                <td class="p-3 font-semibold text-slate-900">${f.nome}</td>
+                                <td class="p-3"><span class="bg-slate-100 text-slate-700 px-2.5 py-0.5 rounded text-xs border font-medium">${ccContrato}</span></td>
+                                <td class="p-3 text-xs font-bold text-amber-700 uppercase tracking-wider">Complementar</td>
+                                <td class="p-3 text-xs italic text-amber-700 font-medium">Lançamento Extra (${f.complementar.motorEvento || 'Bônus'})</td>
+                                <td class="p-3 text-right font-bold text-amber-900">R$ ${vComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                            `;
+                            corpoTabela.appendChild(tr);
+                        }
+                    }
+                }
+            });
+
+            if(corpoTabela.innerHTML === "") {
+                corpoTabela.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhum registro corresponde aos filtros selecionados.</td></tr>`;
+            }
+
+            totalDisplay.innerText = `R$ ${totalGeralConsolidado.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+        }
+
+        function exportarRelatorioParaCSV() {
+            const corpoTabela = document.getElementById('listaRelatorioCorpo');
+            const linhas = corpoTabela.querySelectorAll('tr');
+            
+            if (linhas.length === 0 || linhas[0].textContent.includes("Nenhum")) {
+                alert("Não existem dados válidos na tabela para exportação.");
+                return;
+            }
+
+            let csvConteudo = "\uFEFF"; 
+            csvConteudo += "Prestador;Centro de Custo;Tipo de Folha;Composição / Detalhe;Líquido Pago/Aprovado\n";
+
+            linhas.forEach(linha => {
+                const colunas = linha.querySelectorAll('td');
+                if (colunas.length < 5) return;
+                
+                let prestador = colunas[0].innerText.trim();
+                let cc = colunas[1].innerText.trim();
+                let tipo = colunas[2].innerText.trim();
+                let detalhe = colunas[3].innerText.trim().replace(/;/g, ',');
+                let valor = colunas[4].innerText.trim();
+
+                csvConteudo += `"${prestador}";"${cc}";"${tipo}";"${detalhe}";"${valor}"\n`;
+            });
+
+            const blob = new Blob([csvConteudo], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const linkAviso = document.createElement("a");
+            
+            linkAviso.setAttribute("href", url);
+            linkAviso.setAttribute("download", `Relatorio_ConnectPJ_Ref_${competenciaSelecionada}.csv`);
+            document.body.appendChild(linkAviso);
+            linkAviso.click();
+            document.body.removeChild(linkAviso);
+        }
+
+        document.getElementById('repFiltroCentroCusto').addEventListener('change', renderizarModuloRelatorios);
+        document.getElementById('repFiltroPrestador').addEventListener('change', renderizarModuloRelatorios);
+        document.getElementById('repFiltroTipoFolha').addEventListener('change', renderizarModuloRelatorios);
+        document.getElementById('btn-exportar-relatorio').addEventListener('click', exportarRelatorioParaCSV);
+        
+        document.getElementById('btn-relatorios').addEventListener('click', () => {
+            mostrarSecao('relatorios');
+            renderizarModuloRelatorios();
+        });
+
+        // =================================================================
+        // O CÓDIGO DO RELATÓRIO TERMINA AQUI. 
+        // Abaixo dele vai continuar o resto do seu script antigo (como a função fecharModalEditar...)
+        // =================================================================
+
+        function fecharModalEditar() {
+            // ... resto do seu código
+🌟 O Toque Final de Sincronização
+Para garantir que o relatório atualize sozinho quando o banco mudar, procure as funções onValue no seu script (onde o Firebase monitora os dados) e adicione a chamada do relatório lá dentro.
+
+Ficará assim:
+
+JavaScript
+        onValue(ref(db, 'contratos'), (snapshot) => {
+            contratosLocais = snapshot.val() || {};
+            // ... seu código interno do contratos ...
+            
+            renderizarTabelasEstatísticas();
+            renderizarModuloRelatorios(); // <--- ADICIONE ESTA LINHA AQUI
+        });
+
+        onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
+            folhasLocais = snapshot.val() || {};
+            renderizarTabelasEstatísticas();
+            atualizarResumoPainelPJ();
+            renderizarModuloRelatorios(); // <--- ADICIONE ESTA LINHA AQUI
+        });
 
             renderizarTabelasEstatísticas();
         });
