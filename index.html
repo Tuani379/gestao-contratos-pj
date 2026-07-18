@@ -675,6 +675,10 @@
             let totalContratos = 0;
             Object.keys(contratosLocais).forEach(key => {
                 const c = contratosLocais[key];
+                
+                // PROTEÇÃO: Ignora nós corrompidos ou vazios do banco para não quebrar o script
+                if (!c || typeof c !== 'object') return;
+
                 totalContratos++;
 
                 let statusBadge = '';
@@ -689,9 +693,13 @@
                     
                     const optMotor = document.createElement('option');
                     optMotor.value = key;
-                    optMotor.innerText = c.razaoSocial || c.nome;
+                    optMotor.innerText = c.razaoSocial || c.nome || "Prestador Sem Nome";
                     motorContratoSelect.appendChild(optMotor);
                 }
+
+                // PROTEÇÃO: Garante que o valor fixo não quebre o toLocaleString se for nulo/indefinido
+                let valorNumerico = parseFloat(c.valorFixoMensal) || 0;
+                let exibeValor = valorNumerico.toLocaleString('pt-BR', {minimumFractionDigits: 2});
 
                 const tr = document.createElement('tr');
                 tr.className = 'border-b hover:bg-slate-50 transition';
@@ -699,7 +707,7 @@
                     <td class="p-3 text-sm font-semibold text-slate-700">${c.razaoSocial || c.nome || '-'}</td>
                     <td class="p-3 text-sm text-slate-600">${c.CNPJ || c.cpf || '-'}</td>
                     <td class="p-3 text-sm text-slate-600">${c.cargo || '-'}</td>
-                    <td class="p-3 text-sm text-slate-600 font-medium">R$ ${c.valorFixoMensal || '-'}</td>
+                    <td class="p-3 text-sm text-slate-600 font-medium">R$ ${exibeValor}</td>
                     <td class="p-3 text-sm text-slate-600">${c.centrodeCusto || '-'}</td>
                     <td class="p-3 text-sm">${statusBadge}</td>
                     <td class="p-3 text-center">${acaoBotao}</td>
