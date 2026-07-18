@@ -343,7 +343,6 @@
             emailjs.init(EMAILJS_PUBLIC_KEY);
         }
 
-        // Removida a barra invertida final "/" do endpoint da URL para evitar conflito restrito no roteamento Vercel
         const firebaseConfig = {
             apiKey: "AIzaSyAHbovXitP9YkRTM902gy79Rwy9st3Igq8",
             authDomain: "connectpj-15532.firebaseapp.com",
@@ -377,7 +376,6 @@
             }
         }
 
-        // --- SISTEMA INTERNO DE NAVEGAÇÃO E REGRAS FINANCEIRAS ---
         const mostrarSecao = (id) => {
             document.getElementById('dashboard').classList.add('hidden');
             document.getElementById('contratos').classList.add('hidden');
@@ -518,11 +516,11 @@
             if (!dataEscolhida) return;
 
             try {
-                const atualizacoes = {};
-                atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/${tipoFolha}/statusPagamento`] = "Pago";
-                atualizacoes[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/${tipoFolha}/dataPagamento`] = dataEscolhida;
+                const updatedObj = {};
+                updatedObj[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/${tipoFolha}/statusPagamento`] = "Pago";
+                updatedObj[`folhas_pagamento/${competenciaSelecionada}/${idContrato}/${tipoFolha}/dataPagamento`] = dataEscolhida;
 
-                await update(ref(db), atualizacoes);
+                await update(ref(db), updatedObj);
                 alert("Pagamento registrado!");
             } catch (error) {
                 alert("Erro ao registrar pagamento: " + error.message);
@@ -677,7 +675,6 @@
             document.getElementById('cardTotalFolha').innerText = valorTotalFolhaRegular.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
             document.getElementById('cardTotalFolhaComplementar').innerText = valorTotalFolhaComplementar.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 
-            // Mapeamento dinâmico dos escutadores gerados dentro das tabelas dinâmicas
             document.querySelectorAll('.select-nf-status').forEach(el => {
                 el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, e.target.dataset.tipo));
             });
@@ -689,7 +686,7 @@
             });
         }
 
-        // --- ASSOCIAÇÃO EXCLUSIVA DE ESCUTADORES DE EVENTOS (MODELO VERCEL) ---
+        // --- ATRIBUIÇÃO DOS ESCUTADORES (SINTAXE MODERNA) ---
         document.getElementById('btn-dashboard').addEventListener('click', () => mostrarSecao('dashboard'));
         document.getElementById('btn-contratos').addEventListener('click', () => mostrarSecao('contratos'));
         document.getElementById('btn-relatorios').addEventListener('click', () => mostrarSecao('relatorios'));
@@ -758,7 +755,8 @@
                     
                     const folhaExistente = folhasLocais[competenciaSelecionada] && folhasLocais[competenciaSelecionada][key];
                     if (!folhaExistente) {
-                        let valorFixoLimpo = parseFloat((contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
+                        // Linha protegida com String(...) corrigindo o erro do .replace
+                        let valorFixoLimpo = parseFloat(String(contrato.valorFixoMensal || '0').replace('.', '').replace(',', '.'));
                         if (isNaN(valorFixoLimpo)) valorFixoLimpo = 0;
 
                         updates[`folhas_pagamento/${competenciaSelecionada}/${key}`] = {
@@ -861,7 +859,7 @@
             reader.readAsDataURL(arquivoInput.files[0]);
         });
 
-        // --- SINCRONIZAÇÃO EM TEMPO REAL COM FIREBASE ---
+        // --- DATABASE TRACKING EM TEMPO REAL ---
         onValue(ref(db, 'contratos'), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             const listaContratos = document.getElementById('listaContratos');
