@@ -271,9 +271,72 @@
         </section>
 
         <!-- MODO RH: RELATÓRIOS -->
-        <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
-            <h2 class="text-xl font-bold">Relatórios</h2>
-        </section>
+<section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
+    
+    <!-- Cabeçalho da seção -->
+    <h2 class="text-xl font-bold text-gray-800 mb-1">📊 Gerador de Relatórios e Auditoria</h2>
+    <p class="text-sm text-gray-500 mb-6">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
+
+    <!-- Filtros -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 items-end">
+        <div>
+            <label class="block text-sm font-medium mb-1">Centro de Custo</label>
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+                <option>-- Todos --</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Prestador PJ</label>
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+                <option>-- Todos --</option>
+            </select>
+        </div>
+        <div>
+            <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
+            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+                <option>-- Todas --</option>
+            </select>
+        </div>
+        <button class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
+            ⬇ Exportar
+        </button>
+    </div>
+
+    <!-- Tabela -->
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-blue-900 text-white text-sm">
+                    <th class="p-3">PRESTADOR</th>
+                    <th class="p-3">CENTRO DE CUSTO</th>
+                    <th class="p-3">TIPO DE FOLHA</th>
+                    <th class="p-3">COMPOSIÇÃO / DETALHE</th>
+                    <th class="p-3 text-right">LÍQUIDO PAGO/APROVADO</th>
+                </tr>
+            </thead>
+            <tbody class="text-sm">
+                <!-- Exemplo de linha -->
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="p-3 font-semibold">Tech Solutions LTDA</td>
+                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border">TI - Desenvolvimento</span></td>
+                    <td class="p-3">Regular</td>
+                    <td class="p-3 italic text-gray-600">Honorário Mensal (Fixo: 12000 + Adic: 1500)</td>
+                    <td class="p-3 text-right font-bold">R$ 13.000,00</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Histórico de Auditoria -->
+    <div class="mt-8">
+        <h3 class="text-xs font-bold text-gray-500 mb-2 uppercase">Histórico de Auditoria</h3>
+        <div class="bg-gray-900 text-green-400 p-4 rounded text-xs font-mono shadow-inner">
+            <p>[30/06/2026 18:00:00] - Banco de dados PostgreSQL conectado com sucesso.</p>
+            <p>[30/06/2026 18:01:05] - Contratos importados do módulo ERP.</p>
+        </div>
+    </div>
+
+</section>
 
         <!-- AREA DO PRESTADOR (PJ) -->
         <section id="area-prestador" class="hidden max-w-xl mx-auto p-6 bg-white rounded-xl border shadow-sm space-y-6">
