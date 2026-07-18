@@ -96,6 +96,7 @@
                         </table>
                     </div>
                     
+                    <!-- CORREÇÃO DO RODAPÉ DO MODAL (Flex e espaçamento adequados) -->
                     <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
                         <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                             Cancelar
@@ -106,7 +107,7 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- MOTOR FINANCEIRO -->
             <div class="bg-white p-6 rounded-xl border shadow-sm">
                 <div class="flex items-center gap-2 mb-2">
@@ -269,56 +270,6 @@
             </div>
         </section>
 
-        <!-- MODAL PARA EDITAR DADOS CADASTRAIS DO PRESTADOR -->
-        <div id="modalEditarCadastro" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50 flex items-center justify-center p-4">
-            <div class="relative p-6 border w-full max-w-lg shadow-lg rounded-md bg-white">
-                <div class="flex justify-between items-center border-b pb-3 mb-4">
-                    <h3 class="text-lg font-bold text-gray-900">Editar Dados Cadastrais</h3>
-                    <button id="btn-fechar-editar-cadastro" class="text-gray-400 hover:text-gray-600 text-xl">&times;</button>
-                </div>
-                
-                <form id="form-editar-cadastro" class="space-y-4">
-                    <input type="hidden" id="edit-cad-id">
-                    
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Nome Completo</label>
-                        <input type="text" id="edit-cad-nome" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Razão Social</label>
-                        <input type="text" id="edit-cad-razao" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                    </div>
-
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">CNPJ</label>
-                            <input type="text" id="edit-cad-cnpj" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700">CPF</label>
-                            <input type="text" id="edit-cad-cpf" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                        </div>
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">E-mail Corporativo</label>
-                        <input type="email" id="edit-cad-email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                    </div>
-
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700">Valor Fixo Mensal (R$)</label>
-                        <input type="number" id="edit-cad-valor-fixo" step="0.01" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm border p-2">
-                    </div>
-
-                    <div class="flex justify-end space-x-3 pt-4 border-t">
-                        <button type="button" id="btn-cancelar-editar-cadastro" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-md hover:bg-gray-300">Cancelar</button>
-                        <button type="button" id="btn-salvar-editar-cadastro" class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700">Salvar Alterações</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
         <!-- MODO RH: RELATÓRIOS -->
         <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
             <h2 class="text-xl font-bold">Relatórios</h2>
@@ -332,6 +283,7 @@
             </div>
 
             <div class="space-y-4">
+                <!-- SELETOR DE COMPETÊNCIA NO PORTAL DO PJ -->
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Mês de Referência:</label>
@@ -402,26 +354,26 @@
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
 
         nomeMeses.forEach((nome, index) => {
-            const numeroMes = String(index + 1).padStart(2, '0');
-            const valorCompetencia = `${numeroMes}-${anoAtualSistema}`;
-            const textoExibicao = `${numeroMes}/${anoAtualSistema}`;
-            
-            const opt1 = document.createElement('option');
-            opt1.value = valorCompetencia;
-            opt1.innerText = `${nome} / ${anoAtualSistema}`;
-            
-            const opt2 = document.createElement('option');
-            opt2.value = valorCompetencia;
-            opt2.innerText = `${nome} / ${anoAtualSistema}`;
+    const numeroMes = String(index + 1).padStart(2, '0');
+    const valorCompetencia = `${numeroMes}-${anoAtualSistema}`; // Mudado para hífen interno
+    const textoExibicao = `${numeroMes}/${anoAtualSistema}`;
+    
+    const opt1 = document.createElement('option');
+    opt1.value = valorCompetencia;
+    opt1.innerText = `${nome} / ${anoAtualSistema}`;
+    
+    const opt2 = document.createElement('option');
+    opt2.value = valorCompetencia;
+    opt2.innerText = `${nome} / ${anoAtualSistema}`;
 
-            if (numeroMes === mesAtualSistema) {
-                opt1.selected = true;
-                opt2.selected = true;
-            }
+    if (numeroMes === mesAtualSistema) {
+        opt1.selected = true;
+        opt2.selected = true;
+    }
 
-            filtroCompetencia.appendChild(opt1);
-            selectCompetenciaPJ.appendChild(opt2);
-        });
+    filtroCompetencia.appendChild(opt1);
+    selectCompetenciaPJ.appendChild(opt2);
+});
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
@@ -708,9 +660,7 @@
                 }
 
                 let trReg = document.createElement('tr');
-                trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm cursor-pointer transition-colors";
-                trReg.setAttribute('data-id-contrato', key);
-
+                trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
                 trReg.innerHTML = `
                     <td class="p-3">${txtRegDetalhe}</td>
                     <td class="p-3 text-xs font-semibold text-slate-500">${f.cnpj || f.cpf || "---"}</td>
@@ -733,26 +683,6 @@
                         }
                     </td>
                 `;
-
-                // --- Clique na linha Regular para abrir o modal de Edição Cadastral ---
-                trReg.addEventListener('click', (e) => {
-                    if (e.target.tagName === 'SELECT' || e.target.closest('select') || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                    
-                    const idContrato = trReg.getAttribute('data-id-contrato');
-                    const cadastro = contratosLocais[idContrato]; 
-                    if (!cadastro) return;
-
-                    document.getElementById('edit-cad-id').value = idContrato;
-                    document.getElementById('edit-cad-nome').value = cadastro.nome || "";
-                    document.getElementById('edit-cad-razao').value = cadastro.razaoSocial || "";
-                    document.getElementById('edit-cad-cnpj').value = cadastro.cnpj || "";
-                    document.getElementById('edit-cad-cpf').value = cadastro.cpf || "";
-                    document.getElementById('edit-cad-email').value = cadastro.emailCorp || "";
-                    document.getElementById('edit-cad-valor-fixo').value = cadastro.valorFixoMensal || 0;
-
-                    document.getElementById('modalEditarCadastro').classList.remove('hidden');
-                });
-
                 tbodyRegular.appendChild(trReg);
 
                 if (f.complementar && f.complementar.statusPagamento !== "Sem Lançamento") {
@@ -766,9 +696,7 @@
                     }
 
                     let trComp = document.createElement('tr');
-                    trComp.className = "border-b hover:bg-amber-50/40 text-slate-700 text-sm cursor-pointer transition-colors";
-                    trComp.setAttribute('data-id-contrato', key);
-
+                    trComp.className = "border-b hover:bg-amber-50/40 text-slate-700 text-sm";
                     trComp.innerHTML = `
                         <td class="p-3">
                             <b>${f.nome}</b><br>
@@ -794,26 +722,6 @@
                             }
                         </td>
                     `;
-
-                    // --- Clique na linha Complementar para abrir o modal de Edição Cadastral ---
-                    trComp.addEventListener('click', (e) => {
-                        if (e.target.tagName === 'SELECT' || e.target.closest('select') || e.target.tagName === 'BUTTON' || e.target.closest('button')) return;
-                        
-                        const idContrato = trComp.getAttribute('data-id-contrato');
-                        const cadastro = contratosLocais[idContrato]; 
-                        if (!cadastro) return;
-
-                        document.getElementById('edit-cad-id').value = idContrato;
-                        document.getElementById('edit-cad-nome').value = cadastro.nome || "";
-                        document.getElementById('edit-cad-razao').value = cadastro.razaoSocial || "";
-                        document.getElementById('edit-cad-cnpj').value = cadastro.cnpj || "";
-                        document.getElementById('edit-cad-cpf').value = cadastro.cpf || "";
-                        document.getElementById('edit-cad-email').value = cadastro.emailCorp || "";
-                        document.getElementById('edit-cad-valor-fixo').value = cadastro.valorFixoMensal || 0;
-
-                        document.getElementById('modalEditarCadastro').classList.remove('hidden');
-                    });
-
                     tbodyComplementar.appendChild(trComp);
                 }
             });
@@ -847,38 +755,6 @@
                 el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'complementar'));
             });
         }
-
-        // --- LÓGICA DO MODAL EDITAR CADASTRO (Fechar e Salvar) ---
-        function fecharModalEditar() {
-            document.getElementById('modalEditarCadastro').classList.add('hidden');
-            document.getElementById('form-editar-cadastro').reset();
-        }
-
-        document.getElementById('btn-fechar-editar-cadastro')?.addEventListener('click', fecharModalEditar);
-        document.getElementById('btn-cancelar-editar-cadastro')?.addEventListener('click', fecharModalEditar);
-
-        document.getElementById('btn-salvar-editar-cadastro')?.addEventListener('click', async () => {
-            const id = document.getElementById('edit-cad-id').value;
-            if (!id) return alert("Erro: ID de registro ausente.");
-
-            const dadosAtualizados = {
-                nome: document.getElementById('edit-cad-nome').value,
-                razaoSocial: document.getElementById('edit-cad-razao').value,
-                cnpj: document.getElementById('edit-cad-cnpj').value,
-                cpf: document.getElementById('edit-cad-cpf').value,
-                emailCorp: document.getElementById('edit-cad-email').value,
-                valorFixoMensal: parseFloat(document.getElementById('edit-cad-valor-fixo').value) || 0
-            };
-
-            try {
-                await update(ref(db, `contratos/${id}`), dadosAtualizados);
-                alert("Cadastro sincronizado e atualizado com sucesso!");
-                fecharModalEditar();
-            } catch (error) {
-                console.error("Erro ao atualizar dados:", error);
-                alert("Não foi possível salvar as alterações.");
-            }
-        });
 
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
         function abrirModalGerarFolha() {
@@ -998,65 +874,68 @@
             });
         });
 
-        document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
-            const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
-            if (checkboxes.length === 0) {
-                alert("Por favor, selecione pelo menos um contrato para criar a folha!");
-                return;
+        // --- COPIE E SUBSTITUA O BLOCO DO BOTÃO POR ESTE ---
+document.getElementById('btn-confirmar-generar-folha').addEventListener('click', async () => {
+    const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
+    if (checkboxes.length === 0) {
+        alert("Por favor, selecione pelo menos um contrato para criar a folha!");
+        return;
+    }
+
+    const compDestino = filtroCompetencia.value; // Já virá com hífen (ex: 07-2026)
+    const compExibicao = compDestino.replace('-', '/'); // Para exibir com barra no alert
+    const pacotesAtualizacao = {};
+    let deFatoCriados = 0;
+
+    checkboxes.forEach(chk => {
+        const idContrato = chk.value;
+        const dadosOrigem = contratosLocais[idContrato];
+
+        if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
+            return; 
+        }
+
+        // Salvando com hífen garante que o Firebase não fragmente os nós
+        pacotesAtualizacao[`folhas_pagamento/${compDestino}/${idContrato}`] = {
+            nome: dadosOrigem.nome || "",
+            razaoSocial: dadosOrigem.razaoSocial || "",
+            cnpj: dadosOrigem.cnpj || "",
+            cpf: dadosOrigem.cpf || "",
+            emailCorp: dadosOrigem.emailCorp || "",
+            regular: {
+                valorFixo: parseFloat(dadosOrigem.valorFixoMensal || 0),
+                motorValor: 0,
+                motorEvento: "",
+                nfStatus: "Aguardando",
+                nfArquivoBase64: "",
+                statusPagamento: "Aguardando NF",
+                dataPagamento: ""
+            },
+            complementar: {
+                motorValor: 0,
+                motorEvento: "",
+                nfStatus: "Aguardando",
+                nfArquivoBase64: "",
+                statusPagamento: "Sem Lançamento",
+                dataPagamento: ""
             }
+        };
+        deFatoCriados++;
+    });
 
-            const compDestino = filtroCompetencia.value; 
-            const compExibicao = compDestino.replace('-', '/'); 
-            const pacotesAtualizacao = {};
-            let deFatoCriados = 0;
-
-            checkboxes.forEach(chk => {
-                const idContrato = chk.value;
-                const dadosOrigem = contratosLocais[idContrato];
-
-                if (folhasLocais[compDestino] && folhasLocais[compDestino][idContrato]) {
-                    return; 
-                }
-
-                pacotesAtualizacao[`folhas_pagamento/${compDestino}/${idContrato}`] = {
-                    nome: dadosOrigem.nome || "",
-                    razaoSocial: dadosOrigem.razaoSocial || "",
-                    cnpj: dadosOrigem.cnpj || "",
-                    cpf: dadosOrigem.cpf || "",
-                    emailCorp: dadosOrigem.emailCorp || "",
-                    regular: {
-                        valorFixo: parseFloat(dadosOrigem.valorFixoMensal || 0),
-                        motorValor: 0,
-                        motorEvento: "",
-                        nfStatus: "Aguardando",
-                        nfArquivoBase64: "",
-                        statusPagamento: "Aguardando NF",
-                        dataPagamento: ""
-                    },
-                    complementar: {
-                        motorValor: 0,
-                        motorEvento: "",
-                        nfStatus: "Aguardando",
-                        nfArquivoBase64: "",
-                        statusPagamento: "Sem Lançamento",
-                        dataPagamento: ""
-                    }
-                };
-                deFatoCriados++;
-            });
-
-            try {
-                if (Object.keys(pacotesAtualizacao).length > 0) {
-                    await update(ref(db), pacotesAtualizacao);
-                }
-                alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compExibicao}.`);
-                
-                const modal = document.getElementById('modalGerarFolha');
-                if (modal) modal.classList.add('hidden');
-            } catch (error) {
-                alert("Erro ao instanciar competência: " + error.message);
-            }
-        });
+    try {
+        if (Object.keys(pacotesAtualizacao).length > 0) {
+            await update(ref(db), pacotesAtualizacao);
+        }
+        alert(`Sucesso! Processados ${deFatoCriados} novos registros para a competência ${compExibicao}.`);
+        
+        // Fecha o modal (certifique-se de que o ID confere com o seu HTML)
+        const modal = document.getElementById('modalGerarFolha');
+        if (modal) modal.classList.add('hidden');
+    } catch (error) {
+        alert("Erro ao instanciar competência: " + error.message);
+    }
+});
 
         document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
         document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
