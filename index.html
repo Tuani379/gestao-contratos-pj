@@ -1160,7 +1160,10 @@ function carregarRelatorio() {
         
         // Itera sobre os prestadores dentro daquela competência
         Object.entries(prestadores).forEach(([id, dados]) => {
-            encontrouDados = true;
+    encontrouDados = true;
+    
+    // Filtro de segurança para não exibir registros sem nome ou contrato vinculado
+    if (!dados.nome || !contratosLocais[id]) return;
             
             // Busca o contrato no banco de contratos usando o ID do prestador
             const contrato = contratosLocais[id] || {};
