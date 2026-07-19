@@ -559,34 +559,30 @@
     <!-- Filtros -->
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 items-end">
-    <!-- Filtro Centro de Custo -->
     <div>
         <label class="block text-sm font-medium mb-1">Centro de Custo</label>
         <select id="filtroCentroCusto" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
             <option value="todos">-- Todos --</option>
         </select>
     </div>
-    <!-- Filtro Prestador -->
     <div>
         <label class="block text-sm font-medium mb-1">Prestador PJ</label>
         <select id="filtroPrestador" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
             <option value="todos">-- Todos --</option>
         </select>
     </div>
-    <!-- Filtro Tipo de Folha -->
-    <div>
-        <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
-        <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-            <option value="todos">-- Todas --</option>
-            <option value="regular">Regular</option>
-            <option value="complementar">Complementar</option>
-        </select>
+    <!-- ... adicione o ID também no Tipo de Folha ... -->
+    <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+        <option value="todos">-- Todas --</option>
+        <option value="regular">Regular</option>
+        <option value="complementar">Complementar</option>
+    </select>
+
+        <button id="btn-exportar-csv" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
+    ⬇ Exportar
+</button>
+
     </div>
-    <!-- Botão -->
-    <button id="btn-exportar-csv" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
-        ⬇ Exportar
-    </button>
-</div>
 
 
 
@@ -1514,72 +1510,121 @@ document.addEventListener('change', (e) => {
 
 
         // --- INTERAÇÃO COM FIREBASE ---
-onValue(ref(db, 'contratos'), (snapshot) => {
-    contratosLocais = snapshot.val() || {};
-    
-    // Filtros
-    const centroSelect = document.getElementById('filtroCentroCusto');
-    const prestadorSelect = document.getElementById('filtroPrestador');
-    centroSelect.innerHTML = '<option value="todos">-- Todos --</option>';
-    prestadorSelect.innerHTML = '<option value="todos">-- Todos --</option>';
 
-    const centros = new Set();
-    const prestadores = new Set();
-    Object.values(contratosLocais).forEach(c => {
-        if(c.centroDeCusto) centros.add(c.centroDeCusto);
-        if(c.nome) prestadores.add(c.nome);
-    });
-    centros.forEach(c => centroSelect.innerHTML += `<option value="${c}">${c}</option>`);
-    prestadores.forEach(p => prestadorSelect.innerHTML += `<option value="${p}">${p}</option>`);
+        onValue(ref(db, 'contratos'), (snapshot) => {
 
-    // Tabela e Motor
-    const motorSelect = document.getElementById('motorContrato');
-    const pjPanelSelect = document.getElementById('selectPrestadorPJ');
-    motorSelect.innerHTML = '<option value="">Selecione...</option>';
-    pjPanelSelect.innerHTML = '<option value="">Selecione sua empresa...</option>';
-    const tbodyGeralContratos = document.getElementById('listaContratos');
-    tbodyGeralContratos.innerHTML = "";
+            contratosLocais = snapshot.val() || {};
 
-    Object.entries(contratosLocais).forEach(([key, c]) => {
-        if (c.status === "Ativo") {
-            let optA = document.createElement('option');
-            optA.value = key;
-            optA.innerText = `${c.nome} (${c.razaoSocial || "Autônomo"})`;
-            motorSelect.appendChild(optA);
-            let optB = document.createElement('option');
-            optB.value = key;
-            optB.innerText = `${c.razaoSocial || c.nome}`;
-            pjPanelSelect.appendChild(optB);
-        }
+            
 
-        let trC = document.createElement('tr');
-        trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
-        trC.onclick = () => abrirModalEdicao(key);
-        trC.innerHTML = `
-            <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
-            <td class="p-3 text-xs">${c.cnpj || c.cpf || "---"}</td>
-            <td class="p-3">${c.cargo || "---"}</td>
-            <td class="p-3 font-bold">R$ ${parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-            <td class="p-3 text-xs">${c.centroDeCusto || "---"}</td>
-            <td><span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-            <td class="p-3 text-center">${c.status === 'Ativo' ? `<button class="btn-desativar-c bg-red-50 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs" data-id="${key}">Desativar</button>` : 'Encerrado'}</td>
-        `;
-        tbodyGeralContratos.appendChild(trC);
-    });
+            const motorSelect = document.getElementById('motorContrato');
 
-    document.querySelectorAll('.btn-desativar-c').forEach(btn => {
-        btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
-    });
+            const pjPanelSelect = document.getElementById('selectPrestadorPJ');
 
-    renderizarTabelasEstatísticas();
-});
+            
 
-onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
-    folhasLocais = snapshot.val() || {};
-    renderizarTabelasEstatísticas();
-    atualizarResumoPainelPJ();
-    carregarRelatorio();
-});
+            motorSelect.innerHTML = '<option value="">Selecione...</option>';
+
+            pjPanelSelect.innerHTML = '<option value="">Selecione sua empresa...</option>';
+
+
+
+            const tbodyGeralContratos = document.getElementById('listaContratos');
+
+            tbodyGeralContratos.innerHTML = "";
+
+
+
+            const entradas = Object.entries(contratosLocais);
+
+            if (entradas.length === 0) {
+
+                tbodyGeralContratos.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
+
+            }
+
+
+
+            entradas.forEach(([key, c]) => {
+
+                if (c.status === "Ativo") {
+
+                    let optA = document.createElement('option');
+
+                    optA.value = key;
+
+                    optA.innerText = `${c.nome} (${c.razaoSocial || "Autônomo"})`;
+
+                    motorSelect.appendChild(optA);
+
+
+
+                    let optB = document.createElement('option');
+
+                    optB.value = key;
+
+                    optB.innerText = `${c.razaoSocial || c.nome}`;
+
+                    pjPanelSelect.appendChild(optB);
+
+                }
+
+
+
+                let vExibir = parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
+
+                let trC = document.createElement('tr');
+                trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
+                trC.onclick = () => abrirModalEdicao(key);
+                trC.innerHTML = `
+                    <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
+                    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || c.cpf || "---"}</td>
+                    <td class="p-3">${c.cargo || "---"}</td>
+                    <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
+                    <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
+                    <td class="p-3">
+                        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span>${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
+                    </td>
+                    <td class="p-3 text-center">
+                        ${c.status === 'Ativo' 
+                            ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
+                            : `<span class="text-xs text-slate-400">Encerrado</span>`
+                        }
+                    </td>
+                `;
+                tbodyGeralContratos.appendChild(trC);
+
+            });
+
+
+
+            document.querySelectorAll('.btn-desativar-c').forEach(btn => {
+
+                btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
+
+            });
+
+
+
+            renderizarTabelasEstatísticas();
+
+        });
+
+
+
+        onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
+
+            folhasLocais = snapshot.val() || {};
+
+            renderizarTabelasEstatísticas();
+
+            atualizarResumoPainelPJ();
+
+            carregarRelatorio();
+
+        });
+
+
 
         // --- BOTÕES E EVENTOS ---
 
@@ -2013,48 +2058,152 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
         // Função para popular a tabela de Relatórios
 
-// --- FUNÇÃO CORRIGIDA DE RELATÓRIO ---
 function carregarRelatorio() {
-    const tbodyRelatorio = document.querySelector('#relatorios tbody');
-    if (!tbodyRelatorio) return;
+
+    // 1. Seleciona o corpo da tabela dentro da seção de relatórios
+
+    const sectionRelatorios = document.getElementById('relatorios');
+
+    const tbodyRelatorio = sectionRelatorios.querySelector('tbody');
+
     
+
+    if (!tbodyRelatorio) {
+
+        console.error("Tabela de relatórios não encontrada!");
+
+        return;
+
+    }
+
+    
+
     tbodyRelatorio.innerHTML = ''; 
+
     let totalGeral = 0;
+
     let encontrouDados = false;
 
-    Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
-        Object.entries(prestadores).forEach(([id, dados]) => {
-            if (!dados.nome || !contratosLocais[id]) return;
-            
-            const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
-            if (valorParaValidar <= 0) return;
 
-            encontrouDados = true;
-            let subTotal = valorParaValidar;
-            totalGeral += subTotal;
+
+    // 2. Log para depuração (Abra o F12 > Console para ver isso)
+
+    console.log("Processando relatórios. Folhas carregadas:", folhasLocais);
+
+
+
+    // 3. Itera sobre as competências (ex: 07-2026)
+
+    Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
+
+        
+
+        // Itera sobre os prestadores dentro daquela competência
+
+        Object.entries(prestadores).forEach(([id, dados]) => {
+
+    
+
+    // --- FILTRO DE SEGURANÇA REFORÇADO ---
+
+    // 1. Verifica se tem nome e não é apenas um espaço em branco
+
+    // 2. Verifica se o valor fixo da folha é maior que zero (para ignorar registros vazios)
+
+    const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
+
+    
+
+    if (!dados.nome || dados.nome.trim() === "" || dados.nome === "Sem Nome" || valorParaValidar <= 0) {
+
+        return; // Pula esta linha se não tiver nome ou se o valor for zero
+
+    }
+
+    // --------------------------------------
+
+
+
+    encontrouDados = true;
+
+    
+
+    // Filtro de segurança para não exibir registros sem nome ou contrato vinculado
+
+    if (!dados.nome || !contratosLocais[id]) return;
+
             
+
+            // Busca o contrato no banco de contratos usando o ID do prestador
+
+            const contrato = contratosLocais[id] || {};
+
+            const centroCusto = contrato.centroDeCusto || "N/A";
+
+            
+
+            // Calcula o valor (Regular + Ajustes)
+
+            let fixo = parseFloat(dados.regular?.valorFixo || 0);
+
+            let extra = parseFloat(dados.regular?.motorValor || 0);
+
+            let subTotal = fixo + extra;
+
+            
+
+            totalGeral += subTotal;
+
+            
+
+            // Adiciona a linha na tabela
+
             tbodyRelatorio.innerHTML += `
+
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="p-3 font-semibold">${dados.nome}</td>
-                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${contratosLocais[id].centroDeCusto || "N/A"}</span></td>
+
+                    <td class="p-3 font-semibold">${dados.nome || 'Prestador'}</td>
+
+                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
+
                     <td class="p-3">Regular</td>
-                    <td class="p-3 text-xs">Fixo: ${dados.regular.valorFixo || 0}</td>
+
+                    <td class="p-3 italic text-gray-600 text-xs">Fixo: ${fixo} + Ajuste: ${extra}</td>
+
                     <td class="p-3 text-right font-bold">R$ ${subTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+
                 </tr>
+
             `;
+
         });
+
     });
 
+
+
+    // 4. Se não achou dados, avisa na tela
+
     if (!encontrouDados) {
-        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum dado processado.</td></tr>';
+
+        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhum dado de folha processado.</td></tr>';
+
     } else {
+
         tbodyRelatorio.innerHTML += `
+
             <tr class="bg-gray-100 font-bold">
-                <td colspan="4" class="p-3 text-right">TOTAL GERAL:</td>
-                <td class="p-3 text-right">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+
+                <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
+
+                <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+
             </tr>
+
         `;
+
     }
+
 }
 window.abrirModalEdicao = function(id) {
     const modal = document.getElementById('modalCadastro');
@@ -2079,7 +2228,6 @@ window.abrirModalEdicao = function(id) {
     
     btnSalvar.dataset.editId = id; 
     modal.classList.remove('hidden');
-    aplicarFiltros(); 
 }
         function exportarParaCSV() {
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
@@ -2115,24 +2263,20 @@ function aplicarFiltros() {
     const prestador = document.getElementById('filtroPrestador').value;
     const tipo = document.getElementById('filtroTipoFolha').value;
 
-    // Seleciona todas as linhas de dados (ignora o cabeçalho)
     const linhas = document.querySelectorAll('#relatorios tbody tr');
 
     linhas.forEach(tr => {
-        // Se for a linha de total, ignoramos o filtro para que ela apareça sempre ou nunca
+        // Ignora a linha de total
         if (tr.classList.contains('bg-gray-100')) return;
 
-        // Pega o texto de cada coluna para comparar
-        const colPrestador = tr.cells[0].innerText.toLowerCase();
-        const colCentro = tr.cells[1].innerText.toLowerCase();
-        const colTipo = tr.cells[2].innerText.toLowerCase();
+        const nome = tr.cells[0].innerText.toLowerCase();
+        const cc = tr.cells[1].innerText.toLowerCase();
+        const tipoLinha = tr.cells[2].innerText.toLowerCase();
 
-        // Lógica de comparação
-        const matchCentro = (centro === 'todos' || colCentro.includes(centro.toLowerCase()));
-        const matchPrestador = (prestador === 'todos' || colPrestador.includes(prestador.toLowerCase()));
-        const matchTipo = (tipo === 'todos' || colTipo.includes(tipo.toLowerCase()));
+        const matchCentro = (centro === 'todos' || cc.includes(centro.toLowerCase()));
+        const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
+        const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo));
 
-        // Exibe ou esconde a linha
         tr.style.display = (matchCentro && matchPrestador && matchTipo) ? '' : 'none';
     });
 }
@@ -2144,5 +2288,3 @@ document.getElementById('filtroTipoFolha').addEventListener('change', aplicarFil
     </script>
 
 </body></html> 
-
-
