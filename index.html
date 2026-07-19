@@ -480,7 +480,7 @@
 
                 <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
 
-                    <h3 class="text-xl font-bold mb-4">Novo Cadastro</h3>
+                    <h3 id="tituloModal" class="text-xl font-bold mb-4">Novo Cadastro</h3>
 
                     <div class="grid grid-cols-2 gap-4">
 
@@ -1782,9 +1782,8 @@
 
                 let trC = document.createElement('tr');
 
-                trC.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
-
-                trC.innerHTML = `
+                trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm"; // Adicionei cursor-pointer e mudei hover para azul
+    trC.onclick = () => abrirModalEdicao(key); // Adicione esta linha
 
                     <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
 
@@ -2425,7 +2424,26 @@ function carregarRelatorio() {
     }
 
 }
+window.abrirModalEdicao = function(id) {
+    const modal = document.getElementById('modalCadastro');
+    const titulo = document.getElementById('tituloModal');
+    const btnSalvar = document.getElementById('btn-salvar-cadastro');
+    const c = contratosLocais[id];
+    if (!c) return;
 
+    titulo.innerText = "Editar Contrato";
+    document.getElementById('campoNome').value = c.nome || "";
+    document.getElementById('campoCpf').value = c.cpf || "";
+    document.getElementById('campoEmail').value = c.email || "";
+    document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
+    document.getElementById('campoCNPJ').value = c.cnpj || "";
+    document.getElementById('campoCentrodeCusto').value = c.centroDeCusto || "";
+    document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+    document.getElementById('campoStatus').value = c.status || "Ativo";
+    
+    btnSalvar.dataset.editId = id; 
+    modal.classList.remove('hidden');
+}
     </script>
 
 </body></html> 
