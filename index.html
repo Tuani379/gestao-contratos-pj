@@ -1282,18 +1282,26 @@
     let fixo = parseFloat(fContrato.regular.valorFixo || 0);
     let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
 
-    let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
+    // Verifica se a NF regular já foi enviada
+    const regularEnviada = fContrato.regular.nfArquivoBase64 && fContrato.regular.nfArquivoBase64.length > 10;
+    let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})} 
+                ${regularEnviada ? '<span class="text-green-600 font-bold ml-2">✔ NF Enviada</span>' : ''}</p>`;
 
-    // --- Lógica corrigida para percorrer a lista ---
     if (fContrato.complementares_lista) {
         seletorDiv.classList.remove('hidden');
         html += `<p class="mt-2 font-bold text-amber-800">Lançamentos Complementares:</p>`;
         
         Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
+            // Verifica se este lançamento específico já tem NF
+            const compEnviada = cItem.nfArquivoBase64 && cItem.nfArquivoBase64.length > 10;
+            
             html += `
                 <div class="mt-1 p-2 bg-amber-50 rounded border border-amber-100">
                     <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
-                    <button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>
+                    ${compEnviada 
+                        ? '<span class="text-green-600 font-bold text-xs">✔ NF já enviada</span>' 
+                        : `<button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>`
+                    }
                 </div>
             `;
         });
