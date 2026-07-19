@@ -559,42 +559,24 @@
     <!-- Filtros -->
 
     <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 items-end">
-
-        <div>
-
-            <label class="block text-sm font-medium mb-1">Centro de Custo</label>
-
-            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-
-                <option>-- Todos --</option>
-
-            </select>
-
-        </div>
-
-        <div>
-
-            <label class="block text-sm font-medium mb-1">Prestador PJ</label>
-
-            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-
-                <option>-- Todos --</option>
-
-            </select>
-
-        </div>
-
-        <div>
-
-            <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
-
-            <select class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
-
-                <option>-- Todas --</option>
-
-            </select>
-
-        </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Centro de Custo</label>
+        <select id="filtroCentroCusto" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+            <option value="todos">-- Todos --</option>
+        </select>
+    </div>
+    <div>
+        <label class="block text-sm font-medium mb-1">Prestador PJ</label>
+        <select id="filtroPrestador" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+            <option value="todos">-- Todos --</option>
+        </select>
+    </div>
+    <!-- ... adicione o ID também no Tipo de Folha ... -->
+    <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
+        <option value="todos">-- Todas --</option>
+        <option value="regular">Regular</option>
+        <option value="complementar">Complementar</option>
+    </select>
 
         <button id="btn-exportar-csv" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
     ⬇ Exportar
@@ -2248,43 +2230,61 @@ window.abrirModalEdicao = function(id) {
     modal.classList.remove('hidden');
 }
         function exportarParaCSV() {
-    // Verifica se existem dados
-    if (!folhasLocais || Object.keys(folhasLocais).length === 0) {
-        alert("Nenhum dado de folha carregado para exportar!");
-        return;
-    }
-
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-    csvContent += "Prestador,CNPJ/CPF,Tipo de Folha,Evento,Valor (R$),Status Pagamento\n";
+    csvContent += "Prestador,Centro de Custo,Tipo,Valor\n";
 
-    Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
-        Object.entries(prestadores).forEach(([id, dados]) => {
-            // Exporta Regular
-            if (dados.regular) {
-                const reg = dados.regular;
-                const subTotalReg = parseFloat(reg.valorFixo || 0) + parseFloat(reg.motorValor || 0);
-                csvContent += `"${dados.nome || ''}","${dados.cnpj || dados.cpf || ''}","Regular","Folha Mensal","${subTotalReg.toFixed(2)}","${reg.statusPagamento || ''}"\n`;
-            }
+    const linhas = document.querySelectorAll('#relatorios tbody tr');
+    
+    linhas.forEach(tr => {
+        // Pula se estiver oculto pelo filtro ou se for a linha de total
+        if (tr.style.display === 'none' || tr.classList.contains('bg-gray-100')) return;
 
-            // Exporta Complementares
-            if (dados.complementares_lista) {
-                Object.entries(dados.complementares_lista).forEach(([idComp, cItem]) => {
-                    csvContent += `"${dados.nome || ''}","${dados.cnpj || dados.cpf || ''}","Complementar","${cItem.motorEvento || ''}","${parseFloat(cItem.motorValor || 0).toFixed(2)}","${cItem.statusPagamento || ''}"\n`;
-                });
-            }
-        });
+        const nome = tr.cells[0].innerText;
+        const cc = tr.cells[1].innerText;
+        const tipo = tr.cells[2].innerText;
+        const valor = tr.cells[4].innerText;
+        
+        csvContent += `"${nome}","${cc}","${tipo}","${valor}"\n`;
     });
 
     const encodedUri = encodeURI(csvContent);
     const link = document.createElement("a");
     link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `Relatorio_Folha_${filtroCompetencia.value}.csv`);
+    link.setAttribute("download", `Relatorio_Filtrado_${new Date().toLocaleDateString()}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
 }
 
 document.getElementById('btn-exportar-csv').addEventListener('click', exportarParaCSV);
+        // Função para aplicar os filtros na tabela
+function aplicarFiltros() {
+    const centro = document.getElementById('filtroCentroCusto').value;
+    const prestador = document.getElementById('filtroPrestador').value;
+    const tipo = document.getElementById('filtroTipoFolha').value;
+
+    const linhas = document.querySelectorAll('#relatorios tbody tr');
+
+    linhas.forEach(tr => {
+        // Ignora a linha de total
+        if (tr.classList.contains('bg-gray-100')) return;
+
+        const nome = tr.cells[0].innerText.toLowerCase();
+        const cc = tr.cells[1].innerText.toLowerCase();
+        const tipoLinha = tr.cells[2].innerText.toLowerCase();
+
+        const matchCentro = (centro === 'todos' || cc.includes(centro.toLowerCase()));
+        const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
+        const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo));
+
+        tr.style.display = (matchCentro && matchPrestador && matchTipo) ? '' : 'none';
+    });
+}
+
+// Adiciona os eventos de mudança nos selects
+document.getElementById('filtroCentroCusto').addEventListener('change', aplicarFiltros);
+document.getElementById('filtroPrestador').addEventListener('change', aplicarFiltros);
+document.getElementById('filtroTipoFolha').addEventListener('change', aplicarFiltros);
     </script>
 
 </body></html> 
