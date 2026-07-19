@@ -1269,32 +1269,33 @@
     const compPJ = document.getElementById('selectCompetenciaPJ').value;
     const quadro = document.getElementById('quadroResumoPJ');
     const detalhes = document.getElementById('detalhesValoresPJ');
-    const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
+    
+    // Captura o valor do radio button selecionado
+    const tipoSelecionado = document.querySelector('input[name="tipoFolhaUpload"]:checked')?.value || 'regular';
 
     if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
         quadro.classList.add('hidden');
-        seletorDiv.classList.add('hidden');
         detalhes.innerHTML = "";
         return;
     }
 
     const fContrato = folhasLocais[compPJ][key];
-    let fixo = parseFloat(fContrato.regular.valorFixo || 0);
-    let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
+    let html = "";
 
-    // Verifica se a NF regular já foi enviada
-    const regularEnviada = fContrato.regular.nfArquivoBase64 && fContrato.regular.nfArquivoBase64.length > 10;
-    let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})} 
+    // --- FILTRAGEM ---
+    if (tipoSelecionado === 'regular') {
+        let fixo = parseFloat(fContrato.regular.valorFixo || 0);
+        let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
+        const regularEnviada = fContrato.regular.nfArquivoBase64 && fContrato.regular.nfArquivoBase64.length > 10;
+        
+        html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})} 
                 ${regularEnviada ? '<span class="text-green-600 font-bold ml-2">✔ NF Enviada</span>' : ''}</p>`;
-
-    if (fContrato.complementares_lista) {
-        seletorDiv.classList.remove('hidden');
-        html += `<p class="mt-2 font-bold text-amber-800">Lançamentos Complementares:</p>`;
+    } 
+    else if (tipoSelecionado === 'complementar' && fContrato.complementares_lista) {
+        html = `<p class="mt-2 font-bold text-amber-800">Lançamentos Complementares:</p>`;
         
         Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
-            // Verifica se este lançamento específico já tem NF
             const compEnviada = cItem.nfArquivoBase64 && cItem.nfArquivoBase64.length > 10;
-            
             html += `
                 <div class="mt-1 p-2 bg-amber-50 rounded border border-amber-100">
                     <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
@@ -1305,9 +1306,6 @@
                 </div>
             `;
         });
-    } else {
-        seletorDiv.classList.add('hidden');
-        document.querySelector('input[name="tipoFolhaUpload"][value="regular"]').checked = true;
     }
 
     detalhes.innerHTML = html;
