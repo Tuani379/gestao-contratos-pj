@@ -1269,20 +1269,30 @@
     const compPJ = document.getElementById('selectCompetenciaPJ').value;
     const quadro = document.getElementById('quadroResumoPJ');
     const detalhes = document.getElementById('detalhesValoresPJ');
+    const seletorDiv = document.getElementById('wrapperSeletorTipoFolha'); // Captura o elemento do seletor
     
-    // Captura o valor do rádio selecionado
     const tipoSelecionado = document.querySelector('input[name="tipoFolhaUpload"]:checked')?.value || 'regular';
 
     if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
         quadro.classList.add('hidden');
+        seletorDiv.classList.add('hidden'); // Esconde o seletor se não houver dados
         detalhes.innerHTML = "";
         return;
     }
 
     const fContrato = folhasLocais[compPJ][key];
+    
+    // --- LÓGICA DO SELETOR ---
+    // Se existir a lista de complementares, mostramos o seletor (as bolinhas)
+    if (fContrato.complementares_lista) {
+        seletorDiv.classList.remove('hidden');
+    } else {
+        seletorDiv.classList.add('hidden');
+    }
+
     let html = "";
 
-    // --- LÓGICA EXCLUSIVA: OU UMA OU OUTRA ---
+    // --- LÓGICA DE EXIBIÇÃO ---
     if (tipoSelecionado === 'regular') {
         let fixo = parseFloat(fContrato.regular.valorFixo || 0);
         let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
@@ -1292,24 +1302,20 @@
                 <p>• <b>Valor:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})} 
                 ${regularEnviada ? '<span class="text-green-600 font-bold ml-2">✔ NF Enviada</span>' : ''}</p>`;
     } 
-    else if (tipoSelecionado === 'complementar') {
-        if (fContrato.complementares_lista) {
-            html = `<p class="font-bold text-amber-800">Lançamentos Complementares:</p>`;
-            Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
-                const compEnviada = cItem.nfArquivoBase64 && cItem.nfArquivoBase64.length > 10;
-                html += `
-                    <div class="mt-2 p-2 bg-amber-50 rounded border border-amber-100">
-                        <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
-                        ${compEnviada 
-                            ? '<span class="text-green-600 font-bold text-xs">✔ NF já enviada</span>' 
-                            : `<button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>`
-                        }
-                    </div>
-                `;
-            });
-        } else {
-            html = `<p class="text-gray-500 italic">Não há lançamentos complementares para este mês.</p>`;
-        }
+    else if (tipoSelecionado === 'complementar' && fContrato.complementares_lista) {
+        html = `<p class="font-bold text-amber-800">Lançamentos Complementares:</p>`;
+        Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
+            const compEnviada = cItem.nfArquivoBase64 && cItem.nfArquivoBase64.length > 10;
+            html += `
+                <div class="mt-2 p-2 bg-amber-50 rounded border border-amber-100">
+                    <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    ${compEnviada 
+                        ? '<span class="text-green-600 font-bold text-xs">✔ NF já enviada</span>' 
+                        : `<button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>`
+                    }
+                </div>
+            `;
+        });
     }
 
     detalhes.innerHTML = html;
