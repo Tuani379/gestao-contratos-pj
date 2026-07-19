@@ -1305,7 +1305,14 @@
     detalhes.innerHTML = html;
     quadro.classList.remove('hidden');
 }
+let idComplementarParaUpload = null;
 
+window.selecionarComp = (id) => {
+    idComplementarParaUpload = id;
+    alert("Nota vinculada ao lançamento selecionado. Agora anexe o arquivo e clique em 'Enviar Nota Fiscal'.");
+    // Seleciona o radio da complementar automaticamente
+    document.querySelector('input[name="tipoFolhaUpload"][value="complementar"]').checked = true;
+};
 
 
         // --- RENDERIZAÇÃO DAS TABELAS ---
@@ -1958,84 +1965,66 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-enviar-nota-pj').addEventListener('click', async () => {
+    const key = document.getElementById('selectPrestadorPJ').value;
+    const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const inputArquivo = document.getElementById('arquivoNFPJ');
+    const arrTipo = document.getElementsByName('tipoFolhaUpload');
+    
+    let tipoSelecionado = "regular";
+    for (let r of arrTipo) {
+        if (r.checked) tipoSelecionado = r.value;
+    }
 
-            const key = document.getElementById('selectPrestadorPJ').value;
+    if (!key) { alert("Identifique a sua Empresa!"); return; }
+    if (inputArquivo.files.length === 0) { alert("Selecione o arquivo da sua Nota Fiscal!"); return; }
 
-            const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    if (!folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
+        alert("A sua folha para este mês ainda não foi liberada pelo RH corporativo.");
+        return;
+    }
 
-            const inputArquivo = document.getElementById('arquivoNFPJ');
+    // --- NOVA LÓGICA DE CAMINHO ---
+    let caminhoBase = `folhas_pagamento/${compPJ}/${key}`;
+    let pathFinal = "";
 
-            const arrTipo = document.getElementsByName('tipoFolhaUpload');
+    if (tipoSelecionado === "regular") {
+        pathFinal = `${caminhoBase}/regular`;
+    } else {
+        // Se for complementar, precisa do ID que salvamos na função selecionarComp
+        if (!idComplementarParaUpload) {
+            alert("Por favor, clique no botão 'Anexar NF desta' em um dos lançamentos complementares acima!");
+            return;
+        }
+        pathFinal = `${caminhoBase}/complementares_lista/${idComplementarParaUpload}`;
+    }
+    // ------------------------------
 
+    const arquivo = inputArquivo.files[0];
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+        const base64String = reader.result;
+        try {
+            const atualizacoes = {};
+            // Agora usamos o pathFinal que aponta exatamente para o lançamento correto
+            atualizacoes[`${pathFinal}/nfArquivoBase64`] = base64String;
+            atualizacoes[`${pathFinal}/nfStatus`] = "Recebida ✔";
+            atualizacoes[`${pathFinal}/statusPagamento`] = "NF Recebida (Avaliando)";
+            atualizacoes[`${pathFinal}/motivoRecusa`] = "";
+
+            await update(ref(db), atualizacoes);
             
-
-            let tipoSelecionado = "regular";
-
-            for (let r of arrTipo) {
-
-                if (r.checked) tipoSelecionado = r.value;
-
-            }
-
-
-
-            if (!key) { alert("Identifique a sua Empresa!"); return; }
-
-            if (inputArquivo.files.length === 0) { alert("Selecione o arquivo da sua Nota Fiscal!"); return; }
-
-
-
-            if (!folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
-
-                alert("A sua folha para este mês ainda não foi liberada pelo RH corporativo.");
-
-                return;
-
-            }
-
-
-
-            const arquivo = inputArquivo.files[0];
-
-            const reader = new FileReader();
-
+            alert("Nota Fiscal enviada com sucesso ao RH!");
             
-
-            reader.onloadend = async () => {
-
-                const base64String = reader.result;
-
-                try {
-
-                    const atualizacoes = {};
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/nfArquivoBase64`] = base64String;
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/nfStatus`] = "Recebida ✔";
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/statusPagamento`] = "NF Recebida (Avaliando)";
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/motivoRecusa`] = "";
-
-
-
-                    await update(ref(db), atualizacoes);
-
-                    alert("Nota Fiscal enviada com sucesso ao RH!");
-
-                    inputArquivo.value = "";
-
-                } catch (error) {
-
-                    alert("Erro ao realizar upload da NF: " + error.message);
-
-                }
-
-            };
-
-            reader.readAsDataURL(arquivo);
-
-        });
+            // Limpa após sucesso
+            inputArquivo.value = "";
+            idComplementarParaUpload = null; 
+        } catch (error) {
+            alert("Erro ao realizar upload da NF: " + error.message);
+        }
+    };
+    reader.readAsDataURL(arquivo);
+});
 
         // Função para popular a tabela de Relatórios
 
