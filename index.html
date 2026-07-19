@@ -1624,31 +1624,20 @@ document.addEventListener('change', (e) => {
             });
 
 
-
             document.querySelectorAll('.btn-desativar-c').forEach(btn => {
 
                 btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
 
             });
-
-
-
+            
             renderizarTabelasEstatísticas();
-
         });
 
-
-
         onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
-
             folhasLocais = snapshot.val() || {};
-
             renderizarTabelasEstatísticas();
-
             atualizarResumoPainelPJ();
-
             carregarRelatorio();
-
         });
 
 
