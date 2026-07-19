@@ -1781,42 +1781,24 @@
                 let vExibir = parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
 
                 let trC = document.createElement('tr');
-
-                trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm"; // Adicionei cursor-pointer e mudei hover para azul
-    trC.onclick = () => abrirModalEdicao(key); // Adicione esta linha
-
+                trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
+                trC.onclick = () => abrirModalEdicao(key);
+                trC.innerHTML = `
                     <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
-
                     <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || c.cpf || "---"}</td>
-
                     <td class="p-3">${c.cargo || "---"}</td>
-
                     <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
-
                     <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-
                     <td class="p-3">
-
-                        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span>
-
-                        ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
-
+                        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span>${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
                     </td>
-
                     <td class="p-3 text-center">
-
                         ${c.status === 'Ativo' 
-
                             ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
-
                             : `<span class="text-xs text-slate-400">Encerrado</span>`
-
                         }
-
                     </td>
-
                 `;
-
                 tbodyGeralContratos.appendChild(trC);
 
             });
