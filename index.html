@@ -2043,74 +2043,56 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
-    // ADICIONE ESTA LINHA:
-    const editId = document.getElementById('btn-salvar-cadastro').dataset.editId;
+    const btnSalvar = document.getElementById('btn-salvar-cadastro');
+    const editId = btnSalvar.dataset.editId; // Pega o ID caso seja edição
 
-            const pacote = {
+    const pacote = {
+        nome: document.getElementById('campoNome').value,
+        cpf: document.getElementById('campoCpf').value,
+        email: document.getElementById('campoEmail').value,
+        cep: document.getElementById('campoCep').value,
+        municipio: document.getElementById('campoMunicipio').value,
+        razaoSocial: document.getElementById('campoRazaoSocial').value,
+        cnpj: document.getElementById('campoCNPJ').value,
+        emailCorp: document.getElementById('campoEmailCorp').value,
+        vigencia: document.getElementById('campoVigencia').value,
+        centroDeCusto: document.getElementById('campoCentrodeCusto').value,
+        cargo: document.getElementById('campoCargo').value,
+        valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
+        departamento: document.getElementById('campoDepartamento').value,
+        gestorDireto: document.getElementById('campoGestorDireto').value,
+        papel: document.getElementById('campoPapel').value,
+        status: document.getElementById('campoStatus').value,
+        unidade: document.getElementById('campoUnidade').value
+    };
 
-                nome: document.getElementById('campoNome').value,
+    if (!pacote.nome) { alert("Nome é obrigatório!"); return; }
 
-                cpf: document.getElementById('campoCpf').value,
+    try {
+        if (editId) {
+            // SE EXISTE UM ID, ELE APENAS ATUALIZA O REGISTRO NO MESMO CAMINHO
+            await update(ref(db, 'contratos/' + editId), pacote);
+            alert("Contrato atualizado com sucesso!");
+        } else {
+            // SE NÃO TEM ID, CRIA UM NOVO REGISTRO
+            await push(ref(db, 'contratos'), pacote);
+            alert("Novo cadastro criado!");
+        }
 
-                email: document.getElementById('campoEmail').value,
-
-                cep: document.getElementById('campoCep').value,
-
-                municipio: document.getElementById('campoMunicipio').value,
-
-                razaoSocial: document.getElementById('campoRazaoSocial').value,
-
-                cnpj: document.getElementById('campoCNPJ').value,
-
-                emailCorp: document.getElementById('campoEmailCorp').value,
-
-                vigencia: document.getElementById('campoVigencia').value,
-
-                centroDeCusto: document.getElementById('campoCentrodeCusto').value,
-
-                cargo: document.getElementById('campoCargo').value,
-
-                valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
-
-                departamento: document.getElementById('campoDepartamento').value,
-
-                gestorDireto: document.getElementById('campoGestorDireto').value,
-
-                papel: document.getElementById('campoPapel').value,
-
-                status: document.getElementById('campoStatus').value,
-
-                unidade: document.getElementById('campoUnidade').value
-
-            };
-
-
-
-            if (!pacote.nome) { alert("Nome é obrigatório!"); return; }
-
-
-
-            try {
-
-                await push(ref(db, 'contratos'), pacote);
-
-                alert("Salvo com sucesso!");
-
-                document.getElementById('modalCadastro').classList.add('hidden');
-
-                
-
-                const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'];
-
-                campos.forEach(id => document.getElementById(id).value = "");
-
-            } catch (error) {
-
-                alert("Erro ao salvar: " + error.message);
-
-            }
-
+        // Fecha e limpa
+        document.getElementById('modalCadastro').classList.add('hidden');
+        btnSalvar.removeAttribute('data-edit-id'); 
+        
+        const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade','campoStatus','campoUnidade'];
+        campos.forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.value = "";
         });
+
+    } catch (error) {
+        alert("Erro ao salvar: " + error.message);
+    }
+});
 
 
 
