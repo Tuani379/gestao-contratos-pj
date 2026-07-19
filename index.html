@@ -1680,11 +1680,9 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
 
-    checkboxes.forEach(chk => {
-
-        const idContrato = chk.value;
-
-        const dadosOrigem = contratosLocais[idContrato];
+    for (const chk of checkboxes) {
+    const idContrato = chk.value;
+    const dadosOrigem = contratosLocais[idContrato];
 
 
 
@@ -1746,17 +1744,22 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
         };
 
-        deFatoCriados++;
-        // DISPARO DO E-MAIL APÓS CRIAR A FOLHA
-        if (dadosOrigem.emailCorp) {
+        // DISPARO COM FOR...OF (mais seguro)
+    if (dadosOrigem.emailCorp) {
+        try {
             await enviarNotificacaoEmail(dadosOrigem.emailCorp, dadosOrigem.nome, {
-                tipo: "Folha Mensal",
-                evento: "Folha Regular - " + compDestino,
+                tipo: "Folha Regular Mensal",
+                evento: "Inicialização de Folha - " + compDestino,
                 valor: parseFloat(dadosOrigem.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}),
-                motivo_recusa: "A folha de pagamento deste mês foi inicializada. Por favor, acesse o portal para enviar sua Nota Fiscal."
+                motivo_recusa: "Olá, a sua folha de pagamento do mês " + compDestino + " foi inicializada. Acesse o portal para anexar sua Nota Fiscal."
             });
+            console.log("E-mail disparado para: " + dadosOrigem.emailCorp);
+        } catch (e) {
+            console.error("Erro no envio:", e);
         }
     }
+    deFatoCriados++;
+}
 
     try {
         await update(ref(db), pacotesAtualizacao);
