@@ -1515,7 +1515,30 @@ document.addEventListener('change', (e) => {
 
             contratosLocais = snapshot.val() || {};
 
-            
+            const centroSelect = document.getElementById('filtroCentroCusto');
+    const prestadorSelect = document.getElementById('filtroPrestador');
+
+    centroSelect.innerHTML = '<option value="todos">-- Todos --</option>';
+    prestadorSelect.innerHTML = '<option value="todos">-- Todos --</option>';
+
+    const centros = new Set();
+    const prestadores = new Set();
+
+    Object.values(contratosLocais).forEach(c => {
+        if(c.centroDeCusto) centros.add(c.centroDeCusto);
+        if(c.nome) prestadores.add(c.nome);
+    });
+
+    centros.forEach(c => {
+        centroSelect.innerHTML += `<option value="${c}">${c}</option>`;
+    });
+
+    prestadores.forEach(p => {
+        prestadorSelect.innerHTML += `<option value="${p}">${p}</option>`;
+    });
+
+    renderizarTabelasEstatísticas();
+});
 
             const motorSelect = document.getElementById('motorContrato');
 
@@ -2228,6 +2251,7 @@ window.abrirModalEdicao = function(id) {
     
     btnSalvar.dataset.editId = id; 
     modal.classList.remove('hidden');
+    aplicarFiltros(); 
 }
         function exportarParaCSV() {
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
@@ -2263,20 +2287,24 @@ function aplicarFiltros() {
     const prestador = document.getElementById('filtroPrestador').value;
     const tipo = document.getElementById('filtroTipoFolha').value;
 
+    // Seleciona todas as linhas de dados (ignora o cabeçalho)
     const linhas = document.querySelectorAll('#relatorios tbody tr');
 
     linhas.forEach(tr => {
-        // Ignora a linha de total
+        // Se for a linha de total, ignoramos o filtro para que ela apareça sempre ou nunca
         if (tr.classList.contains('bg-gray-100')) return;
 
-        const nome = tr.cells[0].innerText.toLowerCase();
-        const cc = tr.cells[1].innerText.toLowerCase();
-        const tipoLinha = tr.cells[2].innerText.toLowerCase();
+        // Pega o texto de cada coluna para comparar
+        const colPrestador = tr.cells[0].innerText.toLowerCase();
+        const colCentro = tr.cells[1].innerText.toLowerCase();
+        const colTipo = tr.cells[2].innerText.toLowerCase();
 
-        const matchCentro = (centro === 'todos' || cc.includes(centro.toLowerCase()));
-        const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
-        const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo));
+        // Lógica de comparação
+        const matchCentro = (centro === 'todos' || colCentro.includes(centro.toLowerCase()));
+        const matchPrestador = (prestador === 'todos' || colPrestador.includes(prestador.toLowerCase()));
+        const matchTipo = (tipo === 'todos' || colTipo.includes(tipo.toLowerCase()));
 
+        // Exibe ou esconde a linha
         tr.style.display = (matchCentro && matchPrestador && matchTipo) ? '' : 'none';
     });
 }
