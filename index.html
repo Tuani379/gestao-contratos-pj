@@ -1747,9 +1747,25 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
         };
 
         deFatoCriados++;
+        // DISPARO DO E-MAIL APÓS CRIAR A FOLHA
+        if (dadosOrigem.emailCorp) {
+            await enviarNotificacaoEmail(dadosOrigem.emailCorp, dadosOrigem.nome, {
+                tipo: "Folha Mensal",
+                evento: "Folha Regular - " + compDestino,
+                valor: parseFloat(dadosOrigem.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2}),
+                motivo_recusa: "A folha de pagamento deste mês foi inicializada. Por favor, acesse o portal para enviar sua Nota Fiscal."
+            });
+        }
+    }
 
-    });
-
+    try {
+        await update(ref(db), pacotesAtualizacao);
+        alert("Folha criada e e-mails de notificação disparados!");
+        document.getElementById('modalGerarFolha').classList.add('hidden');
+    } catch (error) {
+        alert("Erro: " + error.message);
+    }
+});
 
 
     try {
