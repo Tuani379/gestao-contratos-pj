@@ -1571,28 +1571,89 @@ document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
 
 
 
-            // --- LISTENERS PARA FOLHA REGULAR (Mantidos) ---
-document.querySelectorAll('.select-nf-status-reg').forEach(el => {
-    el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'regular'));
-});
-document.querySelectorAll('.btn-liquidar-reg').forEach(el => {
-    el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'regular'));
-});
-document.querySelectorAll('.btn-view-nf-reg').forEach(el => {
-    el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'regular'));
-});
+            function renderizarTabelasEstatísticas() {
+    competenciaSelecionada = filtroCompetencia.value;
 
-// --- LISTENERS PARA FOLHA COMPLEMENTAR (Atualizados para lista) ---
-document.querySelectorAll('.select-nf-status-comp').forEach(el => {
-    el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'complementares_lista/' + e.target.dataset.compId));
-});
-document.querySelectorAll('.btn-liquidar-comp').forEach(el => {
-    el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'complementares_lista/' + e.target.dataset.compId));
-});
-document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
-    el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'complementares_lista/' + e.target.dataset.compId));
-});
+    let qtdAtivos = 0;
+    Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo") qtdAtivos++; });
+    document.getElementById('cardContratosAtivos').innerText = qtdAtivos;
 
+    const baseFolhaMes = folhasLocais[competenciaSelecionada] || {};
+    const tbodyRegular = document.getElementById('listaFolha');
+    const tbodyComplementar = document.getElementById('listaFolhaComplementar');
+    const containerComp = document.getElementById('containerFolhaComplementar');
+
+    tbodyRegular.innerHTML = "";
+    tbodyComplementar.innerHTML = "";
+
+    let totalRegularMes = 0;
+    let totalComplementarMes = 0;
+    let temComplementar = false;
+
+    const chavesFolha = Object.keys(baseFolhaMes);
+
+    if (chavesFolha.length === 0) {
+        tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência.</td></tr>`;
+        document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
+        document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
+        containerComp.classList.add('hidden');
+        return;
+    }
+
+    chavesFolha.forEach(key => {
+        const f = baseFolhaMes[key];
+
+        // Regular
+        let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
+        totalRegularMes += subTotalReg;
+
+        let trReg = document.createElement('tr');
+        trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
+        trReg.innerHTML = `
+            <td class="p-3"><b>${f.nome}</b><br><span class="text-xs text-slate-400">${f.razaoSocial || ""}</span></td>
+            <td class="p-3 text-xs font-semibold text-slate-500">${f.cnpj || f.cpf || "---"}</td>
+            <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+            <td class="p-3 text-center">
+                <select class="select-nf-status-reg border rounded p-1 text-xs font-bold" data-id="${key}">
+                    <option value="Aguardando" ${f.regular.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
+                    <option value="Recebida ✔" ${f.regular.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                    <option value="Recusada ❌" ${f.regular.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                </select>
+            </td>
+            <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-slate-100 p-1 rounded text-xs" data-id="${key}">📄 Abrir</button>` : '---'}</td>
+            <td class="p-3 text-center">${f.regular.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-reg bg-green-600 text-white p-1 rounded text-xs" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
+        `;
+        tbodyRegular.appendChild(trReg);
+
+        // Complementar
+        if (f.complementares_lista) {
+            Object.entries(f.complementares_lista).forEach(([idComp, cItem]) => {
+                temComplementar = true;
+                totalComplementarMes += parseFloat(cItem.motorValor || 0);
+                let trComp = document.createElement('tr');
+                trComp.innerHTML = `
+                    <td class="p-3"><b>${f.nome}</b><br><span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || "Complementar"}</span></td>
+                    <td class="p-3 text-xs">${f.cnpj || f.cpf || "---"}</td>
+                    <td class="p-3 font-bold text-amber-700">R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                    <td class="p-3 text-center">
+                        <select class="select-nf-status-comp border p-1 text-xs font-bold" data-id="${key}" data-comp-id="${idComp}">
+                            <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
+                            <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                            <option value="Recusada ❌" ${cItem.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                        </select>
+                    </td>
+                    <td class="p-3 text-center">${cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-slate-100 p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '---'}</td>
+                    <td class="p-3 text-center">${cItem.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-comp bg-green-600 text-white p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
+                `;
+                tbodyComplementar.appendChild(trComp);
+            });
+        }
+    });
+
+    document.getElementById('cardTotalFolha').innerText = `R$ ${totalRegularMes.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComplementarMes.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+    containerComp.classList.toggle('hidden', !temComplementar);
+}
 
 
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
