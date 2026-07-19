@@ -1654,7 +1654,23 @@ document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
     document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComplementarMes.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
     containerComp.classList.toggle('hidden', !temComplementar);
 }
+document.addEventListener('click', (e) => {
+    const id = e.target.dataset.id;
+    const compId = e.target.dataset.compId;
+    
+    if (e.target.classList.contains('btn-liquidar-reg')) liquidarPagamentoRegistro(id, 'regular');
+    if (e.target.classList.contains('btn-view-nf-reg')) chamarVisualizadorAnexo(id, 'regular');
+    if (e.target.classList.contains('btn-liquidar-comp')) liquidarPagamentoRegistro(id, 'complementares_lista/' + compId);
+    if (e.target.classList.contains('btn-view-nf-comp')) chamarVisualizadorAnexo(id, 'complementares_lista/' + compId);
+});
 
+document.addEventListener('change', (e) => {
+    const id = e.target.dataset.id;
+    const compId = e.target.dataset.compId;
+    
+    if (e.target.classList.contains('select-nf-status-reg')) interagirStatusNF(id, e.target.value, 'regular');
+    if (e.target.classList.contains('select-nf-status-comp')) interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+});
 
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
 
