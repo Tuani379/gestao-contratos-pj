@@ -2043,6 +2043,8 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
+    // ADICIONE ESTA LINHA:
+    const editId = document.getElementById('btn-salvar-cadastro').dataset.editId;
 
             const pacote = {
 
@@ -2427,6 +2429,10 @@ window.abrirModalEdicao = function(id) {
     const modal = document.getElementById('modalCadastro');
     const titulo = document.getElementById('tituloModal');
     const btnSalvar = document.getElementById('btn-salvar-cadastro');
+    
+    // --- ESSA LINHA É A MAIS IMPORTANTE ---
+    btnSalvar.dataset.editId = id; 
+    
     const c = contratosLocais[id];
     if (!c) return;
 
