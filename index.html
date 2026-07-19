@@ -1514,82 +1514,72 @@ document.addEventListener('change', (e) => {
 
 
         // --- INTERAÇÃO COM FIREBASE ---
-        onValue(ref(db, 'contratos'), (snapshot) => {
-            contratosLocais = snapshot.val() || {};
-            
-            // 1. Lógica dos filtros
-            const centroSelect = document.getElementById('filtroCentroCusto');
-            const prestadorSelect = document.getElementById('filtroPrestador');
-            centroSelect.innerHTML = '<option value="todos">-- Todos --</option>';
-            prestadorSelect.innerHTML = '<option value="todos">-- Todos --</option>';
+onValue(ref(db, 'contratos'), (snapshot) => {
+    contratosLocais = snapshot.val() || {};
+    
+    // Filtros
+    const centroSelect = document.getElementById('filtroCentroCusto');
+    const prestadorSelect = document.getElementById('filtroPrestador');
+    centroSelect.innerHTML = '<option value="todos">-- Todos --</option>';
+    prestadorSelect.innerHTML = '<option value="todos">-- Todos --</option>';
 
-            const centros = new Set();
-            const prestadores = new Set();
-            Object.values(contratosLocais).forEach(c => {
-                if(c.centroDeCusto) centros.add(c.centroDeCusto);
-                if(c.nome) prestadores.add(c.nome);
-            });
-            centros.forEach(c => centroSelect.innerHTML += `<option value="${c}">${c}</option>`);
-            prestadores.forEach(p => prestadorSelect.innerHTML += `<option value="${p}">${p}</option>`);
+    const centros = new Set();
+    const prestadores = new Set();
+    Object.values(contratosLocais).forEach(c => {
+        if(c.centroDeCusto) centros.add(c.centroDeCusto);
+        if(c.nome) prestadores.add(c.nome);
+    });
+    centros.forEach(c => centroSelect.innerHTML += `<option value="${c}">${c}</option>`);
+    prestadores.forEach(p => prestadorSelect.innerHTML += `<option value="${p}">${p}</option>`);
 
-            // 2. Lógica das tabelas e selects (MUDOU PARA DENTRO DA FUNÇÃO)
-            const motorSelect = document.getElementById('motorContrato');
-            const pjPanelSelect = document.getElementById('selectPrestadorPJ');
-            motorSelect.innerHTML = '<option value="">Selecione...</option>';
-            pjPanelSelect.innerHTML = '<option value="">Selecione sua empresa...</option>';
+    // Tabela e Motor
+    const motorSelect = document.getElementById('motorContrato');
+    const pjPanelSelect = document.getElementById('selectPrestadorPJ');
+    motorSelect.innerHTML = '<option value="">Selecione...</option>';
+    pjPanelSelect.innerHTML = '<option value="">Selecione sua empresa...</option>';
+    const tbodyGeralContratos = document.getElementById('listaContratos');
+    tbodyGeralContratos.innerHTML = "";
 
-            const tbodyGeralContratos = document.getElementById('listaContratos');
-            tbodyGeralContratos.innerHTML = "";
+    Object.entries(contratosLocais).forEach(([key, c]) => {
+        if (c.status === "Ativo") {
+            let optA = document.createElement('option');
+            optA.value = key;
+            optA.innerText = `${c.nome} (${c.razaoSocial || "Autônomo"})`;
+            motorSelect.appendChild(optA);
+            let optB = document.createElement('option');
+            optB.value = key;
+            optB.innerText = `${c.razaoSocial || c.nome}`;
+            pjPanelSelect.appendChild(optB);
+        }
 
-            const entradas = Object.entries(contratosLocais);
-            if (entradas.length === 0) {
-                tbodyGeralContratos.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum contrato arquivado.</td></tr>`;
-            }
+        let trC = document.createElement('tr');
+        trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
+        trC.onclick = () => abrirModalEdicao(key);
+        trC.innerHTML = `
+            <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
+            <td class="p-3 text-xs">${c.cnpj || c.cpf || "---"}</td>
+            <td class="p-3">${c.cargo || "---"}</td>
+            <td class="p-3 font-bold">R$ ${parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+            <td class="p-3 text-xs">${c.centroDeCusto || "---"}</td>
+            <td><span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+            <td class="p-3 text-center">${c.status === 'Ativo' ? `<button class="btn-desativar-c bg-red-50 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs" data-id="${key}">Desativar</button>` : 'Encerrado'}</td>
+        `;
+        tbodyGeralContratos.appendChild(trC);
+    });
 
-            entradas.forEach(([key, c]) => {
-                if (c.status === "Ativo") {
-                    let optA = document.createElement('option');
-                    optA.value = key;
-                    optA.innerText = `${c.nome} (${c.razaoSocial || "Autônomo"})`;
-                    motorSelect.appendChild(optA);
+    document.querySelectorAll('.btn-desativar-c').forEach(btn => {
+        btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
+    });
 
-                    let optB = document.createElement('option');
-                    optB.value = key;
-                    optB.innerText = `${c.razaoSocial || c.nome}`;
-                    pjPanelSelect.appendChild(optB);
-                }
+    renderizarTabelasEstatísticas();
+});
 
-                let vExibir = parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2});
-                let trC = document.createElement('tr');
-                trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
-                trC.onclick = () => abrirModalEdicao(key);
-                trC.innerHTML = `
-                    <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
-                    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || c.cpf || "---"}</td>
-                    <td class="p-3">${c.cargo || "---"}</td>
-                    <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
-                    <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span>
-                    </td>
-                    <td class="p-3 text-center">
-                        ${c.status === 'Ativo' 
-                            ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
-                            : `<span class="text-xs text-slate-400">Encerrado</span>`
-                        }
-                    </td>
-                `;
-                tbodyGeralContratos.appendChild(trC);
-            });
-
-            document.querySelectorAll('.btn-desativar-c').forEach(btn => {
-                btn.addEventListener('click', (e) => desativarContratoPJ(e.target.dataset.id));
-            });
-
-            renderizarTabelasEstatísticas();
-        }); // <-- FECHAMENTO ÚNICO E CORRETO DO onValue
-
-
+onValue(ref(db, 'folhas_pagamento'), (snapshot) => {
+    folhasLocais = snapshot.val() || {};
+    renderizarTabelasEstatísticas();
+    atualizarResumoPainelPJ();
+    carregarRelatorio();
+});
 
         // --- BOTÕES E EVENTOS ---
 
