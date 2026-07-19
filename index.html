@@ -1265,71 +1265,88 @@
 
 
         function atualizarResumoPainelPJ() {
+    const key = document.getElementById('selectPrestadorPJ').value;
+    const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const quadro = document.getElementById('quadroResumoPJ');
+    const detalhes = document.getElementById('detalhesValoresPJ');
+    const seletorDiv = document.getElementById('wrapperSeletorTipoFolha'); // Captura o elemento do seletor
+    
+    const tipoSelecionado = document.querySelector('input[name="tipoFolhaUpload"]:checked')?.value || 'regular';
 
-            const key = document.getElementById('selectPrestadorPJ').value;
+    if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
+        quadro.classList.add('hidden');
+        seletorDiv.classList.add('hidden'); // Esconde o seletor se não houver dados
+        detalhes.innerHTML = "";
+        return;
+    }
 
-            const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const fContrato = folhasLocais[compPJ][key];
+    
+    // --- LÓGICA DO SELETOR ---
+    // Se existir a lista de complementares, mostramos o seletor (as bolinhas)
+    if (fContrato.complementares_lista) {
+        seletorDiv.classList.remove('hidden');
+    } else {
+        seletorDiv.classList.add('hidden');
+    }
 
-            const quadro = document.getElementById('quadroResumoPJ');
+    let html = "";
 
-            const detalhes = document.getElementById('detalhesValoresPJ');
+    // --- LÓGICA DE EXIBIÇÃO ---
+    if (tipoSelecionado === 'regular') {
+        let fixo = parseFloat(fContrato.regular.valorFixo || 0);
+        let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
+        const regularEnviada = fContrato.regular.nfArquivoBase64 && fContrato.regular.nfArquivoBase64.length > 10;
+        
+        html = `<p class="font-bold text-slate-700">Detalhes da Folha Regular:</p>
+                <p>• <b>Valor:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})} 
+                ${regularEnviada ? '<span class="text-green-600 font-bold ml-2">✔ NF Enviada</span>' : ''}</p>`;
+    } 
+    else if (tipoSelecionado === 'complementar' && fContrato.complementares_lista) {
+        html = `<p class="font-bold text-amber-800">Lançamentos Complementares:</p>`;
+        Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
+            const compEnviada = cItem.nfArquivoBase64 && cItem.nfArquivoBase64.length > 10;
+            html += `
+                <div class="mt-2 p-2 bg-amber-50 rounded border border-amber-100">
+                    <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    ${compEnviada 
+                        ? '<span class="text-green-600 font-bold text-xs">✔ NF já enviada</span>' 
+                        : `<button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>`
+                    }
+                </div>
+            `;
+        });
+    }
 
-            const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
+    detalhes.innerHTML = html;
+    quadro.classList.remove('hidden');
+}
+let idComplementarParaUpload = null;
 
+window.selecionarComp = (id) => {
+    idComplementarParaUpload = id;
+    alert("Nota vinculada ao lançamento selecionado. Agora anexe o arquivo e clique em 'Enviar Nota Fiscal'.");
+    // Seleciona o radio da complementar automaticamente
+    document.querySelector('input[name="tipoFolhaUpload"][value="complementar"]').checked = true;
+};
+// --- CONFIGURAÇÃO INICIAL DA PÁGINA ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Sistema carregado. Conectando ouvintes...");
 
+    // 1. Conecta o ouvinte dos Radio Buttons para atualizar a tela automaticamente
+    document.querySelectorAll('input[name="tipoFolhaUpload"]').forEach(radio => {
+        radio.addEventListener('change', atualizarResumoPainelPJ);
+    });
 
-            if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
-
-                quadro.classList.add('hidden');
-
-                seletorDiv.classList.add('hidden');
-
-                detalhes.innerHTML = "";
-
-                return;
-
-            }
-
-
-
-            const fContrato = folhasLocais[compPJ][key];
-
-            let fixo = parseFloat(fContrato.regular.valorFixo || 0);
-
-            let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
-
-            let complementarExtra = parseFloat(fContrato.complementar.motorValor || 0);
-
-
-
-            let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-
-            
-
-            if (fContrato.complementar.statusPagamento !== "Sem Lançamento" || complementarExtra > 0) {
-
-                seletorDiv.classList.remove('hidden');
-
-                html += `<p class="text-amber-700">• <b>Folha Complementar (${fContrato.complementar.motorEvento || 'Bônus'}):</b> R$ ${complementarExtra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-
-            } else {
-
-                seletorDiv.classList.add('hidden');
-
-                document.querySelector('input[name="tipoFolhaUpload"][value="regular"]').checked = true;
-
-            }
-
-
-
-            detalhes.innerHTML = html;
-
-            quadro.classList.remove('hidden');
-
-        }
-
-
-
+    // 2. Conecta o ouvinte dos Selects (Competência e Prestador) também, 
+    // para garantir que o quadro atualize se eles mudarem
+    document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
+    document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
+});
+// Conecta o evento de clique aos seus radio buttons existentes
+document.querySelectorAll('input[name="tipoFolhaUpload"]').forEach(radio => {
+    radio.addEventListener('change', atualizarResumoPainelPJ);
+});
         // --- RENDERIZAÇÃO DAS TABELAS ---
             // --- RENDERIZAÇÃO DAS TABELAS (VERSÃO LIMPA E FINAL) ---
 function renderizarTabelasEstatísticas() {
@@ -1429,8 +1446,11 @@ document.addEventListener('change', (e) => {
     const id = e.target.dataset.id;
     const compId = e.target.dataset.compId;
     
-    if (e.target.classList.contains('select-nf-status-reg')) interagirStatusNF(id, e.target.value, 'regular');
-    if (e.target.classList.contains('select-nf-status-comp')) interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+    if (e.target.classList.contains('select-nf-status-reg')) {
+        interagirStatusNF(id, e.target.value, 'regular');
+    } else if (e.target.classList.contains('select-nf-status-comp')) {
+         interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+    }
 });
 
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
@@ -1977,84 +1997,66 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-enviar-nota-pj').addEventListener('click', async () => {
+    const key = document.getElementById('selectPrestadorPJ').value;
+    const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const inputArquivo = document.getElementById('arquivoNFPJ');
+    const arrTipo = document.getElementsByName('tipoFolhaUpload');
+    
+    let tipoSelecionado = "regular";
+    for (let r of arrTipo) {
+        if (r.checked) tipoSelecionado = r.value;
+    }
 
-            const key = document.getElementById('selectPrestadorPJ').value;
+    if (!key) { alert("Identifique a sua Empresa!"); return; }
+    if (inputArquivo.files.length === 0) { alert("Selecione o arquivo da sua Nota Fiscal!"); return; }
 
-            const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    if (!folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
+        alert("A sua folha para este mês ainda não foi liberada pelo RH corporativo.");
+        return;
+    }
 
-            const inputArquivo = document.getElementById('arquivoNFPJ');
+    // --- NOVA LÓGICA DE CAMINHO ---
+    let caminhoBase = `folhas_pagamento/${compPJ}/${key}`;
+    let pathFinal = "";
 
-            const arrTipo = document.getElementsByName('tipoFolhaUpload');
+    if (tipoSelecionado === "regular") {
+        pathFinal = `${caminhoBase}/regular`;
+    } else {
+        // Se for complementar, precisa do ID que salvamos na função selecionarComp
+        if (!idComplementarParaUpload) {
+            alert("Por favor, clique no botão 'Anexar NF desta' em um dos lançamentos complementares acima!");
+            return;
+        }
+        pathFinal = `${caminhoBase}/complementares_lista/${idComplementarParaUpload}`;
+    }
+    // ------------------------------
 
+    const arquivo = inputArquivo.files[0];
+    const reader = new FileReader();
+    
+    reader.onloadend = async () => {
+        const base64String = reader.result;
+        try {
+            const atualizacoes = {};
+            // Agora usamos o pathFinal que aponta exatamente para o lançamento correto
+            atualizacoes[`${pathFinal}/nfArquivoBase64`] = base64String;
+            atualizacoes[`${pathFinal}/nfStatus`] = "Recebida ✔";
+            atualizacoes[`${pathFinal}/statusPagamento`] = "NF Recebida (Avaliando)";
+            atualizacoes[`${pathFinal}/motivoRecusa`] = "";
+
+            await update(ref(db), atualizacoes);
             
-
-            let tipoSelecionado = "regular";
-
-            for (let r of arrTipo) {
-
-                if (r.checked) tipoSelecionado = r.value;
-
-            }
-
-
-
-            if (!key) { alert("Identifique a sua Empresa!"); return; }
-
-            if (inputArquivo.files.length === 0) { alert("Selecione o arquivo da sua Nota Fiscal!"); return; }
-
-
-
-            if (!folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
-
-                alert("A sua folha para este mês ainda não foi liberada pelo RH corporativo.");
-
-                return;
-
-            }
-
-
-
-            const arquivo = inputArquivo.files[0];
-
-            const reader = new FileReader();
-
+            alert("Nota Fiscal enviada com sucesso ao RH!");
             
-
-            reader.onloadend = async () => {
-
-                const base64String = reader.result;
-
-                try {
-
-                    const atualizacoes = {};
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/nfArquivoBase64`] = base64String;
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/nfStatus`] = "Recebida ✔";
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/statusPagamento`] = "NF Recebida (Avaliando)";
-
-                    atualizacoes[`folhas_pagamento/${compPJ}/${key}/${tipoSelecionado}/motivoRecusa`] = "";
-
-
-
-                    await update(ref(db), atualizacoes);
-
-                    alert("Nota Fiscal enviada com sucesso ao RH!");
-
-                    inputArquivo.value = "";
-
-                } catch (error) {
-
-                    alert("Erro ao realizar upload da NF: " + error.message);
-
-                }
-
-            };
-
-            reader.readAsDataURL(arquivo);
-
-        });
+            // Limpa após sucesso
+            inputArquivo.value = "";
+            idComplementarParaUpload = null; 
+        } catch (error) {
+            alert("Erro ao realizar upload da NF: " + error.message);
+        }
+    };
+    reader.readAsDataURL(arquivo);
+});
 
         // Função para popular a tabela de Relatórios
 
@@ -2288,4 +2290,3 @@ document.getElementById('filtroTipoFolha').addEventListener('change', aplicarFil
     </script>
 
 </body></html> 
-
