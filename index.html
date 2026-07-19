@@ -1240,28 +1240,33 @@
 
 
 
-        const chamarVisualizadorAnexo = (key, tipoFolha) => {
+        const chamarVisualizadorAnexo = (key, pathTipo) => {
+    const fContrato = folhasLocais[competenciaSelecionada][key];
+    if (!fContrato) return;
 
-            const fContrato = folhasLocais[competenciaSelecionada][key];
+    // Se o pathTipo for uma string com '/', navegamos no objeto
+    // Ex: "complementares_lista/ID123" -> fContrato['complementares_lista']['ID123']
+    let arquivo = null;
+    if (pathTipo.includes('/')) {
+        const partes = pathTipo.split('/');
+        // Navega: fContrato -> complementares_lista -> ID_DO_LANCAMENTO
+        let objAtual = fContrato;
+        partes.forEach(p => {
+            if (objAtual) objAtual = objAtual[p];
+        });
+        arquivo = objAtual ? objAtual.nfArquivoBase64 : null;
+    } else {
+        // Comportamento normal para "regular"
+        arquivo = fContrato[pathTipo] ? fContrato[pathTipo].nfArquivoBase64 : null;
+    }
 
-            if (!fContrato) return;
-
-            const arquivo = fContrato[tipoFolha].nfArquivoBase64;
-
-            if (arquivo) {
-
-                const novaJanela = window.open();
-
-                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
-
-            } else {
-
-                alert("Nota fiscal não anexada.");
-
-            }
-
-        };
-
+    if (arquivo) {
+        const novaJanela = window.open();
+        novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
+    } else {
+        alert("Nota fiscal não encontrada ou não anexada.");
+    }
+};
 
 
         function atualizarResumoPainelPJ() {
