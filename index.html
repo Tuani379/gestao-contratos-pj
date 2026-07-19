@@ -1429,8 +1429,11 @@ document.addEventListener('change', (e) => {
     const id = e.target.dataset.id;
     const compId = e.target.dataset.compId;
     
-    if (e.target.classList.contains('select-nf-status-reg')) interagirStatusNF(id, e.target.value, 'regular');
-    if (e.target.classList.contains('select-nf-status-comp')) interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+    if (e.target.classList.contains('select-nf-status-reg')) {
+        interagirStatusNF(id, e.target.value, 'regular');
+    } else if (e.target.classList.contains('select-nf-status-comp')) {
+         interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+    }
 });
 
         // --- FUNÇÃO PARA RENDERIZAR OS CONTRATOS NO MODAL ---
