@@ -1321,7 +1321,20 @@ window.selecionarComp = (id) => {
     // Seleciona o radio da complementar automaticamente
     document.querySelector('input[name="tipoFolhaUpload"][value="complementar"]').checked = true;
 };
+// --- CONFIGURAÇÃO INICIAL DA PÁGINA ---
+document.addEventListener('DOMContentLoaded', () => {
+    console.log("Sistema carregado. Conectando ouvintes...");
 
+    // 1. Conecta o ouvinte dos Radio Buttons para atualizar a tela automaticamente
+    document.querySelectorAll('input[name="tipoFolhaUpload"]').forEach(radio => {
+        radio.addEventListener('change', atualizarResumoPainelPJ);
+    });
+
+    // 2. Conecta o ouvinte dos Selects (Competência e Prestador) também, 
+    // para garantir que o quadro atualize se eles mudarem
+    document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
+    document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
+});
 
         // --- RENDERIZAÇÃO DAS TABELAS ---
             // --- RENDERIZAÇÃO DAS TABELAS (VERSÃO LIMPA E FINAL) ---
