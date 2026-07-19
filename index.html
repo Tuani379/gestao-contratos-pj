@@ -1571,45 +1571,27 @@ document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
 
 
 
-            // Atribuir escutas dinâmicas criadas
+            // --- LISTENERS PARA FOLHA REGULAR (Mantidos) ---
+document.querySelectorAll('.select-nf-status-reg').forEach(el => {
+    el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'regular'));
+});
+document.querySelectorAll('.btn-liquidar-reg').forEach(el => {
+    el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'regular'));
+});
+document.querySelectorAll('.btn-view-nf-reg').forEach(el => {
+    el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'regular'));
+});
 
-            document.querySelectorAll('.select-nf-status-reg').forEach(el => {
-
-                el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'regular'));
-
-            });
-
-            document.querySelectorAll('.select-nf-status-comp').forEach(el => {
-
-                el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'complementar'));
-
-            });
-
-            document.querySelectorAll('.btn-liquidar-reg').forEach(el => {
-
-                el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'regular'));
-
-            });
-
-            document.querySelectorAll('.btn-liquidar-comp').forEach(el => {
-
-                el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'complementar'));
-
-            });
-
-            document.querySelectorAll('.btn-view-nf-reg').forEach(el => {
-
-                el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'regular'));
-
-            });
-
-            document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
-
-                el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'complementar'));
-
-            });
-
-        }
+// --- LISTENERS PARA FOLHA COMPLEMENTAR (Atualizados para lista) ---
+document.querySelectorAll('.select-nf-status-comp').forEach(el => {
+    el.addEventListener('change', (e) => interagirStatusNF(e.target.dataset.id, e.target.value, 'complementares_lista/' + e.target.dataset.compId));
+});
+document.querySelectorAll('.btn-liquidar-comp').forEach(el => {
+    el.addEventListener('click', (e) => liquidarPagamentoRegistro(e.target.dataset.id, 'complementares_lista/' + e.target.dataset.compId));
+});
+document.querySelectorAll('.btn-view-nf-comp').forEach(el => {
+    el.addEventListener('click', (e) => chamarVisualizadorAnexo(e.target.dataset.id, 'complementares_lista/' + e.target.dataset.compId));
+});
 
 
 
