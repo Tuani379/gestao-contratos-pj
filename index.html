@@ -1241,24 +1241,23 @@
 
 
         const chamarVisualizadorAnexo = (key, pathTipo) => {
+    console.log("Tentando abrir NF. Chave:", key, "Caminho:", pathTipo);
     const fContrato = folhasLocais[competenciaSelecionada][key];
-    if (!fContrato) return;
+    console.log("Objeto encontrado:", fContrato);
 
-    // Se o pathTipo for uma string com '/', navegamos no objeto
-    // Ex: "complementares_lista/ID123" -> fContrato['complementares_lista']['ID123']
     let arquivo = null;
     if (pathTipo.includes('/')) {
         const partes = pathTipo.split('/');
-        // Navega: fContrato -> complementares_lista -> ID_DO_LANCAMENTO
         let objAtual = fContrato;
         partes.forEach(p => {
             if (objAtual) objAtual = objAtual[p];
         });
         arquivo = objAtual ? objAtual.nfArquivoBase64 : null;
     } else {
-        // Comportamento normal para "regular"
         arquivo = fContrato[pathTipo] ? fContrato[pathTipo].nfArquivoBase64 : null;
     }
+
+    console.log("Arquivo Base64 encontrado:", arquivo ? "Sim (tamanho: " + arquivo.length + ")" : "Não encontrado");
 
     if (arquivo) {
         const novaJanela = window.open();
