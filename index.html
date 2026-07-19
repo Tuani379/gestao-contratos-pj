@@ -572,11 +572,14 @@
         </select>
     </div>
     <!-- ... adicione o ID também no Tipo de Folha ... -->
+    <div>
+    <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
     <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
         <option value="todos">-- Todas --</option>
         <option value="regular">Regular</option>
         <option value="complementar">Complementar</option>
     </select>
+</div>
 
         <button id="btn-exportar-csv" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
     ⬇ Exportar
@@ -1240,28 +1243,32 @@
 
 
 
-        const chamarVisualizadorAnexo = (key, tipoFolha) => {
+        const chamarVisualizadorAnexo = (key, pathTipo) => {
+    console.log("Tentando abrir NF. Chave:", key, "Caminho:", pathTipo);
+    const fContrato = folhasLocais[competenciaSelecionada][key];
+    console.log("Objeto encontrado:", fContrato);
 
-            const fContrato = folhasLocais[competenciaSelecionada][key];
+    let arquivo = null;
+    if (pathTipo.includes('/')) {
+        const partes = pathTipo.split('/');
+        let objAtual = fContrato;
+        partes.forEach(p => {
+            if (objAtual) objAtual = objAtual[p];
+        });
+        arquivo = objAtual ? objAtual.nfArquivoBase64 : null;
+    } else {
+        arquivo = fContrato[pathTipo] ? fContrato[pathTipo].nfArquivoBase64 : null;
+    }
 
-            if (!fContrato) return;
+    console.log("Arquivo Base64 encontrado:", arquivo ? "Sim (tamanho: " + arquivo.length + ")" : "Não encontrado");
 
-            const arquivo = fContrato[tipoFolha].nfArquivoBase64;
-
-            if (arquivo) {
-
-                const novaJanela = window.open();
-
-                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
-
-            } else {
-
-                alert("Nota fiscal não anexada.");
-
-            }
-
-        };
-
+    if (arquivo) {
+        const novaJanela = window.open();
+        novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
+    } else {
+        alert("Nota fiscal não encontrada ou não anexada.");
+    }
+};
 
 
         function atualizarResumoPainelPJ() {
@@ -1399,7 +1406,7 @@ function renderizarTabelasEstatísticas() {
                 </select>
             </td>
             <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-slate-100 p-1 rounded text-xs" data-id="${key}">📄 Abrir</button>` : '---'}</td>
-            <td class="p-3 text-center">${f.regular.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-reg bg-green-600 text-white p-1 rounded text-xs" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
+            <td class="p-3 text-center">${f.regular.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
         `;
         tbodyRegular.appendChild(trReg);
 
@@ -1421,7 +1428,7 @@ function renderizarTabelasEstatísticas() {
                         </select>
                     </td>
                     <td class="p-3 text-center">${cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-slate-100 p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '---'}</td>
-                    <td class="p-3 text-center">${cItem.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-comp bg-green-600 text-white p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
+                    <td class="p-3 text-center">${cItem.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
                 `;
                 tbodyComplementar.appendChild(trComp);
             });
