@@ -1335,7 +1335,10 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('selectPrestadorPJ').addEventListener('change', atualizarResumoPainelPJ);
     document.getElementById('selectCompetenciaPJ').addEventListener('change', atualizarResumoPainelPJ);
 });
-
+// Conecta o evento de clique aos seus radio buttons existentes
+document.querySelectorAll('input[name="tipoFolhaUpload"]').forEach(radio => {
+    radio.addEventListener('change', atualizarResumoPainelPJ);
+});
         // --- RENDERIZAÇÃO DAS TABELAS ---
             // --- RENDERIZAÇÃO DAS TABELAS (VERSÃO LIMPA E FINAL) ---
 function renderizarTabelasEstatísticas() {
