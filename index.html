@@ -1403,7 +1403,7 @@ function renderizarTabelasEstatísticas() {
                 </select>
             </td>
             <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-slate-100 p-1 rounded text-xs" data-id="${key}">📄 Abrir</button>` : '---'}</td>
-            <td class="p-3 text-center">${f.regular.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-reg bg-green-600 text-white p-1 rounded text-xs" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
+            <td class="p-3 text-center">${f.regular.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
         `;
         tbodyRegular.appendChild(trReg);
 
@@ -1425,7 +1425,7 @@ function renderizarTabelasEstatísticas() {
                         </select>
                     </td>
                     <td class="p-3 text-center">${cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-slate-100 p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '---'}</td>
-                    <td class="p-3 text-center">${cItem.statusPagamento === 'Pronto para Pagar' ? `<button class="btn-liquidar-comp bg-green-600 text-white p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
+                    <td class="p-3 text-center">${cItem.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
                 `;
                 tbodyComplementar.appendChild(trComp);
             });
