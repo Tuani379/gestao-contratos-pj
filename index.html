@@ -1265,68 +1265,46 @@
 
 
         function atualizarResumoPainelPJ() {
+    const key = document.getElementById('selectPrestadorPJ').value;
+    const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const quadro = document.getElementById('quadroResumoPJ');
+    const detalhes = document.getElementById('detalhesValoresPJ');
+    const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
 
-            const key = document.getElementById('selectPrestadorPJ').value;
+    if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
+        quadro.classList.add('hidden');
+        seletorDiv.classList.add('hidden');
+        detalhes.innerHTML = "";
+        return;
+    }
 
-            const compPJ = document.getElementById('selectCompetenciaPJ').value;
+    const fContrato = folhasLocais[compPJ][key];
+    let fixo = parseFloat(fContrato.regular.valorFixo || 0);
+    let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
 
-            const quadro = document.getElementById('quadroResumoPJ');
+    let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
 
-            const detalhes = document.getElementById('detalhesValoresPJ');
+    // --- Lógica corrigida para percorrer a lista ---
+    if (fContrato.complementares_lista) {
+        seletorDiv.classList.remove('hidden');
+        html += `<p class="mt-2 font-bold text-amber-800">Lançamentos Complementares:</p>`;
+        
+        Object.entries(fContrato.complementares_lista).forEach(([idComp, cItem]) => {
+            html += `
+                <div class="mt-1 p-2 bg-amber-50 rounded border border-amber-100">
+                    <p class="text-amber-700">• <b>${cItem.motorEvento || 'Complementar'}:</b> R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>
+                    <button type="button" onclick="selecionarComp('${idComp}')" class="mt-1 text-[10px] bg-amber-600 text-white px-2 py-0.5 rounded">Anexar NF desta</button>
+                </div>
+            `;
+        });
+    } else {
+        seletorDiv.classList.add('hidden');
+        document.querySelector('input[name="tipoFolhaUpload"][value="regular"]').checked = true;
+    }
 
-            const seletorDiv = document.getElementById('wrapperSeletorTipoFolha');
-
-
-
-            if (!key || !folhasLocais[compPJ] || !folhasLocais[compPJ][key]) {
-
-                quadro.classList.add('hidden');
-
-                seletorDiv.classList.add('hidden');
-
-                detalhes.innerHTML = "";
-
-                return;
-
-            }
-
-
-
-            const fContrato = folhasLocais[compPJ][key];
-
-            let fixo = parseFloat(fContrato.regular.valorFixo || 0);
-
-            let regularExtra = parseFloat(fContrato.regular.motorValor || 0);
-
-            let complementarExtra = parseFloat(fContrato.complementar.motorValor || 0);
-
-
-
-            let html = `<p>• <b>Folha Regular:</b> R$ ${(fixo + regularExtra).toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-
-            
-
-            if (fContrato.complementar.statusPagamento !== "Sem Lançamento" || complementarExtra > 0) {
-
-                seletorDiv.classList.remove('hidden');
-
-                html += `<p class="text-amber-700">• <b>Folha Complementar (${fContrato.complementar.motorEvento || 'Bônus'}):</b> R$ ${complementarExtra.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</p>`;
-
-            } else {
-
-                seletorDiv.classList.add('hidden');
-
-                document.querySelector('input[name="tipoFolhaUpload"][value="regular"]').checked = true;
-
-            }
-
-
-
-            detalhes.innerHTML = html;
-
-            quadro.classList.remove('hidden');
-
-        }
+    detalhes.innerHTML = html;
+    quadro.classList.remove('hidden');
+}
 
 
 
