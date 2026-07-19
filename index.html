@@ -2012,10 +2012,27 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
+    // 1. Muda o título
+    document.getElementById('tituloModal').innerText = "Novo Cadastro";
+    
+    // 2. Remove o ID de edição (garante que é um registro novo)
+    document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
+    
+    // 3. Limpa todos os campos
+    const campos = [
+        'campoNome','campoCpf','campoEmail','campoCep','campoMunicipio',
+        'campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia',
+        'campoCentrodeCusto','campoCargo','campoValorFixoMensal',
+        'campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'
+    ];
+    campos.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = "";
+    });
 
-            document.getElementById('modalCadastro').classList.remove('hidden');
-
-        });
+    // 4. Abre o modal
+    document.getElementById('modalCadastro').classList.remove('hidden');
+});
 
         document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => {
 
