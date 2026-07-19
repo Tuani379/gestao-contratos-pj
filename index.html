@@ -2210,23 +2210,32 @@ window.abrirModalEdicao = function(id) {
     const titulo = document.getElementById('tituloModal');
     const btnSalvar = document.getElementById('btn-salvar-cadastro');
     
-    // --- ESSA LINHA É A MAIS IMPORTANTE ---
     btnSalvar.dataset.editId = id; 
     
     const c = contratosLocais[id];
     if (!c) return;
 
     titulo.innerText = "Editar Contrato";
+    
+    // Preenchendo todos os campos que faltavam
     document.getElementById('campoNome').value = c.nome || "";
     document.getElementById('campoCpf').value = c.cpf || "";
-    document.getElementById('campoEmail').value = c.email || "";
+    document.getElementById('campoEmail').value = c.email || ""; // Agora busca o e-mail
+    document.getElementById('campoCep').value = c.cep || "";
+    document.getElementById('campoMunicipio').value = c.municipio || "";
     document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
     document.getElementById('campoCNPJ').value = c.cnpj || "";
+    document.getElementById('campoEmailCorp').value = c.emailCorp || ""; // Agora busca o e-mail corporativo
+    document.getElementById('campoVigencia').value = c.vigencia || "";
     document.getElementById('campoCentrodeCusto').value = c.centroDeCusto || "";
+    document.getElementById('campoCargo').value = c.cargo || "";
     document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+    document.getElementById('campoDepartamento').value = c.departamento || "";
+    document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
+    document.getElementById('campoPapel').value = c.papel || "";
     document.getElementById('campoStatus').value = c.status || "Ativo";
+    document.getElementById('campoUnidade').value = c.unidade || "";
     
-    btnSalvar.dataset.editId = id; 
     modal.classList.remove('hidden');
 }
         function exportarParaCSV() {
