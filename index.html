@@ -2013,149 +2013,48 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
         // Função para popular a tabela de Relatórios
 
+// --- FUNÇÃO CORRIGIDA DE RELATÓRIO ---
 function carregarRelatorio() {
-
-    // 1. Seleciona o corpo da tabela dentro da seção de relatórios
-
-    const sectionRelatorios = document.getElementById('relatorios');
-
-    const tbodyRelatorio = sectionRelatorios.querySelector('tbody');
-
+    const tbodyRelatorio = document.querySelector('#relatorios tbody');
+    if (!tbodyRelatorio) return;
     
-
-    if (!tbodyRelatorio) {
-
-        console.error("Tabela de relatórios não encontrada!");
-
-        return;
-
-    }
-
-    
-
     tbodyRelatorio.innerHTML = ''; 
-
     let totalGeral = 0;
-
     let encontrouDados = false;
 
-
-
-    // 2. Log para depuração (Abra o F12 > Console para ver isso)
-
-    console.log("Processando relatórios. Folhas carregadas:", folhasLocais);
-
-
-
-    // 3. Itera sobre as competências (ex: 07-2026)
-
     Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
-
-        
-
-        // Itera sobre os prestadores dentro daquela competência
-
         Object.entries(prestadores).forEach(([id, dados]) => {
-
-    
-
-    // --- FILTRO DE SEGURANÇA REFORÇADO ---
-
-    // 1. Verifica se tem nome e não é apenas um espaço em branco
-
-    // 2. Verifica se o valor fixo da folha é maior que zero (para ignorar registros vazios)
-
-    const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
-
-    
-
-    if (!dados.nome || dados.nome.trim() === "" || dados.nome === "Sem Nome" || valorParaValidar <= 0) {
-
-        return; // Pula esta linha se não tiver nome ou se o valor for zero
-
-    }
-
-    // --------------------------------------
-
-
-
-    encontrouDados = true;
-
-    
-
-    // Filtro de segurança para não exibir registros sem nome ou contrato vinculado
-
-    if (!dados.nome || !contratosLocais[id]) return;
-
+            if (!dados.nome || !contratosLocais[id]) return;
             
+            const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
+            if (valorParaValidar <= 0) return;
 
-            // Busca o contrato no banco de contratos usando o ID do prestador
-
-            const contrato = contratosLocais[id] || {};
-
-            const centroCusto = contrato.centroDeCusto || "N/A";
-
-            
-
-            // Calcula o valor (Regular + Ajustes)
-
-            let fixo = parseFloat(dados.regular?.valorFixo || 0);
-
-            let extra = parseFloat(dados.regular?.motorValor || 0);
-
-            let subTotal = fixo + extra;
-
-            
-
+            encontrouDados = true;
+            let subTotal = valorParaValidar;
             totalGeral += subTotal;
-
             
-
-            // Adiciona a linha na tabela
-
             tbodyRelatorio.innerHTML += `
-
                 <tr class="border-b hover:bg-gray-50">
-
-                    <td class="p-3 font-semibold">${dados.nome || 'Prestador'}</td>
-
-                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
-
+                    <td class="p-3 font-semibold">${dados.nome}</td>
+                    <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${contratosLocais[id].centroDeCusto || "N/A"}</span></td>
                     <td class="p-3">Regular</td>
-
-                    <td class="p-3 italic text-gray-600 text-xs">Fixo: ${fixo} + Ajuste: ${extra}</td>
-
+                    <td class="p-3 text-xs">Fixo: ${dados.regular.valorFixo || 0}</td>
                     <td class="p-3 text-right font-bold">R$ ${subTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-
                 </tr>
-
             `;
-
         });
-
-
-    // 4. Se não achou dados, avisa na tela
+    });
 
     if (!encontrouDados) {
-
-        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhum dado de folha processado.</td></tr>';
-
+        tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center">Nenhum dado processado.</td></tr>';
     } else {
-
         tbodyRelatorio.innerHTML += `
-
             <tr class="bg-gray-100 font-bold">
-
-                <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
-
-                <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-
+                <td colspan="4" class="p-3 text-right">TOTAL GERAL:</td>
+                <td class="p-3 text-right">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
             </tr>
-
         `;
-
     }
-
 }
 window.abrirModalEdicao = function(id) {
     const modal = document.getElementById('modalCadastro');
