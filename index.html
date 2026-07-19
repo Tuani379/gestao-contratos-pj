@@ -2248,21 +2248,28 @@ window.abrirModalEdicao = function(id) {
     modal.classList.remove('hidden');
 }
         function exportarParaCSV() {
+    // Verifica se existem dados
+    if (!folhasLocais || Object.keys(folhasLocais).length === 0) {
+        alert("Nenhum dado de folha carregado para exportar!");
+        return;
+    }
+
     let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
     csvContent += "Prestador,CNPJ/CPF,Tipo de Folha,Evento,Valor (R$),Status Pagamento\n";
 
     Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
         Object.entries(prestadores).forEach(([id, dados]) => {
-            
             // Exporta Regular
-            const reg = dados.regular;
-            const subTotalReg = parseFloat(reg.valorFixo || 0) + parseFloat(reg.motorValor || 0);
-            csvContent += `"${dados.nome}","${dados.cnpj || dados.cpf}","Regular","Folha Mensal","${subTotalReg.toFixed(2)}","${reg.statusPagamento}"\n`;
+            if (dados.regular) {
+                const reg = dados.regular;
+                const subTotalReg = parseFloat(reg.valorFixo || 0) + parseFloat(reg.motorValor || 0);
+                csvContent += `"${dados.nome || ''}","${dados.cnpj || dados.cpf || ''}","Regular","Folha Mensal","${subTotalReg.toFixed(2)}","${reg.statusPagamento || ''}"\n`;
+            }
 
             // Exporta Complementares
             if (dados.complementares_lista) {
                 Object.entries(dados.complementares_lista).forEach(([idComp, cItem]) => {
-                    csvContent += `"${dados.nome}","${dados.cnpj || dados.cpf}","Complementar","${cItem.motorEvento}","${parseFloat(cItem.motorValor || 0).toFixed(2)}","${cItem.statusPagamento}"\n`;
+                    csvContent += `"${dados.nome || ''}","${dados.cnpj || dados.cpf || ''}","Complementar","${cItem.motorEvento || ''}","${parseFloat(cItem.motorValor || 0).toFixed(2)}","${cItem.statusPagamento || ''}"\n`;
                 });
             }
         });
