@@ -2044,7 +2044,7 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
     const btnSalvar = document.getElementById('btn-salvar-cadastro');
-    const editId = btnSalvar.dataset.editId; // Pega o ID caso seja edição
+    const editId = btnSalvar.dataset.editId; // Captura o ID da edição
 
     const pacote = {
         nome: document.getElementById('campoNome').value,
@@ -2070,20 +2070,21 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
     try {
         if (editId) {
-            // SE EXISTE UM ID, ELE APENAS ATUALIZA O REGISTRO NO MESMO CAMINHO
+            // Se tem editId, ATUALIZA o contrato específico
             await update(ref(db, 'contratos/' + editId), pacote);
             alert("Contrato atualizado com sucesso!");
         } else {
-            // SE NÃO TEM ID, CRIA UM NOVO REGISTRO
+            // Se NÃO tem editId, CRIA UM NOVO
             await push(ref(db, 'contratos'), pacote);
-            alert("Novo cadastro criado!");
+            alert("Novo contrato criado!");
         }
 
-        // Fecha e limpa
+        // Limpa o modal e o ID
+        btnSalvar.removeAttribute('data-edit-id');
         document.getElementById('modalCadastro').classList.add('hidden');
-        btnSalvar.removeAttribute('data-edit-id'); 
         
-        const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade','campoStatus','campoUnidade'];
+        // Limpa os campos
+        const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'];
         campos.forEach(id => {
             const el = document.getElementById(id);
             if(el) el.value = "";
