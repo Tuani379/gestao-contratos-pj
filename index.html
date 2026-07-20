@@ -1543,7 +1543,7 @@ document.addEventListener('change', (e) => {
     const entradas = Object.entries(contratosLocais);
 
     if (entradas.length === 0) {
-        tbodyGeralContratos.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
+        tbodyGeralContratos.innerHTML = `<tr><td colspan="15" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
         return;
     }
 
@@ -1564,22 +1564,27 @@ document.addEventListener('change', (e) => {
         let trC = document.createElement('tr');
         trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
         
-        // Permite clicar na linha para editar (exceto no botão de desativar)
         trC.onclick = (e) => {
             if (!e.target.classList.contains('btn-desativar-c')) {
                 abrirModalEdicao(key);
             }
         };
 
+        // As 15 colunas mapeadas exatamente na ordem do seu <thead>
         trC.innerHTML = `
-            <td class="p-3"><b>${c.nome || "---"}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
-            <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || c.cpf || "---"}</td>
-            <td class="p-3 text-xs text-slate-600">${c.emailCorp || c.email || "---"}</td>
+            <td class="p-3 font-semibold">${c.nome || "---"}</td>
+            <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
+            <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
+            <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
+            <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
+            <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
             <td class="p-3">${c.cargo || "---"}</td>
+            <td class="p-3">${c.papel || "---"}</td>
             <td class="p-3 text-xs">${c.departamento || "---"}</td>
             <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
             <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-            <td class="p-3 text-xs text-slate-600"><b>Gestor:</b> ${c.gestorDireto || "---"}<br><b>Unid:</b> ${c.unidade || "---"}</td>
+            <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
+            <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
             <td class="p-3">
                 <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status || 'Ativo'}</span>
                 ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
