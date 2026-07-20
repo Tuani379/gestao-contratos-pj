@@ -438,14 +438,19 @@
 
                     <thead class="bg-slate-100 border-b">
     <tr>
-        <th class="p-3 text-sm font-bold text-slate-600">Razão Social / Nome</th>
-        <th class="p-3 text-sm font-bold text-slate-600">CNPJ / CPF</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Nome</th>
+        <th class="p-3 text-sm font-bold text-slate-600">CPF</th>
         <th class="p-3 text-sm font-bold text-slate-600">E-mail</th>
-        <th class="p-3 text-sm font-bold text-slate-600">Cargo / Função</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Razão Social</th>
+        <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
+        <th class="p-3 text-sm font-bold text-slate-600">E-mailCorp</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Cargo</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Função</th>
         <th class="p-3 text-sm font-bold text-slate-600">Departamento</th>
         <th class="p-3 text-sm font-bold text-slate-600">Valor Fixo Mensal</th>
         <th class="p-3 text-sm font-bold text-slate-600">Centro de Custo</th>
-        <th class="p-3 text-sm font-bold text-slate-600">Gestor / Unidade</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Gestor</th>
+        <th class="p-3 text-sm font-bold text-slate-600">Unidade</th>
         <th class="p-3 text-sm font-bold text-slate-600">Status</th>
         <th class="p-3 text-sm font-bold text-slate-600 text-center">Ações</th>
     </tr>
@@ -1594,14 +1599,19 @@ let trC = document.createElement('tr');
 trC.className = "border-b hover:bg-blue-50 cursor-pointer text-slate-700 text-sm";
 trC.onclick = () => abrirModalEdicao(key);
 trC.innerHTML = `
-    <td class="p-3"><b>${c.nome}</b><br><span class="text-xs text-slate-400">${c.razaoSocial || "---"}</span></td>
-    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || c.cpf || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.emailCorp || c.email || "---"}</td>
+    <td class="p-3 font-semibold">${c.nome || "---"}</td>
+    <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
+    <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
+    <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
+    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
+    <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
     <td class="p-3">${c.cargo || "---"}</td>
+    <td class="p-3">${c.papel || "---"}</td>
     <td class="p-3 text-xs">${c.departamento || "---"}</td>
     <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
     <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-    <td class="p-3 text-xs text-slate-600"><b>Gestor:</b> ${c.gestorDireto || "---"}<br><b>Unid:</b> ${c.unidade || "---"}</td>
+    <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
+    <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
     <td class="p-3">
         <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span>
         ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
