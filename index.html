@@ -1140,13 +1140,19 @@
             chavesFiltradas.forEach(({ idContrato, dadosFolha, cInfo }) => {
                 let subReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 let cnpjExibe = cInfo.cnpj || dadosFolha.cnpj || '---';
-                let statusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+                let rawStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+                
+                let labelStatusReg = "Enviar NF";
+                let badgeCorReg = "bg-slate-100 text-slate-700";
+                if (rawStatusReg === "Recebida ✔") { labelStatusReg = "NF enviada"; badgeCorReg = "bg-green-100 text-green-800"; }
+                else if (rawStatusReg === "Recusada ❌") { labelStatusReg = "Ajustar NF"; badgeCorReg = "bg-red-100 text-red-800"; }
+                else { badgeCorReg = "bg-amber-100 text-amber-800"; }
 
                 tbodyReg.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-bold text-slate-800">${dadosFolha.nome}<br><span class="text-[11px] font-normal text-slate-500">${cnpjExibe}</span></td>
                         <td class="p-3 font-bold text-blue-950">R$ ${subReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${statusReg === 'Recebida ✔' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusReg}</span></td>
+                        <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${badgeCorReg}">${labelStatusReg}</span></td>
                         <td class="p-3">
                             <input type="file" id="arquivo-reg-${idContrato}" accept="application/pdf,image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
                         </td>
@@ -1157,13 +1163,19 @@
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         temCompPJ = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let statusComp = cItem.nfStatus || "Aguardando";
+                        let rawStatusComp = cItem.nfStatus || "Aguardando";
+
+                        let labelStatusComp = "Enviar NF";
+                        let badgeCorComp = "bg-slate-100 text-slate-700";
+                        if (rawStatusComp === "Recebida ✔") { labelStatusComp = "NF enviada"; badgeCorComp = "bg-green-100 text-green-800"; }
+                        else if (rawStatusComp === "Recusada ❌") { labelStatusComp = "Ajustar NF"; badgeCorComp = "bg-red-100 text-red-800"; }
+                        else { badgeCorComp = "bg-amber-100 text-amber-800"; }
 
                         tbodyComp.innerHTML += `
                             <tr class="border-b hover:bg-amber-50/50">
                                 <td class="p-3 font-bold text-amber-950">${dadosFolha.nome}<br><span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || 'Complementar'}</span></td>
                                 <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${statusComp === 'Recebida ✔' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusComp}</span></td>
+                                <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${badgeCorComp}">${labelStatusComp}</span></td>
                                 <td class="p-3">
                                     <input type="file" id="arquivo-comp-${idContrato}-${idComp}" accept="application/pdf,image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer">
                                 </td>
