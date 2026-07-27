@@ -902,10 +902,15 @@
                 let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
                 totalRegularMes += subTotalReg;
 
-                // Prioridade absoluta para o CNPJ do contrato atual, se não houver pega o CNPJ da folha ou o CPF
                 let docIdentificacao = (contratoReal.cnpj && contratoReal.cnpj.trim() !== "" && contratoReal.cnpj !== "---") 
                     ? contratoReal.cnpj 
                     : ((f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (contratoReal.cpf || f.cpf || "---"));
+
+                // Tratamento do Botão de Liquidar para a Folha Regular
+                let statusRegHTML = f.regular.statusPagamento || "Aguardando NF";
+                if (statusRegHTML === "Pronto para Pagar" || statusRegHTML.includes("Recebida")) {
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-3 rounded text-xs font-bold shadow-sm transition">💰 Liquidar</button>`;
+                }
 
                 let trReg = document.createElement('tr');
                 trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
@@ -921,7 +926,7 @@
                         </select>
                     </td>
                     <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-slate-100 p-1 rounded text-xs" data-id="${key}">📄 Abrir</button>` : '---'}</td>
-                    <td class="p-3 text-center">${f.regular.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
+                    <td class="p-3 text-center">${statusRegHTML}</td>
                 `;
                 tbodyRegular.appendChild(trReg);
 
@@ -929,6 +934,12 @@
                     Object.entries(f.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementar = true;
                         totalComplementarMes += parseFloat(cItem.motorValor || 0);
+
+                        let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
+                        if (statusCompHTML === "Pronto para Pagar" || statusCompHTML.includes("Recebida")) {
+                            statusCompHTML = `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-3 rounded text-xs font-bold shadow-sm transition" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
+                        }
+
                         let trComp = document.createElement('tr');
                         trComp.className = "border-b hover:bg-amber-50/40 text-slate-700 text-sm";
                         trComp.innerHTML = `
@@ -943,7 +954,7 @@
                                 </select>
                             </td>
                             <td class="p-3 text-center">${cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-slate-100 p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '---'}</td>
-                            <td class="p-3 text-center">${cItem.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
+                            <td class="p-3 text-center">${statusCompHTML}</td>
                         `;
                         tbodyComplementar.appendChild(trComp);
                     });
@@ -1350,7 +1361,7 @@
                     const atualizacoes = {};
                     atualizacoes[`${pathFinal}/nfArquivoBase64`] = base64String;
                     atualizacoes[`${pathFinal}/nfStatus`] = "Recebida ✔";
-                    atualizacoes[`${pathFinal}/statusPagamento`] = "NF Recebida (Avaliando)";
+                    atualizacoes[`${pathFinal}/statusPagamento`] = "Pronto para Pagar";
                     atualizacoes[`${pathFinal}/motivoRecusa`] = "";
 
                     await update(ref(db), atualizacoes);
