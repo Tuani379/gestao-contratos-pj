@@ -59,8 +59,9 @@
                             <p id="dropdown-empresa-ativa" class="text-xs font-bold text-blue-900">Carregando...</p>
                         </div>
                         <div class="space-y-1">
+                            <button onclick="abrirConfiguracoesEmpresa()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🏢 Informações da Empresa</button>
                             <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔑 Alterar Senha</button>
-                            <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🏢 Trocar / Outras Contas</button>
+                            <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔄 Trocar / Outras Contas</button>
                         </div>
                         <div class="border-t pt-2 mt-2">
                             <button onclick="fazerLogout()" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition">🚪 Sair da Conta</button>
@@ -125,7 +126,7 @@
             <div class="flex items-center gap-2">
                 <span class="font-extrabold text-blue-950 text-base">ConnectPJ</span>
                 <span class="text-slate-300">|</span>
-                <span id="label-empresa-topo" class="text-blue-900 font-bold text-xs bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">Empresa: Carregando...</span>
+                <span id="label-empresa-topo" class="text-blue-900 font-bold text-xs bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200 cursor-pointer hover:bg-blue-100 transition" onclick="abrirConfiguracoesEmpresa()" title="Clique para gerenciar dados da empresa">Empresa: Carregando...</span>
                 <span class="text-slate-300">|</span>
                 <span id="data-atual-sistema" class="text-slate-600 font-medium text-xs"></span>
             </div>
@@ -416,6 +417,123 @@
                 </div>
             </section>
 
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (EXATAMENTE COMO NO PRINT) -->
+            <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
+                <div class="flex justify-between items-start border-b pb-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-pink-600 flex items-center gap-2">Informações da empresa</h2>
+                        <p class="text-xs text-slate-500 mt-1">Consulte e gerencie as informações cadastraias da empresa e personalize a aparência da plataforma.</p>
+                    </div>
+                    <button onclick="mostrarSecao('dashboard')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
+                </div>
+
+                <!-- CARD 1: LOGO DA EMPRESA -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Logo da empresa</h3>
+                            <p class="text-xs text-slate-500">Personalize a aparência da plataforma com o logotipo da sua organização.</p>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4">
+                        <p class="text-xs font-semibold text-slate-700 mb-2">Adicione o logotipo da sua empresa.</p>
+                        <div class="flex items-center gap-4">
+                            <div id="preview-logo-container" class="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 overflow-hidden">
+                                <span class="text-xs text-slate-400 font-bold">LOGO</span>
+                            </div>
+                            <div>
+                                <input type="file" id="inputArquivoLogo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-pink-50 file:text-pink-700 hover:file:bg-pink-100 cursor-pointer">
+                                <p class="text-[10px] text-slate-400 mt-1">PNG, JPG ou SVG recomendados.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 2: DADOS CADASTRAIS -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Dados cadastrais</h3>
+                            <p class="text-xs text-slate-500">Consulte e gerencie as informações cadastrais da empresa.</p>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">CNPJ</label>
+                            <input type="text" id="emp-cnpj" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Inscrição estadual</label>
+                            <input type="text" id="emp-inscEstadual" placeholder="-" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Inscrição municipal</label>
+                            <input type="text" id="emp-inscMunicipal" placeholder="-" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Razão social</label>
+                            <input type="text" id="emp-razaoSocial" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Nome fantasia</label>
+                            <input type="text" id="emp-nomeFantasia" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Ramo de atividade</label>
+                            <input type="text" id="emp-ramoAtividade" placeholder="-" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Telefone</label>
+                            <input type="text" id="emp-telefone" placeholder="-" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 3: ENDEREÇO -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Endereço</h3>
+                            <p class="text-xs text-slate-500">Visualize seus dados de endereço da empresa.</p>
+                        </div>
+                    </div>
+                    <div class="border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">CEP</label>
+                            <input type="text" id="emp-cep" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div class="md:col-span-2">
+                            <label class="block font-semibold text-slate-400 mb-1">Logradouro</label>
+                            <input type="text" id="emp-logradouro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Número</label>
+                            <input type="text" id="emp-numero" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Complemento (opcional)</label>
+                            <input type="text" id="emp-complemento" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Bairro</label>
+                            <input type="text" id="emp-bairro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Cidade</label>
+                            <input type="text" id="emp-cidade" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-400 mb-1">Estado</label>
+                            <input type="text" id="emp-estado" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 pt-2">
+                    <button onclick="salvarInformacoesEmpresa()" class="bg-pink-600 hover:bg-pink-700 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition shadow-md">Salvar Alterações</button>
+                </div>
+            </section>
+
             <!-- PORTAL DO PRESTADOR -->
             <section id="area-prestador" class="hidden max-w-xl mx-auto p-6 bg-white rounded-xl border shadow-sm space-y-6">
                 <div class="border-b pb-4">
@@ -445,7 +563,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -585,23 +703,94 @@
         };
 
         window.fazerLogout = () => { signOut(auth); };
-        window.toggleSenha = () => { const i = document.getElementById('login-senha-saas'); i.type = i.type === "password" ? "text" : "password"; };
-        window.abrirConfiguracoes = () => { alert("Configurações"); };
-        window.abrirAjuda = () => { alert("Ajuda"); };
+
+        window.abrirConfiguracoesEmpresa = () => {
+            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('secao-info-empresa').classList.remove('hidden');
+            
+            // Carregar dados da empresa ativa do banco
+            const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
+            get(ref(db, pathInfo)).then((snapshot) => {
+                const dados = snapshot.val() || {};
+                document.getElementById('emp-cnpj').value = dados.cnpj || (empresaAtivaId === 'matriz' ? '42.563.021/0001-70' : '');
+                document.getElementById('emp-inscEstadual').value = dados.inscEstadual || '';
+                document.getElementById('emp-inscMunicipal').value = dados.inscMunicipal || '';
+                document.getElementById('emp-razaoSocial').value = dados.razaoSocial || empresaAtivaNome;
+                document.getElementById('emp-nomeFantasia').value = dados.nomeFantasia || '';
+                document.getElementById('emp-ramoAtividade').value = dados.ramoAtividade || '';
+                document.getElementById('emp-telefone').value = dados.telefone || '';
+                document.getElementById('emp-cep').value = dados.cep || '';
+                document.getElementById('emp-logradouro').value = dados.logradouro || '';
+                document.getElementById('emp-numero').value = dados.numero || '';
+                document.getElementById('emp-complemento').value = dados.complemento || '';
+                document.getElementById('emp-bairro').value = dados.bairro || '';
+                document.getElementById('emp-cidade').value = dados.cidade || '';
+                document.getElementById('emp-estado').value = dados.estado || '';
+
+                if (dados.logoBase64) {
+                    document.getElementById('preview-logo-container').innerHTML = `<img src="${dados.logoBase64}" class="w-full h-full object-contain">`;
+                } else {
+                    document.getElementById('preview-logo-container').innerHTML = `<span class="text-xs text-slate-400 font-bold">LOGO</span>`;
+                }
+            });
+        };
+
+        window.salvarInformacoesEmpresa = async () => {
+            const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
+            const fileInput = document.getElementById('inputArquivoLogo');
+            
+            const salvarDadosNoBanco = async (logoBase64Url = null) => {
+                const pacote = {
+                    cnpj: document.getElementById('emp-cnpj').value,
+                    inscEstadual: document.getElementById('emp-inscEstadual').value,
+                    inscMunicipal: document.getElementById('emp-inscMunicipal').value,
+                    razaoSocial: document.getElementById('emp-razaoSocial').value,
+                    nomeFantasia: document.getElementById('emp-nomeFantasia').value,
+                    ramoAtividade: document.getElementById('emp-ramoAtividade').value,
+                    telefone: document.getElementById('emp-telefone').value,
+                    cep: document.getElementById('emp-cep').value,
+                    logradouro: document.getElementById('emp-logradouro').value,
+                    numero: document.getElementById('emp-numero').value,
+                    complemento: document.getElementById('emp-complemento').value,
+                    bairro: document.getElementById('emp-bairro').value,
+                    cidade: document.getElementById('emp-cidade').value,
+                    estado: document.getElementById('emp-estado').value
+                };
+                if (logoBase64Url) pacote.logoBase64 = logoBase64Url;
+
+                await update(ref(db, pathInfo), pacote);
+                alert("Informações da empresa salvas com sucesso!");
+                localStorage.setItem('connectpj_empresa_nome', pacote.razaoSocial);
+                document.getElementById('dropdown-empresa-ativa').innerText = pacote.razaoSocial;
+                document.getElementById('label-empresa-topo').innerText = `Empresa: ${pacote.razaoSocial}`;
+            };
+
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    await salvarDadosNoBanco(reader.result);
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                await salvarDadosNoBanco();
+            }
+        };
 
         window.mostrarSecao = (id) => {
-            ['dashboard', 'contratos', 'relatorios'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
             
             const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'relatorios': 'btn-relatorios' };
             Object.entries(mapBotoes).forEach(([sec, btnId]) => {
                 const btn = document.getElementById(btnId);
-                if (sec === id) {
-                    btn.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-900');
-                    btn.classList.add('border-blue-600', 'text-blue-950');
-                } else {
-                    btn.classList.remove('border-blue-600', 'text-blue-950');
-                    btn.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-900');
+                if (btn) {
+                    if (sec === id) {
+                        btn.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-900');
+                        btn.classList.add('border-blue-600', 'text-blue-950');
+                    } else {
+                        btn.classList.remove('border-blue-600', 'text-blue-950');
+                        btn.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-900');
+                    }
                 }
             });
 
