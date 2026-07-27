@@ -8,13 +8,44 @@
 
     <!-- Script Oficial do EmailJS -->
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script></head><body class="bg-slate-50 font-sans">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script></head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
 <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
                 <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa</p>
             </div>
+            <!-- PAINEL LATERAL DE PERFIL E NAVEGAÇÃO -->
+<aside class="bg-blue-950 text-white w-64 flex flex-col justify-between p-6 shadow-2xl z-20">
+    <div>
+        <div class="text-center mb-8 pb-4 border-b border-blue-900">
+            <div id="user-avatar" class="w-16 h-16 mx-auto rounded-full bg-white text-blue-950 flex items-center justify-center font-extrabold text-lg mb-3 shadow-inner border-2 border-blue-300">
+                --
+            </div>
+            <h2 id="user-name" class="font-extrabold text-sm uppercase tracking-wide truncate">Carregando...</h2>
+            <span id="user-role" class="text-xs text-blue-400 mt-0.5 block font-medium">Administrador</span>
+        </div>
+
+        <div class="space-y-2">
+            <div class="text-xs text-blue-400 uppercase font-bold tracking-wider mb-2">Navegação</div>
+            <button onclick="mudarPainelModo('rh')" id="menu-btn-rh" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition">Painel Corporativo (RH/Fin)</button>
+            <button onclick="mudarPainelModo('pj')" id="menu-btn-pj" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition">Área do Prestador (PJ)</button>
+        </div>
+    </div>
+
+    <!-- RODAPÉ DA BARRA LATERAL (BOTÕES: SAIR, CONFIGURAÇÕES, AJUDA) -->
+    <div class="grid grid-cols-3 gap-2 pt-4 border-t border-blue-900">
+        <button onclick="fazerLogout()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-red-600 p-2 rounded-xl text-[11px] font-semibold transition" title="Sair">
+            <span class="text-sm mb-0.5">🚪</span> Sair
+        </button>
+        <button onclick="abrirConfiguracoes()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-blue-800 p-2 rounded-xl text-[11px] font-semibold transition" title="Configurações">
+            <span class="text-sm mb-0.5">⚙️</span>
+        </button>
+        <button onclick="abrirAjuda()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-blue-800 p-2 rounded-xl text-[11px] font-semibold transition" title="Ajuda">
+            <span class="text-sm mb-0.5">❓</span>
+        </button>
+    </div>
+</aside>
 
             <form id="form-login-saas" class="space-y-4">
                 <div>
