@@ -578,7 +578,7 @@
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Seu e-mail master configurado como dono da plataforma
+        // Seu e-mail master configurado inquestionavelmente como dono da plataforma
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
 
         const dataHojeObj = new Date();
@@ -599,7 +599,7 @@
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
         if (filtroRelatorioCompetencia) {
-            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Todas as Competências --</option>';
+            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Toutes as Competências --</option>';
         }
 
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
@@ -679,22 +679,57 @@
                 let userEmail = (user.email || "").toLowerCase();
                 const eAdminMaster = (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase());
 
-                onValue(ref(db, 'empresas_clientes'), (snapshot) => {
-                    const empresas = snapshot.val() || {};
-                    let empresaEncontradaId = null;
-                    let empresaEncontradaNome = null;
-                    let nomeResponsavelEmpresa = null;
+                // SE FOR O DONO MASTER, FORÇA O RESET IMEDIATO PARA A MATRIZ E IGNORA VINCULOS DE CLIENTE
+                if (eAdminMaster) {
+                    empresaAtivaId = "matriz";
+                    empresaAtivaNome = "CONNECTPJ MATRIZ";
+                    localStorage.setItem('connectpj_empresa_ativa', "matriz");
+                    localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
+                    
+                    document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
+                    document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
-                    Object.entries(empresas).forEach(([id, emp]) => {
-                        if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail) {
-                            empresaEncontradaId = id;
-                            empresaEncontradaNome = emp.razaoSocial;
-                            nomeResponsavelEmpresa = emp.razaoSocial;
-                        }
-                    });
+                    const btnTrocarContas = document.getElementById('menu-trocar-outras-contas');
+                    if (btnTrocarContas) btnTrocarContas.parentElement.style.display = 'block';
+                    const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
+                    if (btnNovaEmpresaMaster) btnNovaEmpresaMaster.style.display = 'block';
 
-                    // Se NÃO for o Master, trava o escopo exclusivamente na empresa do cliente
-                    if (!eAdminMaster) {
+                    const badgePerfil = document.getElementById('badge-tipo-usuario');
+                    if (badgePerfil) {
+                        badgePerfil.innerText = "Master / Admin";
+                        badgePerfil.className = "bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded";
+                    }
+
+                    let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
+                    let partes = nomeEmail.split(' ');
+                    let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+                    
+                    document.getElementById('user-name').innerText = nomeFormatado;
+                    document.getElementById('dropdown-nome-usuario').innerText = nomeFormatado;
+                    document.getElementById('dropdown-email-usuario').innerText = userEmail;
+                    
+                    let iniciais = partes[0].charAt(0);
+                    if (partes.length > 1) {
+                        iniciais += partes[partes.length - 1].charAt(0);
+                    }
+                    document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
+
+                } else {
+                    // Modo Cliente Comum
+                    onValue(ref(db, 'empresas_clientes'), (snapshot) => {
+                        const empresas = snapshot.val() || {};
+                        let empresaEncontradaId = null;
+                        let empresaEncontradaNome = null;
+                        let nomeResponsavelEmpresa = null;
+
+                        Object.entries(empresas).forEach(([id, emp]) => {
+                            if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail) {
+                                empresaEncontradaId = id;
+                                empresaEncontradaNome = emp.razaoSocial;
+                                nomeResponsavelEmpresa = emp.razaoSocial;
+                            }
+                        });
+
                         if (empresaEncontradaId) {
                             empresaAtivaId = empresaEncontradaId;
                             empresaAtivaNome = empresaEncontradaNome;
@@ -708,13 +743,11 @@
                         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
                         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
-                        // Oculta completamente o botão de trocar contas e de criar nova empresa para clientes comuns
                         const btnTrocarContas = document.getElementById('menu-trocar-outras-contas');
                         if (btnTrocarContas) btnTrocarContas.parentElement.style.display = 'none';
                         const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
                         if (btnNovaEmpresaMaster) btnNovaEmpresaMaster.style.display = 'none';
 
-                        // Atualiza o crachá do perfil para indicar que é cliente
                         const badgePerfil = document.getElementById('badge-tipo-usuario');
                         if (badgePerfil) {
                             badgePerfil.innerText = "Cliente";
@@ -734,23 +767,8 @@
                             }
                             document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
                         }
-                    } else {
-                        // Modo Administrador Master (Você - tuanicaraca@gmail.com)
-                        let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
-                        let partes = nomeEmail.split(' ');
-                        let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
-                        
-                        document.getElementById('user-name').innerText = nomeFormatado;
-                        document.getElementById('dropdown-nome-usuario').innerText = nomeFormatado;
-                        document.getElementById('dropdown-email-usuario').innerText = userEmail;
-                        
-                        let iniciais = partes[0].charAt(0);
-                        if (partes.length > 1) {
-                            iniciais += partes[partes.length - 1].charAt(0);
-                        }
-                        document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
-                    }
-                }, { onlyOnce: true });
+                    }, { onlyOnce: true });
+                }
 
             } else {
                 telaLogin.classList.remove('hidden');
@@ -996,7 +1014,12 @@
             carregarEmpresasSeletor(e.target.value);
         });
 
-        window.fazerLogout = () => { signOut(auth); };
+        window.fazerLogout = () => { 
+            localStorage.removeItem('connectpj_empresa_ativa');
+            localStorage.removeItem('connectpj_empresa_nome');
+            signOut(auth); 
+        };
+
         window.toggleSenha = () => {
             const inputSenha = document.getElementById('login-senha-saas');
             const iconeOlho = document.getElementById('icone-olho');
