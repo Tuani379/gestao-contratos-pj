@@ -282,7 +282,7 @@
                                 <th class="p-3">E-mail Corp.</th>
                                 <th class="p-3">Cargo</th>
                                 <th class="p-3">Valor Fixo</th>
-                                <th class="p-3">Departamento</th>
+                                <th class="p-3">Centro de Custo</th>
                                 <th class="p-3">Gestor Direto</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Ações</th>
@@ -321,7 +321,16 @@
                             <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded text-sm">
                             <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
                             <input id="campoValorFixoMensal" type="number" placeholder="Valor Fixo Mensal (R$)" class="w-full p-2 border rounded text-sm">
-                            <input id="campoDepartamento" type="text" placeholder="Departamento" class="w-full p-2 border rounded text-sm">
+                            
+                            <!-- CENTRO DE CUSTO CORRIGIDO -->
+                            <div>
+                                <label class="block text-[11px] font-bold text-slate-700 mb-1">Centro de Custo</label>
+                                <select id="campoDepartamento" class="w-full p-2 border rounded text-sm bg-white">
+                                    <option value="Prestador">Prestador</option>
+                                    <option value="105 - Prestadores de Serviço Financeiro">105 - Prestadores de Serviço Financeiro</option>
+                                </select>
+                            </div>
+
                             <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
                             <select id="campoStatus" class="w-full p-2 border rounded bg-white text-sm">
                                 <option value="Ativo">Ativo</option>
@@ -656,7 +665,8 @@
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto'].forEach(id => document.getElementById(id).value = '');
+            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoCargo','campoValorFixoMensal','campoGestorDireto'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('campoDepartamento').value = "Prestador";
             document.getElementById('modalCadastro').classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => document.getElementById('modalCadastro').classList.add('hidden'));
@@ -705,7 +715,7 @@
             document.getElementById('campoEmailCorp').value = c.emailCorp || "";
             document.getElementById('campoCargo').value = c.cargo || "";
             document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
-            document.getElementById('campoDepartamento').value = c.departamento || "";
+            document.getElementById('campoDepartamento').value = c.departamento || "Prestador";
             document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
             document.getElementById('campoStatus').value = c.status || "Ativo";
             document.getElementById('modalCadastro').classList.remove('hidden');
@@ -794,7 +804,7 @@
                                 <td class="p-3 text-center">
                                     <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
                                         <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
-                                        <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                        <option value="Recebida ✔" ${cItem.nfStatus === 'Receb_ida ✔' ? 'selected' : ''}>Recebida ✔</option>
                                         <option value="Recusada ❌" ${cItem.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                                     </select>
                                 </td>
@@ -829,7 +839,7 @@
                 const contratoInfo = contratosLocais[idPrestador] || {};
                 const nomePrestador = dadosPrestador.nome;
                 const departamento = contratoInfo.departamento || "Prestador";
-                const centroCustoExibicao = departamento === "Prestador" ? `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">Prestador</span>` : `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">${departamento}</span>`;
+                const centroCustoExibicao = `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">${departamento}</span>`;
 
                 if (fPrestador !== "todos" && nomePrestador !== fPrestador) return;
                 if (fCC !== "todos" && departamento !== fCC) return;
