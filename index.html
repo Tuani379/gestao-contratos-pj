@@ -851,11 +851,20 @@
         };
 
         window.mudarPainelModo = (modo) => {
+            const btnRh = document.getElementById('menu-btn-rh');
+            const btnPj = document.getElementById('menu-btn-pj');
+
             if (modo === 'rh') {
+                btnRh.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
+                btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition";
+                
                 document.getElementById('menu-rh').classList.remove('hidden');
                 document.getElementById('area-prestador').classList.add('hidden');
                 mostrarSecao('dashboard');
             } else {
+                btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
+                btnRh.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition";
+
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
