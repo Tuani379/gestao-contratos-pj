@@ -807,7 +807,8 @@
 
     </main>
 
-
+<div class="flex-1 flex flex-col h-screen overflow-hidden">
+    </div>
 
     <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
@@ -957,13 +958,38 @@ const auth = getAuth(app);
 
     // Monitora o estado da sessão (esconde a tela de login se logado)
     onAuthStateChanged(auth, async (user) => {
-        const telaLogin = document.getElementById('tela-login');
-        if (user) {
-            telaLogin.classList.add('hidden'); // Oculta o login
-        } else {
-            telaLogin.classList.remove('hidden'); // Mostra o login se deslogado
+    const telaLogin = document.getElementById('tela-login');
+    if (user) {
+        telaLogin.classList.add('hidden');
+
+        // Extrai o nome base do e-mail e gera as iniciais automaticamente
+        let nomeEmail = user.email.split('@')[0].replace('.', ' ');
+        let partes = nomeEmail.split(' ');
+        let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
+
+        document.getElementById('user-name').innerText = nomeFormatado;
+
+        let iniciais = partes[0].charAt(0);
+        if (partes.length > 1) {
+            iniciais += partes[partes.length - 1].charAt(0);
+        } else if (partes[0].length > 1) {
+            iniciais += partes[0].charAt(1);
         }
-    });
+        document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
+
+    } else {
+        telaLogin.classList.remove('hidden');
+    }
+});
+
+// Funções auxiliares dos botões de rodapé
+window.abrirConfiguracoes = () => {
+    alert("Módulo de Configurações em desenvolvimento.");
+};
+
+window.abrirAjuda = () => {
+    alert("Central de Ajuda ConnectPJ.");
+};
 
     window.fazerLogout = () => {
         signOut(auth);
