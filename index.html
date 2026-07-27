@@ -689,7 +689,6 @@
                         }
                     });
 
-                    // Se encontrou uma empresa vinculada e NÃO é o e-mail mestre/admin principal da matriz, trava o ID nela
                     const eAdminMaster = (userEmail.toLowerCase() === "tuanicaraca@gmail.com" || userEmail.toLowerCase() === "tuanisantoscaraca@hotmail.com"); 
 
                     if (empresaEncontradaId && !eAdminMaster) {
@@ -720,7 +719,6 @@
                             document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
                         }
                     } else {
-                        // Modo Administrador Master (Matriz)
                         let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                         let partes = nomeEmail.split(' ');
                         let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
@@ -872,11 +870,21 @@
                 empresasLocais = snapshot.val() || {};
                 container.innerHTML = "";
 
+                const userEmail = auth.currentUser ? auth.currentUser.email.toLowerCase() : "";
+                const eAdminMaster = (userEmail === "tuanicaraca@gmail.com" || userEmail === "tuanisantoscaraca@hotmail.com");
+
                 const entradas = Object.entries(empresasLocais);
-                let listaRender = [{ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", status: "Ativo" }];
+                let listaRender = [];
                 
+                // Se for admin master, exibe a Matriz e todas as empresas. Se for cliente comum, exibe apenas a empresa dele!
+                if (eAdminMaster) {
+                    listaRender.push({ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", status: "Ativo" });
+                }
+
                 entradas.forEach(([id, emp]) => {
-                    listaRender.push({ id, razaoSocial: emp.razaoSocial, cnpj: emp.cnpj, status: emp.status || "Ativo" });
+                    if (eAdminMaster || (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail)) {
+                        listaRender.push({ id, razaoSocial: emp.razaoSocial, cnpj: emp.cnpj, status: emp.status || "Ativo" });
+                    }
                 });
 
                 const filtradas = listaRender.filter(e => 
@@ -901,7 +909,7 @@
                         if (inativa) {
                             acaoBotaoHTML = `<button onclick="mudarStatusEmpresa('${emp.id}', 'Ativo', '${emp.razaoSocial}')" class="text-xs font-bold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition">Ativar 🔄</button>`;
                         } else {
-                            let botaoDesativar = `<button onclick="mudarStatusEmpresa('${emp.id}', 'Inativo', '${emp.razaoSocial}')" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl transition" title="Desativar Empresa">🗑️</button>`;
+                            let botaoDesativar = eAdminMaster ? `<button onclick="mudarStatusEmpresa('${emp.id}', 'Inativo', '${emp.razaoSocial}')" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl transition" title="Desativar Empresa">🗑️</button>` : "";
                             let acaoAcessar = ativa 
                                 ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
                                 : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>`;
