@@ -897,11 +897,15 @@
 
             chavesFolha.forEach(key => {
                 const f = baseFolhaMes[key];
+                const contratoReal = contratosLocais[key] || {};
 
                 let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
                 totalRegularMes += subTotalReg;
 
-                let docIdentificacao = (f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (f.cpf || "---");
+                // Prioridade absoluta para o CNPJ do contrato atual, se não houver pega o CNPJ da folha ou o CPF
+                let docIdentificacao = (contratoReal.cnpj && contratoReal.cnpj.trim() !== "" && contratoReal.cnpj !== "---") 
+                    ? contratoReal.cnpj 
+                    : ((f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (contratoReal.cpf || f.cpf || "---"));
 
                 let trReg = document.createElement('tr');
                 trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
