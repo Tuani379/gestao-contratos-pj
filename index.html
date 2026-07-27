@@ -72,7 +72,7 @@
                             <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
                                 <span>🔑</span> Alterar Senha
                             </button>
-                            <button onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
+                            <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
                                 <span>🏢</span> Trocar / Outras Contas
                             </button>
                         </div>
@@ -135,7 +135,7 @@
                     <h2 class="text-xl font-extrabold text-slate-900 mb-1">Empresas Cadastradas</h2>
                     <p class="text-xs text-slate-500">Gerencie e alterne entre as organizações do grupo.</p>
                 </div>
-                <button onclick="abrirModalNovaEmpresaMaster()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm">
+                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm">
                     + Nova Empresa
                 </button>
             </div>
@@ -689,13 +689,22 @@
                         }
                     });
 
-                    if (empresaEncontradaId) {
+                    // Se encontrou uma empresa vinculada e NÃO é o e-mail mestre/admin principal da matriz, trava o ID nela
+                    const eAdminMaster = (userEmail.toLowerCase() === "tuanicaraca@gmail.com" || userEmail.toLowerCase() === "tuanisantoscaraca@hotmail.com"); 
+
+                    if (empresaEncontradaId && !eAdminMaster) {
                         empresaAtivaId = empresaEncontradaId;
                         empresaAtivaNome = empresaEncontradaNome;
                         localStorage.setItem('connectpj_empresa_ativa', empresaAtivaId);
                         localStorage.setItem('connectpj_empresa_nome', empresaAtivaNome);
                         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
                         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
+
+                        // Oculta opção de trocar contas e de criar nova empresa para clientes comuns
+                        const btnTrocarContas = document.getElementById('menu-trocar-outras-contas');
+                        if (btnTrocarContas) btnTrocarContas.parentElement.style.display = 'none';
+                        const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
+                        if (btnNovaEmpresaMaster) btnNovaEmpresaMaster.style.display = 'none';
 
                         if (nomeResponsavelEmpresa) {
                             let partes = nomeResponsavelEmpresa.split(' ');
@@ -711,6 +720,7 @@
                             document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
                         }
                     } else {
+                        // Modo Administrador Master (Matriz)
                         let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                         let partes = nomeEmail.split(' ');
                         let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
@@ -817,17 +827,14 @@
             btnSalvar.innerText = "Cadastrando...";
 
             try {
-                // 1. Gera senha temporária automática
                 const senhaTemporaria = "ConnectPJ@" + Math.floor(1000 + Math.random() * 9000);
 
-                // 2. Cria automaticamente a conta no Firebase Auth para o cliente
                 try {
                     await createUserWithEmailAndPassword(auth, email, senhaTemporaria);
                 } catch (err) {
-                    console.log("A conta Auth pode já existir ou foi tratada:", err.message);
+                    console.log("Conta Auth já existe:", err.message);
                 }
 
-                // 3. Salva os dados da empresa no Realtime Database
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'));
                 await update(novaEmpresaRef, {
                     razaoSocial: razaoSocial,
@@ -837,7 +844,6 @@
                     criadoEm: new Date().toLocaleDateString('pt-BR')
                 });
 
-                // 4. Envia o e-mail com a senha temporária via EmailJS
                 if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         to_email: email,
@@ -849,7 +855,7 @@
                     });
                 }
 
-                alert("Nova empresa cadastrada, conta de acesso gerada no Firebase e convite enviado por e-mail!");
+                alert("Nova empresa cadastrada com sucesso e convite enviado!");
                 fecharModalNovaEmpresaMaster();
                 carregarEmpresasSeletor();
             } catch (error) {
