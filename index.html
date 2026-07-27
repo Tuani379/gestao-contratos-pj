@@ -225,7 +225,7 @@
                             <thead>
                                 <tr class="border-b bg-slate-100">
                                     <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
+                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ / CPF</th>
                                     <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
                                     <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
@@ -253,7 +253,7 @@
                             <thead>
                                 <tr class="border-b bg-amber-100/50">
                                     <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
+                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ / CPF</th>
                                     <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
                                     <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
@@ -901,11 +901,13 @@
                 let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
                 totalRegularMes += subTotalReg;
 
+                let docIdentificacao = (f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (f.cpf || "---");
+
                 let trReg = document.createElement('tr');
                 trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
                 trReg.innerHTML = `
                     <td class="p-3"><b>${f.nome}</b><br><span class="text-xs text-slate-400">${f.razaoSocial || ""}</span></td>
-                    <td class="p-3 text-xs font-semibold text-slate-500">${f.cnpj || f.cpf || "---"}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-500">${docIdentificacao}</td>
                     <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                     <td class="p-3 text-center">
                         <select class="select-nf-status-reg border rounded p-1 text-xs font-bold" data-id="${key}">
@@ -927,7 +929,7 @@
                         trComp.className = "border-b hover:bg-amber-50/40 text-slate-700 text-sm";
                         trComp.innerHTML = `
                             <td class="p-3"><b>${f.nome}</b><br><span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || "Complementar"}</span></td>
-                            <td class="p-3 text-xs">${f.cnpj || f.cpf || "---"}</td>
+                            <td class="p-3 text-xs">${docIdentificacao}</td>
                             <td class="p-3 font-bold text-amber-700">R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                             <td class="p-3 text-center">
                                 <select class="select-nf-status-comp border p-1 text-xs font-bold" data-id="${key}" data-comp-id="${idComp}">
@@ -1370,7 +1372,6 @@
             tbodyRelatorio.innerHTML = ''; 
             let encontrouDados = false;
 
-            // Conjuntos para popular os filtros dinamicamente
             const centrosCustosSet = new Set();
             const prestadoresSet = new Set();
 
@@ -1439,7 +1440,6 @@
                 });
             });
 
-            // Popular select de Centro de Custo preservando a seleção atual se houver
             const ccAtual = selectCentroCusto.value;
             selectCentroCusto.innerHTML = '<option value="todos">-- Todos --</option>';
             Array.from(centrosCustosSet).sort().forEach(cc => {
@@ -1450,7 +1450,6 @@
                 selectCentroCusto.appendChild(opt);
             });
 
-            // Popular select de Prestador PJ preservando a seleção atual se houver
             const prestAtual = selectPrestador.value;
             selectPrestador.innerHTML = '<option value="todos">-- Todos --</option>';
             Array.from(prestadoresSet).sort().forEach(p => {
