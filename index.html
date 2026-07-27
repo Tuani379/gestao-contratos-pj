@@ -258,7 +258,7 @@
                 </div>
             </section>
 
-            <!-- EQUIPE E CONTRATOS (COM TODOS OS CAMPOS SEPARADOS) -->
+            <!-- EQUIPE E CONTRATOS -->
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
@@ -271,7 +271,6 @@
                     </div>
                 </div>
 
-                <!-- TABELA AMPLA COM TODAS AS COLUNAS SEPARADAS -->
                 <div class="overflow-x-auto border rounded-xl">
                     <table class="w-full text-left border-collapse whitespace-nowrap">
                         <thead class="bg-slate-100 border-b text-[11px] font-extrabold text-slate-700">
@@ -571,6 +570,8 @@
                 else if (c.perfilTipo === "Financeiro") badgeCor = "bg-emerald-100 text-emerald-800";
                 else if (c.perfilTipo === "Jurídico") badgeCor = "bg-amber-100 text-amber-800";
 
+                let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
+
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-semibold">${c.nome || '---'}</td>
@@ -583,7 +584,7 @@
                         <td class="p-3 text-slate-600">${c.cnpj || '---'}</td>
                         <td class="p-3 text-slate-600">${c.emailCorp || '---'}</td>
                         <td class="p-3 text-slate-600">${c.cargo || '---'}</td>
-                        <td class="p-3 font-bold text-blue-950">${c.perfilTipo === 'Prestador PJ' ? 'R$ ' + parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---'}</td>
+                        <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
                         <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
