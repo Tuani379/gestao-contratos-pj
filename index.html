@@ -27,9 +27,6 @@
         </button>
     </div>
 </div>
-                <div class="flex justify-between items-center text-xs">
-                    <a href="#" class="text-blue-600 hover:underline">Esqueci minha senha</a>
-                </div>
                 <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">
                     Entrar
                 </button>
@@ -37,48 +34,34 @@
         </div>
     </div>
 
-    <!-- PAINEL LATERAL DE PERFIL E NAVEGAÇÃO -->
+    <!-- PAINEL LATERAL -->
     <aside class="bg-blue-950 text-white w-64 flex flex-col justify-between p-6 shadow-2xl z-20">
         <div>
-            <!-- BLOCO DE PERFIL CLICÁVEL -->
             <div class="relative mb-8 pb-4 border-b border-blue-900">
                 <button id="btn-perfil-dropdown" onclick="toggleMenuPerfil(event)" class="w-full text-center focus:outline-none group p-2 rounded-xl hover:bg-blue-900/40 transition flex flex-col items-center">
-                    <div id="user-avatar" class="w-16 h-16 mx-auto rounded-full bg-white text-blue-950 flex items-center justify-center font-extrabold text-lg mb-2 shadow-inner border-2 border-blue-300 group-hover:scale-105 transition">
-                        --
-                    </div>
+                    <div id="user-avatar" class="w-16 h-16 mx-auto rounded-full bg-white text-blue-950 flex items-center justify-center font-extrabold text-lg mb-2 shadow-inner border-2 border-blue-300">--</div>
                     <h2 id="user-name" class="font-extrabold text-sm uppercase tracking-wide truncate max-w-full">Carregando...</h2>
-                    <span id="user-role" class="text-xs text-blue-400 mt-0.5 block font-medium">Perfil ▾</span>
+                    <span id="badge-tipo-usuario" class="text-xs text-blue-400 mt-0.5 block font-medium">Perfil ▾</span>
                 </button>
 
-                <!-- MODAL / DROPDOWN DE PERFIL -->
                 <div id="modal-perfil-detalhes" class="hidden absolute left-0 top-full mt-2 w-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 p-5 z-50 text-left">
                     <div class="flex justify-between items-start mb-3 border-b pb-2">
                         <div>
                             <h3 id="dropdown-nome-usuario" class="font-bold text-sm text-blue-950">---</h3>
                             <p id="dropdown-email-usuario" class="text-xs text-slate-500 break-all">---</p>
                         </div>
-                        <span id="badge-tipo-usuario" class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Admin</span>
                     </div>
-
                     <div class="space-y-3 pt-1">
                         <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Empresa Ativa</p>
                             <p id="dropdown-empresa-ativa" class="text-xs font-bold text-blue-900">Carregando...</p>
                         </div>
-
                         <div class="space-y-1">
-                            <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
-                                <span>🔑</span> Alterar Senha
-                            </button>
-                            <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
-                                <span>🏢</span> Trocar / Outras Contas
-                            </button>
+                            <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔑 Alterar Senha</button>
+                            <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🏢 Trocar / Outras Contas</button>
                         </div>
-
                         <div class="border-t pt-2 mt-2">
-                            <button onclick="fazerLogout()" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-2">
-                                <span>🚪</span> Sair da Conta
-                            </button>
+                            <button onclick="fazerLogout()" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition">🚪 Sair da Conta</button>
                         </div>
                     </div>
                 </div>
@@ -90,104 +73,63 @@
                 <button onclick="mudarPainelModo('pj')" id="menu-btn-pj" class="w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition">Portal do Prestador</button>
             </div>
         </div>
-
-        <!-- RODAPÉ DA BARRA LATERAL -->
-        <div class="grid grid-cols-3 gap-2 pt-4 border-t border-blue-900">
-            <button onclick="fazerLogout()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-red-600 p-2 rounded-xl text-[11px] font-semibold transition" title="Sair">
-                <span class="text-sm mb-0.5">🚪</span> Sair
-            </button>
-            <button onclick="abrirConfiguracoes()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-blue-800 p-2 rounded-xl text-[11px] font-semibold transition" title="Configurações">
-                <span class="text-sm mb-0.5">⚙️</span>
-            </button>
-            <button onclick="abrirAjuda()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-blue-800 p-2 rounded-xl text-[11px] font-semibold transition" title="Ajuda">
-                <span class="text-sm mb-0.5">❓</span>
-            </button>
-        </div>
     </aside>
-
-    <!-- MODAL DE TROCAR SENHA -->
-    <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold text-blue-950 mb-3">Alterar Senha</h3>
-            <p id="textoModalSenha" class="text-xs text-slate-500 mb-4">Insira sua nova senha abaixo para atualizar o acesso.</p>
-            <div class="space-y-3 mb-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Nova Senha</label>
-                    <input type="password" id="inputNovaSenha" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600">
-                </div>
-            </div>
-            <div class="flex justify-end gap-2">
-                <button id="btnCancelarTrocaSenha" onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800">Salvar Nova Senha</button>
-            </div>
-        </div>
-    </div>
 
     <!-- MODAL SELETOR DE EMPRESAS -->
     <div id="modalSeletorEmpresas" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharSeletorEmpresas()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
-            
             <div class="flex justify-between items-center mb-4">
                 <div>
                     <h2 class="text-xl font-extrabold text-slate-900 mb-1">Empresas Cadastradas</h2>
                     <p class="text-xs text-slate-500">Gerencie e alterne entre as organizações do grupo.</p>
                 </div>
-                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition shadow-sm">
-                    + Nova Empresa
-                </button>
+                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">+ Nova Empresa</button>
             </div>
+            <div class="space-y-3" id="listaEmpresasDisponiveis"></div>
+        </div>
+    </div>
 
-            <div class="mb-4">
-                <input type="text" id="buscaEmpresaInput" placeholder="Buscar empresa ou grupo por nome ou CNPJ..." class="w-full p-3 border rounded-xl text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600">
+    <!-- MODAL NOVA EMPRESA -->
+    <div id="modalNovaEmpresaMaster" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border">
+            <h3 class="text-lg font-bold text-blue-950 mb-3">Cadastrar Nova Empresa Cliente</h3>
+            <div class="space-y-3 mb-4">
+                <input type="text" id="inputNovaRazaoSocial" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                <input type="text" id="inputNovoCnpj" placeholder="CNPJ" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                <input type="email" id="inputNovoEmailEmpresa" placeholder="E-mail do Administrador" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
             </div>
-
-            <div class="space-y-3" id="listaEmpresasDisponiveis">
-                <!-- Injetado dinamicamente -->
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalNovaEmpresaMaster()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button id="btnSalvarEmpresaMaster" onclick="salvarNovaEmpresaMaster()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar</button>
             </div>
         </div>
     </div>
 
-    <!-- MODAL CADASTRAR NOVA EMPRESA MASTER (Cria o Admin Inicial da Empresa) -->
-    <div id="modalNovaEmpresaMaster" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold text-blue-950 mb-3">Cadastrar Nova Empresa Cliente</h3>
-            <p class="text-xs text-slate-500 mb-4">Insira os dados da empresa e defina o Administrador responsável.</p>
-            <div class="space-y-3 mb-4">
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Razão Social</label>
-                    <input type="text" id="inputNovaRazaoSocial" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">CNPJ</label>
-                    <input type="text" id="inputNovoCnpj" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">E-mail do Administrador (Responsável)</label>
-                    <input type="email" id="inputNovoEmailEmpresa" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 outline-none" placeholder="admin@empresa.com">
-                </div>
-            </div>
+    <!-- MODAL TROCAR SENHA -->
+    <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
+            <h3 class="text-lg font-bold text-blue-950 mb-3">Alterar Senha</h3>
+            <input type="password" id="inputNovaSenha" placeholder="Nova Senha" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4">
             <div class="flex justify-end gap-2">
-                <button onclick="fecharModalNovaEmpresaMaster()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button id="btnSalvarEmpresaMaster" onclick="salvarNovaEmpresaMaster()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition">Salvar e Convidar Admin</button>
+                <button onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar</button>
             </div>
         </div>
     </div>
 
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
-        <!-- BARRA TOP -->
         <div class="bg-white border-b border-slate-200 px-6 py-2.5 flex justify-between items-center text-sm shadow-sm">
             <div class="flex items-center gap-2">
-                <span class="font-extrabold text-blue-950 tracking-tight text-base">ConnectPJ</span>
+                <span class="font-extrabold text-blue-950 text-base">ConnectPJ</span>
                 <span class="text-slate-300">|</span>
                 <span id="label-empresa-topo" class="text-blue-900 font-bold text-xs bg-blue-50 px-2.5 py-1 rounded-md border border-blue-200">Empresa: Carregando...</span>
                 <span class="text-slate-300">|</span>
-                <span id="data-atual-sistema" class="text-slate-600 font-medium text-xs">Carregando data...</span>
+                <span id="data-atual-sistema" class="text-slate-600 font-medium text-xs"></span>
             </div>
             <div class="text-xs text-slate-400 font-semibold">Conecta. Organiza. Simplifica.</div>
         </div>
 
-        <!-- MENU DO RH / CORPORATIVO -->
         <nav id="menu-rh" class="bg-white border-b shadow-sm">
             <div class="max-w-7xl mx-auto flex gap-8 px-6">
                 <button id="btn-dashboard" onclick="mostrarSecao('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-950 transition">Folha de Pagamento</button>
@@ -198,146 +140,116 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- MODO RH: DASHBOARD -->
+            <!-- DASHBOARD -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
-                        <p class="text-sm font-bold text-slate-500 uppercase">Membros / Contratos</p>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <p class="text-sm font-bold text-slate-500 uppercase">Membros Ativos</p>
                         <h3 id="cardContratosAtivos" class="text-3xl font-extrabold text-blue-900 mt-2">0</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border shadow-sm flex flex-col justify-between">
-                        <p class="text-sm font-bold text-slate-500 uppercase">Total da Folha Regular</p>
+                    <div class="bg-white p-6 rounded-xl border shadow-sm">
+                        <p class="text-sm font-bold text-slate-500 uppercase">Total Folha Regular</p>
                         <h3 id="cardTotalFolha" class="text-3xl font-extrabold text-blue-900 mt-2">R$ 0,00</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-amber-200 bg-amber-50/20 shadow-sm flex flex-col justify-between">
-                        <p class="text-sm font-bold text-amber-700 uppercase">Total Folha Complementar</p>
+                    <div class="bg-white p-6 rounded-xl border border-amber-200 bg-amber-50/20 shadow-sm">
+                        <p class="text-sm font-bold text-amber-700 uppercase">Total Complementar</p>
                         <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm flex flex-col justify-between">
-                        <div>
-                            <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
-                            <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer w-full">
-                                <!-- Injetado -->
-                            </select>
-                        </div>
-                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
-                            <span>🔄</span> Criar Folha do Mês
-                        </button>
+                    <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm">
+                        <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
+                        <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
+                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar Folha do Mês</button>
                     </div>
                 </div>
 
-                <!-- MODAL SELEÇÃO DE CONTRATOS PARA CRIAR FOLHA -->
+                <!-- MODAL GERAR FOLHA -->
                 <div id="modalGerarFolha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
-                        <div class="flex justify-between items-center mb-4 border-b pb-2">
-                            <h3 class="text-xl font-bold text-blue-900">Selecionar Prestadores para a Folha</h3>
-                            <span id="competenciaModalLabel" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded"></span>
-                        </div>
-                        <p class="text-xs text-slate-500 mb-4">Apenas prestadores PJ ativos serão incluídos na folha.</p>
-                        
+                        <h3 class="text-xl font-bold text-blue-900 mb-4">Selecionar Prestadores para a Folha</h3>
                         <div class="overflow-x-auto max-h-[40vh] border rounded-lg mb-4">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-100 border-b text-xs font-bold text-slate-600">
                                         <th class="p-2 w-12 text-center">Selec.</th>
-                                        <th class="p-2">Nome / Razão Social</th>
-                                        <th class="p-2">Documento</th>
+                                        <th class="p-2">Nome</th>
+                                        <th class="p-2">CNPJ</th>
                                         <th class="p-2 text-right">Valor Fixo</th>
                                     </tr>
                                 </thead>
-                                <tbody id="listaContratosParaFolha" class="text-sm">
-                                    <!-- Injetado -->
-                                </tbody>
+                                <tbody id="listaContratosParaFolha" class="text-sm"></tbody>
                             </table>
                         </div>
-                        
-                        <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
-                            <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border rounded-lg text-sm font-semibold text-slate-700">Cancelar</button>
-                            <button id="btn-confirmar-gerar-folha" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm">Processar Folha</button>
+                        <div class="flex justify-end gap-2">
+                            <button id="btn-cancelar-gerar-folha" class="px-4 py-2 border rounded">Cancelar</button>
+                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- MOTOR FINANCEIRO -->
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-lg">⚙️</span>
-                        <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos</h2>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-6">Selecione o prestador PJ e aplique eventos extras à competência selecionada.</p>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
+                    <h2 class="text-lg font-bold text-blue-900 mb-2">⚙️ Motor Financeiro: Ajustes e Lançamentos</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end mt-4">
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Prestador PJ</label>
-                            <select id="motorContrato" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-semibold text-slate-700">
-                                <option value="">Selecione...</option>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Prestador PJ</label>
+                            <select id="motorContrato" class="w-full p-2 border rounded text-sm bg-slate-50"><option value="">Selecione...</option></select>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Tipo</label>
+                            <select id="motorTipo" class="w-full p-2 border rounded text-sm bg-slate-50">
+                                <option value="regular">Regular (Soma ao Fixo)</option>
+                                <option value="complementar">Complementar (Separada)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">2. Tipo de Lançamento</label>
-                            <select id="motorTipo" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
-                                <option value="regular">Folha Regular (Soma ao Fixo)</option>
-                                <option value="complementar">Folha Complementar (Separada)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">3. Evento</label>
-                            <select id="motorEvento" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Evento</label>
+                            <select id="motorEvento" class="w-full p-2 border rounded text-sm bg-slate-50">
                                 <option value="Bônus por Performance">Bônus por Performance</option>
                                 <option value="Comissão de Vendas">Comissão de Vendas</option>
                                 <option value="Hora Extra">Hora Extra</option>
-                                <option value="Ajuste Retroativo">Ajuste Retroativo</option>
                             </select>
                         </div>
                         <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">4. Valor (R$)</label>
-                            <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Valor (R$)</label>
+                            <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded text-sm">
                         </div>
-                        <div>
-                            <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">Aplicar</button>
-                        </div>
+                        <button id="btn-aplicar-motor" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">Aplicar</button>
                     </div>
                 </div>
 
-                <!-- TABELA 1: FOLHA REGULAR -->
+                <!-- TABELA FOLHA REGULAR -->
                 <div class="p-6 bg-white rounded-xl border shadow-sm">
-                    <div class="mb-6">
-                        <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
-                    </div>
+                    <h2 class="text-xl font-bold text-blue-900 mb-4">Folha de Pagamento Mensal</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b bg-slate-100">
-                                    <th class="p-3 text-sm font-bold text-slate-600">Prestador</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
+                                <tr class="border-b bg-slate-100 text-xs font-bold text-slate-600">
+                                    <th class="p-3">Prestador</th>
+                                    <th class="p-3">CNPJ</th>
+                                    <th class="p-3">Valor a Pagar</th>
+                                    <th class="p-3 text-center">Nota Fiscal (NF)</th>
+                                    <th class="p-3 text-center">Visualizar</th>
+                                    <th class="p-3 text-center">Status Pagamento</th>
                                 </tr>
                             </thead>
-                            <tbody id="listaFolha">
-                                <tr><td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência e inicialize a folha...</td></tr>
-                            </tbody>
+                            <tbody id="listaFolha"><tr><td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
 
-                <!-- TABELA 2: FOLHA COMPLEMENTAR -->
+                <!-- TABELA FOLHA COMPLEMENTAR -->
                 <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha Complementar</h2>
-                    </div>
+                    <h2 class="text-xl font-bold text-amber-900">⚡ Folha Complementar</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
-                                <tr class="border-b bg-amber-100/50">
-                                    <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
+                                <tr class="border-b bg-amber-100/50 text-xs font-bold text-amber-900">
+                                    <th class="p-3">Prestador / Evento</th>
+                                    <th class="p-3">CNPJ</th>
+                                    <th class="p-3">Valor Adicional</th>
+                                    <th class="p-3 text-center">NF</th>
+                                    <th class="p-3 text-center">Visualizar</th>
+                                    <th class="p-3 text-center">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="listaFolhaComplementar"></tbody>
@@ -346,66 +258,71 @@
                 </div>
             </section>
 
-            <!-- MODO RH: CONTRATOS E PERFIS -->
+            <!-- EQUIPE E CONTRATOS (COM TODOS OS CAMPOS SEPARADOS) -->
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ</h2>
-                        <p class="text-xs text-slate-500">Cadastre colaboradores internos (Admin, RH, Financeiro, Jurídico) ou prestadores PJ.</p>
+                        <p class="text-xs text-slate-500">Visualize todos os dados detalhados cadastrados.</p>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">
-                            <span>📊</span> Exportar Excel
-                        </button>
-                        <button id="btn-abrir-cadastro" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm">
-                            + Novo Cadastro
-                        </button>
+                        <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition">📊 Exportar Excel</button>
+                        <button id="btn-abrir-cadastro" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm">+ Novo Cadastro</button>
                     </div>
                 </div>
 
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse">
-                        <thead class="bg-slate-100 border-b">
-                            <tr class="text-xs font-bold text-slate-600">
-                                <th class="p-3">Nome / Perfil</th>
-                                <th class="p-3">Documento</th>
-                                <th class="p-3">E-mail</th>
-                                <th class="p-3">Cargo / Departamento</th>
-                                <th class="p-3">Valor Fixo (PJ)</th>
+                <!-- TABELA AMPLA COM TODAS AS COLUNAS SEPARADAS -->
+                <div class="overflow-x-auto border rounded-xl">
+                    <table class="w-full text-left border-collapse whitespace-nowrap">
+                        <thead class="bg-slate-100 border-b text-[11px] font-extrabold text-slate-700">
+                            <tr>
+                                <th class="p-3">Nome Completo</th>
+                                <th class="p-3">Perfil</th>
+                                <th class="p-3">CPF</th>
+                                <th class="p-3">E-mail Pessoal</th>
+                                <th class="p-3">CEP</th>
+                                <th class="p-3">Município</th>
+                                <th class="p-3">Razão Social</th>
+                                <th class="p-3">CNPJ</th>
+                                <th class="p-3">E-mail Corp.</th>
+                                <th class="p-3">Cargo</th>
+                                <th class="p-3">Valor Fixo</th>
+                                <th class="p-3">Departamento</th>
+                                <th class="p-3">Gestor Direto</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="listaContratos">
-                            <tr><td colspan="7" class="p-4 text-center text-slate-400">Carregando cadastros...</td></tr>
+                        <tbody id="listaContratos" class="text-xs">
+                            <tr><td colspan="15" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- MODAL CADASTRO COM SELETOR DE PERFIL -->
+                <!-- MODAL CADASTRO / EDIÇÃO -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                         <h3 id="tituloModal" class="text-xl font-bold mb-4 text-blue-950">Novo Cadastro</h3>
                         
                         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Selecione o Perfil do Usuário / Contrato:</label>
-                            <select id="campoPerfilTipo" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none focus:ring-2 focus:ring-blue-600">
-                                <option value="Prestador PJ">Prestador PJ (Envia Nota Fiscal e recebe folha)</option>
-                                <option value="Administrador">Administrador (Acesso total à empresa)</option>
-                                <option value="RH">RH (Gestão de folha e equipe)</option>
-                                <option value="Financeiro">Financeiro (Aprovação e liquidação de pagamentos)</option>
-                                <option value="Jurídico">Jurídico (Auditoria e contratos)</option>
+                            <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Perfil do Usuário / Contrato:</label>
+                            <select id="campoPerfilTipo" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
+                                <option value="Prestador PJ">Prestador PJ</option>
+                                <option value="Administrador">Administrador</option>
+                                <option value="RH">RH</option>
+                                <option value="Financeiro">Financeiro</option>
+                                <option value="Jurídico">Jurídico</option>
                             </select>
                         </div>
 
                         <div class="grid grid-cols-2 gap-4">
                             <input id="campoNome" type="text" placeholder="Nome Completo" class="w-full p-2 border rounded text-sm">
                             <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2 border rounded text-sm">
-                            <input id="campoEmail" type="text" placeholder="E-mail de Acesso / Pessoal" class="w-full p-2 border rounded text-sm">
+                            <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2 border rounded text-sm">
                             <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2 border rounded text-sm">
                             <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2 border rounded text-sm">
-                            <input id="campoRazaoSocial" type="text" placeholder="Razão Social (PJ)" class="w-full p-2 border rounded text-sm">
-                            <input id="campoCNPJ" type="text" placeholder="CNPJ (PJ)" class="w-full p-2 border rounded text-sm">
+                            <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2 border rounded text-sm">
+                            <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2 border rounded text-sm">
                             <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2 border rounded text-sm">
                             <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
                             <input id="campoValorFixoMensal" type="number" placeholder="Valor Fixo Mensal (R$)" class="w-full p-2 border rounded text-sm">
@@ -425,33 +342,32 @@
                 </div>
             </section>
 
-            <!-- MODO RH: RELATÓRIOS -->
+            <!-- RELATÓRIOS -->
             <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
-                <h2 class="text-xl font-bold text-gray-800 mb-1">📊 Relatórios e Auditoria</h2>
-                <div class="overflow-x-auto mt-6">
+                <h2 class="text-xl font-bold text-gray-800 mb-4">📊 Relatórios e Auditoria</h2>
+                <div class="overflow-x-auto border rounded-xl">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-blue-900 text-white text-sm">
+                            <tr class="bg-blue-900 text-white text-xs">
                                 <th class="p-3">COMPETÊNCIA</th>
                                 <th class="p-3">PRESTADOR</th>
                                 <th class="p-3">PERFIL</th>
                                 <th class="p-3 text-right">VALOR PAGO</th>
                             </tr>
                         </thead>
-                        <tbody class="text-sm" id="tabelaRelatorioCorpo">
+                        <tbody id="tabelaRelatorioCorpo" class="text-xs">
                             <tr><td colspan="4" class="p-4 text-center text-gray-500">Nenhum registro.</td></tr>
                         </tbody>
                     </table>
                 </div>
             </section>
 
-            <!-- AREA DO PRESTADOR (PJ) -->
+            <!-- PORTAL DO PRESTADOR -->
             <section id="area-prestador" class="hidden max-w-xl mx-auto p-6 bg-white rounded-xl border shadow-sm space-y-6">
                 <div class="border-b pb-4">
                     <h2 class="text-2xl font-bold text-blue-900">Portal do Prestador PJ</h2>
                     <p class="text-sm text-slate-500 mt-1">Envie sua Nota Fiscal para a competência correspondente.</p>
                 </div>
-
                 <div class="space-y-4">
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -460,39 +376,16 @@
                         </div>
                         <div>
                             <label class="block text-sm font-bold text-slate-700 mb-2">Seu Cadastro:</label>
-                            <select id="selectPrestadorPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold">
-                                <option value="">Selecione...</option>
-                            </select>
+                            <select id="selectPrestadorPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold"><option value="">Selecione...</option></select>
                         </div>
                     </div>
-
-                    <div id="wrapperSeletorTipoFolha" class="hidden space-y-2">
-                        <label class="block text-sm font-bold text-slate-700">Tipo de Folha:</label>
-                        <div class="flex gap-4">
-                            <label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
-                                <input type="radio" name="tipoFolhaUpload" value="regular" checked class="w-4 h-4 text-blue-600"> Regular (Mensal)
-                            </label>
-                            <label class="flex items-center gap-2 text-sm font-semibold cursor-pointer">
-                                <input type="radio" name="tipoFolhaUpload" value="complementar" class="w-4 h-4 text-blue-600"> Complementar
-                            </label>
-                        </div>
-                    </div>
-
-                    <div id="quadroResumoPJ" class="hidden p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                        <p class="text-sm font-bold text-blue-900">Detalhamento:</p>
-                        <div class="text-xs text-slate-700 mt-2 space-y-1" id="detalhesValoresPJ"></div>
-                    </div>
-
                     <div>
                         <label class="block text-sm font-bold text-slate-700 mb-2">Arquivo da Nota Fiscal (PDF/Imagem):</label>
                         <input id="arquivoNFPJ" type="file" accept="application/pdf,image/*" class="w-full p-2 border rounded-lg bg-slate-50 text-sm">
                     </div>
-
-                    <button id="btn-enviar-nota-pj" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">
-                        📤 Enviar Nota Fiscal
-                    </button>
+                    <button id="btn-enviar-nota-pj" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">📤 Enviar Nota Fiscal</button>
                 </div>
-              </section>
+            </section>
         </main>
     </div>
 
@@ -502,38 +395,24 @@
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
-
         const dataHojeObj = new Date();
         const anoAtualSistema = dataHojeObj.getFullYear();
         const mesAtualSistema = String(dataHojeObj.getMonth() + 1).padStart(2, '0');
-        
         document.getElementById('data-atual-sistema').innerText = `Hoje, ${dataHojeObj.toLocaleDateString('pt-BR')}`;
 
         const nomeMeses = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
-
         const filtroCompetencia = document.getElementById('filtroCompetencia');
         const selectCompetenciaPJ = document.getElementById('selectCompetenciaPJ');
-        filtroCompetencia.innerHTML = '';
-        selectCompetenciaPJ.innerHTML = '';
-
+        filtroCompetencia.innerHTML = ''; selectCompetenciaPJ.innerHTML = '';
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
 
         nomeMeses.forEach((nome, index) => {
             const numeroMes = String(index + 1).padStart(2, '0');
             const valorCompetencia = `${numeroMes}-${anoAtualSistema}`;
-            const opt1 = document.createElement('option');
-            opt1.value = valorCompetencia;
-            opt1.innerText = `${nome} / ${anoAtualSistema}`;
-            const opt2 = document.createElement('option');
-            opt2.value = valorCompetencia;
-            opt2.innerText = `${nome} / ${anoAtualSistema}`;
-
-            if (numeroMes === mesAtualSistema) {
-                opt1.selected = true;
-                opt2.selected = true;
-            }
-            filtroCompetencia.appendChild(opt1);
-            selectCompetenciaPJ.appendChild(opt2);
+            const opt1 = document.createElement('option'); opt1.value = valorCompetencia; opt1.innerText = `${nome} / ${anoAtualSistema}`;
+            const opt2 = document.createElement('option'); opt2.value = valorCompetencia; opt2.innerText = `${nome} / ${anoAtualSistema}`;
+            if (numeroMes === mesAtualSistema) { opt1.selected = true; opt2.selected = true; }
+            filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2);
         });
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
@@ -557,218 +436,92 @@
 
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
-
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
         document.getElementById('form-login-saas').addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('login-email-saas').value;
-            const senha = document.getElementById('login-senha-saas').value;
             try {
-                await signInWithEmailAndPassword(auth, email, senha);
-            } catch (error) {
-                alert("Erro ao entrar: " + error.message);
-            }
+                await signInWithEmailAndPassword(auth, document.getElementById('login-email-saas').value, document.getElementById('login-senha-saas').value);
+            } catch (error) { alert("Erro ao entrar: " + error.message); }
         });
 
         onAuthStateChanged(auth, async (user) => {
-            const telaLogin = document.getElementById('tela-login');
             if (user) {
-                telaLogin.classList.add('hidden');
+                document.getElementById('tela-login').classList.add('hidden');
                 let userEmail = (user.email || "").toLowerCase();
-                const eAdminMaster = (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase());
-
-                if (eAdminMaster) {
+                if (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
-                        empresaAtivaId = "matriz";
-                        empresaAtivaNome = "CONNECTPJ MATRIZ";
+                        empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
                         localStorage.setItem('connectpj_empresa_ativa', "matriz");
                         localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
                     }
-                    
-                    document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
-                    document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
-                    document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
-                    document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
-
-                    document.getElementById('badge-tipo-usuario').innerText = "Dono Master";
-                    document.getElementById('badge-tipo-usuario').className = "bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded";
-
-                    let nomeFormatado = "Master Platform";
-                    document.getElementById('user-name').innerText = nomeFormatado;
-                    document.getElementById('dropdown-nome-usuario').innerText = nomeFormatado;
+                    document.getElementById('user-name').innerText = "Master Platform";
+                    document.getElementById('dropdown-nome-usuario').innerText = "Master Platform";
                     document.getElementById('dropdown-email-usuario').innerText = userEmail;
                     document.getElementById('user-avatar').innerText = "MS";
+                    document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
+                    document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
                 } else {
-                    // Verifica se o usuário logado gerencia ou pertence a alguma empresa cliente
-                    onValue(ref(db, 'empresas_clientes'), (snapshot) => {
-                        const empresas = snapshot.val() || {};
-                        let empresaEncontradaId = null;
-                        let empresaEncontradaNome = null;
-
-                        Object.entries(empresas).forEach(([id, emp]) => {
-                            if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail) {
-                                empresaEncontradaId = id;
-                                empresaEncontradaNome = emp.razaoSocial;
-                            }
-                        });
-
-                        if (empresaEncontradaId) {
-                            empresaAtivaId = empresaEncontradaId;
-                            empresaAtivaNome = empresaEncontradaNome;
-                            localStorage.setItem('connectpj_empresa_ativa', empresaAtivaId);
-                            localStorage.setItem('connectpj_empresa_nome', empresaAtivaNome);
-                        } else {
-                            empresaAtivaId = "sem_acesso";
-                            empresaAtivaNome = "COLABORADOR";
-                        }
-
-                        document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
-                        document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
-                        document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
-                        document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
-
-                        document.getElementById('badge-tipo-usuario').innerText = "Administrador";
-                        document.getElementById('badge-tipo-usuario').className = "bg-purple-100 text-purple-800 text-[10px] font-bold px-2 py-0.5 rounded";
-                        document.getElementById('user-name').innerText = userEmail.split('@')[0].toUpperCase();
-                        document.getElementById('dropdown-nome-usuario').innerText = userEmail;
-                        document.getElementById('dropdown-email-usuario').innerText = userEmail;
-                        document.getElementById('user-avatar').innerText = userEmail.charAt(0).toUpperCase();
-                    }, { onlyOnce: true });
+                    document.getElementById('user-name').innerText = userEmail.split('@')[0].toUpperCase();
+                    document.getElementById('dropdown-nome-usuario').innerText = userEmail;
+                    document.getElementById('dropdown-email-usuario').innerText = userEmail;
+                    document.getElementById('user-avatar').innerText = userEmail.charAt(0).toUpperCase();
+                    document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
+                    document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
                 }
             } else {
-                telaLogin.classList.remove('hidden');
+                document.getElementById('tela-login').classList.remove('hidden');
             }
         });
 
-        window.toggleMenuPerfil = (e) => {
-            e.stopPropagation();
-            document.getElementById('modal-perfil-detalhes').classList.toggle('hidden');
-        };
+        window.toggleMenuPerfil = (e) => { e.stopPropagation(); document.getElementById('modal-perfil-detalhes').classList.toggle('hidden'); };
+        document.addEventListener('click', () => { document.getElementById('modal-perfil-detalhes').classList.add('hidden'); });
 
-        document.addEventListener('click', (e) => {
-            const modal = document.getElementById('modal-perfil-detalhes');
-            const btn = document.getElementById('btn-perfil-dropdown');
-            if (modal && !modal.classList.contains('hidden') && !modal.contains(e.target) && !btn.contains(e.target)) {
-                modal.classList.add('hidden');
-            }
-        });
-
-        window.abrirModalTrocarSenha = () => {
-            document.getElementById('modal-perfil-detalhes').classList.add('hidden');
-            document.getElementById('modalTrocarSenha').classList.remove('hidden');
-        };
+        window.abrirModalTrocarSenha = () => { document.getElementById('modalTrocarSenha').classList.remove('hidden'); };
         window.fecharModalTrocarSenha = () => { document.getElementById('modalTrocarSenha').classList.add('hidden'); };
-
         window.salvarNovaSenha = async () => {
-            const novaSenha = document.getElementById('inputNovaSenha').value;
-            if (!novaSenha || novaSenha.length < 6) { alert("A senha deve ter pelo menos 6 caracteres!"); return; }
-            try {
-                await updatePassword(auth.currentUser, novaSenha);
-                alert("Senha alterada com sucesso!");
-                fecharModalTrocarSenha();
-            } catch (error) { alert("Erro: " + error.message); }
+            const s = document.getElementById('inputNovaSenha').value;
+            if (!s || s.length < 6) { alert("Senha mínima de 6 caracteres!"); return; }
+            await updatePassword(auth.currentUser, s);
+            alert("Senha alterada!"); fecharModalTrocarSenha();
         };
 
         window.abrirSeletorEmpresas = () => {
-            document.getElementById('modal-perfil-detalhes').classList.add('hidden');
-            carregarEmpresasSeletor();
+            onValue(ref(db, 'empresas_clientes'), (snapshot) => {
+                const emp = snapshot.val() || {};
+                const container = document.getElementById('listaEmpresasDisponiveis');
+                container.innerHTML = "";
+                let lista = [{ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70" }];
+                Object.entries(emp).forEach(([id, e]) => lista.push({ id, razaoSocial: e.razaoSocial, cnpj: e.cnpj }));
+                lista.forEach(e => {
+                    let ativa = (e.id === empresaAtivaId);
+                    container.innerHTML += `<div class="p-3 border rounded-xl flex justify-between items-center bg-white"><div><b>${e.razaoSocial}</b><br><small>${e.cnpj}</small></div>${ativa ? '<span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-bold">Atual</span>' : `<button onclick="alternarEmpresaAtiva('${e.id}', '${e.razaoSocial}')" class="text-xs bg-slate-100 hover:bg-blue-50 px-3 py-1 rounded font-bold text-blue-600">Acessar</button>`}</div>`;
+                });
+            }, { onlyOnce: true });
             document.getElementById('modalSeletorEmpresas').classList.remove('hidden');
         };
         window.fecharSeletorEmpresas = () => { document.getElementById('modalSeletorEmpresas').classList.add('hidden'); };
+        window.alternarEmpresaAtiva = (id, nome) => { localStorage.setItem('connectpj_empresa_ativa', id); localStorage.setItem('connectpj_empresa_nome', nome); location.reload(); };
 
-        window.abrirModalNovaEmpresaMaster = () => {
-            document.getElementById('inputNovaRazaoSocial').value = "";
-            document.getElementById('inputNovoCnpj').value = "";
-            document.getElementById('inputNovoEmailEmpresa').value = "";
-            document.getElementById('modalNovaEmpresaMaster').classList.remove('hidden');
-        };
+        window.abrirModalNovaEmpresaMaster = () => { document.getElementById('modalNovaEmpresaMaster').classList.remove('hidden'); };
         window.fecharModalNovaEmpresaMaster = () => { document.getElementById('modalNovaEmpresaMaster').classList.add('hidden'); };
-
         window.salvarNovaEmpresaMaster = async () => {
-            const razaoSocial = document.getElementById('inputNovaRazaoSocial').value;
-            const cnpj = document.getElementById('inputNovoCnpj').value;
-            const email = document.getElementById('inputNovoEmailEmpresa').value;
-            const btnSalvar = document.getElementById('btnSalvarEmpresaMaster');
-
-            if (!razaoSocial || !cnpj || !email) { alert("Preencha todos os campos!"); return; }
-            btnSalvar.disabled = true;
-            btnSalvar.innerText = "Criando e Convidando...";
-
-            try {
-                const senhaTemp = "ConnectPJ@" + Math.floor(1000 + Math.random() * 9000);
-                try { await createUserWithEmailAndPassword(auth, email, senhaTemp); } catch (e) { console.log(e); }
-
-                const novaEmpresaRef = push(ref(db, 'empresas_clientes'));
-                await update(novaEmpresaRef, { razaoSocial, cnpj, emailResponsavel: email, status: "Ativo" });
-
-                if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
-                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
-                        to_email: email, to_name: razaoSocial,
-                        tipo_lancamento: "CONVITE DE ACESSO ADMIN AO CONNECTPJ",
-                        evento_financeiro: "Nova Organização",
-                        valor: `Sua empresa ${razaoSocial} foi cadastrada.\n\nSua senha temporária é: ${senhaTemp}`
-                    });
-                }
-
-                alert("Empresa cadastrada e e-mail enviado ao Administrador!");
-                fecharModalNovaEmpresaMaster();
-                carregarEmpresasSeletor();
-            } catch (error) {
-                alert("Erro: " + error.message);
-                btnSalvar.disabled = false;
-                btnSalvar.innerText = "Salvar e Convidar Admin";
-            }
-        };
-
-        function carregarEmpresasSeletor() {
-            const container = document.getElementById('listaEmpresasDisponiveis');
-            onValue(ref(db, 'empresas_clientes'), (snapshot) => {
-                const empresas = snapshot.val() || {};
-                container.innerHTML = "";
-                let lista = [{ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", status: "Ativo" }];
-
-                Object.entries(empresas).forEach(([id, emp]) => {
-                    lista.push({ id, razaoSocial: emp.razaoSocial, cnpj: emp.cnpj, status: emp.status || "Ativo" });
-                });
-
-                lista.forEach(emp => {
-                    let ativa = (emp.id === empresaAtivaId);
-                    let card = document.createElement('div');
-                    card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${ativa ? 'bg-blue-50 border-blue-300' : 'bg-white border-slate-200'}`;
-                    card.innerHTML = `
-                        <div>
-                            <h4 class="font-extrabold text-sm text-slate-900">${emp.razaoSocial}</h4>
-                            <p class="text-xs text-slate-500">CNPJ: ${emp.cnpj}</p>
-                        </div>
-                        <div>
-                            ${ativa ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl">Acessar →</button>`}
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }, { onlyOnce: true });
-        }
-
-        window.alternarEmpresaAtiva = (id, nome) => {
-            localStorage.setItem('connectpj_empresa_ativa', id);
-            localStorage.setItem('connectpj_empresa_nome', nome);
-            location.reload();
+            const r = document.getElementById('inputNovaRazaoSocial').value;
+            const c = document.getElementById('inputNovoCnpj').value;
+            const em = document.getElementById('inputNovoEmailEmpresa').value;
+            if (!r || !c || !em) { alert("Preencha tudo!"); return; }
+            await update(push(ref(db, 'empresas_clientes')), { razaoSocial: r, cnpj: c, emailResponsavel: em, status: "Ativo" });
+            alert("Empresa salva!"); fecharModalNovaEmpresaMaster();
         };
 
         window.fazerLogout = () => { signOut(auth); };
-        window.toggleSenha = () => {
-            const i = document.getElementById('login-senha-saas');
-            i.type = i.type === "password" ? "text" : "password";
-        };
+        window.toggleSenha = () => { const i = document.getElementById('login-senha-saas'); i.type = i.type === "password" ? "text" : "password"; };
         window.abrirConfiguracoes = () => { alert("Configurações"); };
         window.abrirAjuda = () => { alert("Ajuda"); };
 
         window.mostrarSecao = (id) => {
-            document.getElementById('dashboard').classList.add('hidden');
-            document.getElementById('contratos').classList.add('hidden');
-            document.getElementById('relatorios').classList.add('hidden');
+            ['dashboard', 'contratos', 'relatorios'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         };
 
@@ -800,39 +553,43 @@
 
             const entradas = Object.entries(contratosLocais);
             if (entradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="15" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
             entradas.forEach(([key, c]) => {
                 if (c.status === "Ativo" && c.perfilTipo === "Prestador PJ") {
-                    let optA = document.createElement('option');
-                    optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || "PJ"})`;
+                    let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || "PJ"})`;
                     motorSelect.appendChild(optA);
-
-                    let optB = document.createElement('option');
-                    optB.value = key; optB.innerText = `${c.razaoSocial || c.nome}`;
+                    let optB = document.createElement('option'); optB.value = key; optB.innerText = `${c.razaoSocial || c.nome}`;
                     pjPanelSelect.appendChild(optB);
                 }
 
                 let badgeCor = "bg-slate-100 text-slate-800";
                 if (c.perfilTipo === "Administrador") badgeCor = "bg-purple-100 text-purple-800";
-                if (c.perfilTipo === "RH") badgeCor = "bg-blue-100 text-blue-800";
-                if (c.perfilTipo === "Financeiro") badgeCor = "bg-emerald-100 text-emerald-800";
-                if (c.perfilTipo === "Jurídico") badgeCor = "bg-amber-100 text-amber-800";
+                else if (c.perfilTipo === "RH") badgeCor = "bg-blue-100 text-blue-800";
+                else if (c.perfilTipo === "Financeiro") badgeCor = "bg-emerald-100 text-emerald-800";
+                else if (c.perfilTipo === "Jurídico") badgeCor = "bg-amber-100 text-amber-800";
 
-                let tr = document.createElement('tr');
-                tr.className = "border-b hover:bg-slate-50 text-sm";
-                tr.innerHTML = `
-                    <td class="p-3"><b>${c.nome}</b><br><span class="text-[10px] font-bold px-2 py-0.5 rounded ${badgeCor}">${c.perfilTipo || 'Prestador PJ'}</span></td>
-                    <td class="p-3 text-xs">${c.cnpj || c.cpf || '---'}</td>
-                    <td class="p-3 text-xs">${c.email || '---'}</td>
-                    <td class="p-3 text-xs">${c.cargo || '---'} / ${c.departamento || '---'}</td>
-                    <td class="p-3 text-xs font-bold text-slate-900">${c.perfilTipo === 'Prestador PJ' ? 'R$ ' + parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---'}</td>
-                    <td class="p-3"><span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                    <td class="p-3 text-center"><button onclick="abrirModalEdicao('${key}')" class="text-xs bg-slate-100 px-2 py-1 rounded">Editar</button></td>
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-semibold">${c.nome || '---'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador PJ'}</span></td>
+                        <td class="p-3 text-slate-600">${c.cpf || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.email || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.cep || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.municipio || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.razaoSocial || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.cnpj || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.emailCorp || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.cargo || '---'}</td>
+                        <td class="p-3 font-bold text-blue-950">${c.perfilTipo === 'Prestador PJ' ? 'R$ ' + parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---'}</td>
+                        <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+                        <td class="p-3 text-center"><button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button></td>
+                    </tr>
                 `;
-                tbody.appendChild(tr);
             });
             renderizarTabelasEstatísticas();
         });
@@ -843,11 +600,12 @@
         });
 
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
-            document.getElementById('tituloModal').innerText = "Novo Cadastro com Perfil";
+            document.getElementById('tituloModal').innerText = "Novo Cadastro";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
+            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('modalCadastro').classList.remove('hidden');
         });
-        document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => { document.getElementById('modalCadastro').classList.add('hidden'); });
+        document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => document.getElementById('modalCadastro').classList.add('hidden'));
 
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
             const editId = document.getElementById('btn-salvar-cadastro').dataset.editId;
@@ -867,18 +625,14 @@
                 gestorDireto: document.getElementById('campoGestorDireto').value,
                 status: document.getElementById('campoStatus').value
             };
-
-            if (!pacote.nome) { alert("Nome é obrigatório!"); return; }
-
-            try {
-                if (editId) {
-                    await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
-                } else {
-                    await push(ref(db, pathContratosDB), pacote);
-                }
-                alert("Salvo com sucesso!");
-                document.getElementById('modalCadastro').classList.add('hidden');
-            } catch (error) { alert("Erro: " + error.message); }
+            if (!pacote.nome) { alert("Nome obrigatório!"); return; }
+            if (editId) {
+                await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+            } else {
+                await push(ref(db, pathContratosDB), pacote);
+            }
+            alert("Salvo com sucesso!");
+            document.getElementById('modalCadastro').classList.add('hidden');
         });
 
         window.abrirModalEdicao = (id) => {
@@ -914,7 +668,15 @@
             tbodyRegular.innerHTML = "";
             let totalReg = 0;
 
-            Object.entries(baseFolhaMes).forEach(([key, f]) => {
+            const chavesFolha = Object.keys(baseFolhaMes);
+            if (chavesFolha.length === 0) {
+                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência.</td></tr>`;
+                document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
+                return;
+            }
+
+            chavesFolha.forEach(key => {
+                const f = baseFolhaMes[key];
                 let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
                 totalReg += subTotalReg;
                 tbodyRegular.innerHTML += `
@@ -978,6 +740,11 @@
                 fileInput.value = "";
             };
             reader.readAsDataURL(fileInput.files[0]);
+        });
+
+        document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
+        document.getElementById('btn-exportar-contratos-excel').addEventListener('click', () => {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("#contratos table")), "Equipe_Contratos.xlsx");
         });
     </script>
 </body></html>
