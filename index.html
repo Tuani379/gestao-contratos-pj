@@ -677,6 +677,7 @@
                 document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
                 document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
                 containerComp.classList.add('hidden');
+                atualizarRelatoriosAuditoria();
                 return;
             }
 
@@ -751,6 +752,55 @@
             document.getElementById('cardTotalFolha').innerText = `R$ ${totalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
+            
+            atualizarRelatoriosAuditoria();
+        }
+
+        function atualizarRelatoriosAuditoria() {
+            const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
+            corpoRelatorio.innerHTML = "";
+            let registrosEncontrados = 0;
+
+            Object.entries(folhasLocais).forEach(([competencia, prestadoresObj]) => {
+                Object.entries(prestadoresObj).forEach(([idPrestador, dadosPrestador]) => {
+                    const contratoInfo = contratosLocais[idPrestador] || {};
+                    const perfilPrestador = contratoInfo.perfilTipo || "Prestador PJ";
+
+                    if (dadosPrestador.regular && dadosPrestador.regular.statusPagamento === "Pago") {
+                        registrosEncontrados++;
+                        let valReg = parseFloat(dadosPrestador.regular.valorFixo || 0) + parseFloat(dadosPrestador.regular.motorValor || 0);
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold text-blue-950">${competencia}</td>
+                                <td class="p-3 font-semibold">${dadosPrestador.nome} (Regular)</td>
+                                <td class="p-3 text-slate-600">${perfilPrestador}</td>
+                                <td class="p-3 text-right font-bold text-emerald-700">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            </tr>
+                        `;
+                    }
+
+                    if (dadosPrestador.complementares_lista) {
+                        Object.entries(dadosPrestador.complementares_lista).forEach(([idComp, compItem]) => {
+                            if (compItem.statusPagamento === "Pago") {
+                                registrosEncontrados++;
+                                let valComp = parseFloat(compItem.motorValor || 0);
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold text-blue-950">${competencia}</td>
+                                        <td class="p-3 font-semibold">${dadosPrestador.nome} <span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${compItem.motorEvento || 'Complementar'}</span></td>
+                                        <td class="p-3 text-slate-600">${perfilPrestador}</td>
+                                        <td class="p-3 text-right font-bold text-emerald-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
+                });
+            });
+
+            if (registrosEncontrados === 0) {
+                corpoRelatorio.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro de pagamento liquidado encontrado.</td></tr>`;
+            }
         }
 
         window.chamarVisualizadorAnexo = (key, pathTipo) => {
