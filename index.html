@@ -708,7 +708,7 @@
             document.getElementById('campoDepartamento').value = c.departamento || "";
             document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
             document.getElementById('campoStatus').value = c.status || "Ativo";
-            document.getElementById('modalCadastro').classList.add('hidden');
+            document.getElementById('modalCadastro').classList.remove('hidden');
         };
 
         function renderizarTabelasEstatísticas() {
@@ -831,13 +831,9 @@
                 const departamento = contratoInfo.departamento || "Prestador";
                 const centroCustoExibicao = departamento === "Prestador" ? `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">Prestador</span>` : `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">${departamento}</span>`;
 
-                // Filtro por Prestador
                 if (fPrestador !== "todos" && nomePrestador !== fPrestador) return;
-
-                // Filtro por Centro de Custo
                 if (fCC !== "todos" && departamento !== fCC) return;
 
-                // 1. Processar Folha Regular
                 if (fTipoFolha === "todas" || fTipoFolha === "Regular") {
                     let valorRegFixo = parseFloat(dadosPrestador.regular?.valorFixo || 0);
                     let valorRegMotor = parseFloat(dadosPrestador.regular?.motorValor || 0);
@@ -865,7 +861,6 @@
                     }
                 }
 
-                // 2. Processar Folha Complementar
                 if (fTipoFolha === "todas" || fTipoFolha === "Complementar") {
                     if (dadosPrestador.complementares_lista) {
                         Object.entries(dadosPrestador.complementares_lista).forEach(([idComp, cItem]) => {
@@ -900,7 +895,6 @@
             document.getElementById('relatorioTotalGeral').innerText = `R$ ${somaTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
         }
 
-        // Eventos para atualizar o relatório instantaneamente ao mexer nos filtros
         ['relFiltroCompetencia', 'relFiltroCentroCusto', 'relFiltroPrestador', 'relFiltroTipoFolha'].forEach(id => {
             document.getElementById(id).addEventListener('change', atualizarRelatoriosAuditoria);
         });
