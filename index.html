@@ -164,7 +164,7 @@
                                     <tr class="bg-slate-100 border-b text-xs font-bold text-slate-600">
                                         <th class="p-2 w-12 text-center">Selec.</th>
                                         <th class="p-2">Nome</th>
-                                        <th class="p-2">Documento</th>
+                                        <th class="p-2">CNPJ</th>
                                         <th class="p-2 text-right">Valor Fixo</th>
                                     </tr>
                                 </thead>
@@ -221,7 +221,7 @@
                             <thead>
                                 <tr class="border-b bg-slate-100 text-xs font-bold text-slate-600">
                                     <th class="p-3">Prestador</th>
-                                    <th class="p-3">Documento (CPF/CNPJ)</th>
+                                    <th class="p-3">CNPJ</th>
                                     <th class="p-3">Valor a Pagar</th>
                                     <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
@@ -241,7 +241,7 @@
                             <thead>
                                 <tr class="border-b bg-amber-100/50 text-xs font-bold text-amber-900">
                                     <th class="p-3">Prestador / Evento</th>
-                                    <th class="p-3">Documento (CPF/CNPJ)</th>
+                                    <th class="p-3">CNPJ</th>
                                     <th class="p-3">Valor Adicional</th>
                                     <th class="p-3 text-center">NF</th>
                                     <th class="p-3 text-center">Visualizar</th>
@@ -685,15 +685,14 @@
                 let subTotalReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
                 totalReg += subTotalReg;
 
-                // Puxa o documento correto do cadastro atualizado (CNPJ prioritário, senão CPF)
                 let docCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (contratosLocais[key]?.cpf || f.cnpj || '---');
 
-                // Status de Pagamento e Botão Liquidar
+                // Status de Pagamento e Botão Liquidar corrigido com renderização síncrona
                 let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
-                if (statusRegHTML === "Pronto para Pagar" || f.regular?.nfStatus === "Recebida ✔") {
-                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
-                } else if (statusRegHTML === "Pago") {
+                if (statusRegHTML === "Pago") {
                     statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
+                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar") {
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
                 // Botão de Visualizar NF
@@ -704,7 +703,13 @@
                         <td class="p-3"><b>${f.nome}</b></td>
                         <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
                         <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3 text-center text-xs font-semibold text-slate-700">${f.regular?.nfStatus || 'Aguardando'}</td>
+                        <td class="p-3 text-center">
+                            <select class="select-nf-status-reg border rounded p-1 text-xs font-bold bg-white" data-id="${key}">
+                                <option value="Aguardando" ${f.regular?.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
+                                <option value="Recebida ✔" ${f.regular?.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                <option value="Recusada ❌" ${f.regular?.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                            </select>
+                        </td>
                         <td class="p-3 text-center">${botaoVisualizarReg}</td>
                         <td class="p-3 text-center">${statusRegHTML}</td>
                     </tr>
@@ -717,10 +722,10 @@
                         totalComp += valComp;
 
                         let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
-                        if (statusCompHTML === "Pronto para Pagar" || cItem.nfStatus === "Recebida ✔") {
-                            statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
-                        } else if (statusCompHTML === "Pago") {
+                        if (statusCompHTML === "Pago") {
                             statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
+                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar") {
+                            statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
                         }
 
                         let botaoVisualizarComp = cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
@@ -730,7 +735,13 @@
                                 <td class="p-3"><b>${f.nome}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || 'Complementar'}</span></td>
                                 <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
                                 <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-3 text-center text-xs font-semibold text-slate-700">${cItem.nfStatus || 'Aguardando'}</td>
+                                <td class="p-3 text-center">
+                                    <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
+                                        <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
+                                        <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                        <option value="Recusada ❌" ${cItem.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
+                                    </select>
+                                </td>
                                 <td class="p-3 text-center">${botaoVisualizarComp}</td>
                                 <td class="p-3 text-center">${statusCompHTML}</td>
                             </tr>
@@ -744,7 +755,7 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        // Funções para Visualizar e Liquidar Pagamentos
+        // Funções para Visualizar, Liquidar e Recusar NF com E-mail
         window.chamarVisualizadorAnexo = (key, pathTipo) => {
             const fContrato = folhasLocais[competenciaSelecionada][key];
             let arquivo = null;
@@ -780,6 +791,51 @@
             }
         };
 
+        const interagirStatusNF = async (idContrato, novoStatus, tipoFolha) => {
+            let statusPagamento = "Aguardando NF";
+            let motivoPrompt = "";
+
+            if (novoStatus === "Recebida ✔") {
+                statusPagamento = "Pronto para Pagar";
+            } else if (novoStatus === "Recusada ❌") {
+                statusPagamento = "NF Recusada / Corrigir";
+                motivoPrompt = prompt("Digite o motivo da recusa desta Nota Fiscal:");
+                if (!motivoPrompt) return;
+
+                // Disparo de e-mail via EmailJS informando a recusa e o motivo ao prestador
+                const contratoObj = contratosLocais[idContrato] || {};
+                const emailDestino = contratoObj.email || contratoObj.emailCorp;
+                if (emailDestino && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
+                    try {
+                        await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                            to_email: emailDestino,
+                            to_name: contratoObj.nome || "Prestador",
+                            tipo_lancamento: "NOTA FISCAL RECUSADA",
+                            evento_financeiro: "Competência: " + competenciaSelecionada,
+                            valor: `Olá ${contratoObj.nome},\n\nSua Nota Fiscal enviada para a competência ${competenciaSelecionada} foi recusada.\n\nMotivo da recusa: ${motivoPrompt}\n\nPor favor, acesse o Portal do Prestador, ajuste sua nota fiscal e faça o reenvio.`
+                        });
+                        alert("Nota recusada e e-mail de notificação enviado ao prestador!");
+                    } catch (err) {
+                        console.log("Erro ao enviar e-mail via EmailJS:", err);
+                        alert("Nota recusada, mas houve falha ao enviar o e-mail automático.");
+                    }
+                } else {
+                    alert("Nota recusada com sucesso!");
+                }
+            }
+
+            try {
+                const atualizacoes = {};
+                atualizacoes[`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/${tipoFolha}/nfStatus`] = novoStatus;
+                atualizacoes[`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/${tipoFolha}/statusPagamento`] = statusPagamento;
+                atualizacoes[`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/${tipoFolha}/motivoRecusa`] = motivoPrompt;
+
+                await update(ref(db), atualizacoes);
+            } catch (error) {
+                alert("Erro ao atualizar status da NF: " + error.message);
+            }
+        };
+
         document.addEventListener('click', (e) => {
             const id = e.target.dataset.id;
             const compId = e.target.dataset.compId;
@@ -787,6 +843,13 @@
             if (e.target.classList.contains('btn-view-nf-reg')) chamarVisualizadorAnexo(id, 'regular');
             if (e.target.classList.contains('btn-liquidar-comp')) liquidarPagamentoRegistro(id, 'complementares_lista/' + compId);
             if (e.target.classList.contains('btn-view-nf-comp')) chamarVisualizadorAnexo(id, 'complementares_lista/' + compId);
+        });
+
+        document.addEventListener('change', (e) => {
+            const id = e.target.dataset.id;
+            const compId = e.target.dataset.compId;
+            if (e.target.classList.contains('select-nf-status-reg')) interagirStatusNF(id, e.target.value, 'regular');
+            if (e.target.classList.contains('select-nf-status-comp')) interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
         });
 
         document.getElementById('btn-gerar-folha').addEventListener('click', () => {
