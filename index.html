@@ -171,7 +171,7 @@
             </div>
             <div class="flex justify-end gap-2">
                 <button onclick="fecharModalNovaEmpresaMaster()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button onclick="salvarNovaEmpresaMaster()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800">Salvar e Convidar</button>
+                <button id="btnSalvarEmpresaMaster" onclick="salvarNovaEmpresaMaster()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800 transition">Salvar e Convidar</button>
             </div>
         </div>
     </div>
@@ -575,7 +575,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const dataHojeObj = new Date();
@@ -754,6 +754,9 @@
             document.getElementById('inputNovaRazaoSocial').value = "";
             document.getElementById('inputNovoCnpj').value = "";
             document.getElementById('inputNovoEmailEmpresa').value = "";
+            const btnSalvar = document.getElementById('btnSalvarEmpresaMaster');
+            btnSalvar.disabled = false;
+            btnSalvar.innerText = "Salvar e Convidar";
             document.getElementById('modalNovaEmpresaMaster').classList.remove('hidden');
         };
 
@@ -765,11 +768,16 @@
             const razaoSocial = document.getElementById('inputNovaRazaoSocial').value;
             const cnpj = document.getElementById('inputNovoCnpj').value;
             const email = document.getElementById('inputNovoEmailEmpresa').value;
+            const btnSalvar = document.getElementById('btnSalvarEmpresaMaster');
 
             if (!razaoSocial || !cnpj) {
                 alert("Razão Social e CNPJ são obrigatórios!");
                 return;
             }
+
+            // Trava o botão para evitar duplo clique e cadastros duplicados
+            btnSalvar.disabled = true;
+            btnSalvar.innerText = "Cadastrando...";
 
             try {
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'));
@@ -777,6 +785,7 @@
                     razaoSocial: razaoSocial,
                     cnpj: cnpj,
                     emailResponsavel: email,
+                    status: "Ativo",
                     criadoEm: new Date().toLocaleDateString('pt-BR')
                 });
 
@@ -796,6 +805,8 @@
                 carregarEmpresasSeletor();
             } catch (error) {
                 alert("Erro ao cadastrar empresa: " + error.message);
+                btnSalvar.disabled = false;
+                btnSalvar.innerText = "Salvar e Convidar";
             }
         };
 
@@ -807,10 +818,10 @@
                 container.innerHTML = "";
 
                 const entradas = Object.entries(empresasLocais);
-                let listaRender = [{ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70" }];
+                let listaRender = [{ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", status: "Ativo" }];
                 
                 entradas.forEach(([id, emp]) => {
-                    listaRender.push({ id, razaoSocial: emp.razaoSocial, cnpj: emp.cnpj });
+                    listaRender.push({ id, razaoSocial: emp.razaoSocial, cnpj: emp.cnpj, status: emp.status || "Ativo" });
                 });
 
                 const filtradas = listaRender.filter(e => 
@@ -824,30 +835,41 @@
 
                 filtradas.forEach(emp => {
                     let ativa = (emp.id === empresaAtivaId);
+                    let inativa = (emp.status === "Inativo");
                     let iniciaisEmp = emp.razaoSocial.split(' ').map(w => w[0]).slice(0, 2).join('');
-                    let card = document.createElement('div');
-                    card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${ativa ? 'bg-blue-50/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`;
                     
-                    let botaoExcluir = (emp.id !== 'matriz') 
-                        ? `<button onclick="excluirEmpresaMaster('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl transition" title="Excluir Empresa">🗑️</button>` 
-                        : '';
+                    let card = document.createElement('div');
+                    card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${ativa ? 'bg-blue-50/50 border-blue-300 shadow-sm' : (inativa ? 'bg-slate-100/80 border-slate-200 opacity-70' : 'bg-white border-slate-200 hover:border-slate-300')}`;
+                    
+                    let acaoBotaoHTML = "";
+                    if (emp.id !== 'matriz') {
+                        if (inativa) {
+                            acaoBotaoHTML = `<button onclick="mudarStatusEmpresa('${emp.id}', 'Ativo', '${emp.razaoSocial}')" class="text-xs font-bold text-emerald-600 hover:text-emerald-800 bg-emerald-50 hover:bg-emerald-100 px-3 py-1.5 rounded-xl transition">Ativar 🔄</button>`;
+                        } else {
+                            let botaoDesativar = `<button onclick="mudarStatusEmpresa('${emp.id}', 'Inativo', '${emp.razaoSocial}')" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl transition" title="Desativar Empresa">🗑️</button>`;
+                            let acaoAcessar = ativa 
+                                ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
+                                : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>`;
+                            acaoBotaoHTML = `${botaoDesativar} ${acaoAcessar}`;
+                        }
+                    } else {
+                        acaoBotaoHTML = ativa 
+                            ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
+                            : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>`;
+                    }
 
                     card.innerHTML = `
                         <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-xs">
+                            <div class="w-10 h-10 rounded-xl ${inativa ? 'bg-slate-300 text-slate-700' : 'bg-blue-100 text-blue-900'} font-bold flex items-center justify-center text-xs">
                                 ${iniciaisEmp}
                             </div>
                             <div>
-                                <h4 class="font-extrabold text-sm text-slate-900">${emp.razaoSocial}</h4>
+                                <h4 class="font-extrabold text-sm ${inativa ? 'text-slate-500 line-through' : 'text-slate-900'}">${emp.razaoSocial} ${inativa ? '<span class="text-[10px] text-red-600 bg-red-100 px-1.5 py-0.5 rounded ml-1 no-underline">Inativa</span>' : ''}</h4>
                                 <p class="text-xs text-slate-500">CNPJ: ${emp.cnpj}</p>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-                            ${botaoExcluir}
-                            ${ativa 
-                                ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
-                                : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>`
-                            }
+                            ${acaoBotaoHTML}
                         </div>
                     `;
                     container.appendChild(card);
@@ -865,20 +887,23 @@
             location.reload(); 
         };
 
-        window.excluirEmpresaMaster = async (id, nome) => {
-            if (confirm(`Tem certeza que deseja remover a empresa "${nome}" e todos os dados dela do sistema?`)) {
+        window.mudarStatusEmpresa = async (id, novoStatus, nome) => {
+            const mensagem = novoStatus === "Inativo" 
+                ? `Tem certeza que deseja desativar a empresa "${nome}"? Ela ficará oculta das folhas ativas, mas mantida no sistema.`
+                : `Deseja reativar a empresa "${nome}"?`;
+
+            if (confirm(mensagem)) {
                 try {
-                    await remove(ref(db, `empresas_clientes/${id}`));
-                    await remove(ref(db, `empresas_clientes_dados/${id}`));
+                    await update(ref(db, `empresas_clientes/${id}`), { status: novoStatus });
                     
-                    if (empresaAtivaId === id) {
+                    if (novoStatus === "Inativo" && empresaAtivaId === id) {
                         alternarEmpresaAtiva('matriz', 'CONNECTPJ MATRIZ');
                     } else {
                         carregarEmpresasSeletor();
                     }
-                    alert("Empresa desativada/removida com sucesso!");
+                    alert(`Empresa ${novoStatus === "Inativo" ? "desativada" : "ativada"} com sucesso!`);
                 } catch (error) {
-                    alert("Erro ao excluir empresa: " + error.message);
+                    alert("Erro ao alterar status da empresa: " + error.message);
                 }
             }
         };
@@ -904,23 +929,6 @@
 
         let contratosLocais = {};
         let folhasLocais = {};
-
-        async function enviarNotificacaoEmail(destinatarioEmail, nomePrestador, dadosLancamento) {
-            if (!EMAILJS_PUBLIC_KEY || EMAILJS_PUBLIC_KEY === "SUA_PUBLIC_KEY") return;
-            try {
-                const templateParams = {
-                    to_email: destinatarioEmail,
-                    to_name: nomePrestador,
-                    tipo_lancamento: dadosLancamento.tipo,
-                    evento_financeiro: dadosLancamento.evento,
-                    valor: dadosLancamento.valor,
-                    motivo_recusa: dadosLancamento.motivo_recusa || ""
-                };
-                await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-            } catch (error) {
-                console.error("Erro ao enviar e-mail via EmailJS:", error);
-            }
-        }
 
         window.mostrarSecao = (id) => {
             document.getElementById('dashboard').classList.add('hidden');
