@@ -808,7 +808,7 @@
                             to_name: contratoObj.nome || "Prestador",
                             tipo_lancamento: "NOTA FISCAL RECUSADA",
                             evento_financeiro: competenciaSelecionada,
-                            valor: `Sua Nota Fiscal enviada para a competência ${competenciaSelecionada} foi recusada.\n\nMotivo da recusa: ${motivoPrompt}`
+                            mensagem_motivo: `Motivo da recusa: ${motivoPrompt}`
                         });
                         alert("Nota recusada e e-mail de notificação enviado ao prestador!");
                     } catch (err) {
