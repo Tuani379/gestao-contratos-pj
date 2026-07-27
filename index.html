@@ -556,7 +556,18 @@
         window.fazerLogout = () => {
             signOut(auth);
         };
-
+window.toggleSenha = () => {
+            const inputSenha = document.getElementById('login-senha-saas');
+            const iconeOlho = document.getElementById('icone-olho');
+            
+            if (inputSenha.type === "password") {
+                inputSenha.type = "text";
+                iconeOlho.innerText = "👁️‍🗨️";
+            } else {
+                inputSenha.type = "password";
+                iconeOlho.innerText = "👁️";
+            }
+        };
         window.abrirConfiguracoes = () => {
             alert("Módulo de Configurações em desenvolvimento.");
         };
