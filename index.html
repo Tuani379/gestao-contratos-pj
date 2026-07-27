@@ -980,14 +980,14 @@
         }
 
         window.alternarEmpresaAtiva = (id, nome) => {
-            empresaAtivaId = id;
-            empresaAtivaNome = nome;
-            localStorage.setItem('connectpj_empresa_ativa', id);
-            localStorage.setItem('connectpj_empresa_nome', nome);
-            fecharSeletorEmpresas();
-            alert(`Alternado com sucesso para: ${nome}`);
-            location.reload(); 
-        };
+    empresaAtivaId = id;
+    empresaAtivaNome = nome;
+    localStorage.setItem('connectpj_empresa_ativa', id);
+    localStorage.setItem('connectpj_empresa_nome', nome);
+    fecharSeletorEmpresas();
+    alert(`Alternado com sucesso para: ${nome}`);
+    location.reload(); // <--- Certifique-se de que o location.reload() está aqui
+};
 
         window.mudarStatusEmpresa = async (id, novoStatus, nome) => {
             const mensagem = novoStatus === "Inativo" 
