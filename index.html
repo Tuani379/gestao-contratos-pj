@@ -1362,11 +1362,17 @@
         function carregarRelatorio() {
             const sectionRelatorios = document.getElementById('relatorios');
             const tbodyRelatorio = sectionRelatorios.querySelector('tbody');
+            const selectCentroCusto = document.getElementById('filtroCentroCusto');
+            const selectPrestador = document.getElementById('filtroPrestador');
             
             if (!tbodyRelatorio) return;
             
             tbodyRelatorio.innerHTML = ''; 
             let encontrouDados = false;
+
+            // Conjuntos para popular os filtros dinamicamente
+            const centrosCustosSet = new Set();
+            const prestadoresSet = new Set();
 
             Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
                 const compExibicao = competencia.replace('-', '/');
@@ -1374,6 +1380,9 @@
                     const contrato = contratosLocais[id] || {};
                     const centroCusto = contrato.centroDeCusto || "N/A";
                     const nomePrestador = dados.nome || contrato.nome || 'Prestador';
+
+                    if (centroCusto && centroCusto !== "N/A") centrosCustosSet.add(centroCusto);
+                    if (nomePrestador) prestadoresSet.add(nomePrestador);
 
                     // 1. Processar Folha Regular
                     const fixo = parseFloat(dados.regular?.valorFixo || 0);
@@ -1424,6 +1433,28 @@
                         });
                     }
                 });
+            });
+
+            // Popular select de Centro de Custo preservando a seleção atual se houver
+            const ccAtual = selectCentroCusto.value;
+            selectCentroCusto.innerHTML = '<option value="todos">-- Todos --</option>';
+            Array.from(centrosCustosSet).sort().forEach(cc => {
+                const opt = document.createElement('option');
+                opt.value = cc;
+                opt.innerText = cc;
+                if (cc === ccAtual) opt.selected = true;
+                selectCentroCusto.appendChild(opt);
+            });
+
+            // Popular select de Prestador PJ preservando a seleção atual se houver
+            const prestAtual = selectPrestador.value;
+            selectPrestador.innerHTML = '<option value="todos">-- Todos --</option>';
+            Array.from(prestadoresSet).sort().forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = p;
+                if (p === prestAtual) opt.selected = true;
+                selectPrestador.appendChild(opt);
             });
 
             if (!encontrouDados) {
@@ -1525,13 +1556,13 @@
                 if (tr.id === 'linhaTotalConsolidado') return;
 
                 const linhaCompetencia = tr.dataset.competencia || "";
-                const nome = tr.cells[1].innerText.toLowerCase();
-                const cc = tr.cells[2].innerText.toLowerCase();
+                const nome = tr.cells[1].innerText.trim();
+                const cc = tr.cells[2].innerText.trim();
                 const tipoLinha = tr.cells[3].innerText.toLowerCase();
 
                 const matchComp = (compFiltro === 'todos' || linhaCompetencia === compFiltro);
-                const matchCentro = (centro === 'todos' || cc.includes(centro.toLowerCase()));
-                const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
+                const matchCentro = (centro === 'todos' || cc === centro);
+                const matchPrestador = (prestador === 'todos' || nome === prestador);
                 const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo.toLowerCase()));
 
                 if (matchComp && matchCentro && matchPrestador && matchTipo) {
