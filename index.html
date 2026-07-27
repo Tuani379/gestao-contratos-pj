@@ -12,24 +12,16 @@
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
                 <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa</p>
             </div>
-
             <form id="form-login-saas" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
                     <input type="email" id="login-email-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                 </div>
-             <div>
-    <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
-    <div class="relative">
-        <input type="password" id="login-senha-saas" required class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
-        <button type="button" onclick="toggleSenha()" class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 focus:outline-none">
-            <span id="icone-olho">👁️</span>
-        </button>
-    </div>
-</div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">
-                    Entrar
-                </button>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
+                    <input type="password" id="login-senha-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
+                </div>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">Entrar</button>
             </form>
         </div>
     </div>
@@ -229,7 +221,7 @@
                             <thead>
                                 <tr class="border-b bg-slate-100 text-xs font-bold text-slate-600">
                                     <th class="p-3">Prestador</th>
-                                    <th class="p-3">Documento</th>
+                                    <th class="p-3">Documento (CPF/CNPJ)</th>
                                     <th class="p-3">Valor a Pagar</th>
                                     <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
@@ -249,7 +241,7 @@
                             <thead>
                                 <tr class="border-b bg-amber-100/50 text-xs font-bold text-amber-900">
                                     <th class="p-3">Prestador / Evento</th>
-                                    <th class="p-3">Documento</th>
+                                    <th class="p-3">Documento (CPF/CNPJ)</th>
                                     <th class="p-3">Valor Adicional</th>
                                     <th class="p-3 text-center">NF</th>
                                     <th class="p-3 text-center">Visualizar</th>
@@ -693,14 +685,28 @@
                 let subTotalReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
                 totalReg += subTotalReg;
 
+                // Puxa o documento correto do cadastro atualizado (CNPJ prioritário, senão CPF)
+                let docCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (contratosLocais[key]?.cpf || f.cnpj || '---');
+
+                // Status de Pagamento e Botão Liquidar
+                let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
+                if (statusRegHTML === "Pronto para Pagar" || f.regular?.nfStatus === "Recebida ✔") {
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
+                } else if (statusRegHTML === "Pago") {
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
+                }
+
+                // Botão de Visualizar NF
+                let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
+
                 tbodyRegular.innerHTML += `
-                    <tr class="border-b text-sm">
+                    <tr class="border-b text-sm hover:bg-slate-50">
                         <td class="p-3"><b>${f.nome}</b></td>
-                        <td class="p-3 text-xs">${f.cnpj || '---'}</td>
-                        <td class="p-3 font-bold">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3 text-center">${f.regular?.nfStatus || 'Aguardando'}</td>
-                        <td class="p-3 text-center">---</td>
-                        <td class="p-3 text-center">${f.regular?.statusPagamento || 'Aguardando'}</td>
+                        <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
+                        <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td class="p-3 text-center text-xs font-semibold text-slate-700">${f.regular?.nfStatus || 'Aguardando'}</td>
+                        <td class="p-3 text-center">${botaoVisualizarReg}</td>
+                        <td class="p-3 text-center">${statusRegHTML}</td>
                     </tr>
                 `;
 
@@ -709,14 +715,24 @@
                         temComp = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
                         totalComp += valComp;
+
+                        let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
+                        if (statusCompHTML === "Pronto para Pagar" || cItem.nfStatus === "Recebida ✔") {
+                            statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
+                        } else if (statusCompHTML === "Pago") {
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
+                        }
+
+                        let botaoVisualizarComp = cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
+
                         tbodyComplementar.innerHTML += `
-                            <tr class="border-b text-sm bg-amber-50/20">
+                            <tr class="border-b text-sm bg-amber-50/20 hover:bg-amber-50/50">
                                 <td class="p-3"><b>${f.nome}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || 'Complementar'}</span></td>
-                                <td class="p-3 text-xs">${f.cnpj || '---'}</td>
+                                <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
                                 <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-3 text-center">${cItem.nfStatus || 'Aguardando'}</td>
-                                <td class="p-3 text-center">---</td>
-                                <td class="p-3 text-center">${cItem.statusPagamento || 'Aguardando'}</td>
+                                <td class="p-3 text-center text-xs font-semibold text-slate-700">${cItem.nfStatus || 'Aguardando'}</td>
+                                <td class="p-3 text-center">${botaoVisualizarComp}</td>
+                                <td class="p-3 text-center">${statusCompHTML}</td>
                             </tr>
                         `;
                     });
@@ -728,13 +744,59 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
+        // Funções para Visualizar e Liquidar Pagamentos
+        window.chamarVisualizadorAnexo = (key, pathTipo) => {
+            const fContrato = folhasLocais[competenciaSelecionada][key];
+            let arquivo = null;
+            if (pathTipo.includes('/')) {
+                const partes = pathTipo.split('/');
+                let objAtual = fContrato;
+                partes.forEach(p => { if (objAtual) objAtual = objAtual[p]; });
+                arquivo = objAtual ? objAtual.nfArquivoBase64 : null;
+            } else {
+                arquivo = fContrato[pathTipo] ? fContrato[pathTipo].nfArquivoBase64 : null;
+            }
+
+            if (arquivo) {
+                const novaJanela = window.open();
+                novaJanela.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; width:100%; height:100%;"></iframe>`);
+            } else {
+                alert("Nota fiscal não encontrada ou arquivo corrompido.");
+            }
+        };
+
+        const liquidarPagamentoRegistro = async (idContrato, tipoFolha) => {
+            const dataEscolhida = prompt("Confirme a data de pagamento:", new Date().toLocaleDateString('pt-BR'));
+            if (!dataEscolhida) return;
+
+            try {
+                await update(ref(db), {
+                    [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/${tipoFolha}/statusPagamento`]: "Pago",
+                    [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/${tipoFolha}/dataPagamento`]: dataEscolhida
+                });
+                alert("Pagamento liquidado com sucesso!");
+            } catch (error) {
+                alert("Erro ao liquidar pagamento: " + error.message);
+            }
+        };
+
+        document.addEventListener('click', (e) => {
+            const id = e.target.dataset.id;
+            const compId = e.target.dataset.compId;
+            if (e.target.classList.contains('btn-liquidar-reg')) liquidarPagamentoRegistro(id, 'regular');
+            if (e.target.classList.contains('btn-view-nf-reg')) chamarVisualizadorAnexo(id, 'regular');
+            if (e.target.classList.contains('btn-liquidar-comp')) liquidarPagamentoRegistro(id, 'complementares_lista/' + compId);
+            if (e.target.classList.contains('btn-view-nf-comp')) chamarVisualizadorAnexo(id, 'complementares_lista/' + compId);
+        });
+
         document.getElementById('btn-gerar-folha').addEventListener('click', () => {
             const modal = document.getElementById('modalGerarFolha');
             const tbody = document.getElementById('listaContratosParaFolha');
             tbody.innerHTML = "";
             Object.entries(contratosLocais).forEach(([key, c]) => {
                 if (c.status === "Ativo") {
-                    tbody.innerHTML += `<tr><td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-folha"></td><td class="p-2">${c.nome}</td><td class="p-2 text-xs">${c.cnpj || c.cpf || '---'}</td><td class="p-2 text-right">R$ ${parseFloat(c.valorFixoMensal||0).toLocaleString('pt-BR')}</td></tr>`;
+                    let docExibicao = c.cnpj || c.cpf || '---';
+                    tbody.innerHTML += `<tr><td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-folha"></td><td class="p-2">${c.nome}</td><td class="p-2 text-xs">${docExibicao}</td><td class="p-2 text-right">R$ ${parseFloat(c.valorFixoMensal||0).toLocaleString('pt-BR')}</td></tr>`;
                 }
             });
             modal.classList.remove('hidden');
@@ -749,7 +811,7 @@
                 const id = chk.value;
                 const c = contratosLocais[id];
                 pacote[`${pathFolhasDB}/${compDestino}/${id}`] = {
-                    nome: c.nome, cnpj: c.cnpj || '',
+                    nome: c.nome, cnpj: c.cnpj || c.cpf || '',
                     regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
                 };
             });
