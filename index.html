@@ -1913,7 +1913,28 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
             // Se NÃO tem editId, CRIA UM NOVO
             await push(ref(db, 'contratos'), pacote);
             alert("Novo contrato criado!");
-        }
+            // Dentro do evento de salvar cadastro, na parte do "else" (quando cria um novo):
+else {
+    // 1. Salva no Firebase
+    const novoContratoRef = await push(ref(db, 'contratos'), pacote);
+    
+    // 2. DISPARA O E-MAIL AUTOMÁTICO DE CONVITE VIA EMAILJS
+const templateParams = {
+    to_email: pacote.emailCorp || pacote.email, 
+    to_name: pacote.nome,
+    empresa_nome: "ConnectPJ Matriz", // Você pode alterar para o nome da empresa se desejar
+    link_acesso: `https://seu-sistema.com/criar-senha.html?email=${encodeURIComponent(pacote.emailCorp || pacote.email)}`
+};
+
+emailjs.send(EMAILJS_SERVICE_ID, "template_pbvu4jp", templateParams)
+    .then((response) => {
+        console.log("E-mail de convite enviado com sucesso!", response.status, response.text);
+    }, (error) => {
+        console.error("Erro ao enviar e-mail de convite:", error);
+    });
+
+alert("Novo contrato criado e e-mail de convite enviado ao prestador!");
+}
 
         // Limpa o modal e o ID
         btnSalvar.removeAttribute('data-edit-id');
