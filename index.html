@@ -1879,78 +1879,68 @@ document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', a
 
 
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
-    const btnSalvar = document.getElementById('btn-salvar-cadastro');
-    const editId = btnSalvar.dataset.editId; // Captura o ID da edição
+            const btnSalvar = document.getElementById('btn-salvar-cadastro');
+            const editId = btnSalvar.dataset.editId;
 
-    const pacote = {
-        nome: document.getElementById('campoNome').value,
-        cpf: document.getElementById('campoCpf').value,
-        email: document.getElementById('campoEmail').value,
-        cep: document.getElementById('campoCep').value,
-        municipio: document.getElementById('campoMunicipio').value,
-        razaoSocial: document.getElementById('campoRazaoSocial').value,
-        cnpj: document.getElementById('campoCNPJ').value,
-        emailCorp: document.getElementById('campoEmailCorp').value,
-        vigencia: document.getElementById('campoVigencia').value,
-        centroDeCusto: document.getElementById('campoCentrodeCusto').value,
-        cargo: document.getElementById('campoCargo').value,
-        valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
-        departamento: document.getElementById('campoDepartamento').value,
-        gestorDireto: document.getElementById('campoGestorDireto').value,
-        papel: document.getElementById('campoPapel').value,
-        status: document.getElementById('campoStatus').value,
-        unidade: document.getElementById('campoUnidade').value
-    };
+            const pacote = {
+                nome: document.getElementById('campoNome').value,
+                cpf: document.getElementById('campoCpf').value,
+                email: document.getElementById('campoEmail').value,
+                cep: document.getElementById('campoCep').value,
+                municipio: document.getElementById('campoMunicipio').value,
+                razaoSocial: document.getElementById('campoRazaoSocial').value,
+                cnpj: document.getElementById('campoCNPJ').value,
+                emailCorp: document.getElementById('campoEmailCorp').value,
+                vigencia: document.getElementById('campoVigencia').value,
+                centroDeCusto: document.getElementById('campoCentrodeCusto').value,
+                cargo: document.getElementById('campoCargo').value,
+                valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
+                departamento: document.getElementById('campoDepartamento').value,
+                gestorDireto: document.getElementById('campoGestorDireto').value,
+                papel: document.getElementById('campoPapel').value,
+                status: document.getElementById('campoStatus').value,
+                unidade: document.getElementById('campoUnidade').value
+            };
 
-    if (!pacote.nome) { alert("Nome é obrigatório!"); return; }
+            if (!pacote.nome) { alert("Nome é obrigatório!"); return; }
 
-    try {
-        if (editId) {
-            // Se tem editId, ATUALIZA o contrato específico
-            await update(ref(db, 'contratos/' + editId), pacote);
-            alert("Contrato atualizado com sucesso!");
-        } else {
-            // Se NÃO tem editId, CRIA UM NOVO
-            await push(ref(db, 'contratos'), pacote);
-            alert("Novo contrato criado!");
-            // Dentro do evento de salvar cadastro, na parte do "else" (quando cria um novo):
-else {
-    // 1. Salva no Firebase
-    const novoContratoRef = await push(ref(db, 'contratos'), pacote);
-    
-    // 2. DISPARA O E-MAIL AUTOMÁTICO DE CONVITE VIA EMAILJS
-const templateParams = {
-    to_email: pacote.emailCorp || pacote.email, 
-    to_name: pacote.nome,
-    empresa_nome: "ConnectPJ Matriz", // Você pode alterar para o nome da empresa se desejar
-    link_acesso: `https://seu-sistema.com/criar-senha.html?email=${encodeURIComponent(pacote.emailCorp || pacote.email)}`
-};
+            try {
+                if (editId) {
+                    await update(ref(db, 'contratos/' + editId), pacote);
+                    alert("Contrato atualizado com sucesso!");
+                } else {
+                    await push(ref(db, 'contratos'), pacote);
+                    
+                    const templateParams = {
+                        to_email: pacote.emailCorp || pacote.email, 
+                        to_name: pacote.nome,
+                        empresa_nome: "ConnectPJ Matriz",
+                        link_acesso: `https://seu-sistema.com/criar-senha.html?email=${encodeURIComponent(pacote.emailCorp || pacote.email)}`
+                    };
 
-emailjs.send(EMAILJS_SERVICE_ID, "template_pbvu4jp", templateParams)
-    .then((response) => {
-        console.log("E-mail de convite enviado com sucesso!", response.status, response.text);
-    }, (error) => {
-        console.error("Erro ao enviar e-mail de convite:", error);
-    });
+                    emailjs.send(EMAILJS_SERVICE_ID, "template_pbvu4jp", templateParams)
+                        .then((response) => {
+                            console.log("E-mail de convite enviado com sucesso!", response.status, response.text);
+                        }, (error) => {
+                            console.error("Erro ao enviar e-mail de convite:", error);
+                        });
 
-alert("Novo contrato criado e e-mail de convite enviado ao prestador!");
-}
+                    alert("Novo contrato criado e e-mail de convite enviado ao prestador!");
+                }
 
-        // Limpa o modal e o ID
-        btnSalvar.removeAttribute('data-edit-id');
-        document.getElementById('modalCadastro').classList.add('hidden');
-        
-        // Limpa os campos
-        const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'];
-        campos.forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.value = "";
+                btnSalvar.removeAttribute('data-edit-id');
+                document.getElementById('modalCadastro').classList.add('hidden');
+                
+                const campos = ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoVigencia','campoCentrodeCusto','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoPapel','campoUnidade'];
+                campos.forEach(id => {
+                    const el = document.getElementById(id);
+                    if(el) el.value = "";
+                });
+
+            } catch (error) {
+                alert("Erro ao salvar: " + error.message);
+            }
         });
-
-    } catch (error) {
-        alert("Erro ao salvar: " + error.message);
-    }
-});
 
 
 
