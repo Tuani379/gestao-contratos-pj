@@ -322,13 +322,10 @@
                             <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
                             <input id="campoValorFixoMensal" type="number" placeholder="Valor Fixo Mensal (R$)" class="w-full p-2 border rounded text-sm">
                             
-                            <!-- CENTRO DE CUSTO CORRIGIDO -->
+                            <!-- CENTRO DE CUSTO DIGITÁVEL -->
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 mb-1">Centro de Custo</label>
-                                <select id="campoDepartamento" class="w-full p-2 border rounded text-sm bg-white">
-                                    <option value="Prestador">Prestador</option>
-                                    <option value="105 - Prestadores de Serviço Financeiro">105 - Prestadores de Serviço Financeiro</option>
-                                </select>
+                                <input id="campoDepartamento" type="text" placeholder="Ex: 105 - Financeiro" class="w-full p-2 border rounded text-sm bg-white">
                             </div>
 
                             <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
@@ -363,8 +360,6 @@
                         <label class="block text-xs font-bold text-slate-700 mb-1">Centro de Custo</label>
                         <select id="relFiltroCentroCusto" class="w-full p-2 border rounded text-xs bg-white">
                             <option value="todos">-- Todos --</option>
-                            <option value="Prestador">Prestador</option>
-                            <option value="105 - Prestadores de Serviço Financeiro">105 - Prestadores de Serviço Financeiro</option>
                         </select>
                     </div>
                     <div>
@@ -601,10 +596,12 @@
             const motorSelect = document.getElementById('motorContrato');
             const pjPanelSelect = document.getElementById('selectPrestadorPJ');
             const relFiltroPrestador = document.getElementById('relFiltroPrestador');
+            const relFiltroCentroCusto = document.getElementById('relFiltroCentroCusto');
             
             motorSelect.innerHTML = '<option value="">Selecione...</option>';
             pjPanelSelect.innerHTML = '<option value="">Selecione...</option>';
             relFiltroPrestador.innerHTML = '<option value="todos">-- Todos --</option>';
+            relFiltroCentroCusto.innerHTML = '<option value="todos">-- Todos --</option>';
             
             const tbody = document.getElementById('listaContratos');
             tbody.innerHTML = "";
@@ -615,6 +612,9 @@
                 return;
             }
 
+            // Coletar centros de custo dinamicamente para o filtro de relatórios
+            let centrosCustoSet = new Set();
+
             entradas.forEach(([key, c]) => {
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
@@ -624,6 +624,10 @@
 
                     let optC = document.createElement('option'); optC.value = c.nome; optC.innerText = c.nome;
                     relFiltroPrestador.appendChild(optC);
+                }
+
+                if (c.departamento && c.departamento.trim() !== "") {
+                    centrosCustoSet.add(c.departamento.trim());
                 }
 
                 let badgeCor = "bg-slate-100 text-slate-800";
@@ -654,6 +658,14 @@
                     </tr>
                 `;
             });
+
+            centrosCustoSet.forEach(cc => {
+                let optCC = document.createElement('option');
+                optCC.value = cc;
+                optCC.innerText = cc;
+                relFiltroCentroCusto.appendChild(optCC);
+            });
+
             renderizarTabelasEstatísticas();
         });
 
@@ -665,8 +677,7 @@
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoCargo','campoValorFixoMensal','campoGestorDireto'].forEach(id => document.getElementById(id).value = '');
-            document.getElementById('campoDepartamento').value = "Prestador";
+            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('modalCadastro').classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => document.getElementById('modalCadastro').classList.add('hidden'));
@@ -715,7 +726,7 @@
             document.getElementById('campoEmailCorp').value = c.emailCorp || "";
             document.getElementById('campoCargo').value = c.cargo || "";
             document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
-            document.getElementById('campoDepartamento').value = c.departamento || "Prestador";
+            document.getElementById('campoDepartamento').value = c.departamento || "";
             document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
             document.getElementById('campoStatus').value = c.status || "Ativo";
             document.getElementById('modalCadastro').classList.remove('hidden');
@@ -804,7 +815,7 @@
                                 <td class="p-3 text-center">
                                     <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
                                         <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
-                                        <option value="Recebida ✔" ${cItem.nfStatus === 'Receb_ida ✔' ? 'selected' : ''}>Recebida ✔</option>
+                                        <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
                                         <option value="Recusada ❌" ${cItem.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
                                     </select>
                                 </td>
