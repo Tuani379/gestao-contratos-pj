@@ -59,7 +59,7 @@
                             <h3 id="dropdown-nome-usuario" class="font-bold text-sm text-blue-950">---</h3>
                             <p id="dropdown-email-usuario" class="text-xs text-slate-500 break-all">---</p>
                         </div>
-                        <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Admin</span>
+                        <span id="badge-tipo-usuario" class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Admin</span>
                     </div>
 
                     <div class="space-y-3 pt-1">
@@ -93,7 +93,7 @@
             </div>
         </div>
 
-        <!-- RODAPÉ DA BARRA LATERAL (BOTÕES: SAIR, CONFIGURAÇÕES, AJUDA) -->
+        <!-- RODAPÉ DA BARRA LATERAL -->
         <div class="grid grid-cols-3 gap-2 pt-4 border-t border-blue-900">
             <button onclick="fazerLogout()" class="flex flex-col items-center justify-center bg-blue-900/60 hover:bg-red-600 p-2 rounded-xl text-[11px] font-semibold transition" title="Sair">
                 <span class="text-sm mb-0.5">🚪</span> Sair
@@ -125,7 +125,7 @@
         </div>
     </div>
 
-    <!-- MODAL SELETOR DE EMPRESAS / OUTRAS CONTAS (ESTILO FLASH) -->
+    <!-- MODAL SELETOR DE EMPRESAS -->
     <div id="modalSeletorEmpresas" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharSeletorEmpresas()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
@@ -578,6 +578,9 @@
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
+        // Seu e-mail master configurado como dono da plataforma
+        const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
+
         const dataHojeObj = new Date();
         const anoAtualSistema = dataHojeObj.getFullYear();
         const mesAtualSistema = String(dataHojeObj.getMonth() + 1).padStart(2, '0');
@@ -673,7 +676,8 @@
             const telaLogin = document.getElementById('tela-login');
             if (user) {
                 telaLogin.classList.add('hidden');
-                let userEmail = user.email || "";
+                let userEmail = (user.email || "").toLowerCase();
+                const eAdminMaster = (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase());
 
                 onValue(ref(db, 'empresas_clientes'), (snapshot) => {
                     const empresas = snapshot.val() || {};
@@ -682,28 +686,40 @@
                     let nomeResponsavelEmpresa = null;
 
                     Object.entries(empresas).forEach(([id, emp]) => {
-                        if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail.toLowerCase()) {
+                        if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail) {
                             empresaEncontradaId = id;
                             empresaEncontradaNome = emp.razaoSocial;
                             nomeResponsavelEmpresa = emp.razaoSocial;
                         }
                     });
 
-                    const eAdminMaster = (userEmail.toLowerCase() === "tuanicaraca@gmail.com" || userEmail.toLowerCase() === "tuanisantoscaraca@hotmail.com"); 
+                    // Se NÃO for o Master, trava o escopo exclusivamente na empresa do cliente
+                    if (!eAdminMaster) {
+                        if (empresaEncontradaId) {
+                            empresaAtivaId = empresaEncontradaId;
+                            empresaAtivaNome = empresaEncontradaNome;
+                            localStorage.setItem('connectpj_empresa_ativa', empresaAtivaId);
+                            localStorage.setItem('connectpj_empresa_nome', empresaAtivaNome);
+                        } else {
+                            empresaAtivaId = "sem_acesso";
+                            empresaAtivaNome = "ACESSO RESTRITO";
+                        }
 
-                    if (empresaEncontradaId && !eAdminMaster) {
-                        empresaAtivaId = empresaEncontradaId;
-                        empresaAtivaNome = empresaEncontradaNome;
-                        localStorage.setItem('connectpj_empresa_ativa', empresaAtivaId);
-                        localStorage.setItem('connectpj_empresa_nome', empresaAtivaNome);
                         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
                         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
-                        // Oculta opção de trocar contas e de criar nova empresa para clientes comuns
+                        // Oculta completamente o botão de trocar contas e de criar nova empresa para clientes comuns
                         const btnTrocarContas = document.getElementById('menu-trocar-outras-contas');
                         if (btnTrocarContas) btnTrocarContas.parentElement.style.display = 'none';
                         const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
                         if (btnNovaEmpresaMaster) btnNovaEmpresaMaster.style.display = 'none';
+
+                        // Atualiza o crachá do perfil para indicar que é cliente
+                        const badgePerfil = document.getElementById('badge-tipo-usuario');
+                        if (badgePerfil) {
+                            badgePerfil.innerText = "Cliente";
+                            badgePerfil.className = "bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-0.5 rounded";
+                        }
 
                         if (nomeResponsavelEmpresa) {
                             let partes = nomeResponsavelEmpresa.split(' ');
@@ -719,6 +735,7 @@
                             document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
                         }
                     } else {
+                        // Modo Administrador Master (Você - tuanicaraca@gmail.com)
                         let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                         let partes = nomeEmail.split(' ');
                         let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
@@ -787,6 +804,11 @@
         };
 
         window.abrirSeletorEmpresas = () => {
+            const userEmail = auth.currentUser ? auth.currentUser.email.toLowerCase() : "";
+            if (userEmail !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                alert("Acesso restrito ao administrador principal.");
+                return;
+            }
             document.getElementById('modal-perfil-detalhes').classList.add('hidden');
             carregarEmpresasSeletor();
             document.getElementById('modalSeletorEmpresas').classList.remove('hidden');
@@ -871,12 +893,11 @@
                 container.innerHTML = "";
 
                 const userEmail = auth.currentUser ? auth.currentUser.email.toLowerCase() : "";
-                const eAdminMaster = (userEmail === "tuanicaraca@gmail.com" || userEmail === "tuanisantoscaraca@hotmail.com");
+                const eAdminMaster = (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase());
 
                 const entradas = Object.entries(empresasLocais);
                 let listaRender = [];
                 
-                // Se for admin master, exibe a Matriz e todas as empresas. Se for cliente comum, exibe apenas a empresa dele!
                 if (eAdminMaster) {
                     listaRender.push({ id: 'matriz', razaoSocial: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", status: "Ativo" });
                 }
