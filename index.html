@@ -8,7 +8,11 @@
 
     <!-- Script Oficial do EmailJS -->
 
-    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script></head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+
+    <!-- Biblioteca SheetJS para Exportação Excel -->
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+</head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
 
 <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
@@ -94,7 +98,7 @@
         </nav>
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
-            
+             
             <!-- MODO RH: DASHBOARD & FOLHA MENSAL -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -132,7 +136,7 @@
                             <span id="competenciaModalLabel" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded"></span>
                         </div>
                         <p class="text-xs text-slate-500 mb-4">Marque os prestadores que farão parte da folha de pagamento deste mês de referência.</p>
-                        
+                         
                         <div class="mb-3 flex justify-between items-center bg-slate-50 p-2 rounded border text-sm">
                             <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
                                 <input id="chkSelecionarTodosContratos" type="checkbox" checked class="w-4 h-4 text-blue-600 rounded"> Selecionar Todos
@@ -154,7 +158,7 @@
                                 </tbody>
                             </table>
                         </div>
-                        
+                         
                         <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
                             <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                                 Cancelar
@@ -172,8 +176,8 @@
                         <span class="text-lg">⚙️</span>
                         <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
                     </div>
-                    <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione events extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
-                    
+                    <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
+                     
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
@@ -221,7 +225,7 @@
                             <thead>
                                 <tr class="border-b bg-slate-100">
                                     <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
+                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ / CPF</th>
                                     <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
                                     <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
@@ -249,7 +253,7 @@
                             <thead>
                                 <tr class="border-b bg-amber-100/50">
                                     <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
+                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ / CPF</th>
                                     <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
                                     <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
@@ -268,30 +272,43 @@
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
-                    <button id="btn-abrir-cadastro" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
-                        + Novo Cadastro
-                    </button>
+                    <div class="flex gap-2">
+                        <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition shadow-sm flex items-center gap-1.5">
+                            <span>📊</span> Exportar Excel
+                        </button>
+                        <button id="btn-abrir-cadastro" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold">
+                            + Novo Cadastro
+                        </button>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto">
                     <table class="w-full text-left border-collapse">
                         <thead class="bg-slate-100 border-b">
-                            <tr>
-                                <th class="p-3 text-sm font-bold text-slate-600">Razão Social / Nome</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">CNPJ / CPF</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">E-mail</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Cargo / Função</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Departamento</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Valor Fixo Mensal</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Centro de Custo</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Gestor / Unidade</th>
-                                <th class="p-3 text-sm font-bold text-slate-600">Status</th>
-                                <th class="p-3 text-sm font-bold text-slate-600 text-center">Ações</th>
+                            <tr class="text-xs font-bold text-slate-600">
+                                <th class="p-3">Nome</th>
+                                <th class="p-3">CPF</th>
+                                <th class="p-3">CEP</th>
+                                <th class="p-3">Município</th>
+                                <th class="p-3">E-mail Pessoal</th>
+                                <th class="p-3">Razão Social</th>
+                                <th class="p-3">CNPJ</th>
+                                <th class="p-3">E-mail Corp.</th>
+                                <th class="p-3">Cargo</th>
+                                <th class="p-3">Papel</th>
+                                <th class="p-3">Departamento</th>
+                                <th class="p-3">Valor Fixo</th>
+                                <th class="p-3">Centro de Custo</th>
+                                <th class="p-3">Gestor Direto</th>
+                                <th class="p-3">Unidade</th>
+                                <th class="p-3">Vigência</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaContratos">
                             <tr>
-                                <td colspan="10" class="p-4 text-center text-slate-400">Carregando contratos...</td>
+                                <td colspan="18" class="p-4 text-center text-slate-400">Carregando contratos...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -336,7 +353,13 @@
                 <h2 class="text-xl font-bold text-gray-800 mb-1">📊 Gerador de Relatórios e Auditoria</h2>
                 <p class="text-sm text-gray-500 mb-6">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
 
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8 items-end">
+                <div class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-8 items-end">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Competência</label>
+                        <select id="filtroRelatorioCompetencia" class="w-full border border-gray-300 rounded p-2 text-sm bg-white font-semibold text-blue-900">
+                            <option value="todos">-- Todas as Competências --</option>
+                        </select>
+                    </div>
                     <div>
                         <label class="block text-sm font-medium mb-1">Centro de Custo</label>
                         <select id="filtroCentroCusto" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
@@ -353,8 +376,8 @@
                         <label class="block text-sm font-medium mb-1">Tipo de Folha</label>
                         <select id="filtroTipoFolha" class="w-full border border-gray-300 rounded p-2 text-sm bg-white">
                             <option value="todos">-- Todas --</option>
-                            <option value="regular">Regular</option>
-                            <option value="complementar">Complementar</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Complementar">Complementar</option>
                         </select>
                     </div>
                     <button id="btn-exportar-csv" class="bg-blue-900 text-white font-bold py-2 px-4 rounded shadow hover:bg-blue-800 transition">
@@ -366,6 +389,7 @@
                     <table class="w-full text-left border-collapse">
                         <thead>
                             <tr class="bg-blue-900 text-white text-sm">
+                                <th class="p-3">COMPETÊNCIA</th>
                                 <th class="p-3">PRESTADOR</th>
                                 <th class="p-3">CENTRO DE CUSTO</th>
                                 <th class="p-3">TIPO DE FOLHA</th>
@@ -375,6 +399,7 @@
                         </thead>
                         <tbody class="text-sm">
                             <tr class="border-b hover:bg-gray-50">
+                                <td class="p-3">--/----</td>
                                 <td class="p-3 font-semibold">Tech Solutions LTDA</td>
                                 <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border">TI - Desenvolvimento</span></td>
                                 <td class="p-3">Regular</td>
@@ -465,9 +490,13 @@
 
         const filtroCompetencia = document.getElementById('filtroCompetencia');
         const selectCompetenciaPJ = document.getElementById('selectCompetenciaPJ');
+        const filtroRelatorioCompetencia = document.getElementById('filtroRelatorioCompetencia');
         
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
+        if (filtroRelatorioCompetencia) {
+            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Todas as Competências --</option>';
+        }
 
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
 
@@ -483,6 +512,10 @@
             opt2.value = valorCompetencia;
             opt2.innerText = `${nome} / ${anoAtualSistema}`;
 
+            const opt3 = document.createElement('option');
+            opt3.value = valorCompetencia;
+            opt3.innerText = `${nome} / ${anoAtualSistema}`;
+
             if (numeroMes === mesAtualSistema) {
                 opt1.selected = true;
                 opt2.selected = true;
@@ -490,6 +523,9 @@
 
             filtroCompetencia.appendChild(opt1);
             selectCompetenciaPJ.appendChild(opt2);
+            if (filtroRelatorioCompetencia) {
+                filtroRelatorioCompetencia.appendChild(opt3);
+            }
         });
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
@@ -526,20 +562,17 @@
             }
         });
 
-        // Configuração de Sessão, Iniciais Automáticas e Perfil no Sidebar
         onAuthStateChanged(auth, async (user) => {
             const telaLogin = document.getElementById('tela-login');
             if (user) {
                 telaLogin.classList.add('hidden');
                 
-                // Extrai o nome base do e-mail (ex: tuani.cruz -> Tuani Cruz)
                 let nomeEmail = user.email.split('@')[0].replace('.', ' ');
                 let partes = nomeEmail.split(' ');
                 let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
                 
                 document.getElementById('user-name').innerText = nomeFormatado;
                 
-                // Gera as Iniciais automaticamente (Ex: Tuani Cruz -> TC)
                 let iniciais = partes[0].charAt(0);
                 if (partes.length > 1) {
                     iniciais += partes[partes.length - 1].charAt(0);
@@ -556,7 +589,7 @@
         window.fazerLogout = () => {
             signOut(auth);
         };
-window.toggleSenha = () => {
+        window.toggleSenha = () => {
             const inputSenha = document.getElementById('login-senha-saas');
             const iconeOlho = document.getElementById('icone-olho');
             
@@ -864,15 +897,26 @@ window.toggleSenha = () => {
 
             chavesFolha.forEach(key => {
                 const f = baseFolhaMes[key];
+                const contratoReal = contratosLocais[key] || {};
 
                 let subTotalReg = parseFloat(f.regular.valorFixo || 0) + parseFloat(f.regular.motorValor || 0);
                 totalRegularMes += subTotalReg;
+
+                let docIdentificacao = (contratoReal.cnpj && contratoReal.cnpj.trim() !== "" && contratoReal.cnpj !== "---") 
+                    ? contratoReal.cnpj 
+                    : ((f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (contratoReal.cpf || f.cpf || "---"));
+
+                // Tratamento do Botão de Liquidar para a Folha Regular
+                let statusRegHTML = f.regular.statusPagamento || "Aguardando NF";
+                if (statusRegHTML === "Pronto para Pagar" || statusRegHTML.includes("Recebida")) {
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-3 rounded text-xs font-bold shadow-sm transition">💰 Liquidar</button>`;
+                }
 
                 let trReg = document.createElement('tr');
                 trReg.className = "border-b hover:bg-slate-50 text-slate-700 text-sm";
                 trReg.innerHTML = `
                     <td class="p-3"><b>${f.nome}</b><br><span class="text-xs text-slate-400">${f.razaoSocial || ""}</span></td>
-                    <td class="p-3 text-xs font-semibold text-slate-500">${f.cnpj || f.cpf || "---"}</td>
+                    <td class="p-3 text-xs font-semibold text-slate-500">${docIdentificacao}</td>
                     <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                     <td class="p-3 text-center">
                         <select class="select-nf-status-reg border rounded p-1 text-xs font-bold" data-id="${key}">
@@ -882,7 +926,7 @@ window.toggleSenha = () => {
                         </select>
                     </td>
                     <td class="p-3 text-center">${f.regular.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-slate-100 p-1 rounded text-xs" data-id="${key}">📄 Abrir</button>` : '---'}</td>
-                    <td class="p-3 text-center">${f.regular.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}">💰 Liquidar</button>` : f.regular.statusPagamento}</td>
+                    <td class="p-3 text-center">${statusRegHTML}</td>
                 `;
                 tbodyRegular.appendChild(trReg);
 
@@ -890,10 +934,17 @@ window.toggleSenha = () => {
                     Object.entries(f.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementar = true;
                         totalComplementarMes += parseFloat(cItem.motorValor || 0);
+
+                        let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
+                        if (statusCompHTML === "Pronto para Pagar" || statusCompHTML.includes("Recebida")) {
+                            statusCompHTML = `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-3 rounded text-xs font-bold shadow-sm transition" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
+                        }
+
                         let trComp = document.createElement('tr');
+                        trComp.className = "border-b hover:bg-amber-50/40 text-slate-700 text-sm";
                         trComp.innerHTML = `
                             <td class="p-3"><b>${f.nome}</b><br><span class="text-xs bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || "Complementar"}</span></td>
-                            <td class="p-3 text-xs">${f.cnpj || f.cpf || "---"}</td>
+                            <td class="p-3 text-xs">${docIdentificacao}</td>
                             <td class="p-3 font-bold text-amber-700">R$ ${parseFloat(cItem.motorValor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                             <td class="p-3 text-center">
                                 <select class="select-nf-status-comp border p-1 text-xs font-bold" data-id="${key}" data-comp-id="${idComp}">
@@ -903,7 +954,7 @@ window.toggleSenha = () => {
                                 </select>
                             </td>
                             <td class="p-3 text-center">${cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-slate-100 p-1 rounded text-xs" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '---'}</td>
-                            <td class="p-3 text-center">${cItem.statusPagamento === 'NF Recebida (Avaliando)' ? `<button class="btn-liquidar-comp bg-green-600 hover:bg-green-700 text-white p-1 px-2 rounded text-xs font-bold shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>` : cItem.statusPagamento}</td>
+                            <td class="p-3 text-center">${statusCompHTML}</td>
                         `;
                         tbodyComplementar.appendChild(trComp);
                     });
@@ -932,7 +983,7 @@ window.toggleSenha = () => {
             if (e.target.classList.contains('select-nf-status-reg')) {
                 interagirStatusNF(id, e.target.value, 'regular');
             } else if (e.target.classList.contains('select-nf-status-comp')) {
-                 interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
+                interagirStatusNF(id, e.target.value, 'complementares_lista/' + compId);
             }
         });
 
@@ -988,7 +1039,7 @@ window.toggleSenha = () => {
             const entradas = Object.entries(contratosLocais);
 
             if (entradas.length === 0) {
-                tbodyGeralContratos.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
+                tbodyGeralContratos.innerHTML = `<tr><td colspan="18" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
                 return;
             }
 
@@ -1016,30 +1067,33 @@ window.toggleSenha = () => {
                 };
 
                 trC.innerHTML = `
-                    <td class="p-3 font-semibold">${c.nome || "---"}</td>
-                    <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
-                    <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
-                    <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
-                    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
-                    <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
-                    <td class="p-3">${c.cargo || "---"}</td>
-                    <td class="p-3">${c.papel || "---"}</td>
-                    <td class="p-3 text-xs">${c.departamento || "---"}</td>
-                    <td class="p-3 font-bold text-slate-900">R$ ${vExibir}</td>
-                    <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-                    <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
-                    <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
-                    <td class="p-3">
-                        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status || 'Ativo'}</span>
-                        ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
-                    </td>
-                    <td class="p-3 text-center">
-                        ${c.status === 'Ativo' 
-                            ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
-                            : `<span class="text-xs text-slate-400">Encerrado</span>`
-                        }
-                    </td>
-                `;
+        <td class="p-3 font-semibold">${c.nome || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.cep || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.municipio || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
+        <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.cargo || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.papel || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.departamento || "---"}</td>
+        <td class="p-3 text-xs font-bold text-slate-900">R$ ${vExibir}</td>
+        <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.vigencia || "---"}</td>
+        <td class="p-3">
+            <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status || 'Ativo'}</span>
+            ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
+        </td>
+        <td class="p-3 text-center">
+            ${c.status === 'Ativo' 
+                ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
+                : `<span class="text-xs text-slate-400">Encerrado</span>`
+            }
+        </td>
+    `;
                 tbodyGeralContratos.appendChild(trC);
             });
 
@@ -1307,7 +1361,7 @@ window.toggleSenha = () => {
                     const atualizacoes = {};
                     atualizacoes[`${pathFinal}/nfArquivoBase64`] = base64String;
                     atualizacoes[`${pathFinal}/nfStatus`] = "Recebida ✔";
-                    atualizacoes[`${pathFinal}/statusPagamento`] = "NF Recebida (Avaliando)";
+                    atualizacoes[`${pathFinal}/statusPagamento`] = "Pronto para Pagar";
                     atualizacoes[`${pathFinal}/motivoRecusa`] = "";
 
                     await update(ref(db), atualizacoes);
@@ -1325,55 +1379,113 @@ window.toggleSenha = () => {
         function carregarRelatorio() {
             const sectionRelatorios = document.getElementById('relatorios');
             const tbodyRelatorio = sectionRelatorios.querySelector('tbody');
+            const selectCentroCusto = document.getElementById('filtroCentroCusto');
+            const selectPrestador = document.getElementById('filtroPrestador');
             
             if (!tbodyRelatorio) return;
             
             tbodyRelatorio.innerHTML = ''; 
-            let totalGeral = 0;
             let encontrouDados = false;
 
-            Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
-                Object.entries(prestadores).forEach(([id, dados]) => {
-                    const valorParaValidar = parseFloat(dados.regular?.valorFixo || 0) + parseFloat(dados.regular?.motorValor || 0);
-                    
-                    if (!dados.nome || dados.nome.trim() === "" || dados.nome === "Sem Nome" || valorParaValidar <= 0) {
-                        return;
-                    }
+            const centrosCustosSet = new Set();
+            const prestadoresSet = new Set();
 
-                    if (!dados.nome || !contratosLocais[id]) return;
-                        
-                    encontrouDados = true;
+            Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
+                const compExibicao = competencia.replace('-', '/');
+                Object.entries(prestadores).forEach(([id, dados]) => {
                     const contrato = contratosLocais[id] || {};
                     const centroCusto = contrato.centroDeCusto || "N/A";
-                    
-                    let fixo = parseFloat(dados.regular?.valorFixo || 0);
-                    let extra = parseFloat(dados.regular?.motorValor || 0);
-                    let subTotal = fixo + extra;
-                    
-                    totalGeral += subTotal;
-                    
-                    tbodyRelatorio.innerHTML += `
-                        <tr class="border-b hover:bg-gray-50">
-                            <td class="p-3 font-semibold">${dados.nome || 'Prestador'}</td>
-                            <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
-                            <td class="p-3">Regular</td>
-                            <td class="p-3 italic text-gray-600 text-xs">Fixo: ${fixo} + Ajuste: ${extra}</td>
-                            <td class="p-3 text-right font-bold">R$ ${subTotal.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
-                        </tr>
-                    `;
+                    const nomePrestador = dados.nome || contrato.nome || '';
+
+                    if (centroCusto && centroCusto !== "N/A" && centroCusto.toLowerCase() !== "prestador") {
+                        centrosCustosSet.add(centroCusto);
+                    }
+                    if (nomePrestador && nomePrestador.toLowerCase() !== "prestador") {
+                        prestadoresSet.add(nomePrestador);
+                    }
+
+                    // 1. Processar Folha Regular
+                    const fixo = parseFloat(dados.regular?.valorFixo || 0);
+                    const motorValReg = parseFloat(dados.regular?.motorValor || 0);
+                    const eventoReg = dados.regular?.motorEvento;
+                    const subTotalReg = fixo + motorValReg;
+
+                    if (subTotalReg > 0 || fixo > 0) {
+                        encontrouDados = true;
+
+                        let detalheReg = `Honorário Fixo: R$ ${fixo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                        if (motorValReg > 0 && eventoReg) {
+                            detalheReg += ` + ${eventoReg}: R$ ${motorValReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+                        }
+
+                        tbodyRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}" data-valor="${subTotalReg}">
+                                <td class="p-3 font-medium text-blue-900">${compExibicao}</td>
+                                <td class="p-3 font-semibold">${nomePrestador}</td>
+                                <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
+                                <td class="p-3">Regular</td>
+                                <td class="p-3 italic text-gray-600 text-xs">${detalheReg}</td>
+                                <td class="p-3 text-right font-bold">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                            </tr>
+                        `;
+                    }
+
+                    // 2. Processar Folhas Complementares
+                    if (dados.complementares_lista) {
+                        Object.entries(dados.complementares_lista).forEach(([_, cItem]) => {
+                            const valComp = parseFloat(cItem.motorValor || 0);
+                            const eventoComp = cItem.motorEvento || "Complementar";
+
+                            if (valComp > 0) {
+                                encontrouDados = true;
+
+                                tbodyRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}" data-valor="${valComp}">
+                                        <td class="p-3 font-medium text-blue-900">${compExibicao}</td>
+                                        <td class="p-3 font-semibold">${nomePrestador}</td>
+                                        <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
+                                        <td class="p-3 text-amber-800 font-semibold">Complementar</td>
+                                        <td class="p-3 italic text-amber-900 text-xs">${eventoComp}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                        <td class="p-3 text-right font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
                 });
             });
 
+            const ccAtual = selectCentroCusto.value;
+            selectCentroCusto.innerHTML = '<option value="todos">-- Todos --</option>';
+            Array.from(centrosCustosSet).sort().forEach(cc => {
+                const opt = document.createElement('option');
+                opt.value = cc;
+                opt.innerText = cc;
+                if (cc === ccAtual) opt.selected = true;
+                selectCentroCusto.appendChild(opt);
+            });
+
+            const prestAtual = selectPrestador.value;
+            selectPrestador.innerHTML = '<option value="todos">-- Todos --</option>';
+            Array.from(prestadoresSet).sort().forEach(p => {
+                const opt = document.createElement('option');
+                opt.value = p;
+                opt.innerText = p;
+                if (p === prestAtual) opt.selected = true;
+                selectPrestador.appendChild(opt);
+            });
+
             if (!encontrouDados) {
-                tbodyRelatorio.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-gray-500">Nenhum dado de folha processado.</td></tr>';
+                tbodyRelatorio.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-gray-500">Nenhum dado de folha processado.</td></tr>';
             } else {
                 tbodyRelatorio.innerHTML += `
-                    <tr class="bg-gray-100 font-bold">
-                        <td colspan="4" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
-                        <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                    <tr id="linhaTotalConsolidado" class="bg-gray-100 font-bold">
+                        <td colspan="5" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
+                        <td id="valorTotalConsolidado" class="p-3 text-right text-blue-900">R$ 0,00</td>
                     </tr>
                 `;
             }
+            aplicarFiltros();
         }
 
         window.abrirModalEdicao = function(id) {
@@ -1410,18 +1522,20 @@ window.toggleSenha = () => {
 
         function exportarParaCSV() {
             let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-            csvContent += "Prestador,Centro de Custo,Tipo,Valor\n";
+            csvContent += "Competencia,Prestador,Centro de Custo,Tipo,Detalhe,Valor\n";
 
             const linhas = document.querySelectorAll('#relatorios tbody tr');
             linhas.forEach(tr => {
-                if (tr.style.display === 'none' || tr.classList.contains('bg-gray-100')) return;
+                if (tr.style.display === 'none' || tr.id === 'linhaTotalConsolidado') return;
 
-                const nome = tr.cells[0].innerText;
-                const cc = tr.cells[1].innerText;
-                const tipo = tr.cells[2].innerText;
-                const valor = tr.cells[4].innerText;
+                const comp = tr.cells[0].innerText;
+                const nome = tr.cells[1].innerText;
+                const cc = tr.cells[2].innerText;
+                const tipo = tr.cells[3].innerText;
+                const detalhe = tr.cells[4].innerText;
+                const valor = tr.cells[5].innerText;
                 
-                csvContent += `"${nome}","${cc}","${tipo}","${valor}"\n`;
+                csvContent += `"${comp}","${nome}","${cc}","${tipo}","${detalhe}","${valor}"\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
@@ -1435,28 +1549,55 @@ window.toggleSenha = () => {
 
         document.getElementById('btn-exportar-csv').addEventListener('click', exportarParaCSV);
 
+        function exportarContratosExcel() {
+            const tabela = document.querySelector("#contratos table");
+            if (!tabela) {
+                alert("Tabela de contratos não encontrada!");
+                return;
+            }
+            const wb = XLSX.utils.table_to_book(tabela, { sheet: "Contratos" });
+            XLSX.writeFile(wb, `Relatorio_Contratos_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`);
+        }
+
+        document.getElementById('btn-exportar-contratos-excel').addEventListener('click', exportarContratosExcel);
+
         function aplicarFiltros() {
+            const compFiltro = document.getElementById('filtroRelatorioCompetencia').value;
             const centro = document.getElementById('filtroCentroCusto').value;
             const prestador = document.getElementById('filtroPrestador').value;
             const tipo = document.getElementById('filtroTipoFolha').value;
 
             const linhas = document.querySelectorAll('#relatorios tbody tr');
+            let somaFiltrada = 0;
 
             linhas.forEach(tr => {
-                if (tr.classList.contains('bg-gray-100')) return;
+                if (tr.id === 'linhaTotalConsolidado') return;
 
-                const nome = tr.cells[0].innerText.toLowerCase();
-                const cc = tr.cells[1].innerText.toLowerCase();
-                const tipoLinha = tr.cells[2].innerText.toLowerCase();
+                const linhaCompetencia = tr.dataset.competencia || "";
+                const nome = tr.cells[1].innerText.trim();
+                const cc = tr.cells[2].innerText.trim();
+                const tipoLinha = tr.cells[3].innerText.toLowerCase();
 
-                const matchCentro = (centro === 'todos' || cc.includes(centro.toLowerCase()));
-                const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
-                const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo));
+                const matchComp = (compFiltro === 'todos' || linhaCompetencia === compFiltro);
+                const matchCentro = (centro === 'todos' || cc === centro);
+                const matchPrestador = (prestador === 'todos' || nome === prestador);
+                const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo.toLowerCase()));
 
-                tr.style.display = (matchCentro && matchPrestador && matchTipo) ? '' : 'none';
+                if (matchComp && matchCentro && matchPrestador && matchTipo) {
+                    tr.style.display = '';
+                    somaFiltrada += parseFloat(tr.dataset.valor || 0);
+                } else {
+                    tr.style.display = 'none';
+                }
             });
+
+            const spanTotal = document.getElementById('valorTotalConsolidado');
+            if (spanTotal) {
+                spanTotal.innerText = `R$ ${somaFiltrada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            }
         }
 
+        document.getElementById('filtroRelatorioCompetencia').addEventListener('change', aplicarFiltros);
         document.getElementById('filtroCentroCusto').addEventListener('change', aplicarFiltros);
         document.getElementById('filtroPrestador').addEventListener('change', aplicarFiltros);
         document.getElementById('filtroTipoFolha').addEventListener('change', aplicarFiltros);
