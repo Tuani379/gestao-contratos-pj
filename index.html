@@ -1379,10 +1379,14 @@
                 Object.entries(prestadores).forEach(([id, dados]) => {
                     const contrato = contratosLocais[id] || {};
                     const centroCusto = contrato.centroDeCusto || "N/A";
-                    const nomePrestador = dados.nome || contrato.nome || 'Prestador';
+                    const nomePrestador = dados.nome || contrato.nome || '';
 
-                    if (centroCusto && centroCusto !== "N/A") centrosCustosSet.add(centroCusto);
-                    if (nomePrestador) prestadoresSet.add(nomePrestador);
+                    if (centroCusto && centroCusto !== "N/A" && centroCusto.toLowerCase() !== "prestador") {
+                        centrosCustosSet.add(centroCusto);
+                    }
+                    if (nomePrestador && nomePrestador.toLowerCase() !== "prestador") {
+                        prestadoresSet.add(nomePrestador);
+                    }
 
                     // 1. Processar Folha Regular
                     const fixo = parseFloat(dados.regular?.valorFixo || 0);
