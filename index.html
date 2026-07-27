@@ -575,7 +575,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const dataHojeObj = new Date();
@@ -596,7 +596,7 @@
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
         if (filtroRelatorioCompetencia) {
-            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Toutes as Competências --</option>';
+            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Todas as Competências --</option>';
         }
 
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
@@ -828,6 +828,10 @@
                     let card = document.createElement('div');
                     card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${ativa ? 'bg-blue-50/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`;
                     
+                    let botaoExcluir = (emp.id !== 'matriz') 
+                        ? `<button onclick="excluirEmpresaMaster('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 px-2.5 py-1.5 rounded-xl transition" title="Excluir Empresa">🗑️</button>` 
+                        : '';
+
                     card.innerHTML = `
                         <div class="flex items-center gap-3">
                             <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-xs">
@@ -838,7 +842,8 @@
                                 <p class="text-xs text-slate-500">CNPJ: ${emp.cnpj}</p>
                             </div>
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
+                            ${botaoExcluir}
                             ${ativa 
                                 ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
                                 : `<button onclick="alternarEmpresaAtiva('${emp.id}', '${emp.razaoSocial}')" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>`
@@ -858,6 +863,24 @@
             fecharSeletorEmpresas();
             alert(`Alternado com sucesso para: ${nome}`);
             location.reload(); 
+        };
+
+        window.excluirEmpresaMaster = async (id, nome) => {
+            if (confirm(`Tem certeza que deseja remover a empresa "${nome}" e todos os dados dela do sistema?`)) {
+                try {
+                    await remove(ref(db, `empresas_clientes/${id}`));
+                    await remove(ref(db, `empresas_clientes_dados/${id}`));
+                    
+                    if (empresaAtivaId === id) {
+                        alternarEmpresaAtiva('matriz', 'CONNECTPJ MATRIZ');
+                    } else {
+                        carregarEmpresasSeletor();
+                    }
+                    alert("Empresa desativada/removida com sucesso!");
+                } catch (error) {
+                    alert("Erro ao excluir empresa: " + error.message);
+                }
+            }
         };
 
         document.getElementById('buscaEmpresaInput').addEventListener('input', (e) => {
@@ -1208,7 +1231,6 @@
             modal.classList.remove('hidden');
         }
 
-        // CARREGAMENTO DOS DADOS ISOLADOS POR EMPRESA ATIVA
         const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
         const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
 
