@@ -412,7 +412,7 @@
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
-        const EMAILJS_TEMPLATE_ID = "template_bvvnbfs";
+        const EMAILJS_TEMPLATE_ID = "template_pbvu4jp"; // Atualizado com o seu novo ID de modelo!
         if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") emailjs.init(EMAILJS_PUBLIC_KEY);
 
         const firebaseConfig = {
@@ -685,9 +685,8 @@
                 let subTotalReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
                 totalReg += subTotalReg;
 
-                let docCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (contratosLocais[key]?.cpf || f.cnpj || '---');
+                let cnpjCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (f.cnpj || '---');
 
-                // Status de Pagamento e Botão Liquidar corrigido com renderização síncrona
                 let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
                 if (statusRegHTML === "Pago") {
                     statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
@@ -695,13 +694,12 @@
                     statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
-                // Botão de Visualizar NF
                 let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
 
                 tbodyRegular.innerHTML += `
                     <tr class="border-b text-sm hover:bg-slate-50">
                         <td class="p-3"><b>${f.nome}</b></td>
-                        <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
+                        <td class="p-3 text-xs text-slate-600 font-medium">${cnpjCadastrado}</td>
                         <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                         <td class="p-3 text-center">
                             <select class="select-nf-status-reg border rounded p-1 text-xs font-bold bg-white" data-id="${key}">
@@ -733,7 +731,7 @@
                         tbodyComplementar.innerHTML += `
                             <tr class="border-b text-sm bg-amber-50/20 hover:bg-amber-50/50">
                                 <td class="p-3"><b>${f.nome}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || 'Complementar'}</span></td>
-                                <td class="p-3 text-xs text-slate-600 font-medium">${docCadastrado}</td>
+                                <td class="p-3 text-xs text-slate-600 font-medium">${cnpjCadastrado}</td>
                                 <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                 <td class="p-3 text-center">
                                     <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
@@ -755,7 +753,6 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        // Funções para Visualizar, Liquidar e Recusar NF com E-mail
         window.chamarVisualizadorAnexo = (key, pathTipo) => {
             const fContrato = folhasLocais[competenciaSelecionada][key];
             let arquivo = null;
@@ -802,7 +799,6 @@
                 motivoPrompt = prompt("Digite o motivo da recusa desta Nota Fiscal:");
                 if (!motivoPrompt) return;
 
-                // Disparo de e-mail via EmailJS informando a recusa e o motivo ao prestador
                 const contratoObj = contratosLocais[idContrato] || {};
                 const emailDestino = contratoObj.email || contratoObj.emailCorp;
                 if (emailDestino && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
@@ -858,7 +854,7 @@
             tbody.innerHTML = "";
             Object.entries(contratosLocais).forEach(([key, c]) => {
                 if (c.status === "Ativo") {
-                    let docExibicao = c.cnpj || c.cpf || '---';
+                    let docExibicao = c.cnpj || '---';
                     tbody.innerHTML += `<tr><td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-folha"></td><td class="p-2">${c.nome}</td><td class="p-2 text-xs">${docExibicao}</td><td class="p-2 text-right">R$ ${parseFloat(c.valorFixoMensal||0).toLocaleString('pt-BR')}</td></tr>`;
                 }
             });
@@ -874,7 +870,7 @@
                 const id = chk.value;
                 const c = contratosLocais[id];
                 pacote[`${pathFolhasDB}/${compDestino}/${id}`] = {
-                    nome: c.nome, cnpj: c.cnpj || c.cpf || '',
+                    nome: c.nome, cnpj: c.cnpj || '',
                     regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
                 };
             });
