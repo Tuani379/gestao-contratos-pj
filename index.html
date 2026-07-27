@@ -120,12 +120,12 @@
                             <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
                             <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none focus:outline-none focus:ring-0 cursor-pointer w-full">
                                 <!-- Injetado dinamicamente via Javascript -->
-                            </select>
-                        </div>
-                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
-                            <span>🔄</span> Criar Folha do Mês
-                        </button>
-                    </div>
+                          </select>
+                      </div>
+                      <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition flex items-center justify-center gap-1.5 shadow-sm">
+                          <span>🔄</span> Criar Folha do Mês
+                      </button>
+                  </div>
                 </div>
 
                 <!-- MODAL SELEÇÃO DE CONTRATOS PARA CRIAR FOLHA -->
@@ -136,142 +136,140 @@
                             <span id="competenciaModalLabel" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded"></span>
                         </div>
                         <p class="text-xs text-slate-500 mb-4">Marque os prestadores que farão parte da folha de pagamento deste mês de referência.</p>
-                        
+                         
                         <div class="mb-3 flex justify-between items-center bg-slate-50 p-2 rounded border text-sm">
                             <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
                                 <input id="chkSelecionarTodosContratos" type="checkbox" checked class="w-4 h-4 text-blue-600 rounded"> Selecionar Todos
-                            </label>
-                        </div>
+                          </label>
+                      </div>
 
-                        <div class="overflow-x-auto max-h-[40vh] border rounded-lg mb-4">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-100 border-b text-xs font-bold text-slate-600">
-                                        <th class="p-2 w-12 text-center">Selec.</th>
-                                        <th class="p-2">Prestador / Razão Social</th>
-                                        <th class="p-2">CNPJ / CPF</th>
-                                        <th class="p-2 text-right">Valor Fixo</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="listaContratosParaFolha" class="text-sm">
-                                    <!-- Injetado dinamicamente via JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        
-                        <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
-                            <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
-                                Cancelar
-                            </button>
-                            <button id="btn-confirmar-gerar-folha" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm transition whitespace-nowrap">
-                                Processar e Criar Folha
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MOTOR FINANCEIRO -->
-              <div class="bg-white p-6 rounded-xl border shadow-sm">
-                  <div class="flex items-center gap-2 mb-2">
-                      <span class="text-lg">⚙️</span>
-                      <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
+                      <div class="overflow-x-auto max-h-[40vh] border rounded-lg mb-4">
+                          <table class="w-full text-left border-collapse">
+                              <thead>
+                                  <tr class="bg-slate-100 border-b text-xs font-bold text-slate-600">
+                                      <th class="p-2 w-12 text-center">Selec.</th>
+                                      <th class="p-2">Prestador / Razão Social</th>
+                                      <th class="p-2">CNPJ / CPF</th>
+                                      <th class="p-2 text-right">Valor Fixo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="listaContratosParaFolha" class="text-sm">
+                                <!-- Injetado dinamicamente via JS -->
+                            </tbody>
+                      </table>
                   </div>
-                  <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
-                
-                  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
-                      <div>
-                          <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
-                          <select id="motorContrato" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-semibold text-slate-700">
-                              <option value="">Selecione...</option>
-                          </select>
-                      </div>
-                      <div>
-                          <label class="block text-xs font-bold text-slate-700 mb-2">2. Tipo de Lançamento</label>
-                          <select id="motorTipo" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
-                              <option value="regular">Folha Regular (Soma ao Fixo Mensal)</option>
-                              <option value="complementar">Folha Complementar (Separada)</option>
-                        </select>
-                      </div>
-                      <div>
-                          <label class="block text-xs font-bold text-slate-700 mb-2">3. Evento Financeiro</label>
-                          <select id="motorEvento" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
-                              <option value="Bônus por Performance">Bônus por Performance</option>
-                              <option value="Comissão de Vendas">Comissão de Vendas</option>
-                              <option value="Hora Extra">Hora Extra</option>
-                              <option value="Ajuste Retroativo">Ajuste Retroativo</option>
-                        </select>
-                      </div>
-                      <div>
-                          <label class="block text-xs font-bold text-slate-700 mb-2">4. Valor do Evento (R$)</label>
-                          <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
-                      </div>
-                      <div>
-                          <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
-                              Aplicar e Atualizar
-                        </button>
-                      </div>
+                   
+                  <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
+                      <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
+                          Cancelar
+                    </button>
+                    <button id="btn-confirmar-gerar-folha" class="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-sm shadow-sm transition whitespace-nowrap">
+                        Processar e Criar Folha
+                    </button>
                 </div>
-            </div>
-
-              <!-- TABELA 1: FOLHA REGULAR -->
-              <div class="p-6 bg-white rounded-xl border shadow-sm">
-                  <div class="mb-6">
-                      <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
-                      <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais regulares dos prestadores.</p>
-                  </div>
-
-                  <div class="overflow-x-auto">
-                      <table class="w-full text-left border-collapse">
-                          <thead>
-                              <tr class="border-b bg-slate-100">
-                                  <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
-                                  <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
-                                  <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
-                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
-                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
-                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
-                              </tr>
-                        </thead>
-                        <tbody id="listaFolha">
-                            <tr>
-                                <td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência e inicialize a folha do mês...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-              <!-- TABELA 2: FOLHA COMPLEMENTAR -->
-              <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
-                  <div>
-                      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
-                      <p class="text-sm text-slate-500">Controle de bônus, comissões e horas extras independentes com fluxos de notas separados.</p>
-                  </div>
-
-                  <div class="overflow-x-auto">
-                      <table class="w-full text-left border-collapse">
-                          <thead>
-                              <tr class="border-b bg-amber-100/50">
-                                  <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
-                                  <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
-                                  <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
-                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
-                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
-                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
-                              </tr>
-                        </thead>
-                        <tbody id="listaFolhaComplementar">
-                            <!-- Injetado dinamicamente -->
-                        </tbody>
-                    </table>
-                </div>
+              </div>
           </div>
-          </section>
 
-            <!-- MODO RH: CONTRATOS -->
-            <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
-                <div class="flex justify-between items-center mb-6">
-                    <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
+          <!-- MOTOR FINANCEIRO -->
+          <div class="bg-white p-6 rounded-xl border shadow-sm">
+              <div class="flex items-center gap-2 mb-2">
+                  <span class="text-lg">⚙️</span>
+                  <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
+              </div>
+              <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
+            
+              <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
+                  <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
+                      <select id="motorContrato" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-semibold text-slate-700">
+                          <option value="">Selecione...</option>
+                      </select>
+                </div>
+                  <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-2">2. Tipo de Lançamento</label>
+                      <select id="motorTipo" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                          <option value="regular">Folha Regular (Soma ao Fixo Mensal)</option>
+                          <option value="complementar">Folha Complementar (Separada)</option>
+                    </select>
+                </div>
+                  <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-2">3. Evento Financeiro</label>
+                      <select id="motorEvento" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                          <option value="Bônus por Performance">Bônus por Performance</option>
+                          <option value="Comissão de Vendas">Comissão de Vendas</option>
+                          <option value="Hora Extra">Hora Extra</option>
+                          <option value="Ajuste Retroativo">Ajuste Retroativo</option>
+                    </select>
+                </div>
+                  <div>
+                      <label class="block text-xs font-bold text-slate-700 mb-2">4. Valor do Evento (R$)</label>
+                      <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
+                </div>
+                  <div>
+                      <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
+                        Aplicar e Atualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+          <!-- TABELA 1: FOLHA REGULAR -->
+          <div class="p-6 bg-white rounded-xl border shadow-sm">
+              <div class="mb-6">
+                  <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
+                  <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais regulares dos prestadores.</p>
+              </div>
+
+              <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                      <thead>
+                          <tr class="border-b bg-slate-100">
+                              <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
+                              <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
+                              <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
+                              <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
+                              <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
+                              <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaFolha">
+                        <tr>
+                            <td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência e inicialize a folha do mês...</td>
+                        </tr>
+                  </tbody>
+              </div>
+          </div>
+
+          <!-- TABELA 2: FOLHA COMPLEMENTAR -->
+          <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
+              <div>
+                  <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
+                  <p class="text-sm text-slate-500">Controle de bônus, comissões e horas extras independentes com fluxos de notas separados.</p>
+              </div>
+
+              <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                      <thead>
+                          <tr class="border-b bg-amber-100/50">
+                              <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
+                              <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
+                              <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
+                              <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
+                              <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
+                              <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
+                        </tr>
+                    </thead>
+                    <tbody id="listaFolhaComplementar">
+                        <!-- Injetado dinamicamente -->
+                  </tbody>
+              </div>
+        </div>
+        </section>
+
+          <!-- MODO RH: CONTRATOS -->
+          <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
+              <div class="flex justify-between items-center mb-6">
+                  <h2 class="text-xl font-bold text-blue-900">Gestão de Contratos</h2>
                     <div class="flex gap-2">
                         <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition shadow-sm flex items-center gap-1.5">
                             <span>📊</span> Exportar Excel
@@ -348,7 +346,7 @@
               </div>
           </section>
 
-            <!-- MODO RH: RELATÓRIOS -->
+          <!-- MODO RH: RELATÓRIOS -->
           <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
               <h2 class="text-xl font-bold text-gray-800 mb-1">📊 Gerador de Relatórios e Auditoria</h2>
               <p class="text-sm text-gray-500 mb-6">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
@@ -1365,7 +1363,6 @@
             if (!tbodyRelatorio) return;
             
             tbodyRelatorio.innerHTML = ''; 
-            let totalGeral = 0;
             let encontrouDados = false;
 
             Object.entries(folhasLocais).forEach(([competencia, prestadores]) => {
@@ -1383,7 +1380,6 @@
 
                     if (subTotalReg > 0 || fixo > 0) {
                         encontrouDados = true;
-                        totalGeral += subTotalReg;
 
                         let detalheReg = `Honorário Fixo: R$ ${fixo.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
                         if (motorValReg > 0 && eventoReg) {
@@ -1391,7 +1387,7 @@
                         }
 
                         tbodyRelatorio.innerHTML += `
-                            <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}">
+                            <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}" data-valor="${subTotalReg}">
                                 <td class="p-3 font-medium text-blue-900">${compExibicao}</td>
                                 <td class="p-3 font-semibold">${nomePrestador}</td>
                                 <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
@@ -1410,10 +1406,9 @@
 
                             if (valComp > 0) {
                                 encontrouDados = true;
-                                totalGeral += valComp;
 
                                 tbodyRelatorio.innerHTML += `
-                                    <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}">
+                                    <tr class="border-b hover:bg-gray-50" data-competencia="${competencia}" data-valor="${valComp}">
                                         <td class="p-3 font-medium text-blue-900">${compExibicao}</td>
                                         <td class="p-3 font-semibold">${nomePrestador}</td>
                                         <td class="p-3"><span class="bg-gray-100 px-2 py-1 rounded border text-xs">${centroCusto}</span></td>
@@ -1434,7 +1429,7 @@
                 tbodyRelatorio.innerHTML += `
                     <tr id="linhaTotalConsolidado" class="bg-gray-100 font-bold">
                         <td colspan="5" class="p-3 text-right">TOTAL CONSOLIDADO:</td>
-                        <td class="p-3 text-right text-blue-900">R$ ${totalGeral.toLocaleString('pt-BR', {minimumFractionDigits: 2})}</td>
+                        <td id="valorTotalConsolidado" class="p-3 text-right text-blue-900">R$ 0,00</td>
                     </tr>
                 `;
             }
@@ -1521,6 +1516,7 @@
             const tipo = document.getElementById('filtroTipoFolha').value;
 
             const linhas = document.querySelectorAll('#relatorios tbody tr');
+            let somaFiltrada = 0;
 
             linhas.forEach(tr => {
                 if (tr.id === 'linhaTotalConsolidado') return;
@@ -1535,8 +1531,18 @@
                 const matchPrestador = (prestador === 'todos' || nome.includes(prestador.toLowerCase()));
                 const matchTipo = (tipo === 'todos' || tipoLinha.includes(tipo.toLowerCase()));
 
-                tr.style.display = (matchComp && matchCentro && matchPrestador && matchTipo) ? '' : 'none';
+                if (matchComp && matchCentro && matchPrestador && matchTipo) {
+                    tr.style.display = '';
+                    somaFiltrada += parseFloat(tr.dataset.valor || 0);
+                } else {
+                    tr.style.display = 'none';
+                }
             });
+
+            const spanTotal = document.getElementById('valorTotalConsolidado');
+            if (spanTotal) {
+                spanTotal.innerText = `R$ ${somaFiltrada.toLocaleString('pt-BR', {minimumFractionDigits: 2})}`;
+            }
         }
 
         document.getElementById('filtroRelatorioCompetencia').addEventListener('change', aplicarFiltros);
