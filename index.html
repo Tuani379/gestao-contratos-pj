@@ -412,7 +412,7 @@
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
-        const EMAILJS_TEMPLATE_ID = "template_pbvu4jp"; // Atualizado com o seu novo ID de modelo!
+        const EMAILJS_TEMPLATE_ID = "template_pbvu4jp";
         if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") emailjs.init(EMAILJS_PUBLIC_KEY);
 
         const firebaseConfig = {
@@ -807,8 +807,8 @@
                             to_email: emailDestino,
                             to_name: contratoObj.nome || "Prestador",
                             tipo_lancamento: "NOTA FISCAL RECUSADA",
-                            evento_financeiro: "Competência: " + competenciaSelecionada,
-                            valor: `Olá ${contratoObj.nome},\n\nSua Nota Fiscal enviada para a competência ${competenciaSelecionada} foi recusada.\n\nMotivo da recusa: ${motivoPrompt}\n\nPor favor, acesse o Portal do Prestador, ajuste sua nota fiscal e faça o reenvio.`
+                            evento_financeiro: competenciaSelecionada,
+                            valor: `Sua Nota Fiscal enviada para a competência ${competenciaSelecionada} foi recusada.\n\nMotivo da recusa: ${motivoPrompt}`
                         });
                         alert("Nota recusada e e-mail de notificação enviado ao prestador!");
                     } catch (err) {
