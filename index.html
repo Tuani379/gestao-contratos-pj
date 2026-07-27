@@ -1,15 +1,9 @@
 <!DOCTYPE html><html lang="pt-BR"><head>
-
     <meta charset="UTF-8">
-
     <title>ConnectPJ - Sistema Completo</title>
-
     <script src="https://cdn.tailwindcss.com"></script>
-
     <!-- Script Oficial do EmailJS -->
-
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-
     <!-- Biblioteca SheetJS para Exportação Excel -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
@@ -26,7 +20,7 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
                     <input type="email" id="login-email-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                 </div>
-               <div>
+             <div>
     <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
     <div class="relative">
         <input type="password" id="login-senha-saas" required class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
@@ -48,12 +42,48 @@
     <!-- PAINEL LATERAL DE PERFIL E NAVEGAÇÃO -->
     <aside class="bg-blue-950 text-white w-64 flex flex-col justify-between p-6 shadow-2xl z-20">
         <div>
-            <div class="text-center mb-8 pb-4 border-b border-blue-900">
-                <div id="user-avatar" class="w-16 h-16 mx-auto rounded-full bg-white text-blue-950 flex items-center justify-center font-extrabold text-lg mb-3 shadow-inner border-2 border-blue-300">
-                    --
+            <!-- BLOCO DE PERFIL CLICÁVEL (ESTILO FLASH) -->
+            <div class="relative mb-8 pb-4 border-b border-blue-900">
+                <button id="btn-perfil-dropdown" onclick="toggleMenuPerfil(event)" class="w-full text-center focus:outline-none group p-2 rounded-xl hover:bg-blue-900/40 transition flex flex-col items-center">
+                    <div id="user-avatar" class="w-16 h-16 mx-auto rounded-full bg-white text-blue-950 flex items-center justify-center font-extrabold text-lg mb-2 shadow-inner border-2 border-blue-300 group-hover:scale-105 transition">
+                        --
+                    </div>
+                    <h2 id="user-name" class="font-extrabold text-sm uppercase tracking-wide truncate max-w-full">Carregando...</h2>
+                    <span id="user-role" class="text-xs text-blue-400 mt-0.5 block font-medium">Administrador ▾</span>
+                </button>
+
+                <!-- MODAL / DROPDOWN DE PERFIL (ESTILO FLASH) -->
+                <div id="modal-perfil-detalhes" class="hidden absolute left-0 top-full mt-2 w-72 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 p-5 z-50 text-left">
+                    <div class="flex justify-between items-start mb-3 border-b pb-2">
+                        <div>
+                            <h3 id="dropdown-nome-usuario" class="font-bold text-sm text-blue-950">---</h3>
+                            <p id="dropdown-email-usuario" class="text-xs text-slate-500 break-all">---</p>
+                        </div>
+                        <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-0.5 rounded">Admin</span>
+                    </div>
+
+                    <div class="space-y-3 pt-1">
+                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                            <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Empresa Ativa</p>
+                            <p id="dropdown-empresa-ativa" class="text-xs font-bold text-blue-900">ConnectPJ Matriz</p>
+                        </div>
+
+                        <div class="space-y-1">
+                            <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
+                                <span>🔑</span> Alterar Senha
+                            </button>
+                            <button onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 hover:text-blue-900 rounded-lg transition flex items-center gap-2">
+                                <span>🏢</span> Trocar / Outras Contas
+                            </button>
+                        </div>
+
+                        <div class="border-t pt-2 mt-2">
+                            <button onclick="fazerLogout()" class="w-full text-left px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 rounded-lg transition flex items-center gap-2">
+                                <span>🚪</span> Sair da Conta
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <h2 id="user-name" class="font-extrabold text-sm uppercase tracking-wide truncate">Carregando...</h2>
-                <span id="user-role" class="text-xs text-blue-400 mt-0.5 block font-medium">Administrador</span>
             </div>
             
             <div class="space-y-2">
@@ -77,6 +107,42 @@
         </div>
     </aside>
 
+    <!-- MODAL DE TROCAR SENHA -->
+    <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
+            <h3 class="text-lg font-bold text-blue-950 mb-3">Alterar Senha</h3>
+            <p class="text-xs text-slate-500 mb-4">Insira sua nova senha abaixo para atualizar o acesso.</p>
+            <div class="space-y-3 mb-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Nova Senha</label>
+                    <input type="password" id="inputNovaSenha" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600">
+                </div>
+            </div>
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800">Salvar Nova Senha</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL SELETOR DE EMPRESAS / OUTRAS CONTAS (ESTILO FLASH) -->
+    <div id="modalSeletorEmpresas" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border relative max-h-[85vh] overflow-y-auto">
+            <button onclick="fecharSeletorEmpresas()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
+            
+            <h2 class="text-xl font-extrabold text-slate-900 mb-1">Acesse outras contas ConnectPJ</h2>
+            <p class="text-xs text-slate-500 mb-6">Veja abaixo as organizações e CNPJs em que você possui acesso.</p>
+
+            <div class="mb-4">
+                <input type="text" id="buscaEmpresaInput" placeholder="Buscar empresa ou grupo por nome ou CNPJ..." class="w-full p-3 border rounded-xl text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+
+            <div class="space-y-3" id="listaEmpresasDisponiveis">
+                <!-- Injetado dinamicamente via JS -->
+            </div>
+        </div>
+    </div>
+
     <div class="flex-1 flex flex-col h-screen overflow-hidden">
         <!-- BARRA TOP COMPACTA -->
         <div class="bg-white border-b border-slate-200 px-6 py-2.5 flex justify-between items-center text-sm shadow-sm">
@@ -98,7 +164,7 @@
         </nav>
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
-             
+            
             <!-- MODO RH: DASHBOARD & FOLHA MENSAL -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -136,7 +202,7 @@
                             <span id="competenciaModalLabel" class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded"></span>
                         </div>
                         <p class="text-xs text-slate-500 mb-4">Marque os prestadores que farão parte da folha de pagamento deste mês de referência.</p>
-                         
+                        
                         <div class="mb-3 flex justify-between items-center bg-slate-50 p-2 rounded border text-sm">
                             <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
                                 <input id="chkSelecionarTodosContratos" type="checkbox" checked class="w-4 h-4 text-blue-600 rounded"> Selecionar Todos
@@ -158,7 +224,7 @@
                                 </tbody>
                             </table>
                         </div>
-                         
+                        
                         <div class="flex justify-end items-center gap-3 border-t pt-4 mt-2">
                             <button id="btn-cancelar-gerar-folha" class="px-5 py-2 border border-slate-300 rounded-lg text-sm font-semibold text-slate-700 hover:bg-slate-50 transition">
                                 Cancelar
@@ -177,7 +243,7 @@
                         <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
                     </div>
                     <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
-                     
+                    
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
                         <div>
                             <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
@@ -468,14 +534,14 @@
                         📤 Enviar Nota Fiscal
                     </button>
                 </div>
-            </section>
+              </section>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const dataHojeObj = new Date();
         const anoAtualSistema = dataHojeObj.getFullYear();
@@ -567,11 +633,14 @@
             if (user) {
                 telaLogin.classList.add('hidden');
                 
-                let nomeEmail = user.email.split('@')[0].replace('.', ' ');
+                let userEmail = user.email || "usuario@connectpj.com";
+                let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                 let partes = nomeEmail.split(' ');
                 let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
                 
                 document.getElementById('user-name').innerText = nomeFormatado;
+                document.getElementById('dropdown-nome-usuario').innerText = nomeFormatado;
+                document.getElementById('dropdown-email-usuario').innerText = userEmail;
                 
                 let iniciais = partes[0].charAt(0);
                 if (partes.length > 1) {
@@ -584,6 +653,113 @@
             } else {
                 telaLogin.classList.remove('hidden');
             }
+        });
+
+        // Funções do Menu de Perfil / Dropdown estilo Flash
+        window.toggleMenuPerfil = (e) => {
+            e.stopPropagation();
+            const modal = document.getElementById('modal-perfil-detalhes');
+            modal.classList.toggle('hidden');
+        };
+
+        // Fechar dropdown ao clicar fora
+        document.addEventListener('click', (e) => {
+            const modal = document.getElementById('modal-perfil-detalhes');
+            const btn = document.getElementById('btn-perfil-dropdown');
+            if (modal && !modal.classList.contains('hidden') && !modal.contains(e.target) && !btn.contains(e.target)) {
+                modal.classList.add('hidden');
+            }
+        });
+
+        window.abrirModalTrocarSenha = () => {
+            document.getElementById('modal-perfil-detalhes').classList.add('hidden');
+            document.getElementById('inputNovaSenha').value = "";
+            document.getElementById('modalTrocarSenha').classList.remove('hidden');
+        };
+
+        window.fecharModalTrocarSenha = () => {
+            document.getElementById('modalTrocarSenha').classList.add('hidden');
+        };
+
+        window.salvarNovaSenha = async () => {
+            const novaSenha = document.getElementById('inputNovaSenha').value;
+            if (!novaSenha || novaSenha.length < 6) {
+                alert("A nova senha deve ter pelo menos 6 caracteres!");
+                return;
+            }
+            const user = auth.currentUser;
+            if (user) {
+                try {
+                    await updatePassword(user, novaSenha);
+                    alert("Senha alterada com sucesso!");
+                    fecharModalTrocarSenha();
+                } catch (error) {
+                    alert("Erro ao alterar senha (pode ser necessário fazer login novamente): " + error.message);
+                }
+            } else {
+                alert("Usuário não autenticado.");
+            }
+        };
+
+        window.abrirSeletorEmpresas = () => {
+            document.getElementById('modal-perfil-detalhes').classList.add('hidden');
+            renderizarListaEmpresasSeletor();
+            document.getElementById('modalSeletorEmpresas').classList.remove('hidden');
+        };
+
+        window.fecharSeletorEmpresas = () => {
+            document.getElementById('modalSeletorEmpresas').classList.add('hidden');
+        };
+
+        function renderizarListaEmpresasSeletor(filtro = "") {
+            const container = document.getElementById('listaEmpresasDisponiveis');
+            container.innerHTML = "";
+
+            // Simulando empresas/organizações do grupo (estilo Flash)
+            const empresasExemplo = [
+                { nome: "CONNECTPJ MATRIZ", cnpj: "42.563.021/0001-70", ativa: true },
+                { nome: "WISER LOG TECNOLOGIA LTDA", cnpj: "17.239.037/0001-70", ativa: false },
+                { nome: "RSX TECNOLOGIA E SISTEMAS", cnpj: "50.765.680/0001-02", ativa: false },
+                { nome: "BOOSTECH TECNOLOGIA LTDA", cnpj: "41.978.942/0001-26", ativa: false }
+            ];
+
+            const filtradas = empresasExemplo.filter(e => 
+                e.nome.toLowerCase().includes(filtro.toLowerCase()) || e.cnpj.includes(filtro)
+            );
+
+            if (filtradas.length === 0) {
+                container.innerHTML = `<p class="text-xs text-slate-400 text-center py-4">Nenhuma empresa encontrada.</p>`;
+                return;
+            }
+
+            filtradas.forEach(emp => {
+                let iniciaisEmp = emp.nome.split(' ').map(w => w[0]).slice(0, 2).join('');
+                let card = document.createElement('div');
+                card.className = `p-4 rounded-2xl border transition flex items-center justify-between ${emp.ativa ? 'bg-blue-50/50 border-blue-300 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300'}`;
+                
+                card.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-blue-100 text-blue-900 font-bold flex items-center justify-center text-xs">
+                            ${iniciaisEmp}
+                        </div>
+                        <div>
+                            <h4 class="font-extrabold text-sm text-slate-900">${emp.nome}</h4>
+                            <p class="text-xs text-slate-500">CNPJ: ${emp.cnpj}</p>
+                        </div>
+                    </div>
+                    <div>
+                        ${emp.ativa 
+                            ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
+                            : '<button onclick="alert('Alternando para ' + emp.nome + ''); fecharSeletorEmpresas();" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>'
+                        }
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        document.getElementById('buscaEmpresaInput').addEventListener('input', (e) => {
+            renderizarListaEmpresasSeletor(e.target.value);
         });
 
         window.fazerLogout = () => {
@@ -906,7 +1082,6 @@
                     ? contratoReal.cnpj 
                     : ((f.cnpj && f.cnpj.trim() !== "" && f.cnpj !== "---") ? f.cnpj : (contratoReal.cpf || f.cpf || "---"));
 
-                // Tratamento do Botão de Liquidar para a Folha Regular
                 let statusRegHTML = f.regular.statusPagamento || "Aguardando NF";
                 if (statusRegHTML === "Pronto para Pagar" || statusRegHTML.includes("Recebida")) {
                     statusRegHTML = `<button class="btn-liquidar-reg bg-green-600 hover:bg-green-700 text-white p-1 px-3 rounded text-xs font-bold shadow-sm transition">💰 Liquidar</button>`;
@@ -1521,10 +1696,12 @@
         };
 
         function exportarParaCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
-            csvContent += "Competencia,Prestador,Centro de Custo,Tipo,Detalhe,Valor\n";
+            let csvContent = "data:text/csv;charset=utf-8,﻿"; 
+            csvContent += "Competencia,Prestador,Centro de Custo,Tipo,Detalhe,Valor
+";
 
             const linhas = document.querySelectorAll('#relatorios tbody tr');
+            linhas.fontWeight = '';
             linhas.forEach(tr => {
                 if (tr.style.display === 'none' || tr.id === 'linhaTotalConsolidado') return;
 
@@ -1535,7 +1712,8 @@
                 const detalhe = tr.cells[4].innerText;
                 const valor = tr.cells[5].innerText;
                 
-                csvContent += `"${comp}","${nome}","${cc}","${tipo}","${detalhe}","${valor}"\n`;
+                csvContent += `"${comp}","${nome}","${cc}","${tipo}","${detalhe}","${valor}"
+`;
             });
 
             const encodedUri = encodeURI(csvContent);
