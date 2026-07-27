@@ -596,7 +596,7 @@
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
         if (filtroRelatorioCompetencia) {
-            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Todas as Competências --</option>';
+            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Toutes as Competências --</option>';
         }
 
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
@@ -673,8 +673,33 @@
             const telaLogin = document.getElementById('tela-login');
             if (user) {
                 telaLogin.classList.add('hidden');
-                
-                let userEmail = user.email || "usuario@connectpj.com";
+                let userEmail = user.email || "";
+
+                // Verifica se o usuário logado corresponde a alguma empresa cadastrada via e-mail
+                onValue(ref(db, 'empresas_clientes'), (snapshot) => {
+                    const empresas = snapshot.val() || {};
+                    let empresaEncontradaId = null;
+                    let empresaEncontradaNome = null;
+
+                    Object.entries(empresas).forEach(([id, emp]) => {
+                        if (emp.emailResponsavel && emp.emailResponsavel.toLowerCase() === userEmail.toLowerCase()) {
+                            empresaEncontradaId = id;
+                            empresaEncontradaNome = emp.razaoSocial;
+                        }
+                    });
+
+                    // Se encontrou uma empresa vinculada a este e-mail e nenhuma outra foi selecionada ainda, define ela como ativa
+                    if (empresaEncontradaId && (!localStorage.getItem('connectpj_empresa_ativa') || localStorage.getItem('connectpj_empresa_ativa') === "matriz")) {
+                        empresaAtivaId = empresaEncontradaId;
+                        empresaAtivaNome = empresaEncontradaNome;
+                        localStorage.setItem('connectpj_empresa_ativa', empresaAtivaId);
+                        localStorage.setItem('connectpj_empresa_nome', empresaAtivaNome);
+                        document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
+                        document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
+                    }
+                }, { onlyOnce: true });
+
+                // Formata o nome do usuário com base no e-mail
                 let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                 let partes = nomeEmail.split(' ');
                 let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
@@ -775,7 +800,6 @@
                 return;
             }
 
-            // Trava o botão para evitar duplo clique e cadastros duplicados
             btnSalvar.disabled = true;
             btnSalvar.innerText = "Cadastrando...";
 
