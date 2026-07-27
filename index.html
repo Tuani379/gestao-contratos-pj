@@ -750,7 +750,7 @@
                     <div>
                         ${emp.ativa 
                             ? '<span class="text-xs font-bold text-blue-700 bg-blue-100 px-3 py-1 rounded-full">Atual</span>' 
-                            : '<button onclick="alert('Alternando para ' + emp.nome + ''); fecharSeletorEmpresas();" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>'
+                            : '<button onclick="fecharSeletorEmpresas()" class="text-xs font-bold text-blue-600 hover:text-blue-800 bg-slate-100 hover:bg-blue-50 px-3 py-1.5 rounded-xl transition">Acessar →</button>'
                         }
                     </div>
                 `;
@@ -1696,12 +1696,10 @@
         };
 
         function exportarParaCSV() {
-            let csvContent = "data:text/csv;charset=utf-8,﻿"; 
-            csvContent += "Competencia,Prestador,Centro de Custo,Tipo,Detalhe,Valor
-";
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; 
+            csvContent += "Competencia,Prestador,Centro de Custo,Tipo,Detalhe,Valor\n";
 
             const linhas = document.querySelectorAll('#relatorios tbody tr');
-            linhas.fontWeight = '';
             linhas.forEach(tr => {
                 if (tr.style.display === 'none' || tr.id === 'linhaTotalConsolidado') return;
 
@@ -1712,8 +1710,7 @@
                 const detalhe = tr.cells[4].innerText;
                 const valor = tr.cells[5].innerText;
                 
-                csvContent += `"${comp}","${nome}","${cc}","${tipo}","${detalhe}","${valor}"
-`;
+                csvContent += `"${comp}","${nome}","${cc}","${tipo}","${detalhe}","${valor}"\n`;
             });
 
             const encodedUri = encodeURI(csvContent);
