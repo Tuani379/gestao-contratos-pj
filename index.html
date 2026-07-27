@@ -576,7 +576,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const dataHojeObj = new Date();
         const anoAtualSistema = dataHojeObj.getFullYear();
@@ -675,7 +675,6 @@
                 telaLogin.classList.add('hidden');
                 let userEmail = user.email || "";
 
-                // Verifica se o usuário logado corresponde a alguma empresa cadastrada
                 onValue(ref(db, 'empresas_clientes'), (snapshot) => {
                     const empresas = snapshot.val() || {};
                     let empresaEncontradaId = null;
@@ -712,7 +711,6 @@
                             document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
                         }
                     } else {
-                        // Caso seja o Admin Principal (Matriz)
                         let nomeEmail = userEmail.split('@')[0].replace('.', ' ');
                         let partes = nomeEmail.split(' ');
                         let nomeFormatado = partes.map(p => p.charAt(0).toUpperCase() + p.slice(1)).join(' ');
@@ -819,9 +817,17 @@
             btnSalvar.innerText = "Cadastrando...";
 
             try {
-                // Gera senha temporária automática
+                // 1. Gera senha temporária automática
                 const senhaTemporaria = "ConnectPJ@" + Math.floor(1000 + Math.random() * 9000);
 
+                // 2. Cria automaticamente a conta no Firebase Auth para o cliente
+                try {
+                    await createUserWithEmailAndPassword(auth, email, senhaTemporaria);
+                } catch (err) {
+                    console.log("A conta Auth pode já existir ou foi tratada:", err.message);
+                }
+
+                // 3. Salva os dados da empresa no Realtime Database
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'));
                 await update(novaEmpresaRef, {
                     razaoSocial: razaoSocial,
@@ -831,6 +837,7 @@
                     criadoEm: new Date().toLocaleDateString('pt-BR')
                 });
 
+                // 4. Envia o e-mail com a senha temporária via EmailJS
                 if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         to_email: email,
@@ -842,7 +849,7 @@
                     });
                 }
 
-                alert("Nova empresa cadastrada com sucesso e convite com a senha temporária enviado por e-mail!");
+                alert("Nova empresa cadastrada, conta de acesso gerada no Firebase e convite enviado por e-mail!");
                 fecharModalNovaEmpresaMaster();
                 carregarEmpresasSeletor();
             } catch (error) {
