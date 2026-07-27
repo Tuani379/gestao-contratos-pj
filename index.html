@@ -322,7 +322,6 @@
                             <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2 border rounded text-sm">
                             <input id="campoValorFixoMensal" type="number" placeholder="Valor Fixo Mensal (R$)" class="w-full p-2 border rounded text-sm">
                             
-                            <!-- CENTRO DE CUSTO DIGITÁVEL -->
                             <div>
                                 <label class="block text-[11px] font-bold text-slate-700 mb-1">Centro de Custo</label>
                                 <input id="campoDepartamento" type="text" placeholder="Ex: 105 - Financeiro" class="w-full p-2 border rounded text-sm bg-white">
@@ -571,6 +570,20 @@
         window.mostrarSecao = (id) => {
             ['dashboard', 'contratos', 'relatorios'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
+            
+            // Atualizar estilos das abas (linha azul e cores)
+            const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'relatorios': 'btn-relatorios' };
+            Object.entries(mapBotoes).forEach(([sec, btnId]) => {
+                const btn = document.getElementById(btnId);
+                if (sec === id) {
+                    btn.classList.remove('border-transparent', 'text-slate-500', 'hover:text-slate-900');
+                    btn.classList.add('border-blue-600', 'text-blue-950');
+                } else {
+                    btn.classList.remove('border-blue-600', 'text-blue-950');
+                    btn.classList.add('border-transparent', 'text-slate-500', 'hover:text-slate-900');
+                }
+            });
+
             if(id === 'relatorios') atualizarRelatoriosAuditoria();
         };
 
@@ -612,8 +625,8 @@
                 return;
             }
 
-            // Coletar centros de custo dinamicamente para o filtro de relatórios
             let centrosCustoSet = new Set();
+            let nomesPrestadoresSet = new Set();
 
             entradas.forEach(([key, c]) => {
                 if (c.status === "Ativo") {
@@ -621,9 +634,10 @@
                     motorSelect.appendChild(optA);
                     let optB = document.createElement('option'); optB.value = key; optB.innerText = `${c.razaoSocial || c.nome}`;
                     pjPanelSelect.appendChild(optB);
+                }
 
-                    let optC = document.createElement('option'); optC.value = c.nome; optC.innerText = c.nome;
-                    relFiltroPrestador.appendChild(optC);
+                if (c.nome && c.nome.trim() !== "") {
+                    nomesPrestadoresSet.add(c.nome.trim());
                 }
 
                 if (c.departamento && c.departamento.trim() !== "") {
@@ -657,6 +671,11 @@
                         <td class="p-3 text-center"><button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button></td>
                     </tr>
                 `;
+            });
+
+            nomesPrestadoresSet.forEach(nome => {
+                let optC = document.createElement('option'); optC.value = nome; optC.innerText = nome;
+                relFiltroPrestador.appendChild(optC);
             });
 
             centrosCustoSet.forEach(cc => {
@@ -848,11 +867,19 @@
             const prestadoresObj = folhasLocais[fComp] || {};
             Object.entries(prestadoresObj).forEach(([idPrestador, dadosPrestador]) => {
                 const contratoInfo = contratosLocais[idPrestador] || {};
-                const nomePrestador = dadosPrestador.nome;
+                const nomePrestador = dadosPrestador.nome || contratoInfo.nome || "Desconhecido";
                 const departamento = contratoInfo.departamento || "Prestador";
                 const centroCustoExibicao = `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">${departamento}</span>`;
 
-                if (fPrestador !== "todos" && nomePrestador !== fPrestador) return;
+                if (fPrestador !== "todos") {
+                    let nomeFiltroNorm = fPrestador.trim().toLowerCase();
+                    let nomePrestadorNorm = nomePrestador.trim().toLowerCase();
+                    let nomeContratoNorm = (contratoInfo.nome || "").trim().toLowerCase();
+                    if (!nomePrestadorNorm.includes(nomeFiltroNorm) && !nomeFiltroNorm.includes(nomePrestadorNorm) && nomeContratoNorm !== nomeFiltroNorm) {
+                        return;
+                    }
+                }
+
                 if (fCC !== "todos" && departamento !== fCC) return;
 
                 if (fTipoFolha === "todas" || fTipoFolha === "Regular") {
