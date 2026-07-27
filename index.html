@@ -171,100 +171,102 @@
                 </div>
 
                 <!-- MOTOR FINANCEIRO -->
-                <div class="bg-white p-6 rounded-xl border shadow-sm">
-                    <div class="flex items-center gap-2 mb-2">
-                        <span class="text-lg">⚙️</span>
-                        <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
-                    </div>
-                    <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
-                    
-                    <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
-                            <select id="motorContrato" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-semibold text-slate-700">
-                                <option value="">Selecione...</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">2. Tipo de Lançamento</label>
-                            <select id="motorTipo" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
-                                <option value="regular">Folha Regular (Soma ao Fixo Mensal)</option>
-                                <option value="complementar">Folha Complementar (Separada)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">3. Evento Financeiro</label>
-                            <select id="motorEvento" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
-                                <option value="Bônus por Performance">Bônus por Performance</option>
-                                <option value="Comissão de Vendas">Comissão de Vendas</option>
-                                <option value="Hora Extra">Hora Extra</option>
-                                <option value="Ajuste Retroativo">Ajuste Retroativo</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-xs font-bold text-slate-700 mb-2">4. Valor do Evento (R$)</label>
-                            <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
-                        </div>
-                        <div>
-                            <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
-                                Aplicar e Atualizar
-                            </button>
-                        </div>
-                    </div>
+              <div class="bg-white p-6 rounded-xl border shadow-sm">
+                  <div class="flex items-center gap-2 mb-2">
+                      <span class="text-lg">⚙️</span>
+                      <h2 class="text-lg font-bold text-blue-900">Motor Financeiro: Ajustes e Lançamentos Especiais</h2>
+                  </div>
+                  <p class="text-xs text-slate-500 mb-6">Selecione o contrato, adicione eventos extras (como bônus ou comissões) e clique em aplicar. O lançamento afetará a competência atualmente selecionada acima.</p>
+                
+                  <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end">
+                      <div>
+                          <label class="block text-xs font-bold text-slate-700 mb-2">1. Selecionar Contrato PJ</label>
+                          <select id="motorContrato" class="w-full p-2 border rounded-lg text-sm bg-slate-50 font-semibold text-slate-700">
+                              <option value="">Selecione...</option>
+                          </select>
+                      </div>
+                      <div>
+                          <label class="block text-xs font-bold text-slate-700 mb-2">2. Tipo de Lançamento</label>
+                          <select id="motorTipo" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                              <option value="regular">Folha Regular (Soma ao Fixo Mensal)</option>
+                              <option value="complementar">Folha Complementar (Separada)</option>
+                        </select>
+                      </div>
+                      <div>
+                          <label class="block text-xs font-bold text-slate-700 mb-2">3. Evento Financeiro</label>
+                          <select id="motorEvento" class="w-full p-2 border rounded-lg text-sm bg-slate-50">
+                              <option value="Bônus por Performance">Bônus por Performance</option>
+                              <option value="Comissão de Vendas">Comissão de Vendas</option>
+                              <option value="Hora Extra">Hora Extra</option>
+                              <option value="Ajuste Retroativo">Ajuste Retroativo</option>
+                        </select>
+                      </div>
+                      <div>
+                          <label class="block text-xs font-bold text-slate-700 mb-2">4. Valor do Evento (R$)</label>
+                          <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded-lg text-sm">
+                      </div>
+                      <div>
+                          <button id="btn-aplicar-motor" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg text-sm transition">
+                              Aplicar e Atualizar
+                        </button>
+                      </div>
                 </div>
+            </div>
 
-                <!-- TABELA 1: FOLHA REGULAR -->
-                <div class="p-6 bg-white rounded-xl border shadow-sm">
-                    <div class="mb-6">
-                        <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
-                        <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais regulares dos prestadores.</p>
-                    </div>
+              <!-- TABELA 1: FOLHA REGULAR -->
+              <div class="p-6 bg-white rounded-xl border shadow-sm">
+                  <div class="mb-6">
+                      <h2 class="text-xl font-bold text-blue-900">Folha de Pagamento Mensal</h2>
+                      <p class="text-sm text-slate-500">Acompanhe o envio de notas fiscais regulares dos prestadores.</p>
+                  </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                  <tr class="border-b bg-slate-100">
-                                    <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
-                                    <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
-                                </tr>
-                          </thead>
-                          <tbody id="listaFolha">
-                              <tr>
-                                  <td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência e inicialize a folha do mês...</td>
+                  <div class="overflow-x-auto">
+                      <table class="w-full text-left border-collapse">
+                          <thead>
+                              <tr class="border-b bg-slate-100">
+                                  <th class="p-3 text-sm font-bold text-slate-600">Prestador / Tipo de Folha</th>
+                                  <th class="p-3 text-sm font-bold text-slate-600">CNPJ</th>
+                                  <th class="p-3 text-sm font-bold text-slate-600">Valor a Pagar</th>
+                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Nota Fiscal (NF)</th>
+                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Visualizar NF</th>
+                                  <th class="p-3 text-sm font-bold text-slate-600 text-center">Status Pagamento</th>
                               </tr>
+                        </thead>
+                        <tbody id="listaFolha">
+                            <tr>
+                                <td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência e inicialize a folha do mês...</td>
+                            </tr>
                         </tbody>
-                    </div>
+                    </table>
                 </div>
+            </div>
 
-                <!-- TABELA 2: FOLHA COMPLEMENTAR -->
-                <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
-                    <div>
-                        <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
-                        <p class="text-sm text-slate-500">Controle de bônus, comissões e horas extras independentes com fluxos de notas separados.</p>
-                    </div>
+              <!-- TABELA 2: FOLHA COMPLEMENTAR -->
+              <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
+                  <div>
+                      <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">⚡ Folha de Pagamento Complementar</h2>
+                      <p class="text-sm text-slate-500">Controle de bônus, comissões e horas extras independentes com fluxos de notas separados.</p>
+                  </div>
 
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                  <tr class="border-b bg-amber-100/50">
-                                    <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
-                                    <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
-                                </tr>
-                          </thead>
-                          <tbody id="listaFolhaComplementar">
-                              <!-- Injetado dinamicamente -->
+                  <div class="overflow-x-auto">
+                      <table class="w-full text-left border-collapse">
+                          <thead>
+                              <tr class="border-b bg-amber-100/50">
+                                  <th class="p-3 text-sm font-bold text-amber-900">Prestador / Evento Complementar</th>
+                                  <th class="p-3 text-sm font-bold text-amber-900">CNPJ</th>
+                                  <th class="p-3 text-sm font-bold text-amber-900">Valor Adicional</th>
+                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Nota Fiscal (NF)</th>
+                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Visualizar NF</th>
+                                  <th class="p-3 text-sm font-bold text-amber-900 text-center">Status Pagamento</th>
+                              </tr>
+                        </thead>
+                        <tbody id="listaFolhaComplementar">
+                            <!-- Injetado dinamicamente -->
                         </tbody>
-                    </div>
+                    </table>
                 </div>
-            </section>
+          </div>
+          </section>
 
             <!-- MODO RH: CONTRATOS -->
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
@@ -281,36 +283,36 @@
                 </div>
 
                 <div class="overflow-x-auto">
-    <table class="w-full text-left border-collapse">
-        <thead class="bg-slate-100 border-b">
-            <tr class="text-xs font-bold text-slate-600">
-                <th class="p-3">Nome</th>
-                <th class="p-3">CPF</th>
-                <th class="p-3">CEP</th>
-                <th class="p-3">Município</th>
-                <th class="p-3">E-mail Pessoal</th>
-                <th class="p-3">Razão Social</th>
-                <th class="p-3">CNPJ</th>
-                <th class="p-3">E-mail Corp.</th>
-                <th class="p-3">Cargo</th>
-                <th class="p-3">Papel</th>
-                <th class="p-3">Departamento</th>
-                <th class="p-3">Valor Fixo</th>
-                <th class="p-3">Centro de Custo</th>
-                <th class="p-3">Gestor Direto</th>
-                <th class="p-3">Unidade</th>
-                <th class="p-3">Vigência</th>
-                <th class="p-3">Status</th>
-                <th class="p-3 text-center">Ações</th>
-            </tr>
-        </thead>
-        <tbody id="listaContratos">
-            <tr>
-                <td colspan="15" class="p-4 text-center text-slate-400">Carregando contratos...</td>
-            </tr>
-        </tbody>
-    </table>
-</div>
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-100 border-b">
+                            <tr class="text-xs font-bold text-slate-600">
+                                <th class="p-3">Nome</th>
+                                <th class="p-3">CPF</th>
+                                <th class="p-3">CEP</th>
+                                <th class="p-3">Município</th>
+                                <th class="p-3">E-mail Pessoal</th>
+                                <th class="p-3">Razão Social</th>
+                                <th class="p-3">CNPJ</th>
+                                <th class="p-3">E-mail Corp.</th>
+                                <th class="p-3">Cargo</th>
+                                <th class="p-3">Papel</th>
+                                <th class="p-3">Departamento</th>
+                                <th class="p-3">Valor Fixo</th>
+                                <th class="p-3">Centro de Custo</th>
+                                <th class="p-3">Gestor Direto</th>
+                                <th class="p-3">Unidade</th>
+                                <th class="p-3">Vigência</th>
+                                <th class="p-3">Status</th>
+                                <th class="p-3 text-center">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listaContratos">
+                            <tr>
+                                <td colspan="18" class="p-4 text-center text-slate-400">Carregando contratos...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
 
                 <!-- MODAL CADASTRO -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
@@ -335,7 +337,7 @@
                             <select id="campoStatus" class="w-full p-2 border rounded bg-white">
                                 <option value="Ativo">Ativo</option>
                                 <option value="Inativo">Inativo</option>
-                            </select>
+                          </select>
                             <input id="campoUnidade" type="text" placeholder="Unidade" class="w-full p-2 border rounded border-slate-350 mb-4">
                         </div>
                         <div class="flex justify-end gap-2">
@@ -346,7 +348,7 @@
               </div>
           </section>
 
-          <!-- MODO RH: RELATÓRIOS -->
+            <!-- MODO RH: RELATÓRIOS -->
           <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao">
               <h2 class="text-xl font-bold text-gray-800 mb-1">📊 Gerador de Relatórios e Auditoria</h2>
               <p class="text-sm text-gray-500 mb-6">Filtragem instantânea e consolidação de dados orçamentários por competência.</p>
@@ -1019,7 +1021,7 @@
             const entradas = Object.entries(contratosLocais);
 
             if (entradas.length === 0) {
-                tbodyGeralContratos.innerHTML = `<tr><td colspan="10" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
+                tbodyGeralContratos.innerHTML = `<tr><td colspan="18" class="p-4 text-center text-slate-400">Nenhum contrato arquivado no sistema.</td></tr>`;
                 return;
             }
 
