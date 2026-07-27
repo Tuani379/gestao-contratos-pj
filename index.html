@@ -417,7 +417,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COM CORES AZUIS PADRÃO) -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COM BLOCOS RECOLHÍVEIS) -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -429,14 +429,15 @@
 
                 <!-- CARD 1: LOGO DA EMPRESA -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-logo', 'seta-logo')">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm">Logo da empresa</h3>
                             <p class="text-xs text-slate-500">Personalize a aparência da plataforma com o logotipo da sua organização.</p>
                         </div>
+                        <button type="button" id="seta-logo" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs transition">∧</button>
                     </div>
-                    <div class="border-t pt-4">
-                        <p class="text-xs font-semibold text-slate-700 mb-2">Adicione o logotipo da sua empresa.</p>
+                    <div id="bloco-logo" class="border-t pt-4 space-y-4">
+                        <p class="text-xs font-semibold text-slate-700">Adicione o logotipo da sua empresa.</p>
                         <div class="flex items-center gap-4">
                             <div id="preview-logo-container" class="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 overflow-hidden">
                                 <span class="text-xs text-slate-400 font-bold">LOGO</span>
@@ -451,13 +452,14 @@
 
                 <!-- CARD 2: DADOS CADASTRAIS -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-cadastrais', 'seta-cadastrais')">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm">Dados cadastrais</h3>
                             <p class="text-xs text-slate-500">Consulte e gerencie as informações cadastrais da empresa.</p>
                         </div>
+                        <button type="button" id="seta-cadastrais" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs transition">∧</button>
                     </div>
-                    <div class="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div id="bloco-cadastrais" class="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div>
                             <label class="block font-semibold text-slate-400 mb-1">CNPJ</label>
                             <input type="text" id="emp-cnpj" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold text-slate-800">
@@ -491,13 +493,14 @@
 
                 <!-- CARD 3: ENDEREÇO -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
-                    <div class="flex justify-between items-center">
+                    <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-endereco', 'seta-endereco')">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm">Endereço</h3>
                             <p class="text-xs text-slate-500">Visualize seus dados de endereço da empresa.</p>
                         </div>
+                        <button type="button" id="seta-endereco" class="w-7 h-7 rounded-lg bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold text-xs transition">∧</button>
                     </div>
-                    <div class="border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                    <div id="bloco-endereco" class="border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                         <div>
                             <label class="block font-semibold text-slate-400 mb-1">CEP</label>
                             <input type="text" id="emp-cep" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
@@ -704,8 +707,21 @@
 
         window.fazerLogout = () => { signOut(auth); };
 
+        window.toggleBlocoEmpresa = (blocoId, setaId) => {
+            const bloco = document.getElementById(blocoId);
+            const seta = document.getElementById(setaId);
+            if (bloco.classList.contains('hidden')) {
+                bloco.classList.remove('hidden');
+                seta.innerText = '∧';
+            } else {
+                bloco.classList.add('hidden');
+                seta.innerText = '⌄';
+            }
+        };
+
         window.abrirConfiguracoesEmpresa = () => {
             ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('menu-rh').classList.add('hidden'); // Oculta o menu superior de abas
             document.getElementById('secao-info-empresa').classList.remove('hidden');
             
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
@@ -777,6 +793,7 @@
 
         window.mostrarSecao = (id) => {
             ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('menu-rh').classList.remove('hidden'); // Exibe novamente o menu superior
             document.getElementById(id).classList.remove('hidden');
             
             const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'relatorios': 'btn-relatorios' };
