@@ -279,6 +279,8 @@
             <tr class="text-xs font-bold text-slate-600">
                 <th class="p-3">Nome</th>
                 <th class="p-3">CPF</th>
+                <th class="p-3">CEP</th>
+                <th class="p-3">Município</th>
                 <th class="p-3">E-mail Pessoal</th>
                 <th class="p-3">Razão Social</th>
                 <th class="p-3">CNPJ</th>
@@ -290,6 +292,7 @@
                 <th class="p-3">Centro de Custo</th>
                 <th class="p-3">Gestor Direto</th>
                 <th class="p-3">Unidade</th>
+                <th class="p-3">Vigência</th>
                 <th class="p-3">Status</th>
                 <th class="p-3 text-center">Ações</th>
             </tr>
@@ -1021,30 +1024,33 @@ window.toggleSenha = () => {
                 };
 
                 trC.innerHTML = `
-    <td class="p-3 font-semibold">${c.nome || "---"}</td>
-    <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
-    <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.cargo || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.papel || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.departamento || "---"}</td>
-    <td class="p-3 text-xs font-bold text-slate-900">R$ ${vExibir}</td>
-    <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
-    <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
-    <td class="p-3">
-        <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status || 'Ativo'}</span>
-        ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
-    </td>
-    <td class="p-3 text-center">
-        ${c.status === 'Ativo' 
-            ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
-            : `<span class="text-xs text-slate-400">Encerrado</span>`
-        }
-    </td>
-`;
+        <td class="p-3 font-semibold">${c.nome || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.cpf || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.cep || "---"}</td>
+        <td class="p-3 text-xs text-slate-500">${c.municipio || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.email || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.razaoSocial || "---"}</td>
+        <td class="p-3 text-xs font-semibold text-slate-500">${c.cnpj || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.emailCorp || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.cargo || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.papel || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.departamento || "---"}</td>
+        <td class="p-3 text-xs font-bold text-slate-900">R$ ${vExibir}</td>
+        <td class="p-3 text-xs font-medium text-slate-600">${c.centroDeCusto || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.gestorDireto || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.unidade || "---"}</td>
+        <td class="p-3 text-xs text-slate-600">${c.vigencia || "---"}</td>
+        <td class="p-3">
+            <span class="px-2 py-0.5 text-xs font-bold rounded ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status || 'Ativo'}</span>
+            ${c.motivoEncerramento ? `<p class="text-[10px] text-red-500 mt-0.5 italic max-w-[120px]" title="${c.motivoEncerramento}">Encerrado: ${c.dataEncerramento}</p>` : ''}
+        </td>
+        <td class="p-3 text-center">
+            ${c.status === 'Ativo' 
+                ? `<button class="btn-desativar-c bg-red-50 hover:bg-red-100 text-red-600 border border-red-200 py-1 px-2.5 rounded text-xs font-bold transition" data-id="${key}">Desativar</button>`
+                : `<span class="text-xs text-slate-400">Encerrado</span>`
+            }
+        </td>
+    `;
                 tbodyGeralContratos.appendChild(trC);
             });
 
