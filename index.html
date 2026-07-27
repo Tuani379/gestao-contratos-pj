@@ -578,7 +578,6 @@
         import { getDatabase, ref, push, onValue, update } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-        // Seu e-mail master configurado inquestionavelmente como dono da plataforma
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
 
         const dataHojeObj = new Date();
@@ -599,7 +598,7 @@
         filtroCompetencia.innerHTML = '';
         selectCompetenciaPJ.innerHTML = '';
         if (filtroRelatorioCompetencia) {
-            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Toutes as Competências --</option>';
+            filtroRelatorioCompetencia.innerHTML = '<option value="todos">-- Todas as Competências --</option>';
         }
 
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
@@ -654,6 +653,7 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // Se for o master, o padrão inicial é a matriz, mas respeita a memória se ele escolheu outra
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
 
@@ -679,12 +679,14 @@
                 let userEmail = (user.email || "").toLowerCase();
                 const eAdminMaster = (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase());
 
-                // SE FOR O DONO MASTER, FORÇA O RESET IMEDIATO PARA A MATRIZ E IGNORA VINCULOS DE CLIENTE
                 if (eAdminMaster) {
-                    empresaAtivaId = "matriz";
-                    empresaAtivaNome = "CONNECTPJ MATRIZ";
-                    localStorage.setItem('connectpj_empresa_ativa', "matriz");
-                    localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
+                    // MANTÉM A EMPRESA ATIVA SALVA NO LOCALSTORAGE (Permite ver Amora Cute ou Matriz sem perder)
+                    if (!localStorage.getItem('connectpj_empresa_ativa')) {
+                        empresaAtivaId = "matriz";
+                        empresaAtivaNome = "CONNECTPJ MATRIZ";
+                        localStorage.setItem('connectpj_empresa_ativa', "matriz");
+                        localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
+                    }
                     
                     document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
                     document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
@@ -715,7 +717,6 @@
                     document.getElementById('user-avatar').innerText = iniciais.toUpperCase();
 
                 } else {
-                    // Modo Cliente Comum
                     onValue(ref(db, 'empresas_clientes'), (snapshot) => {
                         const empresas = snapshot.val() || {};
                         let empresaEncontradaId = null;
@@ -980,14 +981,14 @@
         }
 
         window.alternarEmpresaAtiva = (id, nome) => {
-    empresaAtivaId = id;
-    empresaAtivaNome = nome;
-    localStorage.setItem('connectpj_empresa_ativa', id);
-    localStorage.setItem('connectpj_empresa_nome', nome);
-    fecharSeletorEmpresas();
-    alert(`Alternado com sucesso para: ${nome}`);
-    location.reload(); // <--- Certifique-se de que o location.reload() está aqui
-};
+            empresaAtivaId = id;
+            empresaAtivaNome = nome;
+            localStorage.setItem('connectpj_empresa_ativa', id);
+            localStorage.setItem('connectpj_empresa_nome', nome);
+            fecharSeletorEmpresas();
+            alert(`Alternado com sucesso para: ${nome}`);
+            location.reload(); // Recarrega imediatamente a página aplicando os dados da empresa escolhida
+        };
 
         window.mudarStatusEmpresa = async (id, novoStatus, nome) => {
             const mensagem = novoStatus === "Inativo" 
@@ -1015,8 +1016,6 @@
         });
 
         window.fazerLogout = () => { 
-            localStorage.removeItem('connectpj_empresa_ativa');
-            localStorage.removeItem('connectpj_empresa_nome');
             signOut(auth); 
         };
 
@@ -1535,7 +1534,7 @@
             if (!key || inputArquivo.files.length === 0) { alert("Selecione a empresa e o arquivo!"); return; }
 
             let caminhoBase = `${pathFolhasDB}/${compPJ}/${key}`;
-            let pathFinal = tipoSelecionado === "regular" ? `${caminhoBase}/regular` : `${caminhoBase}/complementares_lista/${idComplementarParaUpload}`;
+            let pathFinal = tipoSelecionado === "regular" ? `${caminhoBase}/regular` : `${caminwoodBase}/complementares_lista/${idComplementarParaUpload}`;
 
             const reader = new FileReader();
             reader.onloadend = async () => {
