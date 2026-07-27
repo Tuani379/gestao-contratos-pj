@@ -537,28 +537,63 @@
                 </div>
             </section>
 
-            <!-- PORTAL DO PRESTADOR -->
-            <section id="area-prestador" class="hidden max-w-xl mx-auto p-6 bg-white rounded-xl border shadow-sm space-y-6">
-                <div class="border-b pb-4">
-                    <h2 class="text-2xl font-bold text-blue-900">Portal do Prestador / Membro</h2>
-                    <p class="text-sm text-slate-500 mt-1">Envie sua Nota Fiscal para a competência correspondente.</p>
-                </div>
-                <div class="space-y-4">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Mês de Referência:</label>
-                            <select id="selectCompetenciaPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold"></select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-bold text-slate-700 mb-2">Seu Cadastro:</label>
-                            <select id="selectPrestadorPJ" class="w-full p-3 border rounded-lg bg-slate-50 text-slate-700 font-semibold"><option value="">Selecione...</option></select>
-                        </div>
+            <!-- PORTAL DO PRESTADOR (ATUALIZADO) -->
+            <section id="area-prestador" class="hidden max-w-4xl mx-auto p-8 bg-white rounded-2xl border shadow-sm space-y-6">
+                <div class="border-b pb-4 flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-extrabold text-blue-950">Portal do Prestador / Membro</h2>
+                        <p class="text-xs text-slate-500 mt-1">Consulte seus valores e envie as Notas Fiscais correspondentes.</p>
                     </div>
                     <div>
-                        <label class="block text-sm font-bold text-slate-700 mb-2">Arquivo da Nota Fiscal (PDF/Imagem):</label>
-                        <input id="arquivoNFPJ" type="file" accept="application/pdf,image/*" class="w-full p-2 border rounded-lg bg-slate-50 text-sm">
+                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Mês de Referência:</label>
+                        <select id="selectCompetenciaPJ" class="p-2 border rounded-lg bg-slate-50 text-xs font-bold text-blue-950"></select>
                     </div>
-                    <button id="btn-enviar-nota-pj" class="w-full bg-green-600 hover:bg-green-700 text-white p-3 rounded-lg font-bold text-lg transition">📤 Enviar Nota Fiscal</button>
+                </div>
+
+                <div class="space-y-6">
+                    <!-- Bloco 1: Folha Regular -->
+                    <div class="border rounded-xl p-5 bg-white shadow-sm space-y-3">
+                        <h3 class="font-bold text-blue-900 text-sm flex items-center gap-2">📄 Folha Regular (Honorário Fixo Mensal)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">
+                                        <th class="p-2.5">Prestador / CNPJ</th>
+                                        <th class="p-2.5">Valor Fixo</th>
+                                        <th class="p-2.5">Status Atual</th>
+                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaPrestadorRegular" class="text-xs">
+                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Bloco 2: Folha Complementar -->
+                    <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 shadow-sm space-y-3">
+                        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-2">⚡ Folha Complementar (Eventos e Ajustes)</h3>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead>
+                                    <tr class="bg-amber-100/50 border-b text-xs font-bold text-amber-900">
+                                        <th class="p-2.5">Prestador / Evento</th>
+                                        <th class="p-2.5">Valor Adicional</th>
+                                        <th class="p-2.5">Status Atual</th>
+                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end pt-4 border-t">
+                        <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                            📤 Enviar Notas Fiscais Selecionadas
+                        </button>
+                    </div>
                 </div>
             </section>
         </main>
@@ -614,6 +649,7 @@
 
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
+        let usuarioEmailLogado = "";
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
@@ -627,8 +663,8 @@
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('tela-login').classList.add('hidden');
-                let userEmail = (user.email || "").toLowerCase();
-                if (userEmail === EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                usuarioEmailLogado = (user.email || "").toLowerCase();
+                if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
                         empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
                         localStorage.setItem('connectpj_empresa_ativa', "matriz");
@@ -636,18 +672,19 @@
                     }
                     document.getElementById('user-name').innerText = "Master Platform";
                     document.getElementById('dropdown-nome-usuario').innerText = "Master Platform";
-                    document.getElementById('dropdown-email-usuario').innerText = userEmail;
+                    document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                     document.getElementById('user-avatar').innerText = "MS";
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
                 } else {
-                    document.getElementById('user-name').innerText = userEmail.split('@')[0].toUpperCase();
-                    document.getElementById('dropdown-nome-usuario').innerText = userEmail;
-                    document.getElementById('dropdown-email-usuario').innerText = userEmail;
-                    document.getElementById('user-avatar').innerText = userEmail.charAt(0).toUpperCase();
+                    document.getElementById('user-name').innerText = usuarioEmailLogado.split('@')[0].toUpperCase();
+                    document.getElementById('dropdown-nome-usuario').innerText = usuarioEmailLogado;
+                    document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
+                    document.getElementById('user-avatar').innerText = usuarioEmailLogado.charAt(0).toUpperCase();
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
                 }
+                carregarDadosPortalPrestador();
             } else {
                 document.getElementById('tela-login').classList.remove('hidden');
             }
@@ -720,8 +757,8 @@
         };
 
         window.abrirConfiguracoesEmpresa = () => {
-            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            document.getElementById('menu-rh').classList.add('hidden'); // Oculta o menu superior de abas
+            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
             
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
@@ -792,8 +829,8 @@
         };
 
         window.mostrarSecao = (id) => {
-            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            document.getElementById('menu-rh').classList.remove('hidden'); // Exibe novamente o menu superior
+            ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            document.getElementById('menu-rh').classList.remove('hidden');
             document.getElementById(id).classList.remove('hidden');
             
             const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'relatorios': 'btn-relatorios' };
@@ -822,6 +859,7 @@
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
+                carregarDadosPortalPrestador();
             }
         };
 
@@ -833,12 +871,10 @@
         onValue(ref(db, pathContratosDB), (snapshot) => {
             contratosLocais = snapshot.val() || {};
             const motorSelect = document.getElementById('motorContrato');
-            const pjPanelSelect = document.getElementById('selectPrestadorPJ');
             const relFiltroPrestador = document.getElementById('relFiltroPrestador');
             const relFiltroCentroCusto = document.getElementById('relFiltroCentroCusto');
             
             motorSelect.innerHTML = '<option value="">Selecione...</option>';
-            pjPanelSelect.innerHTML = '<option value="">Selecione...</option>';
             relFiltroPrestador.innerHTML = '<option value="todos">-- Todos --</option>';
             relFiltroCentroCusto.innerHTML = '<option value="todos">-- Todos --</option>';
             
@@ -858,17 +894,10 @@
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
                     motorSelect.appendChild(optA);
-                    let optB = document.createElement('option'); optB.value = key; optB.innerText = `${c.razaoSocial || c.nome}`;
-                    pjPanelSelect.appendChild(optB);
                 }
 
-                if (c.nome && c.nome.trim() !== "") {
-                    nomesPrestadoresSet.add(c.nome.trim());
-                }
-
-                if (c.departamento && c.departamento.trim() !== "") {
-                    centrosCustoSet.add(c.departamento.trim());
-                }
+                if (c.nome && c.nome.trim() !== "") nomesPrestadoresSet.add(c.nome.trim());
+                if (c.departamento && c.departamento.trim() !== "") centrosCustoSet.add(c.departamento.trim());
 
                 let badgeCor = "bg-slate-100 text-slate-800";
                 if (c.perfilTipo === "Administrador") badgeCor = "bg-purple-100 text-purple-800";
@@ -905,9 +934,7 @@
             });
 
             centrosCustoSet.forEach(cc => {
-                let optCC = document.createElement('option');
-                optCC.value = cc;
-                optCC.innerText = cc;
+                let optCC = document.createElement('option'); optCC.value = cc; optCC.innerText = cc;
                 relFiltroCentroCusto.appendChild(optCC);
             });
 
@@ -917,6 +944,7 @@
         onValue(ref(db, pathFolhasDB), (snapshot) => {
             folhasLocais = snapshot.val() || {};
             renderizarTabelasEstatísticas();
+            carregarDadosPortalPrestador();
         });
 
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
@@ -1078,6 +1106,136 @@
             
             atualizarRelatoriosAuditoria();
         }
+
+        function carregarDadosPortalPrestador() {
+            const comp = selectCompetenciaPJ.value;
+            const tbodyReg = document.getElementById('tabelaPrestadorRegular');
+            const tbodyComp = document.getElementById('tabelaPrestadorComplementar');
+            const containerCompPJ = document.getElementById('containerPrestadorComp');
+
+            tbodyReg.innerHTML = "";
+            tbodyComp.innerHTML = "";
+            let temCompPJ = false;
+
+            const baseFolhaMes = folhasLocais[comp] || {};
+
+            let chavesFiltradas = [];
+            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+
+            Object.entries(baseFolhaMes).forEach(([idContrato, dadosFolha]) => {
+                const cInfo = contratosLocais[idContrato] || {};
+                const emailContrato = (cInfo.email || cInfo.emailCorp || "").toLowerCase();
+
+                if (isMaster || emailContrato === usuarioEmailLogado) {
+                    chavesFiltradas.push({ idContrato, dadosFolha, cInfo });
+                }
+            });
+
+            if (chavesFiltradas.length === 0) {
+                tbodyReg.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum lançamento encontrado para o seu usuário nesta competência.</td></tr>`;
+                containerCompPJ.classList.add('hidden');
+                return;
+            }
+
+            chavesFiltradas.forEach(({ idContrato, dadosFolha, cInfo }) => {
+                let subReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
+                let cnpjExibe = cInfo.cnpj || dadosFolha.cnpj || '---';
+                let statusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+
+                tbodyReg.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-bold text-slate-800">${dadosFolha.nome}<br><span class="text-[11px] font-normal text-slate-500">${cnpjExibe}</span></td>
+                        <td class="p-3 font-bold text-blue-950">R$ ${subReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${statusReg === 'Recebida ✔' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusReg}</span></td>
+                        <td class="p-3">
+                            <input type="file" id="arquivo-reg-${idContrato}" accept="application/pdf,image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 cursor-pointer">
+                        </td>
+                    </tr>
+                `;
+
+                if (dadosFolha.complementares_lista) {
+                    Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
+                        temCompPJ = true;
+                        let valComp = parseFloat(cItem.motorValor || 0);
+                        let statusComp = cItem.nfStatus || "Aguardando";
+
+                        tbodyComp.innerHTML += `
+                            <tr class="border-b hover:bg-amber-50/50">
+                                <td class="p-3 font-bold text-amber-950">${dadosFolha.nome}<br><span class="text-[10px] bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded font-bold">${cItem.motorEvento || 'Complementar'}</span></td>
+                                <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-3"><span class="px-2 py-1 rounded font-bold text-[11px] ${statusComp === 'Recebida ✔' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusComp}</span></td>
+                                <td class="p-3">
+                                    <input type="file" id="arquivo-comp-${idContrato}-${idComp}" accept="application/pdf,image/*" class="text-xs text-slate-500 file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-amber-100 file:text-amber-800 hover:file:bg-amber-200 cursor-pointer">
+                                </td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
+
+            containerCompPJ.classList.toggle('hidden', !temCompPJ);
+        }
+
+        selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
+
+        document.getElementById('btn-enviar-todas-notas-pj').addEventListener('click', async () => {
+            const comp = selectCompetenciaPJ.value;
+            const baseFolhaMes = folhasLocais[comp] || {};
+            let atualizacoes = {};
+            let arquivosProcessados = 0;
+
+            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+
+            for (const [idContrato, dadosFolha] of Object.entries(baseFolhaMes)) {
+                const cInfo = contratosLocais[idContrato] || {};
+                const emailContrato = (cInfo.email || cInfo.emailCorp || "").toLowerCase();
+
+                if (isMaster || emailContrato === usuarioEmailLogado) {
+                    const inputReg = document.getElementById(`arquivo-reg-${idContrato}`);
+                    if (inputReg && inputReg.files.length > 0) {
+                        arquivosProcessados++;
+                        const base64Reg = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve(reader.result);
+                            reader.readAsDataURL(inputReg.files[0]);
+                        });
+                        atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/regular/nfArquivoBase64`] = base64Reg;
+                        atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/regular/nfStatus`] = "Recebida ✔";
+                        atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/regular/statusPagamento`] = "Pronto para Pagar";
+                    }
+
+                    if (dadosFolha.complementares_lista) {
+                        for (const [idComp] of Object.entries(dadosFolha.complementares_lista)) {
+                            const inputComp = document.getElementById(`arquivo-comp-${idContrato}-${idComp}`);
+                            if (inputComp && inputComp.files.length > 0) {
+                                arquivosProcessados++;
+                                const base64Comp = await new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.onloadend = () => resolve(reader.result);
+                                    reader.readAsDataURL(inputComp.files[0]);
+                                });
+                                atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/complementares_lista/${idComp}/nfArquivoBase64`] = base64Comp;
+                                atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/complementares_lista/${idComp}/nfStatus`] = "Recebida ✔";
+                                atualizacoes[`${pathFolhasDB}/${comp}/${idContrato}/complementares_lista/${idComp}/statusPagamento`] = "Pronto para Pagar";
+                            }
+                        }
+                    }
+                }
+            }
+
+            if (arquivosProcessados === 0) {
+                alert("Selecione pelo menos um arquivo de Nota Fiscal antes de enviar!");
+                return;
+            }
+
+            try {
+                await update(ref(db), atualizacoes);
+                alert("Notas Fiscais enviadas com sucesso!");
+                carregarDadosPortalPrestador();
+            } catch (error) {
+                alert("Erro ao enviar notas: " + error.message);
+            }
+        });
 
         function atualizarRelatoriosAuditoria() {
             const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
@@ -1320,25 +1478,6 @@
                 alert("Lançamento aplicado com sucesso!");
                 document.getElementById('motorValor').value = "";
             } catch (error) { alert("Erro ao aplicar: " + error.message); }
-        });
-
-        document.getElementById('btn-enviar-nota-pj').addEventListener('click', async () => {
-            const key = document.getElementById('selectPrestadorPJ').value;
-            const comp = selectCompetenciaPJ.value;
-            const fileInput = document.getElementById('arquivoNFPJ');
-            if (!key || fileInput.files.length === 0) { alert("Selecione o prestador e o arquivo!"); return; }
-
-            const reader = new FileReader();
-            reader.onloadend = async () => {
-                await update(ref(db), {
-                    [`${pathFolhasDB}/${comp}/${key}/regular/nfArquivoBase64`]: reader.result,
-                    [`${pathFolhasDB}/${comp}/${key}/regular/nfStatus`]: "Recebida ✔",
-                    [`${pathFolhasDB}/${comp}/${key}/regular/statusPagamento`]: "Pronto para Pagar"
-                });
-                alert("Nota enviada com sucesso!");
-                fileInput.value = "";
-            };
-            reader.readAsDataURL(fileInput.files[0]);
         });
 
         document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
