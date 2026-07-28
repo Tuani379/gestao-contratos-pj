@@ -291,7 +291,7 @@
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ (Etapa 4 - Contratos)</h2>
+                        <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ</h2>
                         <p class="text-xs text-slate-500">Visualize valores, vigências, aditivos, arquivos e alertas de vencimento.</p>
                     </div>
                     <div class="flex gap-2">
@@ -324,10 +324,10 @@
                     </table>
                 </div>
 
-                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO (ETAPA 4) -->
+                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-2xl w-full max-w-4xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
-                        <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato (Etapa 4)</h3>
+                        <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato</h3>
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-200">
                             <div>
@@ -364,7 +364,7 @@
                         </div>
 
                         <div class="space-y-3 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Vigência, Valores e Governança (Etapa 4)</h4>
+                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Vigência, Valores e Governança</h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Início da Vigência:</label>
@@ -545,6 +545,21 @@
                         <div><label class="block font-semibold text-slate-400 mb-1">Bairro</label><input type="text" id="emp-bairro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Cidade</label><input type="text" id="emp-cidade" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Estado</label><input type="text" id="emp-estado" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">🧩 Módulos Contratados e Futuras Expansões</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
+                            <div><p class="font-bold text-green-900">Gestão de Folha & Notas Fiscais</p><p class="text-[10px] text-green-700">Fluxo principal de envio e validação</p></div>
+                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
+                            <div><p class="font-bold text-green-900">Portal do Prestador</p><p class="text-[10px] text-green-700">Acesso exclusivo para upload de NFs</p></div>
+                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
+                        </div>
                     </div>
                 </div>
 
@@ -1009,7 +1024,7 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
-                // Cálculo de Vencimento e Alertas (Etapa 4)
+                // Cálculo de Vencimento e Alertas
                 let alertaHTML = '<span class="text-slate-400">Sem término</span>';
                 if (c.vigenciaFim) {
                     const hoje = new Date();
@@ -1076,7 +1091,7 @@
         });
 
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
-            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato (Etapa 4)";
+            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
             ['campoNome','campoCpf','campoEmail','campoRazaoSocial','campoCNPJ','campoCargo','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('campoFotoArquivo').value = "";
@@ -1154,7 +1169,7 @@
         window.abrirModalEdicao = (id) => {
             const c = contratosLocais[id];
             if (!c) return;
-            document.getElementById('tituloModal').innerText = "Editar Contrato / Cadastro (Etapa 4)";
+            document.getElementById('tituloModal').innerText = "Editar Contrato / Cadastro";
             document.getElementById('btn-salvar-cadastro').dataset.editId = id;
             document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
             document.getElementById('campoNome').value = c.nome || "";
