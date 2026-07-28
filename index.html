@@ -1321,7 +1321,6 @@
 
             const folhaCompetencia = folhasLocais[compPJ] || {};
             let encontrouAlgum = false;
-            let temComplementarGeral = false;
 
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
@@ -1356,8 +1355,8 @@
                 `;
 
                 if (dadosFolha.complementares_lista) {
+                    containerCompPJ.classList.remove('hidden');
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
-                        temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
                         let nfStatusComp = cItem.nfStatus || "Aguardando";
 
@@ -1384,8 +1383,6 @@
                     });
                 }
             });
-
-            containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
             if (!encontrouAlgum) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
