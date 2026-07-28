@@ -291,8 +291,8 @@
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ</h2>
-                        <p class="text-xs text-slate-500">Visualize todos os dados detalhados cadastrados.</p>
+                        <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ (Etapa 4 - Contratos)</h2>
+                        <p class="text-xs text-slate-500">Visualize valores, vigências, aditivos, arquivos e alertas de vencimento.</p>
                     </div>
                     <div class="flex gap-2">
                         <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">📊 Exportar Excel</button>
@@ -306,38 +306,32 @@
                             <tr>
                                 <th class="p-3">Foto</th>
                                 <th class="p-3">Nome Completo</th>
-                                <th class="p-3">Perfil</th>
-                                <th class="p-3">CPF</th>
-                                <th class="p-3">E-mail Pessoal</th>
-                                <th class="p-3">CEP</th>
-                                <th class="p-3">Município</th>
-                                <th class="p-3">Razão Social</th>
-                                <th class="p-3">CNPJ</th>
-                                <th class="p-3">Banco</th>
-                                <th class="p-3">Chave PIX</th>
-                                <th class="p-3">Cargo</th>
+                                <th class="p-3">Tipo / Perfil</th>
+                                <th class="p-3">Vigência (Início - Fim)</th>
+                                <th class="p-3">Alerta Vencimento</th>
                                 <th class="p-3">Valor Fixo</th>
                                 <th class="p-3">Centro de Custo</th>
-                                <th class="p-3">Gestor Responsável</th>
-                                <th class="p-3">Situação Documental</th>
+                                <th class="p-3">Responsável</th>
+                                <th class="p-3">Aditivos</th>
+                                <th class="p-3">Arquivos</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaContratos" class="text-xs">
-                            <tr><td colspan="18" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
+                            <tr><td colspan="12" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO -->
+                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO (ETAPA 4) -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-                    <div class="bg-white rounded-2xl w-full max-w-3xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
-                        <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro Completo do Prestador</h3>
+                    <div class="bg-white rounded-2xl w-full max-w-4xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
+                        <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato (Etapa 4)</h3>
                         
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-200">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-200">
                             <div>
-                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Perfil do Usuário / Contrato:</label>
+                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Tipo de Contrato / Perfil:</label>
                                 <select id="campoPerfilTipo" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
                                     <option value="Administrador">Administrador</option>
                                     <option value="Financeiro">Financeiro</option>
@@ -348,8 +342,12 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Foto do Prestador (Avatar):</label>
+                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Foto (Avatar):</label>
                                 <input type="file" id="campoFotoArquivo" accept="image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Arquivo Anexo do Contrato:</label>
+                                <input type="file" id="campoArquivoContrato" accept=".pdf,image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:font-bold cursor-pointer">
                             </div>
                         </div>
 
@@ -359,35 +357,30 @@
                                 <input id="campoNome" type="text" placeholder="Nome Completo *" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
                                 <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
                                 <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoMunicipio" type="text" placeholder="Município" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
                                 <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
                                 <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Dados Bancários e PIX</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                                <input id="campoBanco" type="text" placeholder="Nome do Banco / Código" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoAgenciaConta" type="text" placeholder="Agência e Conta" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoChavePix" type="text" placeholder="Chave PIX" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                            </div>
-                        </div>
-
-                        <div class="space-y-3 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Alocação e Governança</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                                 <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoValorFixoMensal" type="number" placeholder="Valor Fixo Mensal (R$)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Financeiro)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoGestorDireto" type="text" placeholder="Gestor Responsável / Direto" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <select id="campoSituacaoDocumental" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
-                                    <option value="Documentação Completa ✔">Documentação Completa ✔</option>
-                                    <option value="Pendente de Contrato ⏳">Pendente de Contrato ⏳</option>
-                                    <option value="Certidões Vencidas ❌">Certidões Vencidas ❌</option>
-                                </select>
+                            </div>
+                        </div>
+
+                        <div class="space-y-3 border-t pt-4">
+                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Vigência, Valores e Governança (Etapa 4)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Início da Vigência:</label>
+                                    <input id="campoVigenciaInicio" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Término da Vigência:</label>
+                                    <input id="campoVigenciaFim" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Valor Fixo Mensal (R$):</label>
+                                    <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 font-bold text-blue-950">
+                                </div>
+                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                <input id="campoAditivos" type="text" placeholder="Aditivos (Ex: Aditivo 01 - Reajuste)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
                                 <select id="campoStatus" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
@@ -396,13 +389,13 @@
                         </div>
 
                         <div class="space-y-2 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Observações e Histórico Interno</h4>
-                            <textarea id="campoObservacoes" placeholder="Adicione observações importantes sobre o prestador..." class="w-full p-3 border rounded-xl text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600 h-20"></textarea>
+                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Histórico de Alterações e Observações</h4>
+                            <textarea id="campoHistoricoAlteracoes" placeholder="Registre o histórico de modificações deste contrato..." class="w-full p-3 border rounded-xl text-sm bg-slate-50 outline-none focus:ring-2 focus:ring-blue-600 h-20"></textarea>
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t">
                             <button id="btn-cancelar-cadastro" class="px-5 py-2.5 border rounded-xl text-xs font-semibold text-slate-600">Cancelar</button>
-                            <button id="btn-salvar-cadastro" class="px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-xs hover:bg-blue-800 transition shadow-md">Salvar Cadastro Completo</button>
+                            <button id="btn-salvar-cadastro" class="px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-xs hover:bg-blue-800 transition shadow-md">Salvar Contrato</button>
                         </div>
                     </div>
                 </div>
@@ -489,7 +482,7 @@
                     </div>
                     <div class="bg-slate-50 p-4 rounded-xl border">
                         <p class="text-[11px] font-bold text-slate-500 uppercase">Quantidade de Usuários</p>
-                        <h3 class="text-2xl font-extrabold text-slate-800 mt-1">1 / 10</h3>
+                        <h3 id="info-qtd-usuarios" class="text-2xl font-extrabold text-slate-800 mt-1">1 / 10</h3>
                         <p class="text-[10px] text-slate-400 mt-1">Acessos corporativos</p>
                     </div>
                 </div>
@@ -552,21 +545,6 @@
                         <div><label class="block font-semibold text-slate-400 mb-1">Bairro</label><input type="text" id="emp-bairro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Cidade</label><input type="text" id="emp-cidade" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Estado</label><input type="text" id="emp-estado" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
-                    </div>
-                </div>
-
-                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL -->
-                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">🧩 Módulos Contratados e Futuras Expansões</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
-                            <div><p class="font-bold text-green-900">Gestão de Folha & Notas Fiscais</p><p class="text-[10px] text-green-700">Fluxo principal de envio e validação</p></div>
-                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
-                        </div>
-                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
-                            <div><p class="font-bold text-green-900">Portal do Prestador</p><p class="text-[10px] text-green-700">Acesso exclusivo para upload de NFs</p></div>
-                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
-                        </div>
                     </div>
                 </div>
 
@@ -1003,7 +981,7 @@
 
             const entradas = Object.entries(contratosLocais);
             if (entradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="18" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -1031,24 +1009,42 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
+                // Cálculo de Vencimento e Alertas (Etapa 4)
+                let alertaHTML = '<span class="text-slate-400">Sem término</span>';
+                if (c.vigenciaFim) {
+                    const hoje = new Date();
+                    const fimContrato = new Date(c.vigenciaFim);
+                    const diffTempo = fimContrato - hoje;
+                    const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
+
+                    if (diffDias < 0) {
+                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-800">Vencido ❌</span>`;
+                    } else if (diffDias <= 7) {
+                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-700 animate-pulse">Vence em ${diffDias} dias 🚨</span>`;
+                    } else if (diffDias <= 15) {
+                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">Vence em ${diffDias} dias ⏳</span>`;
+                    } else if (diffDias <= 30) {
+                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-blue-100 text-blue-800">Vence em ${diffDias} dias ⚠️</span>`;
+                    } else {
+                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-green-100 text-green-800">Em dia (${diffDias} dias)</span>`;
+                    }
+                }
+
+                let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : '---';
+                let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
+
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3">${fotoHtml}</td>
                         <td class="p-3 font-semibold">${c.nome || '---'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
-                        <td class="p-3 text-slate-600">${c.cpf || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.email || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.cep || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.municipio || '---'}</td>
-                        <td class="p-3 text-slate-600 font-semibold">${c.razaoSocial || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.cnpj || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.banco || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.chavePix || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.cargo || '---'}</td>
+                        <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
+                        <td class="p-3">${alertaHTML}</td>
                         <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
                         <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] bg-slate-100 text-slate-700 border">${c.situacaoDocumental || 'Completa ✔'}</span></td>
+                        <td class="p-3 text-slate-600">${c.aditivos || '---'}</td>
+                        <td class="p-3 text-center">${botaoAnexoContrato}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         <td class="p-3 text-center space-x-1">
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
@@ -1080,10 +1076,11 @@
         });
 
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
-            document.getElementById('tituloModal').innerText = "Novo Cadastro Completo do Prestador";
+            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato (Etapa 4)";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoCep','campoMunicipio','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoBanco','campoAgenciaConta','campoChavePix','campoCargo','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoObservacoes'].forEach(id => document.getElementById(id).value = '');
+            ['campoNome','campoCpf','campoEmail','campoRazaoSocial','campoCNPJ','campoCargo','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('campoFotoArquivo').value = "";
+            document.getElementById('campoArquivoContrato').value = "";
             document.getElementById('modalCadastro').classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => document.getElementById('modalCadastro').classList.add('hidden'));
@@ -1091,82 +1088,88 @@
         document.getElementById('btn-salvar-cadastro').addEventListener('click', async () => {
             const editId = document.getElementById('btn-salvar-cadastro').dataset.editId;
             const arquivoFotoInput = document.getElementById('campoFotoArquivo');
+            const arquivoContratoInput = document.getElementById('campoArquivoContrato');
             
-            const executarSalvamento = async (fotoBase64Url = null) => {
+            const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
                 const pacote = {
                     perfilTipo: document.getElementById('campoPerfilTipo').value,
                     nome: document.getElementById('campoNome').value,
                     cpf: document.getElementById('campoCpf').value,
                     email: document.getElementById('campoEmail').value,
-                    cep: document.getElementById('campoCep').value,
-                    municipio: document.getElementById('campoMunicipio').value,
                     razaoSocial: document.getElementById('campoRazaoSocial').value,
                     cnpj: document.getElementById('campoCNPJ').value,
-                    emailCorp: document.getElementById('campoEmailCorp').value,
-                    banco: document.getElementById('campoBanco').value,
-                    agenciaConta: document.getElementById('campoAgenciaConta').value,
-                    chavePix: document.getElementById('campoChavePix').value,
                     cargo: document.getElementById('campoCargo').value,
+                    vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
+                    vigenciaFim: document.getElementById('campoVigenciaFim').value,
                     valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
                     departamento: document.getElementById('campoDepartamento').value,
                     gestorDireto: document.getElementById('campoGestorDireto').value,
-                    situacaoDocumental: document.getElementById('campoSituacaoDocumental').value,
-                    observacoes: document.getElementById('campoObservacoes').value,
+                    aditivos: document.getElementById('campoAditivos').value,
+                    historicoAlteracoes: document.getElementById('campoHistoricoAlteracoes').value,
                     status: document.getElementById('campoStatus').value,
                     excluidoLogico: false
                 };
                 if (fotoBase64Url) pacote.fotoBase64 = fotoBase64Url;
+                if (contratoBase64Url) pacote.arquivoContratoBase64 = contratoBase64Url;
 
                 if (!pacote.nome) { alert("Nome obrigatório!"); return; }
 
                 try {
                     if (editId) {
+                        if(!pacote.arquivoContratoBase64 && contratosLocais[editId]?.arquivoContratoBase64) {
+                            pacote.arquivoContratoBase64 = contratosLocais[editId].arquivoContratoBase64;
+                        }
                         await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
-                        alert("Cadastro atualizado com sucesso!");
+                        alert("Contrato atualizado com sucesso!");
                     } else {
                         await push(ref(db, pathContratosDB), pacote);
-                        alert("Cadastro completo realizado com sucesso!");
+                        alert("Contrato cadastrado com sucesso!");
                     }
                     document.getElementById('modalCadastro').classList.add('hidden');
                 } catch (error) { alert("Erro ao salvar: " + error.message); }
             };
 
+            let fotoUrl = null;
+            let contratoUrl = null;
+
             if (arquivoFotoInput.files.length > 0) {
                 const reader = new FileReader();
-                reader.onloadend = async () => { await executarSalvamento(reader.result); };
                 reader.readAsDataURL(arquivoFotoInput.files[0]);
-            } else {
-                if (editId && contratosLocais[editId]?.fotoBase64) {
-                    await executarSalvamento(contratosLocais[editId].fotoBase64);
-                } else {
-                    await executarSalvamento();
-                }
+                await new Promise(r => reader.onloadend = () => { fotoUrl = reader.result; r(); });
+            } else if (editId) {
+                fotoUrl = contratosLocais[editId]?.fotoBase64 || null;
             }
+
+            if (arquivoContratoInput.files.length > 0) {
+                const reader2 = new FileReader();
+                reader2.readAsDataURL(arquivoContratoInput.files[0]);
+                await new Promise(r => reader2.onloadend = () => { contratoUrl = reader2.result; r(); });
+            } else if (editId) {
+                contratoUrl = contratosLocais[editId]?.arquivoContratoBase64 || null;
+            }
+
+            await executarSalvamento(fotoUrl, contratoUrl);
         });
 
         window.abrirModalEdicao = (id) => {
             const c = contratosLocais[id];
             if (!c) return;
-            document.getElementById('tituloModal').innerText = "Editar Cadastro Completo";
+            document.getElementById('tituloModal').innerText = "Editar Contrato / Cadastro (Etapa 4)";
             document.getElementById('btn-salvar-cadastro').dataset.editId = id;
             document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
             document.getElementById('campoNome').value = c.nome || "";
             document.getElementById('campoCpf').value = c.cpf || "";
             document.getElementById('campoEmail').value = c.email || "";
-            document.getElementById('campoCep').value = c.cep || "";
-            document.getElementById('campoMunicipio').value = c.municipio || "";
             document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
             document.getElementById('campoCNPJ').value = c.cnpj || "";
-            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
-            document.getElementById('campoBanco').value = c.banco || "";
-            document.getElementById('campoAgenciaConta').value = c.agenciaConta || "";
-            document.getElementById('campoChavePix').value = c.chavePix || "";
             document.getElementById('campoCargo').value = c.cargo || "";
+            document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
+            document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
             document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
             document.getElementById('campoDepartamento').value = c.departamento || "";
             document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
-            document.getElementById('campoSituacaoDocumental').value = c.situacaoDocumental || "Documentação Completa ✔";
-            document.getElementById('campoObservacoes').value = c.observacoes || "";
+            document.getElementById('campoAditivos').value = c.aditivos || "";
+            document.getElementById('campoHistoricoAlteracoes').value = c.historicoAlteracoes || "";
             document.getElementById('campoStatus').value = c.status || "Ativo";
             document.getElementById('modalCadastro').classList.remove('hidden');
         };
@@ -1287,7 +1290,6 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        // SALVAR STATUS DA NF NO FIREBASE QUANDO ALTERADO NO SELECT
         document.addEventListener('change', async (e) => {
             if (e.target.classList.contains('select-nf-status-reg')) {
                 const id = e.target.dataset.id;
@@ -1302,7 +1304,6 @@
             }
         });
 
-        // PORTAL DO PRESTADOR: LÓGICA DE EXIBIÇÃO E UPLOAD DE NOTAS FISCAIS
         function carregarDadosPortalPrestador() {
             const compPJ = selectCompetenciaPJ.value || competenciaSelecionada;
             const tbodyRegPJ = document.getElementById('tabelaPrestadorRegular');
@@ -1321,6 +1322,7 @@
 
             const folhaCompetencia = folhasLocais[compPJ] || {};
             let encontrouAlgum = false;
+            let temComplementarGeral = false;
 
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
@@ -1355,8 +1357,8 @@
                 `;
 
                 if (dadosFolha.complementares_lista) {
-                    containerCompPJ.classList.remove('hidden');
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
+                        temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
                         let nfStatusComp = cItem.nfStatus || "Aguardando";
 
@@ -1384,6 +1386,8 @@
                 }
             });
 
+            containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
+
             if (!encontrouAlgum) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
@@ -1391,7 +1395,6 @@
 
         selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
 
-        // Ação do Botão "Enviar Notas Fiscais Anexadas"
         document.getElementById('btn-enviar-todas-notas-pj').addEventListener('click', async () => {
             const inputsReg = document.querySelectorAll('.input-nf-reg');
             const inputsComp = document.querySelectorAll('.input-nf-comp');
@@ -1446,8 +1449,15 @@
             }
         });
 
-        // Eventos delegados globais para Abrir NF e Liquidar Pagamento
         document.addEventListener('click', async (e) => {
+            if (e.target.classList.contains('btn-view-arquivo-contrato')) {
+                const id = e.target.dataset.id;
+                const arquivo = contratosLocais[id]?.arquivoContratoBase64;
+                if (arquivo) {
+                    const win = window.open();
+                    win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
+            }
             if (e.target.classList.contains('btn-view-nf-reg')) {
                 const id = e.target.dataset.id;
                 const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[id]?.regular?.nfArquivoBase64;
