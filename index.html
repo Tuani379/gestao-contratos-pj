@@ -466,7 +466,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COMPLETA E RESTAURADA) -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -515,7 +515,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: DADOS CADASTRAIS (RESTAURADO COMPLETO) -->
+                <!-- CARD 2: DADOS CADASTRAIS -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-cadastrais', 'seta-cadastrais')">
                         <div>
@@ -535,7 +535,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 3: ENDEREÇO (RESTAURADO COMPLETO) -->
+                <!-- CARD 3: ENDEREÇO -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-endereco', 'seta-endereco')">
                         <div>
@@ -555,7 +555,7 @@
                     </div>
                 </div>
 
-                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL (BOTÕES CONTRATADO) -->
+                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">🧩 Módulos Contratados e Futuras Expansões</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
@@ -1218,8 +1218,8 @@
 
                 let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
                 if (statusRegHTML === "Pago") {
-                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
-                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar") {
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar" || f.regular?.nfArquivoBase64) {
                     statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
@@ -1250,8 +1250,8 @@
 
                         let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
                         if (statusCompHTML === "Pago") {
-                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-0.5 rounded font-bold text-xs">Pago</span>`;
-                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar") {
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar" || cItem.nfArquivoBase64) {
                             statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
                         }
 
@@ -1281,6 +1281,46 @@
             document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
         }
+
+        // Eventos delegados para Abrir NF e Liquidar Pagamento com 100% de garantia
+        document.addEventListener('click', async (e) => {
+            // Visualizar NF Regular
+            if (e.target.classList.contains('btn-view-nf-reg')) {
+                const id = e.target.dataset.id;
+                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.regular?.nfArquivoBase64;
+                if (arquivo) {
+                    const win = window.open();
+                    win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
+            }
+            // Visualizar NF Complementar
+            if (e.target.classList.contains('btn-view-nf-comp')) {
+                const id = e.target.dataset.id;
+                const compId = e.target.dataset.compId;
+                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.complementares_lista?.[compId]?.nfArquivoBase64;
+                if (arquivo) {
+                    const win = window.open();
+                    win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
+            }
+            // Liquidar Regular
+            if (e.target.classList.contains('btn-liquidar-reg')) {
+                const id = e.target.dataset.id;
+                try {
+                    await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { statusPagamento: "Pago" });
+                    alert("Pagamento liquidado com sucesso!");
+                } catch(err) { alert("Erro: " + err.message); }
+            }
+            // Liquidar Complementar
+            if (e.target.classList.contains('btn-liquidar-comp')) {
+                const id = e.target.dataset.id;
+                const compId = e.target.dataset.compId;
+                try {
+                    await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { statusPagamento: "Pago" });
+                    alert("Pagamento complementar liquidado com sucesso!");
+                } catch(err) { alert("Erro: " + err.message); }
+            }
+        });
 
         function atualizarRelatoriosAuditoria() {
             const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
