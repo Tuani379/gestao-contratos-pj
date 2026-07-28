@@ -568,62 +568,149 @@
                 </div>
             </section>
 
-            <!-- PORTAL DO PRESTADOR -->
-            <section id="area-prestador" class="hidden max-w-4xl mx-auto p-8 bg-white rounded-2xl border shadow-sm space-y-6">
-                <div class="border-b pb-4 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-extrabold text-blue-950">Portal do Prestador / Membro</h2>
-                        <p class="text-xs text-slate-500 mt-1">Consulte seus valores e envie as Notas Fiscais correspondentes.</p>
+            <!-- PORTAL DO PRESTADOR (ETAPA 5) -->
+            <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
+                
+                <!-- Submenu da Etapa 5 -->
+                <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
+                    <div class="flex flex-wrap gap-1 md:gap-2">
+                        <button onclick="mudarSecaoPrestador('pj-dash')" id="btn-pj-dash" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Dashboard</button>
+                        <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Enviar Nota</button>
+                        <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
+                        <button onclick="mudarSecaoPrestador('pj-documentos')" id="btn-pj-documentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Documentos</button>
+                        <button onclick="mudarSecaoPrestador('pj-pagamentos')" id="btn-pj-pagamentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Pagamentos</button>
+                        <button onclick="mudarSecaoPrestador('pj-perfil')" id="btn-pj-perfil" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Perfil</button>
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Mês de Referência:</label>
-                        <select id="selectCompetenciaPJ" class="p-2 border rounded-lg bg-slate-50 text-xs font-bold text-blue-950"></select>
+                    <div class="px-2">
+                        <select id="selectCompetenciaPJ" class="p-2 border rounded-xl bg-slate-50 text-xs font-bold text-blue-950"></select>
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="border rounded-xl p-5 bg-white shadow-sm space-y-3">
-                        <h3 class="font-bold text-blue-900 text-sm flex items-center gap-2">📄 Folha Regular (Honorário Fixo Mensal)</h3>
+                <!-- 1. DASHBOARD PRESTADOR -->
+                <div id="sec-pj-dash" class="sec-pj space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Honorário Fixo Atual</p>
+                            <h3 id="pj-dash-honorario" class="text-2xl font-extrabold text-blue-950 mt-1">R$ 0,00</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Status da Nota Fiscal</p>
+                            <h3 id="pj-dash-status-nf" class="text-lg font-extrabold text-blue-900 mt-1">Aguardando Envio</h3>
+                        </div>
+                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
+                            <p class="text-xs font-bold text-slate-500 uppercase">Previsão / Pagamento</p>
+                            <h3 id="pj-dash-status-pg" class="text-lg font-extrabold text-emerald-700 mt-1">Pendente</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. ENVIAR NOTA -->
+                <div id="sec-pj-enviar" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
+                        <div>
+                            <h2 class="text-xl font-extrabold text-blue-950">Envio de Notas Fiscais</h2>
+                            <p class="text-xs text-slate-500 mt-1">Anexe as Notas Fiscais correspondentes à competência selecionada.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
+                                <h3 class="font-bold text-blue-900 text-sm">📄 Folha Regular (Honorário Fixo Mensal)</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b text-xs font-bold text-slate-600">
+                                                <th class="p-2.5">Prestador / CNPJ</th>
+                                                <th class="p-2.5">Valor Fixo</th>
+                                                <th class="p-2.5">Status Atual</th>
+                                                <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPrestadorRegular" class="text-xs">
+                                            <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 space-y-3">
+                                <h3 class="font-bold text-amber-900 text-sm">⚡ Folha Complementar / Adicionais</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b text-xs font-bold text-amber-900">
+                                                <th class="p-2.5">Evento / Adicional</th>
+                                                <th class="p-2.5">Valor Adicional</th>
+                                                <th class="p-2.5">Status Atual</th>
+                                                <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4 border-t">
+                            <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                📤 Enviar Notas Fiscais Anexadas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. MEUS CONTRATOS -->
+                <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
+                        <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
+                        <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
+                            <p class="text-slate-400">Carregando contrato...</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. MEUS DOCUMENTOS -->
+                <div id="sec-pj-documentos" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
+                        <h2 class="text-xl font-extrabold text-blue-950">Meus Documentos & Anexos</h2>
+                        <p class="text-xs text-slate-500">Visualize e baixe seu contrato assinado e demais documentos.</p>
+                        <div id="pj-conteudo-documentos" class="pt-2">
+                            <p class="text-slate-400 text-xs">Nenhum documento anexo encontrado.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. MEUS PAGAMENTOS -->
+                <div id="sec-pj-pagamentos" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
+                        <h2 class="text-xl font-extrabold text-blue-950">Histórico de Pagamentos</h2>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">
-                                        <th class="p-2.5">Prestador / CNPJ</th>
-                                        <th class="p-2.5">Valor Fixo</th>
-                                        <th class="p-2.5">Status Atual</th>
-                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                        <th class="p-3">Competência</th>
+                                        <th class="p-3">Valor Líquido</th>
+                                        <th class="p-3">Status NF</th>
+                                        <th class="p-3 text-center">Status Pagamento</th>
                                     </tr>
                                 </thead>
-                                <tbody id="tabelaPrestadorRegular" class="text-xs">
-                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>
+                                <tbody id="pj-tabela-pagamentos" class="text-xs">
+                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+                </div>
 
-                    <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 shadow-sm space-y-3">
-                        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-2">⚡ Folha Complementar</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-amber-100/50 border-b text-xs font-bold text-amber-900">
-                                        <th class="p-2.5">Prestador / Evento</th>
-                                        <th class="p-2.5">Valor Adicional</th>
-                                        <th class="p-2.5">Status Atual</th>
-                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
-                            </table>
+                <!-- 6. PERFIL -->
+                <div id="sec-pj-perfil" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4 max-w-xl">
+                        <h2 class="text-xl font-extrabold text-blue-950">Meu Perfil</h2>
+                        <div class="space-y-3 text-xs" id="pj-conteudo-perfil">
+                            <p class="text-slate-400">Carregando dados...</p>
                         </div>
                     </div>
-
-                    <div class="flex justify-end pt-4 border-t">
-                        <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
-                            📤 Enviar Notas Fiscais Anexadas
-                        </button>
-                    </div>
                 </div>
+
             </section>
         </main>
     </div>
@@ -972,8 +1059,24 @@
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
-                carregarDadosPortalPrestador();
+                mudarSecaoPrestador('pj-dash');
             }
+        };
+
+        window.mudarSecaoPrestador = (subId) => {
+            document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`sec-${subId}`).classList.remove('hidden');
+
+            const botoes = ['btn-pj-dash', 'btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-documentos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
+            botoes.forEach(bId => {
+                const b = document.getElementById(bId);
+                if (bId === `btn-${subId}`) {
+                    b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
+                } else {
+                    b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                }
+            });
+            carregarDadosPortalPrestador();
         };
 
         let contratosLocais = {};
@@ -1024,7 +1127,6 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
-                // Cálculo de Vencimento e Alertas
                 let alertaHTML = '<span class="text-slate-400">Sem término</span>';
                 if (c.vigenciaFim) {
                     const hoje = new Date();
@@ -1325,19 +1427,92 @@
             const tbodyCompPJ = document.getElementById('tabelaPrestadorComplementar');
             const containerCompPJ = document.getElementById('containerPrestadorComp');
 
-            tbodyRegPJ.innerHTML = "";
-            tbodyCompPJ.innerHTML = "";
+            if(tbodyRegPJ) tbodyRegPJ.innerHTML = "";
+            if(tbodyCompPJ) tbodyCompPJ.innerHTML = "";
 
             let idContratoLogado = null;
+            let dadosContratoLogado = null;
             Object.entries(contratosLocais).forEach(([id, c]) => {
                 if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
                     idContratoLogado = id;
+                    dadosContratoLogado = c;
                 }
             });
 
             const folhaCompetencia = folhasLocais[compPJ] || {};
             let encontrouAlgum = false;
             let temComplementarGeral = false;
+
+            // Preenchimento de Contratos (Seção Meus Contratos)
+            const divContratos = document.getElementById('pj-conteudo-contratos');
+            if (divContratos) {
+                if (dadosContratoLogado) {
+                    divContratos.innerHTML = `
+                        <div class="p-4 border rounded-xl bg-slate-50 space-y-2">
+                            <p><b>Nome / Razão Social:</b> ${dadosContratoLogado.nome} (${dadosContratoLogado.razaoSocial || '---'})</p>
+                            <p><b>CNPJ / CPF:</b> ${dadosContratoLogado.cnpj || dadosContratoLogado.cpf || '---'}</p>
+                            <p><b>Cargo / Perfil:</b> ${dadosContratoLogado.cargo || '---'} (${dadosContratoLogado.perfilTipo || 'Prestador'})</p>
+                            <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
+                            <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+                            <p><b>Centro de Custo / Gestor:</b> ${dadosContratoLogado.departamento || '---'} / ${dadosContratoLogado.gestorDireto || '---'}</p>
+                        </div>
+                    `;
+                } else if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                    divContratos.innerHTML = `<p class="text-slate-500">Você está logado como Administrador Master. Visualizando visão geral.</p>`;
+                } else {
+                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado ao seu e-mail.</p>`;
+                }
+            }
+
+            // Preenchimento de Documentos (Meus Documentos)
+            const divDocs = document.getElementById('pj-conteudo-documentos');
+            if (divDocs) {
+                if (dadosContratoLogado && dadosContratoLogado.arquivoContratoBase64) {
+                    divDocs.innerHTML = `<button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button>`;
+                } else {
+                    divDocs.innerHTML = `<p class="text-slate-400 text-xs">Nenhum documento de contrato anexo.</p>`;
+                }
+            }
+
+            // Preenchimento Perfil
+            const divPerfil = document.getElementById('pj-conteudo-perfil');
+            if (divPerfil) {
+                if (dadosContratoLogado) {
+                    divPerfil.innerHTML = `
+                        <p><b>Nome:</b> ${dadosContratoLogado.nome}</p>
+                        <p><b>E-mail:</b> ${dadosContratoLogado.email || usuarioEmailLogado}</p>
+                        <p><b>CNPJ:</b> ${dadosContratoLogado.cnpj || '---'}</p>
+                        <p><b>Status:</b> <span class="text-green-700 font-bold">${dadosContratoLogado.status}</span></p>
+                    `;
+                } else {
+                    divPerfil.innerHTML = `<p><b>E-mail:</b> ${usuarioEmailLogado}</p><p><b>Perfil:</b> Administrador / Master</p>`;
+                }
+            }
+
+            // Pagamentos (Meus Pagamentos)
+            const tabelaPgtos = document.getElementById('pj-tabela-pagamentos');
+            if (tabelaPgtos) {
+                tabelaPgtos.innerHTML = "";
+                let temPgtos = false;
+                Object.entries(folhasLocais).forEach(([compKey, compObj]) => {
+                    Object.entries(compObj).forEach(([idF, fData]) => {
+                        if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || idF === idContratoLogado) {
+                            temPgtos = true;
+                            let valTotal = parseFloat(fData.regular?.valorFixo || 0) + parseFloat(fData.regular?.motorValor || 0);
+                            let statusPg = fData.regular?.statusPagamento || "Aguardando";
+                            tabelaPgtos.innerHTML += `
+                                <tr class="border-b">
+                                    <td class="p-3 font-semibold">${compKey.replace('-', '/')}</td>
+                                    <td class="p-3 font-bold text-blue-950">R$ ${valTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    <td class="p-3">${fData.regular?.nfStatus || 'Aguardando'}</td>
+                                    <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold ${statusPg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusPg}</span></td>
+                                </tr>
+                            `;
+                        }
+                    });
+                });
+                if (!temPgtos) tabelaPgtos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum pagamento registrado.</td></tr>`;
+            }
 
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
@@ -1349,6 +1524,14 @@
                 const cnpjExibir = dadosFolha.cnpj || "---";
                 const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+
+                // Atualizar Dashboard Prestador
+                const dashHonorario = document.getElementById('pj-dash-honorario');
+                const dashStatusNf = document.getElementById('pj-dash-status-nf');
+                const dashStatusPg = document.getElementById('pj-dash-status-pg');
+                if (dashHonorario) dashHonorario.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                if (dashStatusNf) dashStatusNf.innerText = nfStatusReg;
+                if (dashStatusPg) dashStatusPg.innerText = dadosFolha.regular?.statusPagamento || "Pendente";
 
                 let badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">NF enviada</span>`;
                 if (nfStatusReg === "Recusada ❌") {
@@ -1362,14 +1545,16 @@
                     acaoRegPJ = `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">`;
                 }
 
-                tbodyRegPJ.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
-                        <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-2.5">${badgeStatusReg}</td>
-                        <td class="p-2.5">${acaoRegPJ}</td>
-                    </tr>
-                `;
+                if (tbodyRegPJ) {
+                    tbodyRegPJ.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
+                            <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            <td class="p-2.5">${badgeStatusReg}</td>
+                            <td class="p-2.5">${acaoRegPJ}</td>
+                        </tr>
+                    `;
+                }
 
                 if (dadosFolha.complementares_lista) {
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
@@ -1389,21 +1574,23 @@
                             acaoCompPJ = `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         }
 
-                        tbodyCompPJ.innerHTML += `
-                            <tr class="border-b bg-amber-50/20">
-                                <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${cItem.motorEvento || 'Adicional'}</span></td>
-                                <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-2.5">${badgeStatusComp}</td>
-                                <td class="p-2.5">${acaoCompPJ}</td>
-                            </tr>
-                        `;
+                        if (tbodyCompPJ) {
+                            tbodyCompPJ.innerHTML += `
+                                <tr class="border-b bg-amber-50/20">
+                                    <td class="p-2.5"><b>${cItem.motorEvento || 'Adicional'}</b></td>
+                                    <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    <td class="p-2.5">${badgeStatusComp}</td>
+                                    <td class="p-2.5">${acaoCompPJ}</td>
+                                </tr>
+                            `;
+                        }
                     });
                 }
             });
 
-            containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
+            if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            if (!encontrouAlgum) {
+            if (!encontrouAlgum && tbodyRegPJ) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
         }
