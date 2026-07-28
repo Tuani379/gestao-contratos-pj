@@ -571,11 +571,10 @@
             <!-- PORTAL DO PRESTADOR (ETAPA 5) -->
             <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
                 
-                <!-- Submenu da Etapa 5 -->
+                <!-- Submenu da Etapa 5 (Sem o botão Dashboard, apenas Enviar Nota e demais) -->
                 <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
                     <div class="flex flex-wrap gap-1 md:gap-2">
-                        <button onclick="mudarSecaoPrestador('pj-dash')" id="btn-pj-dash" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Dashboard</button>
-                        <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Enviar Nota</button>
+                        <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
                         <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
                         <button onclick="mudarSecaoPrestador('pj-documentos')" id="btn-pj-documentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Documentos</button>
                         <button onclick="mudarSecaoPrestador('pj-pagamentos')" id="btn-pj-pagamentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Pagamentos</button>
@@ -586,9 +585,9 @@
                     </div>
                 </div>
 
-                <!-- 1. DASHBOARD & 2. ENVIAR NOTA UNIFICADOS -->
-                <div id="sec-pj-dash" class="sec-pj space-y-6">
-                    <!-- Cards de Resumo (4 quadrados: Fixo + Complementares) -->
+                <!-- TELA ENVIAR NOTA (Com os 4 quadrados de Fixo/Complementar e Tabela abaixo) -->
+                <div id="sec-pj-enviar" class="sec-pj space-y-6">
+                    <!-- Cards de Resumo (Fixo + Complementares) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
                             <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Fixo Mensal</span>
@@ -656,12 +655,7 @@
                     </div>
                 </div>
 
-                <!-- 2. ENVIAR NOTA (Mesma tela unificada) -->
-                <div id="sec-pj-enviar" class="sec-pj hidden space-y-6">
-                    <!-- Espelhado para manter o comportamento exato da aba Enviar Nota -->
-                </div>
-
-                <!-- 3. MEUS CONTRATOS -->
+                <!-- 2. MEUS CONTRATOS -->
                 <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
@@ -671,7 +665,7 @@
                     </div>
                 </div>
 
-                <!-- 4. MEUS DOCUMENTOS -->
+                <!-- 3. MEUS DOCUMENTOS -->
                 <div id="sec-pj-documentos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Documentos & Anexos</h2>
@@ -682,7 +676,7 @@
                     </div>
                 </div>
 
-                <!-- 5. MEUS PAGAMENTOS -->
+                <!-- 4. MEUS PAGAMENTOS -->
                 <div id="sec-pj-pagamentos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Histórico de Pagamentos</h2>
@@ -704,7 +698,7 @@
                     </div>
                 </div>
 
-                <!-- 6. PERFIL -->
+                <!-- 5. PERFIL -->
                 <div id="sec-pj-perfil" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4 max-w-xl">
                         <h2 class="text-xl font-extrabold text-blue-950">Meu Perfil</h2>
@@ -1062,22 +1056,18 @@
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
-                mudarSecaoPrestador('pj-dash');
+                mudarSecaoPrestador('pj-enviar');
             }
         };
 
         window.mudarSecaoPrestador = (subId) => {
             document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
-            if (subId === 'pj-enviar') {
-                document.getElementById('sec-pj-dash').classList.remove('hidden');
-            } else {
-                document.getElementById(`sec-${subId}`).classList.remove('hidden');
-            }
+            document.getElementById(`sec-${subId}`).classList.remove('hidden');
 
-            const botoes = ['btn-pj-dash', 'btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-documentos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
+            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-documentos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
             botoes.forEach(bId => {
                 const b = document.getElementById(bId);
-                if (bId === `btn-${subId}` || (subId === 'pj-enviar' && bId === 'btn-pj-dash')) {
+                if (bId === `btn-${subId}`) {
                     b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
                 } else {
                     b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
@@ -1534,7 +1524,7 @@
                 const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                // Atualizar Cards Fixo do Dashboard
+                // Atualizar Cards Fixo do Dashboard/Envio
                 const cardFixoValor = document.getElementById('pj-card-fixo-valor');
                 const cardFixoNf = document.getElementById('pj-card-fixo-nf');
                 const cardFixoPg = document.getElementById('pj-card-fixo-pg');
