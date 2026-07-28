@@ -6,12 +6,15 @@
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 </head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
 
-<div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
+    <!-- TELA DE LOGIN / RECUPERAÇÃO / PRIMEIRO ACESSO -->
+    <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
         <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
             <div class="text-center mb-6">
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
-                <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa</p>
+                <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa - Fase 1</p>
             </div>
+
+            <!-- Formulário de Login -->
             <form id="form-login-saas" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
@@ -21,8 +24,24 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
                     <input type="password" id="login-senha-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                 </div>
+                <div class="flex justify-between items-center text-xs">
+                    <button type="button" onclick="abrirModalEsqueceuSenha()" class="text-blue-600 hover:underline font-semibold">Esqueceu sua senha?</button>
+                </div>
                 <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">Entrar</button>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL RECUPERAÇÃO DE SENHA -->
+    <div id="modalEsqueceuSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
+            <h3 class="text-lg font-bold text-blue-950 mb-2">Recuperar Senha</h3>
+            <p class="text-xs text-slate-500 mb-4">Insira seu e-mail cadastrado para receber o link de redefinição.</p>
+            <input type="email" id="inputEmailRecuperacao" placeholder="seuemail@empresa.com" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4 outline-none focus:ring-2 focus:ring-blue-600">
+            <div class="flex justify-end gap-2">
+                <button onclick="fecharModalEsqueceuSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button onclick="enviarEmailRecuperacao()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800">Enviar Link</button>
+            </div>
         </div>
     </div>
 
@@ -113,7 +132,7 @@
     <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
             <h3 class="text-lg font-bold text-blue-950 mb-3">Alterar Senha</h3>
-            <input type="password" id="inputNovaSenha" placeholder="Nova Senha" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4">
+            <input type="password" id="inputNovaSenha" placeholder="Nova Senha (mín. 6 caracteres)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4 outline-none focus:ring-2 focus:ring-blue-600">
             <div class="flex justify-end gap-2">
                 <button onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
                 <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar</button>
@@ -537,7 +556,7 @@
                 </div>
             </section>
 
-            <!-- PORTAL DO PRESTADOR (ATUALIZADO) -->
+            <!-- PORTAL DO PRESTADOR -->
             <section id="area-prestador" class="hidden max-w-4xl mx-auto p-8 bg-white rounded-2xl border shadow-sm space-y-6">
                 <div class="border-b pb-4 flex justify-between items-center">
                     <div>
@@ -602,7 +621,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
         const dataHojeObj = new Date();
@@ -671,12 +690,36 @@
             });
         }
 
+        // --- FUNÇÕES DA ETAPA 1 (LOGIN, RECUPERAÇÃO, ALTERAÇÃO E LOGOUT) ---
         document.getElementById('form-login-saas').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email-saas').value, document.getElementById('login-senha-saas').value);
-            } catch (error) { alert("Erro ao entrar: " + error.message); }
+            } catch (error) { 
+                alert("Erro ao entrar: " + error.message); 
+            }
         });
+
+        window.abrirModalEsqueceuSenha = () => { document.getElementById('modalEsqueceuSenha').classList.remove('hidden'); };
+        window.fecharModalEsqueceuSenha = () => { document.getElementById('modalEsqueceuSenha').classList.add('hidden'); };
+
+        window.enviarEmailRecuperacao = async () => {
+            const email = document.getElementById('inputEmailRecuperacao').value;
+            if (!email) { alert("Informe seu e-mail!"); return; }
+            try {
+                await sendPasswordResetEmail(auth, email);
+                alert("E-mail de recuperação enviado com sucesso! Verifique sua caixa de entrada.");
+                fecharModalEsqueceuSenha();
+            } catch (error) {
+                alert("Erro ao enviar e-mail de recuperação: " + error.message);
+            }
+        };
+
+        window.fazerLogout = () => {
+            signOut(auth).then(() => {
+                document.getElementById('tela-login').classList.remove('hidden');
+            });
+        };
 
         onAuthStateChanged(auth, async (user) => {
             if (user) {
@@ -688,17 +731,17 @@
                         localStorage.setItem('connectpj_empresa_ativa', "matriz");
                         localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
                     }
-                    document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
                 } else {
-                    document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
                 }
+                document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                 carregarIdentidadeVisualMenu();
                 carregarDadosPortalPrestador();
             } else {
+                // Sessão expirada ou deslogado
                 document.getElementById('tela-login').classList.remove('hidden');
             }
         });
@@ -722,9 +765,15 @@
         window.fecharModalTrocarSenha = () => { document.getElementById('modalTrocarSenha').classList.add('hidden'); };
         window.salvarNovaSenha = async () => {
             const s = document.getElementById('inputNovaSenha').value;
-            if (!s || s.length < 6) { alert("Senha mínima de 6 caracteres!"); return; }
-            await updatePassword(auth.currentUser, s);
-            alert("Senha alterada!"); fecharModalTrocarSenha();
+            if (!s || s.length < 6) { alert("A senha deve ter no mínimo 6 caracteres!"); return; }
+            try {
+                await updatePassword(auth.currentUser, s);
+                alert("Senha alterada com sucesso!");
+                fecharModalTrocarSenha();
+                document.getElementById('inputNovaSenha').value = "";
+            } catch (error) {
+                alert("Erro ao alterar senha (faça login novamente se necessário): " + error.message);
+            }
         };
 
         window.abrirSeletorEmpresas = () => {
@@ -754,8 +803,6 @@
             await update(push(ref(db, 'empresas_clientes')), { razaoSocial: r, cnpj: c, emailResponsavel: em, status: "Ativo" });
             alert("Empresa salva!"); fecharModalNovaEmpresaMaster();
         };
-
-        window.fazerLogout = () => { signOut(auth); };
 
         window.toggleBlocoEmpresa = (blocoId, setaId) => {
             const bloco = document.getElementById(blocoId);
