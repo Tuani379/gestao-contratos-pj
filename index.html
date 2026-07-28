@@ -1069,6 +1069,7 @@
             });
             renderizarTabelasEstatísticas();
             atualizarRelatoriosAuditoria();
+            carregarDadosPortalPrestador();
         });
 
         onValue(ref(db, pathFolhasDB), (snapshot) => {
@@ -1282,28 +1283,157 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        // Eventos delegados para Abrir NF e Liquidar Pagamento com 100% de garantia
+        // PORTAL DO PRESTADOR: LÓGICA DE EXIBIÇÃO E UPLOAD DE NOTAS FISCAIS
+        function carregarDadosPortalPrestador() {
+            const compPJ = selectCompetenciaPJ.value || competenciaSelecionada;
+            const tbodyRegPJ = document.getElementById('tabelaPrestadorRegular');
+            const tbodyCompPJ = document.getElementById('tabelaPrestadorComplementar');
+            const containerCompPJ = document.getElementById('containerPrestadorComp');
+
+            tbodyRegPJ.innerHTML = "";
+            tbodyCompPJ.innerHTML = "";
+
+            // Se for Master ou Administrador, busca todos os registros ou mostra instrução. Se for prestador, filtra pelo e-mail logado.
+            let idContratoLogado = null;
+            Object.entries(contratosLocais).forEach(([id, c]) => {
+                if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                    idContratoLogado = id;
+                }
+            });
+
+            const folhaCompetencia = folhasLocais[compPJ] || {};
+            let encontrouAlgum = false;
+
+            Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
+                // Se for prestador comum, exibe apenas os seus próprios dados. Se for Master/Admin, exibe todos.
+                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
+                    return;
+                }
+
+                encontrouAlgum = true;
+                const nomeExibir = dadosFolha.nome || "Prestador";
+                const cnpjExibir = dadosFolha.cnpj || "---";
+                const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
+                const statusReg = dadosFolha.regular?.statusPagamento || "Aguardando NF";
+
+                let inputUploadReg = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
+                if (dadosFolha.regular?.nfArquivoBase64) {
+                    inputUploadReg = `<span class="text-xs text-green-700 font-bold">Enviada ✔</span> <button class="btn-view-nf-reg text-xs text-blue-600 hover:underline ml-2" data-id="${idContratoFolha}">Ver Nota</button>`;
+                }
+
+                tbodyRegPJ.innerHTML += `
+                    <tr class="border-b">
+                        <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
+                        <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td class="p-2.5"><span class="px-2 py-1 rounded font-bold text-xs ${statusReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusReg}</span></td>
+                        <td class="p-2.5">${inputUploadReg}</td>
+                    </tr>
+                `;
+
+                if (dadosFolha.complementares_lista) {
+                    containerCompPJ.classList.remove('hidden');
+                    Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
+                        let valComp = parseFloat(cItem.motorValor || 0);
+                        let statusComp = cItem.statusPagamento || "Aguardando NF";
+
+                        let inputUploadComp = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        if (cItem.nfArquivoBase64) {
+                            inputUploadComp = `<span class="text-xs text-green-700 font-bold">Enviada ✔</span> <button class="btn-view-nf-comp text-xs text-blue-600 hover:underline ml-2" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button>`;
+                        }
+
+                        tbodyCompPJ.innerHTML += `
+                            <tr class="border-b bg-amber-50/20">
+                                <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${cItem.motorEvento || 'Adicional'}</span></td>
+                                <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-2.5"><span class="px-2 py-1 rounded font-bold text-xs ${statusComp === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusComp}</span></td>
+                                <td class="p-2.5">${inputUploadComp}</td>
+                            </tr>
+                        `;
+                    });
+                }
+            });
+
+            if (!encontrouAlgum) {
+                tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
+            }
+        }
+
+        selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
+
+        // Ação do Botão "Enviar Notas Fiscais Anexadas"
+        document.getElementById('btn-enviar-todas-notas-pj').addEventListener('click', async () => {
+            const inputsReg = document.querySelectorAll('.input-nf-reg');
+            const inputsComp = document.querySelectorAll('.input-nf-comp');
+            let atualizou = false;
+
+            for (let input of inputsReg) {
+                if (input.files && input.files[0]) {
+                    const id = input.dataset.id;
+                    const file = input.files[0];
+                    await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/regular`), {
+                                nfArquivoBase64: reader.result,
+                                nfStatus: "Recebida ✔",
+                                statusPagamento: "Pronto para Pagar"
+                            });
+                            atualizou = true;
+                            resolve();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+
+            for (let input of inputsComp) {
+                if (input.files && input.files[0]) {
+                    const id = input.dataset.id;
+                    const compId = input.dataset.compId;
+                    const file = input.files[0];
+                    await new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = async () => {
+                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/complementares_lista/${compId}`), {
+                                nfArquivoBase64: reader.result,
+                                nfStatus: "Recebida ✔",
+                                statusPagamento: "Pronto para Pagar"
+                            });
+                            atualizou = true;
+                            resolve();
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+
+            if (atualizou) {
+                alert("Notas Fiscais enviadas com sucesso para validação do RH/Financeiro!");
+                carregarDadosPortalPrestador();
+            } else {
+                alert("Selecione pelo menos um arquivo de Nota Fiscal antes de enviar.");
+            }
+        });
+
+        // Eventos delegados globais para Abrir NF e Liquidar Pagamento
         document.addEventListener('click', async (e) => {
-            // Visualizar NF Regular
             if (e.target.classList.contains('btn-view-nf-reg')) {
                 const id = e.target.dataset.id;
-                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.regular?.nfArquivoBase64;
+                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[id]?.regular?.nfArquivoBase64;
                 if (arquivo) {
                     const win = window.open();
                     win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
                 }
             }
-            // Visualizar NF Complementar
             if (e.target.classList.contains('btn-view-nf-comp')) {
                 const id = e.target.dataset.id;
                 const compId = e.target.dataset.compId;
-                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.complementares_lista?.[compId]?.nfArquivoBase64;
+                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[id]?.complementares_lista?.[compId]?.nfArquivoBase64;
                 if (arquivo) {
                     const win = window.open();
                     win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
                 }
             }
-            // Liquidar Regular
             if (e.target.classList.contains('btn-liquidar-reg')) {
                 const id = e.target.dataset.id;
                 try {
@@ -1311,7 +1441,6 @@
                     alert("Pagamento liquidado com sucesso!");
                 } catch(err) { alert("Erro: " + err.message); }
             }
-            // Liquidar Complementar
             if (e.target.classList.contains('btn-liquidar-comp')) {
                 const id = e.target.dataset.id;
                 const compId = e.target.dataset.compId;
@@ -1419,8 +1548,6 @@
         document.getElementById('btn-exportar-relatorio').addEventListener('click', () => {
             XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("#relatorios table")), "Relatorio_Auditoria_ConnectPJ.xlsx");
         });
-
-        function carregarDadosPortalPrestador() {}
 
         document.getElementById('btn-exportar-contratos-excel').addEventListener('click', () => {
             const tabela = document.getElementById("tabela-contratos-export");
