@@ -1220,6 +1220,8 @@
                 let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
                 if (statusRegHTML === "Pago") {
                     statusRegHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                } else if (f.regular?.nfStatus === "Recusada ❌") {
+                    statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
                 } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar" || f.regular?.nfArquivoBase64) {
                     statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
@@ -1252,6 +1254,8 @@
                         let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
                         if (statusCompHTML === "Pago") {
                             statusCompHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                        } else if (cItem.nfStatus === "Recusada ❌") {
+                            statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
                         } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar" || cItem.nfArquivoBase64) {
                             statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
                         }
@@ -1283,6 +1287,21 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
+        // SALVAR STATUS DA NF NO FIREBASE QUANDO ALTERADO NO SELECT
+        document.addEventListener('change', async (e) => {
+            if (e.target.classList.contains('select-nf-status-reg')) {
+                const id = e.target.dataset.id;
+                const novoStatus = e.target.value;
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: novoStatus });
+            }
+            if (e.target.classList.contains('select-nf-status-comp')) {
+                const id = e.target.dataset.id;
+                const compId = e.target.dataset.compId;
+                const novoStatus = e.target.value;
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { nfStatus: novoStatus });
+            }
+        });
+
         // PORTAL DO PRESTADOR: LÓGICA DE EXIBIÇÃO E UPLOAD DE NOTAS FISCAIS
         function carregarDadosPortalPrestador() {
             const compPJ = selectCompetenciaPJ.value || competenciaSelecionada;
@@ -1293,7 +1312,6 @@
             tbodyRegPJ.innerHTML = "";
             tbodyCompPJ.innerHTML = "";
 
-            // Se for Master ou Administrador, busca todos os registros ou mostra instrução. Se for prestador, filtra pelo e-mail logado.
             let idContratoLogado = null;
             Object.entries(contratosLocais).forEach(([id, c]) => {
                 if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
@@ -1305,7 +1323,6 @@
             let encontrouAlgum = false;
 
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
-                // Se for prestador comum, exibe apenas os seus próprios dados. Se for Master/Admin, exibe todos.
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
                     return;
                 }
@@ -1314,19 +1331,26 @@
                 const nomeExibir = dadosFolha.nome || "Prestador";
                 const cnpjExibir = dadosFolha.cnpj || "---";
                 const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
-                const statusReg = dadosFolha.regular?.statusPagamento || "Aguardando NF";
+                const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                let inputUploadReg = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
+                let badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">NF enviada</span>`;
+                if (nfStatusReg === "Recusada ❌") {
+                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
+                } else if (!dadosFolha.regular?.nfArquivoBase64) {
+                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                }
+
+                let acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
                 if (dadosFolha.regular?.nfArquivoBase64) {
-                    inputUploadReg = `<span class="text-xs text-green-700 font-bold">Enviada ✔</span> <button class="btn-view-nf-reg text-xs text-blue-600 hover:underline ml-2" data-id="${idContratoFolha}">Ver Nota</button>`;
+                    acaoRegPJ = `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">`;
                 }
 
                 tbodyRegPJ.innerHTML += `
                     <tr class="border-b">
                         <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
                         <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-2.5"><span class="px-2 py-1 rounded font-bold text-xs ${statusReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusReg}</span></td>
-                        <td class="p-2.5">${inputUploadReg}</td>
+                        <td class="p-2.5">${badgeStatusReg}</td>
+                        <td class="p-2.5">${acaoRegPJ}</td>
                     </tr>
                 `;
 
@@ -1334,19 +1358,26 @@
                     containerCompPJ.classList.remove('hidden');
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let statusComp = cItem.statusPagamento || "Aguardando NF";
+                        let nfStatusComp = cItem.nfStatus || "Aguardando";
 
-                        let inputUploadComp = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        let badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Enviada ✔</span>`;
+                        if (nfStatusComp === "Recusada ❌") {
+                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
+                        } else if (!cItem.nfArquivoBase64) {
+                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                        }
+
+                        let acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         if (cItem.nfArquivoBase64) {
-                            inputUploadComp = `<span class="text-xs text-green-700 font-bold">Enviada ✔</span> <button class="btn-view-nf-comp text-xs text-blue-600 hover:underline ml-2" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button>`;
+                            acaoCompPJ = `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         }
 
                         tbodyCompPJ.innerHTML += `
                             <tr class="border-b bg-amber-50/20">
                                 <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${cItem.motorEvento || 'Adicional'}</span></td>
                                 <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-2.5"><span class="px-2 py-1 rounded font-bold text-xs ${statusComp === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusComp}</span></td>
-                                <td class="p-2.5">${inputUploadComp}</td>
+                                <td class="p-2.5">${badgeStatusComp}</td>
+                                <td class="p-2.5">${acaoCompPJ}</td>
                             </tr>
                         `;
                     });
