@@ -335,13 +335,14 @@
                         <h3 id="tituloModal" class="text-xl font-bold mb-4 text-blue-950">Novo Cadastro</h3>
                         
                         <div class="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Perfil do Usuário / Contrato:</label>
+                            <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Perfil do Usuário / Contrato (6 Perfis Autorizados):</label>
                             <select id="campoPerfilTipo" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
-                                <option value="Prestador PJ">Prestador PJ</option>
                                 <option value="Administrador">Administrador</option>
-                                <option value="RH">RH</option>
                                 <option value="Financeiro">Financeiro</option>
+                                <option value="RH">RH</option>
+                                <option value="Gestor">Gestor</option>
                                 <option value="Jurídico">Jurídico</option>
+                                <option value="Prestador">Prestador</option>
                             </select>
                         </div>
 
@@ -365,7 +366,7 @@
                             <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
                             <select id="campoStatus" class="w-full p-2 border rounded bg-white text-sm">
                                 <option value="Ativo">Ativo</option>
-                                <option value="Inativo">Inativo / Bloqueado</option>
+                                <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                             </select>
                         </div>
 
@@ -680,7 +681,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -729,6 +730,8 @@
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
         let usuarioEmailLogado = "";
+        let perfilUsuarioLogado = "Administrador"; // Padrão Master
+
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
@@ -750,7 +753,52 @@
             });
         }
 
-        // --- FUNÇÕES DE LOGIN, RECUPERAÇÃO E SEGURANÇA ---
+        // --- MOTOR DE CONTROLE DE ACESSO POR PERFIL (6 PERFIS) ---
+        function aplicarPermissoesPerfil(perfil) {
+            perfilUsuarioLogado = perfil;
+            document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${perfil} ▾`;
+
+            const btnDashboard = document.getElementById('btn-dashboard');
+            const btnContratos = document.getElementById('btn-contratos');
+            const btnRelatorios = document.getElementById('btn-relatorios');
+            const menuPj = document.getElementById('menu-btn-pj');
+            const menuRh = document.getElementById('menu-btn-rh');
+
+            if (perfil === 'Administrador') {
+                // Acesso Total
+                [btnDashboard, btnContratos, btnRelatorios, menuPj, menuRh].forEach(el => el.style.display = 'block');
+            } else if (perfil === 'Financeiro') {
+                // Vê Folha e Relatórios
+                btnDashboard.style.display = 'block';
+                btnRelatorios.style.display = 'block';
+                btnContratos.style.display = 'none';
+                mostrarSecao('dashboard');
+            } else if (perfil === 'RH') {
+                // Vê Cadastros de Equipe e Folha
+                btnDashboard.style.display = 'block';
+                btnContratos.style.display = 'block';
+                btnRelatorios.style.display = 'none';
+                mostrarSecao('contratos');
+            } else if (perfil === 'Gestor') {
+                // Vê Equipe e Relatórios
+                btnDashboard.style.display = 'none';
+                btnContratos.style.display = 'block';
+                btnRelatorios.style.display = 'block';
+                mostrarSecao('contratos');
+            } else if (perfil === 'Jurídico') {
+                // Visualiza APENAS Contratos e Equipe
+                btnDashboard.style.display = 'none';
+                btnRelatorios.style.display = 'none';
+                btnContratos.style.display = 'block';
+                mostrarSecao('contratos');
+            } else if (perfil === 'Prestador') {
+                // Restrito apenas ao Portal do Prestador
+                mudarPainelModo('pj');
+                menuRh.style.display = 'none';
+            }
+        }
+
+        // --- FUNÇÕES DE LOGIN, SEGURANÇA E PERFIS ---
         document.getElementById('form-login-saas').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -797,6 +845,7 @@
             if (user) {
                 document.getElementById('tela-login').classList.add('hidden');
                 usuarioEmailLogado = (user.email || "").toLowerCase();
+                
                 if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
                         empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
@@ -805,10 +854,23 @@
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
+                    aplicarPermissoesPerfil('Administrador');
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
+                    
+                    get(ref(db, pathContratosDB)).then((snapshot) => {
+                        const dados = snapshot.val() || {};
+                        let perfilEncontrado = 'Prestador';
+                        Object.values(dados).forEach(c => {
+                            if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                                perfilEncontrado = c.perfilTipo || 'Prestador';
+                            }
+                        });
+                        aplicarPermissoesPerfil(perfilEncontrado);
+                    });
                 }
+
                 document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                 carregarIdentidadeVisualMenu();
                 carregarDadosPortalPrestador();
@@ -888,6 +950,10 @@
         };
 
         window.abrirConfiguracoesEmpresa = () => {
+            if (perfilUsuarioLogado !== 'Administrador') {
+                alert("Acesso restrito a Administradores.");
+                return;
+            }
             ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
@@ -1036,7 +1102,7 @@
             let nomesPrestadoresSet = new Set();
 
             entradas.forEach(([key, c]) => {
-                if (c.excluidoLogico) return; // Ocultar excluídos logicamente
+                if (c.excluidoLogico) return;
 
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
@@ -1050,14 +1116,15 @@
                 if (c.perfilTipo === "Administrador") badgeCor = "bg-purple-100 text-purple-800";
                 else if (c.perfilTipo === "RH") badgeCor = "bg-blue-100 text-blue-800";
                 else if (c.perfilTipo === "Financeiro") badgeCor = "bg-emerald-100 text-emerald-800";
-                else if (c.perfilTipo === "Jurídico") badgeCor = "bg-amber-100 text-amber-800";
+                else if (c.perfilTipo === "Gestor") badgeCor = "bg-amber-100 text-amber-800";
+                else if (c.perfilTipo === "Jurídico") badgeCor = "bg-indigo-100 text-indigo-800";
 
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-semibold">${c.nome || '---'}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador PJ'}</span></td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
                         <td class="p-3 text-slate-600">${c.cpf || '---'}</td>
                         <td class="p-3 text-slate-600">${c.email || '---'}</td>
                         <td class="p-3 text-slate-600">${c.cep || '---'}</td>
@@ -1134,16 +1201,15 @@
                 } else {
                     await push(ref(db, pathContratosDB), pacote);
                     
-                    // Envio de Convite por E-mail via EmailJS para novos cadastros
                     const emailDestino = pacote.email || pacote.emailCorp;
                     if (emailDestino && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
                         try {
                             await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                                 to_email: emailDestino,
                                 to_name: pacote.nome,
-                                tipo_lancamento: "CONVITE DE ACESSO AO CONNECTPJ",
+                                tipo_lancamento: `CONVITE DE ACESSO AO CONNECTPJ (${pacote.perfilTipo})`,
                                 evento_financeiro: "Plataforma SaaS",
-                                mensagem_motivo: `Olá ${pacote.nome}, seu cadastro foi efetuado na plataforma ${empresaAtivaNome}. Acesse com seu e-mail.`
+                                mensagem_motivo: `Olá ${pacote.nome}, seu perfil de ${pacote.perfilTipo} foi cadastrado na organização ${empresaAtivaNome}. Acesse com seu e-mail.`
                             });
                             alert("Cadastro salvo e e-mail de convite enviado com sucesso!");
                         } catch (err) {
@@ -1165,7 +1231,7 @@
             if (!c) return;
             document.getElementById('tituloModal').innerText = "Editar Cadastro";
             document.getElementById('btn-salvar-cadastro').dataset.editId = id;
-            document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador PJ';
+            document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
             document.getElementById('campoNome').value = c.nome || "";
             document.getElementById('campoCpf').value = c.cpf || "";
             document.getElementById('campoEmail').value = c.email || "";
@@ -1320,7 +1386,7 @@
             const baseFolhaMes = folhasLocais[comp] || {};
 
             let chavesFiltradas = [];
-            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || perfilUsuarioLogado === 'Administrador');
 
             Object.entries(baseFolhaMes).forEach(([idContrato, dadosFolha]) => {
                 const cInfo = contratosLocais[idContrato] || {};
@@ -1396,7 +1462,7 @@
             let atualizacoes = {};
             let arquivosProcessados = 0;
 
-            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+            const isMaster = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || perfilUsuarioLogado === 'Administrador');
 
             for (const [idContrato, dadosFolha] of Object.entries(baseFolhaMes)) {
                 const cInfo = contratosLocais[idContrato] || {};
