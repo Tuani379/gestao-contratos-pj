@@ -586,7 +586,7 @@
                     </div>
                 </div>
 
-                <!-- 1. DASHBOARD & ENVIAR NOTA UNIFICADOS -->
+                <!-- 1. DASHBOARD & 2. ENVIAR NOTA UNIFICADOS -->
                 <div id="sec-pj-dash" class="sec-pj space-y-6">
                     <!-- Cards de Resumo (4 quadrados: Fixo + Complementares) -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -656,9 +656,9 @@
                     </div>
                 </div>
 
-                <!-- 2. ENVIAR NOTA (Atalho dedicado mantendo compatibilidade) -->
+                <!-- 2. ENVIAR NOTA (Mesma tela unificada) -->
                 <div id="sec-pj-enviar" class="sec-pj hidden space-y-6">
-                    <!-- Conteúdo espelhado do dashboard para o menu Enviar Nota -->
+                    <!-- Espelhado para manter o comportamento exato da aba Enviar Nota -->
                 </div>
 
                 <!-- 3. MEUS CONTRATOS -->
@@ -1549,9 +1549,11 @@
                     badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
                 }
 
-                let acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
+                let acaoRegPJ = `<span class="text-slate-400">---</span>`;
                 if (dadosFolha.regular?.nfArquivoBase64) {
                     acaoRegPJ = `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">`;
+                } else {
+                    acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
                 }
 
                 if (tbodyRegPJ) {
@@ -1593,9 +1595,11 @@
                             badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
                         }
 
-                        let acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        let acaoCompPJ = `<span class="text-slate-400">---</span>`;
                         if (cItem.nfArquivoBase64) {
                             acaoCompPJ = `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        } else {
+                            acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         }
 
                         if (tbodyCompPJ) {
