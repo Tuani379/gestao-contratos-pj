@@ -365,13 +365,13 @@
                             <input id="campoGestorDireto" type="text" placeholder="Gestor Direto" class="w-full p-2 border rounded text-sm">
                             <select id="campoStatus" class="w-full p-2 border rounded bg-white text-sm">
                                 <option value="Ativo">Ativo</option>
-                                <option value="Inativo">Inativo</option>
+                                <option value="Inativo">Inativo / Bloqueado</option>
                             </select>
                         </div>
 
                         <div class="flex justify-end gap-2 mt-6">
                             <button id="btn-cancelar-cadastro" class="px-4 py-2 border rounded text-xs font-semibold text-slate-600">Cancelar</button>
-                            <button id="btn-salvar-cadastro" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs hover:bg-blue-700">Salvar Cadastro</button>
+                            <button id="btn-salvar-cadastro" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs hover:bg-blue-700">Salvar Cadastro & Enviar Convite</button>
                         </div>
                     </div>
                 </div>
@@ -441,17 +441,17 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (ETAPA 2 CONSOLIDADA) -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🏢 Etapa 2: Informações da Empresa & Assinatura</h2>
+                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🏢 Informações da Empresa & Assinatura</h2>
                         <p class="text-xs text-slate-500 mt-1">Gerencie os dados cadastrais, plano ativo, limites e módulos contratados da organização.</p>
                     </div>
                     <button onclick="mostrarSecao('dashboard')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
                 </div>
 
-                <!-- SUB-SEÇÃO: PLANO E LIMITES (ETAPA 2) -->
+                <!-- SUB-SEÇÃO: PLANO E LIMITES -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
                         <p class="text-[11px] font-bold text-blue-800 uppercase">Plano Contratado</p>
@@ -680,7 +680,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -750,7 +750,7 @@
             });
         }
 
-        // --- FUNÇÕES DA ETAPA 1 (LOGIN, RECUPERAÇÃO, ALTERAÇÃO E LOGOUT) ---
+        // --- FUNÇÕES DE LOGIN, RECUPERAÇÃO E SEGURANÇA ---
         document.getElementById('form-login-saas').addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
@@ -892,9 +892,8 @@
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
             
-            // Atualizar contadores dinâmicos da Etapa 2
             let qtdContratosAtivos = 0;
-            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo") qtdContratosAtivos++; });
+            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdContratosAtivos++; });
             document.getElementById('info-qtd-contratos').innerText = `${qtdContratosAtivos} / 50`;
 
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
@@ -1037,6 +1036,8 @@
             let nomesPrestadoresSet = new Set();
 
             entradas.forEach(([key, c]) => {
+                if (c.excluidoLogico) return; // Ocultar excluídos logicamente
+
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
                     motorSelect.appendChild(optA);
@@ -1069,7 +1070,11 @@
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
                         <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                        <td class="p-3 text-center"><button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button></td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
+                            <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
+                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold">Excluir</button>
+                        </td>
                     </tr>
                 `;
             });
@@ -1117,16 +1122,42 @@
                 valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
                 departamento: document.getElementById('campoDepartamento').value,
                 gestorDireto: document.getElementById('campoGestorDireto').value,
-                status: document.getElementById('campoStatus').value
+                status: document.getElementById('campoStatus').value,
+                excluidoLogico: false
             };
             if (!pacote.nome) { alert("Nome obrigatório!"); return; }
-            if (editId) {
-                await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
-            } else {
-                await push(ref(db, pathContratosDB), pacote);
+
+            try {
+                if (editId) {
+                    await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+                    alert("Cadastro atualizado com sucesso!");
+                } else {
+                    await push(ref(db, pathContratosDB), pacote);
+                    
+                    // Envio de Convite por E-mail via EmailJS para novos cadastros
+                    const emailDestino = pacote.email || pacote.emailCorp;
+                    if (emailDestino && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
+                        try {
+                            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                                to_email: emailDestino,
+                                to_name: pacote.nome,
+                                tipo_lancamento: "CONVITE DE ACESSO AO CONNECTPJ",
+                                evento_financeiro: "Plataforma SaaS",
+                                mensagem_motivo: `Olá ${pacote.nome}, seu cadastro foi efetuado na plataforma ${empresaAtivaNome}. Acesse com seu e-mail.`
+                            });
+                            alert("Cadastro salvo e e-mail de convite enviado com sucesso!");
+                        } catch (err) {
+                            console.log("Erro ao enviar e-mail de convite:", err);
+                            alert("Cadastro salvo, mas houve falha ao disparar o convite por e-mail.");
+                        }
+                    } else {
+                        alert("Cadastro salvo com sucesso!");
+                    }
+                }
+                document.getElementById('modalCadastro').classList.add('hidden');
+            } catch (error) {
+                alert("Erro ao salvar cadastro: " + error.message);
             }
-            alert("Salvo com sucesso!");
-            document.getElementById('modalCadastro').classList.add('hidden');
         });
 
         window.abrirModalEdicao = (id) => {
@@ -1151,10 +1182,33 @@
             document.getElementById('modalCadastro').classList.remove('hidden');
         };
 
+        window.alternarBloqueioUsuario = async (id) => {
+            const c = contratosLocais[id];
+            if (!c) return;
+            const novoStatus = c.status === 'Ativo' ? 'Inativo / Bloqueado' : 'Ativo';
+            try {
+                await update(ref(db, `${pathContratosDB}/${id}`), { status: novoStatus });
+                alert(`Status alterado para: ${novoStatus}`);
+            } catch (error) {
+                alert("Erro ao alterar status: " + error.message);
+            }
+        };
+
+        window.exclusaoLogicaUsuario = async (id) => {
+            if (confirm("Tem certeza que deseja realizar a exclusão lógica deste usuário/contrato?")) {
+                try {
+                    await update(ref(db, `${pathContratosDB}/${id}`), { excluidoLogico: true, status: 'Inativo' });
+                    alert("Registro excluído logicamente com sucesso!");
+                } catch (error) {
+                    alert("Erro ao excluir: " + error.message);
+                }
+            }
+        };
+
         function renderizarTabelasEstatísticas() {
             competenciaSelecionada = filtroCompetencia.value;
             let qtdAtivos = 0;
-            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo") qtdAtivos++; });
+            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdAtivos++; });
             document.getElementById('cardContratosAtivos').innerText = qtdAtivos;
 
             const baseFolhaMes = folhasLocais[competenciaSelecionada] || {};
@@ -1593,7 +1647,7 @@
             const tbody = document.getElementById('listaContratosParaFolha');
             tbody.innerHTML = "";
             Object.entries(contratosLocais).forEach(([key, c]) => {
-                if (c.status === "Ativo") {
+                if (c.status === "Ativo" && !c.excluidoLogico) {
                     let docExibicao = c.cnpj || '---';
                     tbody.innerHTML += `<tr><td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-folha"></td><td class="p-2">${c.nome}</td><td class="p-2 text-xs">${docExibicao}</td><td class="p-2 text-right">R$ ${parseFloat(c.valorFixoMensal||0).toLocaleString('pt-BR')}</td></tr>`;
                 }
