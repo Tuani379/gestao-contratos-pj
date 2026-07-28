@@ -287,7 +287,7 @@
                 </div>
             </section>
 
-            <!-- EQUIPE E CONTRATOS (COM CAMPOS SEPARADOS) -->
+            <!-- EQUIPE E CONTRATOS -->
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
@@ -408,7 +408,7 @@
                 </div>
             </section>
 
-            <!-- RELATÓRIOS (TOTALMENTE RESTAURADO) -->
+            <!-- RELATÓRIOS -->
             <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">📊 Gerador de Relatórios e Auditoria</h2>
@@ -466,7 +466,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COMPLETA E RESTAURADA) -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -515,34 +515,57 @@
                     </div>
                 </div>
 
-                <!-- CARD 2: DADOS CADASTRAIS -->
+                <!-- CARD 2: DADOS CADASTRAIS (RESTAURADO COMPLETO) -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-cadastrais', 'seta-cadastrais')">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm">Dados cadastrais</h3>
-                            <p class="text-xs text-slate-500">Consulte e gerencie as informações da empresa.</p>
+                            <p class="text-xs text-slate-500">Consulte e gerencie as informações cadastrais da empresa.</p>
                         </div>
                         <button type="button" id="seta-cadastrais" class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-xs">∧</button>
                     </div>
                     <div id="bloco-cadastrais" class="border-t pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
                         <div><label class="block font-semibold text-slate-400 mb-1">CNPJ</label><input type="text" id="emp-cnpj" class="w-full p-2.5 border rounded-lg bg-slate-50 font-bold text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Inscrição estadual</label><input type="text" id="emp-ie" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Inscrição municipal</label><input type="text" id="emp-im" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Razão social</label><input type="text" id="emp-razaoSocial" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                         <div><label class="block font-semibold text-slate-400 mb-1">Nome fantasia</label><input type="text" id="emp-nomeFantasia" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
-                        <div><label class="block font-semibold text-slate-400 mb-1">Telefone</label><input type="text" id="emp-telefone" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Ramo de atividade</label><input type="text" id="emp-ramo" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div class="md:col-span-2"><label class="block font-semibold text-slate-400 mb-1">Telefone</label><input type="text" id="emp-telefone" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
                     </div>
                 </div>
 
-                <!-- CARD 3: MÓDULOS CONTRATADOS & UPSELL -->
+                <!-- CARD 3: ENDEREÇO (RESTAURADO COMPLETO) -->
                 <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
-                    <h3 class="font-bold text-slate-800 text-sm">🧩 Módulos Contratados e Futuras Expansões</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
-                        <div class="p-3 border rounded-xl bg-green-50/50 border-green-200 flex justify-between items-center">
-                            <div><p class="font-bold text-green-900">Gestão de Folha & Notas Fiscais</p><p class="text-[10px] text-green-700">Fluxo principal de envio e validação</p></div>
-                            <span class="px-2 py-1 bg-green-600 text-white font-bold text-[10px] rounded">Contratado</span>
+                    <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-endereco', 'seta-endereco')">
+                        <div>
+                            <h3 class="font-bold text-slate-800 text-sm">Endereço</h3>
+                            <p class="text-xs text-slate-500">Visualize seus dados de endereço da empresa.</p>
                         </div>
-                        <div class="p-3 border rounded-xl bg-green-50/50 border-green-200 flex justify-between items-center">
+                        <button type="button" id="seta-endereco" class="w-7 h-7 rounded-lg bg-slate-100 flex items-center justify-center font-bold text-xs">∧</button>
+                    </div>
+                    <div id="bloco-endereco" class="border-t pt-4 grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
+                        <div><label class="block font-semibold text-slate-400 mb-1">CEP</label><input type="text" id="emp-cep" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div class="md:col-span-2"><label class="block font-semibold text-slate-400 mb-1">Logradouro</label><input type="text" id="emp-logradouro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Número</label><input type="text" id="emp-numero" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Complemento (opcional)</label><input type="text" id="emp-complemento" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Bairro</label><input type="text" id="emp-bairro" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Cidade</label><input type="text" id="emp-cidade" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                        <div><label class="block font-semibold text-slate-400 mb-1">Estado</label><input type="text" id="emp-estado" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800"></div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL (BOTÕES CONTRATADO) -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">🧩 Módulos Contratados e Futuras Expansões</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
+                            <div><p class="font-bold text-green-900">Gestão de Folha & Notas Fiscais</p><p class="text-[10px] text-green-700">Fluxo principal de envio e validação</p></div>
+                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
                             <div><p class="font-bold text-green-900">Portal do Prestador</p><p class="text-[10px] text-green-700">Acesso exclusivo para upload de NFs</p></div>
-                            <span class="px-2 py-1 bg-green-600 text-white font-bold text-[10px] rounded">Contratado</span>
+                            <span class="px-3 py-1.5 bg-green-600 text-white font-bold text-xs rounded-lg shadow-sm">Contratado</span>
                         </div>
                     </div>
                 </div>
@@ -863,9 +886,21 @@
             get(ref(db, pathInfo)).then((snapshot) => {
                 const dados = snapshot.val() || {};
                 document.getElementById('emp-cnpj').value = dados.cnpj || (empresaAtivaId === 'matriz' ? '42.563.021/0001-70' : '');
+                document.getElementById('emp-ie').value = dados.ie || '';
+                document.getElementById('emp-im').value = dados.im || '';
                 document.getElementById('emp-razaoSocial').value = dados.razaoSocial || empresaAtivaNome;
                 document.getElementById('emp-nomeFantasia').value = dados.nomeFantasia || '';
+                document.getElementById('emp-ramo').value = dados.ramo || '';
                 document.getElementById('emp-telefone').value = dados.telefone || '';
+
+                document.getElementById('emp-cep').value = dados.cep || '';
+                document.getElementById('emp-logradouro').value = dados.logradouro || '';
+                document.getElementById('emp-numero').value = dados.numero || '';
+                document.getElementById('emp-complemento').value = dados.complemento || '';
+                document.getElementById('emp-bairro').value = dados.bairro || '';
+                document.getElementById('emp-cidade').value = dados.cidade || '';
+                document.getElementById('emp-estado').value = dados.estado || '';
+
                 if (dados.logoBase64) {
                     document.getElementById('preview-logo-container').innerHTML = `<img src="${dados.logoBase64}" class="w-full h-full object-contain">`;
                 }
@@ -879,9 +914,19 @@
             const salvarDadosNoBanco = async (logoBase64Url = null) => {
                 const pacote = {
                     cnpj: document.getElementById('emp-cnpj').value,
+                    ie: document.getElementById('emp-ie').value,
+                    im: document.getElementById('emp-im').value,
                     razaoSocial: document.getElementById('emp-razaoSocial').value,
                     nomeFantasia: document.getElementById('emp-nomeFantasia').value,
-                    telefone: document.getElementById('emp-telefone').value
+                    ramo: document.getElementById('emp-ramo').value,
+                    telefone: document.getElementById('emp-telefone').value,
+                    cep: document.getElementById('emp-cep').value,
+                    logradouro: document.getElementById('emp-logradouro').value,
+                    numero: document.getElementById('emp-numero').value,
+                    complemento: document.getElementById('emp-complemento').value,
+                    bairro: document.getElementById('emp-bairro').value,
+                    cidade: document.getElementById('emp-cidade').value,
+                    estado: document.getElementById('emp-estado').value
                 };
                 if (logoBase64Url) pacote.logoBase64 = logoBase64Url;
 
@@ -986,7 +1031,6 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
-                // Campos separados conforme solicitado
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3">${fotoHtml}</td>
@@ -1238,7 +1282,6 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        // Motor de Relatórios e Auditoria Totalmente Restaurado
         function atualizarRelatoriosAuditoria() {
             const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
             const fComp = document.getElementById('relFiltroCompetencia').value;
@@ -1339,7 +1382,6 @@
 
         function carregarDadosPortalPrestador() {}
 
-        // Botão Exportar Excel para Contratos funcional
         document.getElementById('btn-exportar-contratos-excel').addEventListener('click', () => {
             const tabela = document.getElementById("tabela-contratos-export");
             const livro = XLSX.utils.table_to_book(tabela, { sheet: "Equipe e Contratos" });
