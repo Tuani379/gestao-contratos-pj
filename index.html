@@ -165,7 +165,7 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- DASHBOARD (FOLHA DE PAGAMENTO COMPLETA RESTAURADA) -->
+            <!-- DASHBOARD (FOLHA DE PAGAMENTO) -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white p-6 rounded-xl border shadow-sm">
@@ -287,7 +287,7 @@
                 </div>
             </section>
 
-            <!-- EQUIPE E CONTRATOS -->
+            <!-- EQUIPE E CONTRATOS (COM CAMPOS SEPARADOS) -->
             <section id="contratos" class="hidden p-6 bg-white rounded-xl border shadow-sm modo-rh-secao">
                 <div class="flex justify-between items-center mb-6">
                     <div>
@@ -309,9 +309,12 @@
                                 <th class="p-3">Perfil</th>
                                 <th class="p-3">CPF</th>
                                 <th class="p-3">E-mail Pessoal</th>
-                                <th class="p-3">CEP / Município</th>
-                                <th class="p-3">Razão Social / CNPJ</th>
-                                <th class="p-3">Banco / PIX</th>
+                                <th class="p-3">CEP</th>
+                                <th class="p-3">Município</th>
+                                <th class="p-3">Razão Social</th>
+                                <th class="p-3">CNPJ</th>
+                                <th class="p-3">Banco</th>
+                                <th class="p-3">Chave PIX</th>
                                 <th class="p-3">Cargo</th>
                                 <th class="p-3">Valor Fixo</th>
                                 <th class="p-3">Centro de Custo</th>
@@ -322,7 +325,7 @@
                             </tr>
                         </thead>
                         <tbody id="listaContratos" class="text-xs">
-                            <tr><td colspan="15" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
+                            <tr><td colspan="18" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -405,7 +408,7 @@
                 </div>
             </section>
 
-            <!-- RELATÓRIOS -->
+            <!-- RELATÓRIOS (TOTALMENTE RESTAURADO) -->
             <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">📊 Gerador de Relatórios e Auditoria</h2>
@@ -463,7 +466,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COM TODOS OS BLOCOS RESTAURADOS) -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -955,7 +958,7 @@
 
             const entradas = Object.entries(contratosLocais);
             if (entradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="15" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="18" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -983,6 +986,7 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
+                // Campos separados conforme solicitado
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3">${fotoHtml}</td>
@@ -990,9 +994,12 @@
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
                         <td class="p-3 text-slate-600">${c.cpf || '---'}</td>
                         <td class="p-3 text-slate-600">${c.email || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.cep || ''} / ${c.municipio || '---'}</td>
-                        <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || ''}</small></td>
-                        <td class="p-3 text-slate-600">${c.banco || '---'}<br><small>PIX: ${c.chavePix || '---'}</small></td>
+                        <td class="p-3 text-slate-600">${c.cep || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.municipio || '---'}</td>
+                        <td class="p-3 text-slate-600 font-semibold">${c.razaoSocial || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.cnpj || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.banco || '---'}</td>
+                        <td class="p-3 text-slate-600">${c.chavePix || '---'}</td>
                         <td class="p-3 text-slate-600">${c.cargo || '---'}</td>
                         <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
@@ -1017,11 +1024,13 @@
                 relFiltroCentroCusto.appendChild(optCC);
             });
             renderizarTabelasEstatísticas();
+            atualizarRelatoriosAuditoria();
         });
 
         onValue(ref(db, pathFolhasDB), (snapshot) => {
             folhasLocais = snapshot.val() || {};
             renderizarTabelasEstatísticas();
+            atualizarRelatoriosAuditoria();
             carregarDadosPortalPrestador();
         });
 
@@ -1229,10 +1238,108 @@
             containerComp.classList.toggle('hidden', !temComp);
         }
 
-        function carregarDadosPortalPrestador() {}
-        function atualizarRelatoriosAuditoria() {}
+        // Motor de Relatórios e Auditoria Totalmente Restaurado
+        function atualizarRelatoriosAuditoria() {
+            const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
+            const fComp = document.getElementById('relFiltroCompetencia').value;
+            const fCC = document.getElementById('relFiltroCentroCusto').value;
+            const fPrestador = document.getElementById('relFiltroPrestador').value;
+            const fTipoFolha = document.getElementById('relFiltroTipoFolha').value;
 
-        // Botão Exportar Excel para Contratos corrigido e funcional
+            corpoRelatorio.innerHTML = "";
+            let registrosEncontrados = 0;
+            let somaTotalGeral = 0;
+
+            const prestadoresObj = folhasLocais[fComp] || {};
+            Object.entries(prestadoresObj).forEach(([idPrestador, dadosPrestador]) => {
+                const contratoInfo = contratosLocais[idPrestador] || {};
+                const nomePrestador = dadosPrestador.nome || contratoInfo.nome || "Desconhecido";
+                const departamento = contratoInfo.departamento || "Prestador";
+                const centroCustoExibicao = `<span class="bg-slate-100 text-slate-700 px-2 py-1 rounded text-[11px] font-semibold border">${departamento}</span>`;
+
+                if (fPrestador !== "todos") {
+                    let nomeFiltroNorm = fPrestador.trim().toLowerCase();
+                    let nomePrestadorNorm = nomePrestador.trim().toLowerCase();
+                    let nomeContratoNorm = (contratoInfo.nome || "").trim().toLowerCase();
+                    if (!nomePrestadorNorm.includes(nomeFiltroNorm) && !nomeFiltroNorm.includes(nomePrestadorNorm) && nomeContratoNorm !== nomeFiltroNorm) {
+                        return;
+                    }
+                }
+
+                if (fCC !== "todos" && departamento !== fCC) return;
+
+                if (fTipoFolha === "todas" || fTipoFolha === "Regular") {
+                    let valorRegFixo = parseFloat(dadosPrestador.regular?.valorFixo || 0);
+                    let valorRegMotor = parseFloat(dadosPrestador.regular?.motorValor || 0);
+                    let valRegTotal = valorRegFixo + valorRegMotor;
+
+                    if (valRegTotal > 0) {
+                        somaTotalGeral += valRegTotal;
+                        registrosEncontrados++;
+
+                        let composicaoTexto = `Honorário Fixo: R$ ${valorRegFixo.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                        if (valorRegMotor > 0) {
+                            composicaoTexto += ` + ${dadosPrestador.regular?.motorEvento || 'Ajuste'}: R$ ${valorRegMotor.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                        }
+
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-medium text-slate-700">${fComp.replace('-', '/')}</td>
+                                <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
+                                <td class="p-3">${centroCustoExibicao}</td>
+                                <td class="p-3 text-slate-700 font-medium">Regular</td>
+                                <td class="p-3 text-slate-600 text-xs">${composicaoTexto}</td>
+                                <td class="p-3 text-right font-extrabold text-blue-950">R$ ${valRegTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            </tr>
+                        `;
+                    }
+                }
+
+                if (fTipoFolha === "todas" || fTipoFolha === "Complementar") {
+                    if (dadosPrestador.complementares_lista) {
+                        Object.entries(dadosPrestador.complementares_lista).forEach(([idComp, cItem]) => {
+                            let valComp = parseFloat(cItem.motorValor || 0);
+                            if (valComp > 0) {
+                                somaTotalGeral += valComp;
+                                registrosEncontrados++;
+
+                                let eventoNome = cItem.motorEvento || 'Adicional';
+                                let composicaoTexto = `${eventoNome}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-medium text-slate-700">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
+                                        <td class="p-3">${centroCustoExibicao}</td>
+                                        <td class="p-3 text-amber-700 font-medium">Complementar</td>
+                                        <td class="p-3 text-slate-600 text-xs">${composicaoTexto}</td>
+                                        <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
+                }
+            });
+
+            if (registrosEncontrados === 0) {
+                corpoRelatorio.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum registro encontrado para os filtros selecionados.</td></tr>`;
+            }
+
+            document.getElementById('relatorioTotalGeral').innerText = `R$ ${somaTotalGeral.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+        }
+
+        ['relFiltroCompetencia', 'relFiltroCentroCusto', 'relFiltroPrestador', 'relFiltroTipoFolha'].forEach(id => {
+            document.getElementById(id).addEventListener('change', atualizarRelatoriosAuditoria);
+        });
+
+        document.getElementById('btn-exportar-relatorio').addEventListener('click', () => {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("#relatorios table")), "Relatorio_Auditoria_ConnectPJ.xlsx");
+        });
+
+        function carregarDadosPortalPrestador() {}
+
+        // Botão Exportar Excel para Contratos funcional
         document.getElementById('btn-exportar-contratos-excel').addEventListener('click', () => {
             const tabela = document.getElementById("tabela-contratos-export");
             const livro = XLSX.utils.table_to_book(tabela, { sheet: "Equipe e Contratos" });
