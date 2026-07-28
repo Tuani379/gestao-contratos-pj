@@ -586,26 +586,24 @@
                     </div>
                 </div>
 
-                <!-- 1. DASHBOARD PRESTADOR -->
+                <!-- 1. DASHBOARD & ENVIAR NOTA UNIFICADOS -->
                 <div id="sec-pj-dash" class="sec-pj space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
-                            <p class="text-xs font-bold text-slate-500 uppercase">Honorário Fixo Atual</p>
-                            <h3 id="pj-dash-honorario" class="text-2xl font-extrabold text-blue-950 mt-1">R$ 0,00</h3>
+                    <!-- Cards de Resumo (4 quadrados: Fixo + Complementares) -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
+                            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Fixo Mensal</span>
+                            <h3 id="pj-card-fixo-valor" class="text-xl font-extrabold text-blue-950">R$ 0,00</h3>
+                            <div class="border-t pt-2 text-xs space-y-1">
+                                <p><b>Status NF:</b> <span id="pj-card-fixo-nf" class="text-slate-600">Aguardando</span></p>
+                                <p><b>Previsão:</b> <span id="pj-card-fixo-pg" class="text-emerald-700 font-semibold">Pendente</span></p>
+                            </div>
                         </div>
-                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
-                            <p class="text-xs font-bold text-slate-500 uppercase">Status da Nota Fiscal</p>
-                            <h3 id="pj-dash-status-nf" class="text-lg font-extrabold text-blue-900 mt-1">Aguardando Envio</h3>
-                        </div>
-                        <div class="bg-white p-6 rounded-2xl border shadow-sm">
-                            <p class="text-xs font-bold text-slate-500 uppercase">Previsão / Pagamento</p>
-                            <h3 id="pj-dash-status-pg" class="text-lg font-extrabold text-emerald-700 mt-1">Pendente</h3>
+                        <div id="pj-card-comp-container" class="contents">
+                            <!-- Cards complementares serão injetados dinamicamente aqui -->
                         </div>
                     </div>
-                </div>
 
-                <!-- 2. ENVIAR NOTA -->
-                <div id="sec-pj-enviar" class="sec-pj hidden space-y-6">
+                    <!-- Envio de Notas Fiscais -->
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
                         <div>
                             <h2 class="text-xl font-extrabold text-blue-950">Envio de Notas Fiscais</h2>
@@ -656,6 +654,11 @@
                             </button>
                         </div>
                     </div>
+                </div>
+
+                <!-- 2. ENVIAR NOTA (Atalho dedicado mantendo compatibilidade) -->
+                <div id="sec-pj-enviar" class="sec-pj hidden space-y-6">
+                    <!-- Conteúdo espelhado do dashboard para o menu Enviar Nota -->
                 </div>
 
                 <!-- 3. MEUS CONTRATOS -->
@@ -1065,12 +1068,16 @@
 
         window.mudarSecaoPrestador = (subId) => {
             document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`sec-${subId}`).classList.remove('hidden');
+            if (subId === 'pj-enviar') {
+                document.getElementById('sec-pj-dash').classList.remove('hidden');
+            } else {
+                document.getElementById(`sec-${subId}`).classList.remove('hidden');
+            }
 
             const botoes = ['btn-pj-dash', 'btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-documentos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
             botoes.forEach(bId => {
                 const b = document.getElementById(bId);
-                if (bId === `btn-${subId}`) {
+                if (bId === `btn-${subId}` || (subId === 'pj-enviar' && bId === 'btn-pj-dash')) {
                     b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
                 } else {
                     b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
@@ -1426,9 +1433,11 @@
             const tbodyRegPJ = document.getElementById('tabelaPrestadorRegular');
             const tbodyCompPJ = document.getElementById('tabelaPrestadorComplementar');
             const containerCompPJ = document.getElementById('containerPrestadorComp');
+            const containerCardComp = document.getElementById('pj-card-comp-container');
 
             if(tbodyRegPJ) tbodyRegPJ.innerHTML = "";
             if(tbodyCompPJ) tbodyCompPJ.innerHTML = "";
+            if(containerCardComp) containerCardComp.innerHTML = "";
 
             let idContratoLogado = null;
             let dadosContratoLogado = null;
@@ -1525,13 +1534,13 @@
                 const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                // Atualizar Dashboard Prestador
-                const dashHonorario = document.getElementById('pj-dash-honorario');
-                const dashStatusNf = document.getElementById('pj-dash-status-nf');
-                const dashStatusPg = document.getElementById('pj-dash-status-pg');
-                if (dashHonorario) dashHonorario.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-                if (dashStatusNf) dashStatusNf.innerText = nfStatusReg;
-                if (dashStatusPg) dashStatusPg.innerText = dadosFolha.regular?.statusPagamento || "Pendente";
+                // Atualizar Cards Fixo do Dashboard
+                const cardFixoValor = document.getElementById('pj-card-fixo-valor');
+                const cardFixoNf = document.getElementById('pj-card-fixo-nf');
+                const cardFixoPg = document.getElementById('pj-card-fixo-pg');
+                if (cardFixoValor) cardFixoValor.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                if (cardFixoNf) cardFixoNf.innerText = nfStatusReg;
+                if (cardFixoPg) cardFixoPg.innerText = dadosFolha.regular?.statusPagamento || "Pendente";
 
                 let badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">NF enviada</span>`;
                 if (nfStatusReg === "Recusada ❌") {
@@ -1561,6 +1570,21 @@
                         temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
                         let nfStatusComp = cItem.nfStatus || "Aguardando";
+                        let eventoNome = cItem.motorEvento || 'Adicional';
+
+                        // Injetar Card Complementar separado (Separando quais notas se refere)
+                        if (containerCardComp) {
+                            containerCardComp.innerHTML += `
+                                <div class="bg-white p-5 rounded-2xl border border-amber-200 bg-amber-50/10 shadow-sm space-y-2">
+                                    <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">${eventoNome}</span>
+                                    <h3 class="text-xl font-extrabold text-amber-950">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</h3>
+                                    <div class="border-t pt-2 text-xs space-y-1">
+                                        <p><b>Status NF:</b> <span class="text-slate-600">${nfStatusComp}</span></p>
+                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${cItem.statusPagamento || "Pendente"}</span></p>
+                                    </div>
+                                </div>
+                            `;
+                        }
 
                         let badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Enviada ✔</span>`;
                         if (nfStatusComp === "Recusada ❌") {
@@ -1577,7 +1601,7 @@
                         if (tbodyCompPJ) {
                             tbodyCompPJ.innerHTML += `
                                 <tr class="border-b bg-amber-50/20">
-                                    <td class="p-2.5"><b>${cItem.motorEvento || 'Adicional'}</b></td>
+                                    <td class="p-2.5"><b>${eventoNome}</b></td>
                                     <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                     <td class="p-2.5">${badgeStatusComp}</td>
                                     <td class="p-2.5">${acaoCompPJ}</td>
