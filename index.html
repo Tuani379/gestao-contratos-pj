@@ -441,14 +441,33 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (COM BLOCOS RECOLHÍVEIS) -->
+            <!-- SEÇÃO INFORMAÇÕES DA EMPRESA (ETAPA 2 CONSOLIDADA) -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">Informações da empresa</h2>
-                        <p class="text-xs text-slate-500 mt-1">Consulte e gerencie as informações cadastraias da empresa e personalize a aparência da plataforma.</p>
+                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🏢 Etapa 2: Informações da Empresa & Assinatura</h2>
+                        <p class="text-xs text-slate-500 mt-1">Gerencie os dados cadastrais, plano ativo, limites e módulos contratados da organização.</p>
                     </div>
                     <button onclick="mostrarSecao('dashboard')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
+                </div>
+
+                <!-- SUB-SEÇÃO: PLANO E LIMITES (ETAPA 2) -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
+                        <p class="text-[11px] font-bold text-blue-800 uppercase">Plano Contratado</p>
+                        <h3 id="info-plano-ativo" class="text-lg font-extrabold text-blue-950 mt-1">ConnectPJ Enterprise</h3>
+                        <span class="inline-block mt-2 px-2 py-0.5 bg-green-100 text-green-800 text-[10px] font-bold rounded">Ativo (30 dias piloto)</span>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase">Quantidade de Contratos</p>
+                        <h3 id="info-qtd-contratos" class="text-2xl font-extrabold text-slate-800 mt-1">0 / 50</h3>
+                        <p class="text-[10px] text-slate-400 mt-1">Prestadores vinculados</p>
+                    </div>
+                    <div class="bg-slate-50 p-4 rounded-xl border">
+                        <p class="text-[11px] font-bold text-slate-500 uppercase">Quantidade de Usuários</p>
+                        <h3 id="info-qtd-usuarios" class="text-2xl font-extrabold text-slate-800 mt-1">1 / 10</h3>
+                        <p class="text-[10px] text-slate-400 mt-1">Acessos corporativos</p>
+                    </div>
                 </div>
 
                 <!-- CARD 1: LOGO DA EMPRESA -->
@@ -552,6 +571,42 @@
                         <div>
                             <label class="block font-semibold text-slate-400 mb-1">Estado</label>
                             <input type="text" id="emp-estado" class="w-full p-2.5 border rounded-lg bg-slate-50 font-medium text-slate-800">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL -->
+                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                    <h3 class="font-bold text-slate-800 text-sm">🧩 Módulos Contratados e Futuras Expansões</h3>
+                    <p class="text-xs text-slate-500">Recursos ativos em seu plano atual e módulos adicionais disponíveis.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                        <div class="p-3 border rounded-xl bg-green-50/50 border-green-200 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-green-900">Gestão de Folha & Notas Fiscais</p>
+                                <p class="text-[10px] text-green-700">Fluxo principal de envio e validação</p>
+                            </div>
+                            <span class="px-2 py-1 bg-green-600 text-white font-bold text-[10px] rounded">Contratado</span>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-green-50/50 border-green-200 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-green-900">Portal do Prestador</p>
+                                <p class="text-[10px] text-green-700">Acesso exclusivo para upload de NFs</p>
+                            </div>
+                            <span class="px-2 py-1 bg-green-600 text-white font-bold text-[10px] rounded">Contratado</span>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-slate-800">Central de Documentos Avançada</p>
+                                <p class="text-[10px] text-slate-500">Controle de validade de certidões</p>
+                            </div>
+                            <button onclick="alert('Solicite a ativação do módulo com o suporte comercial!')" class="px-2.5 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold text-[10px] rounded transition">Contratar</button>
+                        </div>
+                        <div class="p-3 border rounded-xl bg-slate-50 flex justify-between items-center">
+                            <div>
+                                <p class="font-bold text-slate-800">Assinatura Eletrônica de Contratos</p>
+                                <p class="text-[10px] text-slate-500">Validade jurídica integrada</p>
+                            </div>
+                            <button onclick="alert('Solicite a ativação do módulo com o suporte comercial!')" class="px-2.5 py-1 bg-blue-100 text-blue-800 hover:bg-blue-200 font-bold text-[10px] rounded transition">Contratar</button>
                         </div>
                     </div>
                 </div>
@@ -837,6 +892,11 @@
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
             
+            // Atualizar contadores dinâmicos da Etapa 2
+            let qtdContratosAtivos = 0;
+            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo") qtdContratosAtivos++; });
+            document.getElementById('info-qtd-contratos').innerText = `${qtdContratosAtivos} / 50`;
+
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             get(ref(db, pathInfo)).then((snapshot) => {
                 const dados = snapshot.val() || {};
