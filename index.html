@@ -1650,7 +1650,7 @@
 
             if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ) {
                 const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
                 tbodyRegPJ.innerHTML = `
                     <tr class="border-b">
@@ -1660,7 +1660,7 @@
                         <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Anexar NF</span></td>
                     </tr>
                 `;
-            } else if (!encontrouAlgum && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+            } else if (!encontrouAlgum && tbodyRegPJ) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
         }
