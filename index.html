@@ -196,12 +196,14 @@
             </div>
         </div>
 
-        <nav id="menu-rh" class="bg-white border-b shadow-sm">
-            <div class="max-w-7xl mx-auto flex gap-8 px-6">
+        <nav id="menu-rh" class="bg-white border-b shadow-sm overflow-x-auto whitespace-nowrap">
+            <div class="max-w-7xl mx-auto flex gap-6 px-6">
                 <button id="btn-dashboard" onclick="mostrarSecao('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-950 transition">Folha & Tesouraria</button>
                 <button id="btn-contratos" onclick="mostrarSecao('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Equipe e Contratos</button>
                 <button id="btn-documentos" onclick="mostrarSecao('documentos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">📁 Central de Documentos</button>
                 <button id="btn-relatorios" onclick="mostrarSecao('relatorios')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Relatórios</button>
+                <!-- ETAPA 12: ABA AUDITORIA -->
+                <button id="btn-auditoria" onclick="mostrarSecao('auditoria')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition hidden">🛡️ Auditoria</button>
             </div>
         </nav>
 
@@ -673,6 +675,36 @@
                 </div>
             </section>
 
+            <!-- ETAPA 12: SEÇÃO DE AUDITORIA E LOGS -->
+            <section id="auditoria" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🛡️ Central de Auditoria e Logs Imutáveis</h2>
+                        <p class="text-xs text-slate-500 mt-1">Registro contínuo de todas as alterações, edições de contrato, lançamentos financeiros e acessos.</p>
+                    </div>
+                    <button onclick="exportarAuditoriaExcel()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded text-xs transition shadow-sm flex items-center justify-center gap-1.5">📥 Exportar Logs Seguros</button>
+                </div>
+
+                <div class="overflow-x-auto border rounded-xl">
+                    <table id="tabela-auditoria-export" class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 text-[11px] font-extrabold tracking-wider border-b">
+                                <th class="p-3 w-40">DATA / HORA</th>
+                                <th class="p-3">USUÁRIO / RESPONSÁVEL</th>
+                                <th class="p-3">MÓDULO</th>
+                                <th class="p-3">AÇÃO</th>
+                                <th class="p-3">REGISTRO AFETADO</th>
+                                <th class="p-3 text-xs text-red-600">VALOR ANTERIOR</th>
+                                <th class="p-3 text-xs text-green-700">VALOR NOVO</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabelaAuditoriaCorpo" class="text-xs">
+                            <tr><td colspan="7" class="p-4 text-center text-slate-400">Carregando logs de auditoria...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
             <!-- SEÇÃO INFORMAÇÕES DA EMPRESA -->
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
@@ -926,6 +958,24 @@
         const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
         const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
         const pathNotificacoesDB = empresaAtivaId === 'matriz' ? 'notificacoes_sistema' : `empresas_clientes_dados/${empresaAtivaId}/notificacoes_sistema`;
+        const pathAuditoriaDB = empresaAtivaId === 'matriz' ? 'auditoria_logs' : `empresas_clientes_dados/${empresaAtivaId}/auditoria_logs`; // ETAPA 12
+
+        // ETAPA 12 - Função Central de Auditoria Imutável
+        async function registrarAuditoria(modulo, acao, registro, valorAnterior, valorNovo) {
+            try {
+                await push(ref(db, pathAuditoriaDB), {
+                    usuario: usuarioEmailLogado || "Sistema",
+                    dataHora: new Date().toISOString(),
+                    modulo,
+                    acao,
+                    registro,
+                    valorAnterior: valorAnterior ? String(valorAnterior) : "-",
+                    valorNovo: valorNovo ? String(valorNovo) : "-"
+                });
+            } catch (err) {
+                console.error("Erro ao gravar log de auditoria:", err);
+            }
+        }
 
         // Função Auxiliar para Disparo de Notificações Automáticas (Etapa 11)
         async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null) {
@@ -969,6 +1019,42 @@
             if (Object.keys(updates).length > 0) {
                 await update(ref(db, pathNotificacoesDB), updates);
             }
+        };
+
+        // ETAPA 12 - Listener da tabela de Auditoria
+        onValue(ref(db, pathAuditoriaDB), (snapshot) => {
+            const logs = snapshot.val() || {};
+            const corpoAuditoria = document.getElementById('tabelaAuditoriaCorpo');
+            if(!corpoAuditoria) return;
+
+            corpoAuditoria.innerHTML = "";
+            const entradas = Object.entries(logs).reverse(); // Mais recentes primeiro
+
+            if (entradas.length === 0) {
+                corpoAuditoria.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum log registrado até o momento.</td></tr>`;
+                return;
+            }
+
+            entradas.forEach(([key, log]) => {
+                corpoAuditoria.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-semibold text-slate-600">${new Date(log.dataHora).toLocaleString('pt-BR')}</td>
+                        <td class="p-3 font-bold text-slate-800">${log.usuario}</td>
+                        <td class="p-3"><span class="px-2.5 py-1 bg-slate-100 border text-slate-700 rounded-lg text-[10px] font-extrabold uppercase">${log.modulo}</span></td>
+                        <td class="p-3 font-bold text-blue-900">${log.acao}</td>
+                        <td class="p-3 text-slate-700">${log.registro}</td>
+                        <td class="p-3 text-red-600 font-semibold max-w-[150px] truncate" title="${log.valorAnterior}">${log.valorAnterior}</td>
+                        <td class="p-3 text-green-700 font-semibold max-w-[150px] truncate" title="${log.valorNovo}">${log.valorNovo}</td>
+                    </tr>
+                `;
+            });
+        });
+
+        window.exportarAuditoriaExcel = () => {
+            const tabela = document.getElementById("tabela-auditoria-export");
+            const livro = XLSX.utils.table_to_book(tabela, { sheet: "Auditoria" });
+            XLSX.writeFile(livro, `Auditoria_ConnectPJ_${empresaAtivaNome}.xlsx`);
+            registrarAuditoria("Auditoria", "Exportação de Logs", "Excel", "-", "Arquivo Baixado");
         };
 
         onValue(ref(db, pathNotificacoesDB), (snapshot) => {
@@ -1069,11 +1155,12 @@
             const btnContratos = document.getElementById('btn-contratos');
             const btnDocumentos = document.getElementById('btn-documentos');
             const btnRelatorios = document.getElementById('btn-relatorios');
+            const btnAuditoria = document.getElementById('btn-auditoria'); // Etapa 12
             const menuPj = document.getElementById('menu-btn-pj');
             const menuRh = document.getElementById('menu-btn-rh');
 
             if (perfil === 'Administrador') {
-                [btnDashboard, btnContratos, btnDocumentos, btnRelatorios, menuRh].forEach(el => el.style.display = 'block');
+                [btnDashboard, btnContratos, btnDocumentos, btnRelatorios, btnAuditoria, menuRh].forEach(el => el.style.display = 'block');
                 if (adminEhPrestador) {
                     menuPj.style.display = 'block';
                 } else {
@@ -1084,6 +1171,7 @@
                 btnDocumentos.style.display = 'block';
                 btnRelatorios.style.display = 'block';
                 btnContratos.style.display = 'none';
+                btnAuditoria.style.display = 'none';
                 menuPj.style.display = 'none';
                 mostrarSecao('dashboard');
             } else if (perfil === 'RH') {
@@ -1091,6 +1179,7 @@
                 btnContratos.style.display = 'block';
                 btnDocumentos.style.display = 'block';
                 btnRelatorios.style.display = 'none';
+                btnAuditoria.style.display = 'none';
                 menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Gestor') {
@@ -1098,6 +1187,7 @@
                 btnContratos.style.display = 'block';
                 btnDocumentos.style.display = 'block';
                 btnRelatorios.style.display = 'block';
+                btnAuditoria.style.display = 'none';
                 menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Jurídico') {
@@ -1105,6 +1195,7 @@
                 btnRelatorios.style.display = 'none';
                 btnContratos.style.display = 'block';
                 btnDocumentos.style.display = 'block';
+                btnAuditoria.style.display = 'block'; // Etapa 12 - Jurídico vê auditoria
                 menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Prestador') {
@@ -1117,7 +1208,10 @@
             e.preventDefault();
             try {
                 await signInWithEmailAndPassword(auth, document.getElementById('login-email-saas').value, document.getElementById('login-senha-saas').value);
-            } catch (error) { alert("Erro ao entrar: " + error.message); }
+                registrarAuditoria("Acesso", "Login", "Sistema", "-", "Sucesso"); // Auditoria
+            } catch (error) { 
+                alert("Erro ao entrar: " + error.message);
+            }
         });
 
         window.toggleMostrarSenha = () => {
@@ -1197,6 +1291,7 @@
             if (!s || s.length < 6) { alert("A senha deve ter no mínimo 6 caracteres!"); return; }
             try {
                 await updatePassword(auth.currentUser, s);
+                await registrarAuditoria("Perfil", "Alterar Senha", usuarioEmailLogado, "-", "Senha Atualizada"); // Auditoria
                 alert("Senha alterada com sucesso!");
                 fecharModalTrocarSenha();
             } catch (error) { alert("Erro: " + error.message); }
@@ -1230,6 +1325,9 @@
             
             // Disparar Notificação Nova Empresa / Novo Usuário (Etapa 11)
             await registrarNotificacao("Nova Empresa / Usuário", `A organização ${r} foi cadastrada com sucesso.`, "sucesso", em);
+            
+            // Etapa 12 - Auditoria
+            await registrarAuditoria("SaaS Master", "Nova Empresa", r, "-", `CNPJ: ${c}`);
 
             alert("Empresa salva!"); fecharModalNovaEmpresaMaster();
         };
@@ -1257,7 +1355,7 @@
         };
 
         window.abrirConfiguracoesEmpresa = () => {
-            ['dashboard', 'contratos', 'documentos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['dashboard', 'contratos', 'documentos', 'relatorios', 'auditoria', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
 
@@ -1360,6 +1458,8 @@
                 if (logoBase64Url) pacote.logoBase64 = logoBase64Url;
 
                 await update(ref(db, pathInfo), pacote);
+                await registrarAuditoria("Configurações", "Edição Dados Cadastrais", pacote.razaoSocial, "-", "Dados Atualizados"); // Etapa 12
+                
                 alert("Informações da empresa salvas com sucesso!");
                 localStorage.setItem('connectpj_empresa_nome', pacote.razaoSocial);
                 document.getElementById('dropdown-empresa-ativa').innerText = pacote.razaoSocial;
@@ -1377,11 +1477,11 @@
         };
 
         window.mostrarSecao = (id) => {
-            ['dashboard', 'contratos', 'documentos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
+            ['dashboard', 'contratos', 'documentos', 'relatorios', 'auditoria', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById('menu-rh').classList.remove('hidden');
             document.getElementById(id).classList.remove('hidden');
             
-            const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'documentos': 'btn-documentos', 'relatorios': 'btn-relatorios' };
+            const mapBotoes = { 'dashboard': 'btn-dashboard', 'contratos': 'btn-contratos', 'documentos': 'btn-documentos', 'relatorios': 'btn-relatorios', 'auditoria': 'btn-auditoria' };
             Object.entries(mapBotoes).forEach(([sec, btnId]) => {
                 const btn = document.getElementById(btnId);
                 if (btn) {
@@ -1520,7 +1620,7 @@
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
                         <td class="p-3 text-center">${botaoAnexoContrato}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                        <td class="p-3 text-center space-x-1">
+                        <td class="p-3 text-center space-x-1 flex justify-center">
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
                             <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
                             <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
@@ -1625,11 +1725,19 @@
                             pacote.arquivoContratoBase64 = contratosLocais[editId].arquivoContratoBase64;
                         }
                         await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+                        
+                        // Etapa 12 - Auditoria
+                        await registrarAuditoria("Contratos", "Edição", pacote.nome, "Dados Antigos Substituídos", "Dados Atualizados");
+
                         alert("Contrato atualizado com sucesso!");
                     } else {
                         await push(ref(db, pathContratosDB), pacote);
                         // Disparar notificação de Novo Usuário (Etapa 11)
                         await registrarNotificacao("Novo Usuário / Prestador", `O prestador ${pacote.nome} foi cadastrado com sucesso no sistema.`, "sucesso", pacote.email || pacote.emailCorp);
+                        
+                        // Etapa 12 - Auditoria
+                        await registrarAuditoria("Contratos", "Criação", pacote.nome, "-", "Novo Cadastro Realizado");
+
                         alert("Contrato cadastrado com sucesso!");
                     }
                     document.getElementById('modalCadastro').classList.add('hidden');
@@ -1706,11 +1814,15 @@
             if (!c) return;
             const novoStatus = c.status === 'Ativo' ? 'Inativo / Bloqueado' : 'Ativo';
             await update(ref(db, `${pathContratosDB}/${id}`), { status: novoStatus });
+            await registrarAuditoria("Contratos", "Bloqueio/Desbloqueio", c.nome, c.status, novoStatus); // Etapa 12
         };
 
         window.exclusaoLogicaUsuario = async (id) => {
+            const c = contratosLocais[id];
+            if (!c) return;
             if (confirm("Tem certeza que deseja excluir logicamente?")) {
                 await update(ref(db, `${pathContratosDB}/${id}`), { excluidoLogico: true, status: 'Inativo' });
+                await registrarAuditoria("Contratos", "Exclusão Lógica", c.nome, "Ativo", "Excluído"); // Etapa 12
             }
         };
 
@@ -1865,7 +1977,7 @@
                             <input type="date" class="input-vencimento-reg border rounded p-1 text-xs bg-white font-medium" data-id="${key}" value="${dataVencimentoReg}">
                         </td>
                         <td class="p-3 text-center">
-                            <select class="select-nf-status-reg border rounded p-1 text-xs font-bold bg-white" data-id="${key}">
+                            <select class="select-nf-status-reg border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-old="${f.regular?.nfStatus || 'Aguardando'}">
                                 <option value="Aguardando" ${f.regular?.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
                                 <option value="Recebida ✔" ${f.regular?.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
                                 <option value="Recusada ❌" ${f.regular?.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
@@ -1911,7 +2023,7 @@
                                     <input type="date" class="input-vencimento-comp border rounded p-1 text-xs bg-white font-medium" data-id="${key}" data-comp-id="${idComp}" value="${dataVencComp}">
                                 </td>
                                 <td class="p-3 text-center">
-                                    <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
+                                    <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}" data-old="${cItem.nfStatus || 'Aguardando'}">
                                         <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
                                         <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
                                         <option value="Recusada ❌" ${cItem.nfStatus === 'Recusada ❌' ? 'selected' : ''}>Recusada ❌</option>
@@ -1981,8 +2093,12 @@
                     await update(ref(db, `${basePath}/complementares_lista/${itemLiquidandoAtual.compId}`), pacoteUpdate);
                 }
 
-                // Disparar Notificação de Pagamento Realizado (Etapa 11)
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
+                
+                // Etapa 12 - Auditoria
+                await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (Data: ${dataPagamento})`);
+
+                // Disparar Notificação de Pagamento Realizado (Etapa 11)
                 await registrarNotificacao("Pagamento Realizado", `O pagamento de ${cInfo.nome || 'Prestador'} referente a competência ${competenciaSelecionada.replace('-', '/')} foi liquidado com sucesso.`, "sucesso", cInfo.email || cInfo.emailCorp);
 
                 alert("Pagamento liquidado com sucesso!");
@@ -2001,6 +2117,8 @@
         window.estornarPagamentoRegular = async (id) => {
             if (confirm("Deseja estornar este pagamento e retornar o status para 'Em Análise'?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Estorno", cInfo.nome || id, "Pago", "Em Análise"); // Etapa 12
                 alert("Pagamento estornado com sucesso!");
             }
         };
@@ -2008,6 +2126,8 @@
         window.estornarPagamentoComplementar = async (id, compId) => {
             if (confirm("Deseja estornar este pagamento complementar?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Estorno Complementar", cInfo.nome || id, "Pago", "Em Análise"); // Etapa 12
                 alert("Pagamento estornado com sucesso!");
             }
         };
@@ -2016,8 +2136,10 @@
             if (confirm("Deseja reprocessar esta nota para permitir novo reenvio pelo prestador?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
                 
-                // Disparar Notificação de Nota Rejeitada (Etapa 11)
                 const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Reprocessar NF", cInfo.nome || id, "Recusada", "Aguardando Reenvio"); // Etapa 12
+
+                // Disparar Notificação de Nota Rejeitada (Etapa 11)
                 await registrarNotificacao("Nota Rejeitada / Reprocessamento", `Sua Nota Fiscal na competência ${competenciaSelecionada.replace('-', '/')} foi recusada. Por favor, envie uma nova versão.`, "alerta", cInfo.email || cInfo.emailCorp);
 
                 alert("Nota reprocessada! O prestador já pode anexar uma nova versão.");
@@ -2027,6 +2149,8 @@
         window.reprocessarNotaComplementar = async (id, compId) => {
             if (confirm("Deseja reprocessar esta nota complementar?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Reprocessar NF Complementar", cInfo.nome || id, "Recusada", "Aguardando Reenvio"); // Etapa 12
                 alert("Nota reprocessada com sucesso!");
             }
         };
@@ -2080,14 +2204,18 @@
 
         window.excluirItemFolhaRegular = async (idContrato) => {
             if (confirm("Deseja realmente remover este prestador da folha mensal desta competência?")) {
+                const f = folhasLocais[competenciaSelecionada]?.[idContrato] || {};
                 await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}`));
+                await registrarAuditoria("Folha de Pagamento", "Exclusão", f.nome || idContrato, "Folha Regular", "Removido da Competência"); // Etapa 12
                 alert("Registro removido da folha com sucesso!");
             }
         };
 
         window.excluirItemFolhaComplementar = async (idContrato, idComp) => {
             if (confirm("Deseja realmente excluir este lançamento complementar?")) {
+                const f = folhasLocais[competenciaSelecionada]?.[idContrato] || {};
                 await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista/${idComp}`));
+                await registrarAuditoria("Folha de Pagamento", "Exclusão Complementar", f.nome || idContrato, "Evento Complementar", "Removido"); // Etapa 12
                 alert("Lançamento complementar removido com sucesso!");
             }
         };
@@ -2096,10 +2224,13 @@
             if (e.target.classList.contains('select-nf-status-reg')) {
                 const id = e.target.dataset.id;
                 const novoStatus = e.target.value;
+                const statusAntigo = e.target.dataset.old || "Aguardando";
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: novoStatus });
                 
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Mudança Status NF", cInfo.nome || id, statusAntigo, novoStatus); // Etapa 12
+
                 if (novoStatus === "Recebida ✔") {
-                    const cInfo = contratosLocais[id] || {};
                     await registrarNotificacao("Nota Aprovada", `Sua Nota Fiscal na competência ${competenciaSelecionada.replace('-', '/')} foi aprovada pelo financeiro.`, "sucesso", cInfo.email || cInfo.emailCorp);
                 }
             }
@@ -2107,12 +2238,19 @@
                 const id = e.target.dataset.id;
                 const compId = e.target.dataset.compId;
                 const novoStatus = e.target.value;
+                const statusAntigo = e.target.dataset.old || "Aguardando";
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { nfStatus: novoStatus });
+                
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Mudança Status NF Comp.", cInfo.nome || id, statusAntigo, novoStatus); // Etapa 12
             }
             if (e.target.classList.contains('input-vencimento-reg')) {
                 const id = e.target.dataset.id;
                 const novaData = e.target.value;
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { dataVencimento: novaData });
+                
+                const cInfo = contratosLocais[id] || {};
+                await registrarAuditoria("Tesouraria", "Alteração Vencimento", cInfo.nome || id, "-", novaData); // Etapa 12
             }
             if (e.target.classList.contains('input-vencimento-comp')) {
                 const id = e.target.dataset.id;
@@ -2313,6 +2451,8 @@
                             
                             // Disparar Notificação Nova Nota (Etapa 11)
                             await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal referente à competência ${compDestino.replace('-', '/')}.`, "info");
+                            // Etapa 12 - Auditoria
+                            await registrarAuditoria("Portal PJ", "Envio de Nota Fiscal", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
                             atualizou = true;
                             resolve();
@@ -2339,6 +2479,8 @@
 
                             // Disparar Notificação Nova Nota Complementar (Etapa 11)
                             await registrarNotificacao("Nova Nota Fiscal (Complementar)", `O prestador ${c.nome || 'Prestador'} enviou uma Nota Fiscal complementar para a competência ${compDestino.replace('-', '/')}.`, "info");
+                            // Etapa 12 - Auditoria
+                            await registrarAuditoria("Portal PJ", "Envio NF Complementar", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
                             atualizou = true;
                             resolve();
@@ -2637,6 +2779,8 @@
             });
 
             await update(ref(db, `${pathFolhasDB}/${compDestino}`), folhaExistente);
+            await registrarAuditoria("Folha de Pagamento", "Geração/Atualização de Folha", compDestino, "-", `${checkboxes.length} contratos processados`); // Etapa 12
+
             alert("Folha gerada/atualizada com sucesso! Novos contratos foram adicionados e os existentes mantidos.");
             document.getElementById('modalGerarFolha').classList.add('hidden');
         });
@@ -2648,6 +2792,7 @@
             const valor = parseFloat(document.getElementById('motorValor').value || 0);
 
             if (!idContrato || valor <= 0) { alert("Selecione o membro e informe um valor válido!"); return; }
+            const cInfo = contratosLocais[idContrato] || {};
 
             try {
                 if (tipo === "regular") {
@@ -2655,6 +2800,10 @@
                 } else {
                     await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise" });
                 }
+                
+                // Etapa 12 - Auditoria
+                await registrarAuditoria("Motor Financeiro", "Lançamento de Ajuste", cInfo.nome || idContrato, "-", `${tipo.toUpperCase()} - ${evento}: R$ ${valor}`);
+
                 alert("Lançamento aplicado com sucesso!");
                 document.getElementById('motorValor').value = "";
             } catch (error) { alert("Erro ao aplicar: " + error.message); }
