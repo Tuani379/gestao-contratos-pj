@@ -259,7 +259,7 @@
                                     <th class="p-3">Valor a Pagar</th>
                                     <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
-                                    <th class="p-3 text-center">Status Pagamento</th>
+                                    <th class="p-3 text-center">Status Pagamento / Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaFolha"><tr><td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência...</td></tr></tbody>
@@ -279,7 +279,7 @@
                                     <th class="p-3">Valor Adicional</th>
                                     <th class="p-3 text-center">NF</th>
                                     <th class="p-3 text-center">Visualizar</th>
-                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3 text-center">Status / Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaFolhaComplementar"></tbody>
@@ -732,7 +732,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -1355,11 +1355,11 @@
 
                 let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
                 if (statusRegHTML === "Pago") {
-                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                 } else if (f.regular?.nfStatus === "Recusada ❌") {
                     statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
                 } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar" || f.regular?.nfArquivoBase64) {
-                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
                 let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
@@ -1377,7 +1377,10 @@
                             </select>
                         </td>
                         <td class="p-3 text-center">${botaoVisualizarReg}</td>
-                        <td class="p-3 text-center">${statusRegHTML}</td>
+                        <td class="p-3 text-center flex items-center justify-center gap-2">
+                            ${statusRegHTML}
+                            <button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir da Folha">🗑️</button>
+                        </td>
                     </tr>
                 `;
 
@@ -1389,7 +1392,7 @@
 
                         let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
                         if (statusCompHTML === "Pago") {
-                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                         } else if (cItem.nfStatus === "Recusada ❌") {
                             statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
                         } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar" || cItem.nfArquivoBase64) {
@@ -1411,7 +1414,10 @@
                                     </select>
                                 </td>
                                 <td class="p-3 text-center">${botaoVisualizarComp}</td>
-                                <td class="p-3 text-center">${statusCompHTML}</td>
+                                <td class="p-3 text-center flex items-center justify-center gap-2">
+                                    ${statusCompHTML}
+                                    <button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir Lançamento">🗑️</button>
+                                </td>
                             </tr>
                         `;
                     });
@@ -1422,6 +1428,20 @@
             document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
         }
+
+        window.excluirItemFolhaRegular = async (idContrato) => {
+            if (confirm("Deseja realmente remover este prestador da folha mensal desta competência?")) {
+                await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}`));
+                alert("Registro removido da folha com sucesso!");
+            }
+        };
+
+        window.excluirItemFolhaComplementar = async (idContrato, idComp) => {
+            if (confirm("Deseja realmente excluir este lançamento complementar?")) {
+                await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista/${idComp}`));
+                alert("Lançamento complementar removido com sucesso!");
+            }
+        };
 
         document.addEventListener('change', async (e) => {
             if (e.target.classList.contains('select-nf-status-reg')) {
@@ -1461,7 +1481,6 @@
             let encontrouAlgum = false;
             let temComplementarGeral = false;
 
-            // Preenchimento de Contratos (Meus Contratos)
             const divContratos = document.getElementById('pj-conteudo-contratos');
             if (divContratos) {
                 if (dadosContratoLogado) {
@@ -1483,7 +1502,6 @@
                 }
             }
 
-            // Documentos
             const divDocs = document.getElementById('pj-conteudo-documentos');
             if (divDocs) {
                 if (dadosContratoLogado && dadosContratoLogado.arquivoContratoBase64) {
@@ -1493,7 +1511,6 @@
                 }
             }
 
-            // Perfil
             const divPerfil = document.getElementById('pj-conteudo-perfil');
             if (divPerfil) {
                 if (dadosContratoLogado) {
@@ -1509,7 +1526,6 @@
                 }
             }
 
-            // Pagamentos
             const tabelaPgtos = document.getElementById('pj-tabela-pagamentos');
             if (tabelaPgtos) {
                 tabelaPgtos.innerHTML = "";
@@ -1852,14 +1868,12 @@
             const checkboxes = document.querySelectorAll('.chk-folha:checked');
             const compDestino = filtroCompetencia.value;
             
-            // Buscar dados existentes na competência para manter o que já foi gerado
             const snapshotAtual = await get(ref(db, `${pathFolhasDB}/${compDestino}`));
             let folhaExistente = snapshotAtual.val() || {};
             
             checkboxes.forEach(chk => {
                 const id = chk.value;
                 const c = contratosLocais[id];
-                // Se já existir dados para este prestador na folha, preserva (não sobrescreve o regular salvo/enviado)
                 if (!folhaExistente[id]) {
                     folhaExistente[id] = {
                         nome: c.nome, 
