@@ -186,31 +186,68 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- DASHBOARD (FOLHA DE PAGAMENTO E TESOURARIA) -->
+            <!-- DASHBOARD (FOLHA, TESOURARIA E DASHBOARD EXECUTIVO) -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <p class="text-sm font-bold text-slate-500 uppercase">Membros Ativos</p>
-                        <h3 id="cardContratosAtivos" class="text-3xl font-extrabold text-blue-900 mt-2">0</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border shadow-sm">
-                        <p class="text-sm font-bold text-slate-500 uppercase">Total Folha Regular</p>
-                        <h3 id="cardTotalFolha" class="text-3xl font-extrabold text-blue-900 mt-2">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border border-amber-200 bg-amber-50/20 shadow-sm">
-                        <p class="text-sm font-bold text-amber-700 uppercase">Total Complementar</p>
-                        <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
-                    </div>
-                    <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm flex flex-col justify-between">
+                
+                <!-- ETAPA 9: DASHBOARD EXECUTIVO (KPIs & INDICADORES) -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
+                    <div class="flex justify-between items-center border-b pb-3">
                         <div>
-                            <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
-                            <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
+                            <h2 class="text-lg font-extrabold text-blue-950 flex items-center gap-2">📊 Dashboard Executivo & Indicadores</h2>
+                            <p class="text-xs text-slate-500">Visão geral consolidada da operação, contratos, notas e fluxo de caixa.</p>
                         </div>
-                        <div class="flex gap-2 mt-3">
-                            <button id="btn-gerar-folha" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold py-2 px-2 rounded-lg transition shadow-sm">🔄 Gerar Folha</button>
-                            <button onclick="exportarLoteFinanceiroExcel()" class="w-1/2 bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold py-2 px-2 rounded-lg transition shadow-sm">📥 Exportar Lote</button>
+                        <div>
+                            <select id="filtroCompetencia" class="text-xs font-bold text-blue-900 bg-slate-50 border p-2 rounded-xl cursor-pointer"></select>
                         </div>
                     </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+                        <!-- 1. Prestadores -->
+                        <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Prestadores</p>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Ativos:</span><span id="kpi-prest-ativos" class="font-bold text-green-700">0</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Inativos:</span><span id="kpi-prest-inativos" class="font-bold text-red-600">0</span></div>
+                        </div>
+
+                        <!-- 2. Contratos -->
+                        <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Contratos</p>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Ativos:</span><span id="kpi-cont-ativos" class="font-bold text-blue-900">0</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Vencendo (30d):</span><span id="kpi-cont-vencendo" class="font-bold text-amber-600">0</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Encerrados:</span><span id="kpi-cont-encerrados" class="font-bold text-slate-600">0</span></div>
+                        </div>
+
+                        <!-- 3. Notas Fiscais -->
+                        <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Notas Fiscais (Mês)</p>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Recebidas:</span><span id="kpi-nf-recebidas" class="font-bold text-blue-700">0</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Pendentes:</span><span id="kpi-nf-pendentes" class="font-bold text-amber-600">0</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Aprovadas:</span><span id="kpi-nf-aprovadas" class="font-bold text-emerald-700">0</span></div>
+                        </div>
+
+                        <!-- 4. Financeiro -->
+                        <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Financeiro (Mês)</p>
+                            <div class="text-xs text-slate-600">Valor do Mês:</div>
+                            <div id="kpi-fin-total" class="text-sm font-extrabold text-blue-950">R$ 0,00</div>
+                            <div class="flex justify-between items-center text-[11px] pt-1 border-t"><span class="text-green-700 font-semibold">Realizados:</span><span id="kpi-fin-pagos" class="font-bold text-green-700">R$ 0,00</span></div>
+                            <div class="flex justify-between items-center text-[11px]"><span class="text-amber-700 font-semibold">Pendentes:</span><span id="kpi-fin-pendentes" class="font-bold text-amber-700">R$ 0,00</span></div>
+                        </div>
+
+                        <!-- 5. Documentos / Compliance -->
+                        <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
+                            <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Compliance Docs</p>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Regularidade:</span><span id="kpi-doc-regular" class="font-bold text-green-700">OK</span></div>
+                            <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Vencidos ⚠️:</span><span id="kpi-doc-vencidos" class="font-bold text-red-600">0</span></div>
+                            <div class="pt-2">
+                                <button onclick="exportarLoteFinanceiroExcel()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition shadow-sm">📥 Exportar Lote</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 px-1">
+                    <button id="btn-gerar-folha" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">🔄 Gerar / Atualizar Folha da Competência</button>
                 </div>
 
                 <!-- MODAL GERAR FOLHA -->
@@ -1516,26 +1553,90 @@
 
         function renderizarTabelasEstatísticas() {
             competenciaSelecionada = filtroCompetencia.value;
-            let qtdAtivos = 0;
-            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdAtivos++; });
-            document.getElementById('cardContratosAtivos').innerText = qtdAtivos;
+            
+            // --- CÁLCULOS DO DASHBOARD EXECUTIVO (ETAPA 9) ---
+            let prestAtivos = 0, prestInativos = 0;
+            let contAtivos = 0, contVencendo = 0, contEncerrados = 0;
+            let hojeObj = new Date();
+            let daqui30Dias = new Date();
+            daqui30Dias.setDate(hojeObj.getDate() + 30);
+
+            Object.values(contratosLocais).forEach(c => {
+                if (c.excluidoLogico) return;
+                if (c.status === "Ativo") prestAtivos++; else prestInativos++;
+                if (c.status === "Ativo") contAtivos++; else contEncerrados++;
+
+                if (c.vigenciaFim) {
+                    let dataFim = new Date(c.vigenciaFim);
+                    if (dataFim < hojeObj) {
+                        contEncerrados++;
+                    } else if (dataFim <= daqui30Dias) {
+                        contVencendo++;
+                    }
+                }
+            });
+
+            document.getElementById('kpi-prest-ativos').innerText = prestAtivos;
+            document.getElementById('kpi-prest-inativos').innerText = prestInativos;
+            document.getElementById('kpi-cont-ativos').innerText = contAtivos;
+            document.getElementById('kpi-cont-vencendo').innerText = contVencendo;
+            document.getElementById('kpi-cont-encerrados').innerText = contEncerrados;
 
             const baseFolhaMes = folhasLocais[competenciaSelecionada] || {};
+            let nfRecebidas = 0, nfPendentes = 0, nfAprovadas = 0;
+            let totalReg = 0, totalComp = 0, pagosTotal = 0, pendentesTotal = 0;
+
+            Object.values(baseFolhaMes).forEach(f => {
+                // Regular
+                let valReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
+                totalReg += valReg;
+                if (f.regular?.nfArquivoBase64) nfRecebidas++; else nfPendentes++;
+                if (f.regular?.nfStatus === "Recebida ✔" || f.regular?.statusPagamento === "Pago") nfAprovadas++;
+                
+                if (f.regular?.statusPagamento === "Pago") pagosTotal += valReg; else pendentesTotal += valReg;
+
+                // Complementares
+                if (f.complementares_lista) {
+                    Object.values(f.complementares_lista).forEach(cItem => {
+                        let valC = parseFloat(cItem.motorValor || 0);
+                        totalComp += valC;
+                        if (cItem.nfArquivoBase64) nfRecebidas++; else nfPendentes++;
+                        if (cItem.nfStatus === "Recebida ✔" || cItem.statusPagamento === "Pago") nfAprovadas++;
+
+                        if (cItem.statusPagamento === "Pago") pagosTotal += valC; else pendentesTotal += valC;
+                    });
+                }
+            });
+
+            let valorTotalGeralMes = totalReg + totalComp;
+            document.getElementById('kpi-nf-recebidas').innerText = nfRecebidas;
+            document.getElementById('kpi-nf-pendentes').innerText = nfPendentes;
+            document.getElementById('kpi-nf-aprovadas').innerText = nfAprovadas;
+
+            document.getElementById('kpi-fin-total').innerText = `R$ ${valorTotalGeralMes.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('kpi-fin-pagos').innerText = `R$ ${pagosTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+            document.getElementById('kpi-fin-pendentes').innerText = `R$ ${pendentesTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
+            // Compliance de Docs
+            let docsVencidosCount = 0;
+            Object.values(contratosLocais).forEach(c => {
+                if (!c.excluidoLogico && c.vigenciaFim && new Date(c.vigenciaFim) < hojeObj) docsVencidosCount++;
+            });
+            document.getElementById('kpi-doc-vencidos').innerText = docsVencidosCount;
+            document.getElementById('kpi-doc-regular').innerText = docsVencidosCount === 0 ? "OK ✔" : "Atenção ⚠️";
+
+            // --- TABELAS DA FOLHA ---
             const tbodyRegular = document.getElementById('listaFolha');
             const tbodyComplementar = document.getElementById('listaFolhaComplementar');
             const containerComp = document.getElementById('containerFolhaComplementar');
 
             tbodyRegular.innerHTML = "";
             tbodyComplementar.innerHTML = "";
-            let totalReg = 0;
-            let totalComp = 0;
             let temComp = false;
 
             const chavesFolha = Object.keys(baseFolhaMes);
             if (chavesFolha.length === 0) {
                 tbodyRegular.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência. Clique em 'Gerar Folha'.</td></tr>`;
-                document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
-                document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
                 containerComp.classList.add('hidden');
                 return;
             }
@@ -1543,8 +1644,6 @@
             chavesFolha.forEach(key => {
                 const f = baseFolhaMes[key];
                 let subTotalReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
-                totalReg += subTotalReg;
-
                 let cnpjCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (f.cnpj || '---');
                 let dataVencimentoReg = f.regular?.dataVencimento || "";
 
@@ -1592,7 +1691,6 @@
                     Object.entries(f.complementares_lista).forEach(([idComp, cItem]) => {
                         temComp = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        totalComp += valComp;
                         let dataVencComp = cItem.dataVencimento || "";
 
                         let statusCompHTML = cItem.statusPagamento || "Em Análise";
@@ -1638,8 +1736,6 @@
                 }
             });
 
-            document.getElementById('cardTotalFolha').innerText = `R$ ${totalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
         }
 
