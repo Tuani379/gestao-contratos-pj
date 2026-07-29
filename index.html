@@ -591,7 +591,7 @@
             <!-- PORTAL DO PRESTADOR -->
             <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
                 
-                <!-- Submenu da Etapa 5 (Removida a aba Perfil) -->
+                <!-- Submenu da Etapa 5 (Sem a aba Perfil) -->
                 <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
                     <div class="flex flex-wrap gap-1 md:gap-2">
                         <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
@@ -730,7 +730,7 @@
         const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
 
         function carregarIdentidadeVisualMenu(modoPJ = false) {
-            if (modoPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+            if (modoPJ) {
                 get(ref(db, pathContratosDB)).then((snapshot) => {
                     const dados = snapshot.val() || {};
                     let prestadorEncontrado = null;
@@ -1140,7 +1140,7 @@
                         <td class="p-3 text-center space-x-1">
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
                             <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
-                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold">Excluir</button>
+                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
                         </td>
                     </tr>
                 `;
