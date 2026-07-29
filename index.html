@@ -183,7 +183,7 @@
                     <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm">
                         <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
                         <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
-                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar Folha do Mês</button>
+                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar / Atualizar Folha</button>
                     </div>
                 </div>
 
@@ -191,6 +191,7 @@
                 <div id="modalGerarFolha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                         <h3 class="text-xl font-bold text-blue-900 mb-4">Selecionar Cadastros para a Folha</h3>
+                        <p class="text-xs text-slate-500 mb-3">Prestadores já existentes na folha mantêm seus dados e arquivos. Apenas novos cadastros serão incluídos.</p>
                         <div class="overflow-x-auto max-h-[40vh] border rounded-lg mb-4">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -206,7 +207,7 @@
                         </div>
                         <div class="flex justify-end gap-2">
                             <button id="btn-cancelar-gerar-folha" class="px-4 py-2 border rounded">Cancelar</button>
-                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar</button>
+                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar / Atualizar</button>
                         </div>
                     </div>
                 </div>
@@ -292,7 +293,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ</h2>
-                        <p class="text-xs text-slate-500">Visualize valores, vigências, aditivos, arquivos e alertas de vencimento.</p>
+                        <p class="text-xs text-slate-500">Visualize dados completos, vigências, aditivos, arquivos e alertas de vencimento.</p>
                     </div>
                     <div class="flex gap-2">
                         <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">📊 Exportar Excel</button>
@@ -306,25 +307,24 @@
                             <tr>
                                 <th class="p-3">Foto</th>
                                 <th class="p-3">Nome Completo</th>
-                                <th class="p-3">Tipo / Perfil</th>
-                                <th class="p-3">Vigência (Início - Fim)</th>
-                                <th class="p-3">Alerta Vencimento</th>
+                                <th class="p-3">Perfil</th>
+                                <th class="p-3">E-mail / Telefone</th>
+                                <th class="p-3">Razão Social / CNPJ</th>
+                                <th class="p-3">Vigência</th>
                                 <th class="p-3">Valor Fixo</th>
                                 <th class="p-3">Centro de Custo</th>
-                                <th class="p-3">Responsável</th>
-                                <th class="p-3">Aditivos</th>
                                 <th class="p-3">Arquivos</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaContratos" class="text-xs">
-                            <tr><td colspan="12" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
+                            <tr><td colspan="11" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO -->
+                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO SEPARADO -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-2xl w-full max-w-4xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
                         <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato</h3>
@@ -351,37 +351,57 @@
                             </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Dados Pessoais e Empresa PJ</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input id="campoNome" type="text" placeholder="Nome Completo *" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                        <!-- 1. DADOS PESSOAIS -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">👤 1. Dados Pessoais</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <input id="campoNome" type="text" placeholder="Nome Completo *" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoTelefone" type="text" placeholder="Telefone / Celular" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoContatoEmergencia" type="text" placeholder="Contato de Emergência (Nome/Tel)" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white">
                             </div>
                         </div>
 
-                        <div class="space-y-3 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Vigência, Valores e Governança</h4>
+                        <!-- 2. DADOS DA EMPRESA PJ -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">🏢 2. Dados da Empresa PJ & Endereço</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCNPJ" type="text" placeholder="CNPJ Completo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoInscricaoEstadual" type="text" placeholder="Inscrição Estadual" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoInscricaoMunicipal" type="text" placeholder="Inscrição Municipal" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoLogradouro" type="text" placeholder="Logradouro / Endereço" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoNumero" type="text" placeholder="Número" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoBairro" type="text" placeholder="Bairro" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCidade" type="text" placeholder="Cidade" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEstado" type="text" placeholder="Estado (UF)" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+
+                        <!-- 3. VIGÊNCIA, VALORES E GOVERNANÇA -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">⚖️ 3. Vigência, Valores e Governança</h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Início da Vigência:</label>
-                                    <input id="campoVigenciaInicio" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                    <input id="campoVigenciaInicio" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Término da Vigência:</label>
-                                    <input id="campoVigenciaFim" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                    <input id="campoVigenciaFim" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Valor Fixo Mensal (R$):</label>
-                                    <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 font-bold text-blue-950">
+                                    <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950">
                                 </div>
-                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoAditivos" type="text" placeholder="Aditivos (Ex: Aditivo 01 - Reajuste)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <select id="campoStatus" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
+                                <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoAditivos" type="text" placeholder="Aditivos" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <select id="campoStatus" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                                 </select>
@@ -571,7 +591,7 @@
             <!-- PORTAL DO PRESTADOR (ETAPA 5) -->
             <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
                 
-                <!-- Submenu da Etapa 5 (Sem o botão Dashboard, apenas Enviar Nota e demais) -->
+                <!-- Submenu da Etapa 5 -->
                 <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
                     <div class="flex flex-wrap gap-1 md:gap-2">
                         <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
@@ -585,9 +605,9 @@
                     </div>
                 </div>
 
-                <!-- TELA ENVIAR NOTA (Com os 4 quadrados de Fixo/Complementar e Tabela abaixo) -->
+                <!-- TELA ENVIAR NOTA -->
                 <div id="sec-pj-enviar" class="sec-pj space-y-6">
-                    <!-- Cards de Resumo (Fixo + Complementares) -->
+                    <!-- Cards de Resumo -->
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
                             <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Fixo Mensal</span>
@@ -597,9 +617,7 @@
                                 <p><b>Previsão:</b> <span id="pj-card-fixo-pg" class="text-emerald-700 font-semibold">Pendente</span></p>
                             </div>
                         </div>
-                        <div id="pj-card-comp-container" class="contents">
-                            <!-- Cards complementares serão injetados dinamicamente aqui -->
-                        </div>
+                        <div id="pj-card-comp-container" class="contents"></div>
                     </div>
 
                     <!-- Envio de Notas Fiscais -->
@@ -655,7 +673,7 @@
                     </div>
                 </div>
 
-                <!-- 2. MEUS CONTRATOS -->
+                <!-- MEUS CONTRATOS -->
                 <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
@@ -665,7 +683,7 @@
                     </div>
                 </div>
 
-                <!-- 3. MEUS DOCUMENTOS -->
+                <!-- MEUS DOCUMENTOS -->
                 <div id="sec-pj-documentos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Documentos & Anexos</h2>
@@ -676,7 +694,7 @@
                     </div>
                 </div>
 
-                <!-- 4. MEUS PAGAMENTOS -->
+                <!-- MEUS PAGAMENTOS -->
                 <div id="sec-pj-pagamentos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Histórico de Pagamentos</h2>
@@ -698,7 +716,7 @@
                     </div>
                 </div>
 
-                <!-- 5. PERFIL -->
+                <!-- PERFIL -->
                 <div id="sec-pj-perfil" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4 max-w-xl">
                         <h2 class="text-xl font-extrabold text-blue-950">Meu Perfil</h2>
@@ -1096,7 +1114,7 @@
 
             const entradas = Object.entries(contratosLocais);
             if (entradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -1124,26 +1142,6 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
-                let alertaHTML = '<span class="text-slate-400">Sem término</span>';
-                if (c.vigenciaFim) {
-                    const hoje = new Date();
-                    const fimContrato = new Date(c.vigenciaFim);
-                    const diffTempo = fimContrato - hoje;
-                    const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-
-                    if (diffDias < 0) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-800">Vencido ❌</span>`;
-                    } else if (diffDias <= 7) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-700 animate-pulse">Vence em ${diffDias} dias 🚨</span>`;
-                    } else if (diffDias <= 15) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">Vence em ${diffDias} dias ⏳</span>`;
-                    } else if (diffDias <= 30) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-blue-100 text-blue-800">Vence em ${diffDias} dias ⚠️</span>`;
-                    } else {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-green-100 text-green-800">Em dia (${diffDias} dias)</span>`;
-                    }
-                }
-
                 let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : '---';
                 let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
 
@@ -1152,12 +1150,11 @@
                         <td class="p-3">${fotoHtml}</td>
                         <td class="p-3 font-semibold">${c.nome || '---'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
+                        <td class="p-3 text-slate-600">${c.email || c.emailCorp || '---'}<br><small>${c.telefone || ''}</small></td>
+                        <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
                         <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
-                        <td class="p-3">${alertaHTML}</td>
                         <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.aditivos || '---'}</td>
                         <td class="p-3 text-center">${botaoAnexoContrato}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         <td class="p-3 text-center space-x-1">
@@ -1192,7 +1189,7 @@
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoRazaoSocial','campoCNPJ','campoCargo','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
+            ['campoNome','campoCpf','campoEmail','campoTelefone','campoContatoEmergencia','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoInscricaoEstadual','campoInscricaoMunicipal','campoCep','campoLogradouro','campoNumero','campoBairro','campoCidade','campoEstado','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoCargo','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
             document.getElementById('campoFotoArquivo').value = "";
             document.getElementById('campoArquivoContrato').value = "";
             document.getElementById('modalCadastro').classList.remove('hidden');
@@ -1210,8 +1207,19 @@
                     nome: document.getElementById('campoNome').value,
                     cpf: document.getElementById('campoCpf').value,
                     email: document.getElementById('campoEmail').value,
+                    telefone: document.getElementById('campoTelefone').value,
+                    contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
                     razaoSocial: document.getElementById('campoRazaoSocial').value,
                     cnpj: document.getElementById('campoCNPJ').value,
+                    emailCorp: document.getElementById('campoEmailCorp').value,
+                    inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
+                    inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
+                    cep: document.getElementById('campoCep').value,
+                    logradouro: document.getElementById('campoLogradouro').value,
+                    numero: document.getElementById('campoNumero').value,
+                    bairro: document.getElementById('campoBairro').value,
+                    cidade: document.getElementById('campoCidade').value,
+                    estado: document.getElementById('campoEstado').value,
                     cargo: document.getElementById('campoCargo').value,
                     vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
                     vigenciaFim: document.getElementById('campoVigenciaFim').value,
@@ -1274,8 +1282,19 @@
             document.getElementById('campoNome').value = c.nome || "";
             document.getElementById('campoCpf').value = c.cpf || "";
             document.getElementById('campoEmail').value = c.email || "";
+            document.getElementById('campoTelefone').value = c.telefone || "";
+            document.getElementById('campoContatoEmergencia').value = c.contatoEmergencia || "";
             document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
             document.getElementById('campoCNPJ').value = c.cnpj || "";
+            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
+            document.getElementById('campoInscricaoEstadual').value = c.inscricaoEstadual || "";
+            document.getElementById('campoInscricaoMunicipal').value = c.inscricaoMunicipal || "";
+            document.getElementById('campoCep').value = c.cep || "";
+            document.getElementById('campoLogradouro').value = c.logradouro || "";
+            document.getElementById('campoNumero').value = c.numero || "";
+            document.getElementById('campoBairro').value = c.bairro || "";
+            document.getElementById('campoCidade').value = c.cidade || "";
+            document.getElementById('campoEstado').value = c.estado || "";
             document.getElementById('campoCargo').value = c.cargo || "";
             document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
             document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
@@ -1320,7 +1339,7 @@
 
             const chavesFolha = Object.keys(baseFolhaMes);
             if (chavesFolha.length === 0) {
-                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência.</td></tr>`;
+                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência. Clique em 'Criar / Atualizar Folha'.</td></tr>`;
                 document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
                 document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
                 containerComp.classList.add('hidden');
@@ -1442,7 +1461,7 @@
             let encontrouAlgum = false;
             let temComplementarGeral = false;
 
-            // Preenchimento de Contratos (Seção Meus Contratos)
+            // Preenchimento de Contratos (Meus Contratos)
             const divContratos = document.getElementById('pj-conteudo-contratos');
             if (divContratos) {
                 if (dadosContratoLogado) {
@@ -1450,30 +1469,31 @@
                         <div class="p-4 border rounded-xl bg-slate-50 space-y-2">
                             <p><b>Nome / Razão Social:</b> ${dadosContratoLogado.nome} (${dadosContratoLogado.razaoSocial || '---'})</p>
                             <p><b>CNPJ / CPF:</b> ${dadosContratoLogado.cnpj || dadosContratoLogado.cpf || '---'}</p>
-                            <p><b>Cargo / Perfil:</b> ${dadosContratoLogado.cargo || '---'} (${dadosContratoLogado.perfilTipo || 'Prestador'})</p>
+                            <p><b>E-mail Pessoal / Corporativo:</b> ${dadosContratoLogado.email || '---'} / ${dadosContratoLogado.emailCorp || '---'}</p>
+                            <p><b>Telefone / Contato Emergência:</b> ${dadosContratoLogado.telefone || '---'} | ${dadosContratoLogado.contatoEmergencia || '---'}</p>
+                            <p><b>Endereço:</b> ${dadosContratoLogado.logradouro || ''}, ${dadosContratoLogado.numero || ''} - ${dadosContratoLogado.bairro || ''}, ${dadosContratoLogado.cidade || ''}/${dadosContratoLogado.estado || ''} (CEP: ${dadosContratoLogado.cep || ''})</p>
                             <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
                             <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
-                            <p><b>Centro de Custo / Gestor:</b> ${dadosContratoLogado.departamento || '---'} / ${dadosContratoLogado.gestorDireto || '---'}</p>
                         </div>
                     `;
                 } else if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
-                    divContratos.innerHTML = `<p class="text-slate-500">Você está logado como Administrador Master. Visualizando visão geral.</p>`;
+                    divContratos.innerHTML = `<p class="text-slate-500">Logado como Administrador Master.</p>`;
                 } else {
-                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado ao seu e-mail.</p>`;
+                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado.</p>`;
                 }
             }
 
-            // Preenchimento de Documentos (Meus Documentos)
+            // Documentos
             const divDocs = document.getElementById('pj-conteudo-documentos');
             if (divDocs) {
                 if (dadosContratoLogado && dadosContratoLogado.arquivoContratoBase64) {
                     divDocs.innerHTML = `<button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button>`;
                 } else {
-                    divDocs.innerHTML = `<p class="text-slate-400 text-xs">Nenhum documento de contrato anexo.</p>`;
+                    divDocs.innerHTML = `<p class="text-slate-400 text-xs">Nenhum documento anexo.</p>`;
                 }
             }
 
-            // Preenchimento Perfil
+            // Perfil
             const divPerfil = document.getElementById('pj-conteudo-perfil');
             if (divPerfil) {
                 if (dadosContratoLogado) {
@@ -1481,6 +1501,7 @@
                         <p><b>Nome:</b> ${dadosContratoLogado.nome}</p>
                         <p><b>E-mail:</b> ${dadosContratoLogado.email || usuarioEmailLogado}</p>
                         <p><b>CNPJ:</b> ${dadosContratoLogado.cnpj || '---'}</p>
+                        <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
                         <p><b>Status:</b> <span class="text-green-700 font-bold">${dadosContratoLogado.status}</span></p>
                     `;
                 } else {
@@ -1488,7 +1509,7 @@
                 }
             }
 
-            // Pagamentos (Meus Pagamentos)
+            // Pagamentos
             const tabelaPgtos = document.getElementById('pj-tabela-pagamentos');
             if (tabelaPgtos) {
                 tabelaPgtos.innerHTML = "";
@@ -1524,7 +1545,6 @@
                 const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                // Atualizar Cards Fixo do Dashboard/Envio
                 const cardFixoValor = document.getElementById('pj-card-fixo-valor');
                 const cardFixoNf = document.getElementById('pj-card-fixo-nf');
                 const cardFixoPg = document.getElementById('pj-card-fixo-pg');
@@ -1564,7 +1584,6 @@
                         let nfStatusComp = cItem.nfStatus || "Aguardando";
                         let eventoNome = cItem.motorEvento || 'Adicional';
 
-                        // Injetar Card Complementar separado (Separando quais notas se refere)
                         if (containerCardComp) {
                             containerCardComp.innerHTML += `
                                 <div class="bg-white p-5 rounded-2xl border border-amber-200 bg-amber-50/10 shadow-sm space-y-2">
@@ -1828,20 +1847,30 @@
             modal.classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-gerar-folha').addEventListener('click', () => document.getElementById('modalGerarFolha').classList.add('hidden'));
+        
         document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
             const checkboxes = document.querySelectorAll('.chk-folha:checked');
             const compDestino = filtroCompetencia.value;
-            let pacote = {};
+            
+            // Buscar dados existentes na competência para manter o que já foi gerado
+            const snapshotAtual = await get(ref(db, `${pathFolhasDB}/${compDestino}`));
+            let folhaExistente = snapshotAtual.val() || {};
+            
             checkboxes.forEach(chk => {
                 const id = chk.value;
                 const c = contratosLocais[id];
-                pacote[`${pathFolhasDB}/${compDestino}/${id}`] = {
-                    nome: c.nome, cnpj: c.cnpj || '',
-                    regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
-                };
+                // Se já existir dados para este prestador na folha, preserva (não sobrescreve o regular salvo/enviado)
+                if (!folhaExistente[id]) {
+                    folhaExistente[id] = {
+                        nome: c.nome, 
+                        cnpj: c.cnpj || '',
+                        regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
+                    };
+                }
             });
-            await update(ref(db), pacote);
-            alert("Folha gerada com sucesso!");
+
+            await update(ref(db, `${pathFolhasDB}/${compDestino}`), folhaExistente);
+            alert("Folha gerada/atualizada com sucesso! Novos contratos foram adicionados e os existentes mantidos.");
             document.getElementById('modalGerarFolha').classList.add('hidden');
         });
 
