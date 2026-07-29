@@ -1461,7 +1461,8 @@
                             <p><b>E-mail Corporativo:</b> ${dadosContratoLogado.emailCorp || '---'}</p>
                             <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
                             <p><b>Contato de Emergência:</b> ${dadosContratoLogado.contatoEmergencia || '---'}</p>
-                            <p><b>Endereço:</b> ${dadosContratoLogado.logradouro || ''}, ${dadosContratoLogado.numero || ''} - ${dadosContratoLogado.bairro || ''}, ${dadosContratoLogado.cidade || ''}/${dadosContratoLogado.estado || ''} (CEP: ${dadosContratoLogado.cep || ''})</p>
+                            <p><b>Endereço:</b> ${dadosContratoLogado.logradouro || '---'}, ${dadosContratoLogado.numero || ''} - ${dadosContratoLogado.bairro || ''}, ${dadosContratoLogado.cidade || ''}/${dadosContratoLogado.estado || ''}</p>
+                            <p><b>CEP:</b> ${dadosContratoLogado.cep || '---'}</p>
                             <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
                             <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
                             ${botaoContratoAssinado}
@@ -1477,12 +1478,18 @@
             const divPerfil = document.getElementById('pj-conteudo-perfil');
             if (divPerfil) {
                 if (dadosContratoLogado) {
+                    let fotoPerfilHtml = dadosContratoLogado.fotoBase64 ? `<img src="${dadosContratoLogado.fotoBase64}" class="w-16 h-16 rounded-full object-cover border-2 border-blue-200 shadow-sm">` : `<div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center font-bold text-sm text-slate-600">${(dadosContratoLogado.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                     divPerfil.innerHTML = `
-                        <p><b>Nome:</b> ${dadosContratoLogado.nome}</p>
-                        <p><b>E-mail:</b> ${dadosContratoLogado.email || usuarioEmailLogado}</p>
-                        <p><b>CNPJ:</b> ${dadosContratoLogado.cnpj || '---'}</p>
-                        <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
-                        <p><b>Status:</b> <span class="text-green-700 font-bold">${dadosContratoLogado.status}</span></p>
+                        <div class="flex justify-between items-start">
+                            <div class="space-y-2">
+                                <p><b>Nome:</b> ${dadosContratoLogado.nome}</p>
+                                <p><b>E-mail:</b> ${dadosContratoLogado.email || usuarioEmailLogado}</p>
+                                <p><b>CNPJ:</b> ${dadosContratoLogado.cnpj || '---'}</p>
+                                <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
+                                <p><b>Status:</b> <span class="text-green-700 font-bold">${dadosContratoLogado.status}</span></p>
+                            </div>
+                            <div>${fotoPerfilHtml}</div>
+                        </div>
                     `;
                 } else {
                     divPerfil.innerHTML = `<p><b>E-mail:</b> ${usuarioEmailLogado}</p><p><b>Perfil:</b> Administrador / Master</p>`;
