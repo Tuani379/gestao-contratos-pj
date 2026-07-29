@@ -1532,6 +1532,7 @@
                 let temPgtos = false;
                 Object.entries(folhasLocais).forEach(([compKey, compObj]) => {
                     Object.entries(compObj).forEach(([idF, fData]) => {
+                        // Se não for Master, filtra estritamente para o ID do contrato do usuário logado
                         if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || idF === idContratoLogado) {
                             temPgtos = true;
                             let valTotal = parseFloat(fData.regular?.valorFixo || 0) + parseFloat(fData.regular?.motorValor || 0);
@@ -1550,15 +1551,19 @@
                 if (!temPgtos) tabelaPgtos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum pagamento registrado.</td></tr>`;
             }
 
+            // Exibir apenas os dados do próprio usuário logado na aba Enviar Nota
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
-                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
+                // Filtro estrito: Se não for Master e o ID do contrato não for o do usuário, ignora
+                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && idContratoLogado !== idContratoFolha) {
                     return;
                 }
 
                 encontrouAlgum = true;
-                const nomeExibir = dadosFolha.nome || "Prestador";
-                const cnpjExibir = dadosFolha.cnpj || "---";
-                const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
+                const nomeExibir = dadosFolha.nome || dadosContratoLogado?.nome || "Prestador";
+                const cnpjExibir = dadosFolha.cnpj || dadosContratoLogado?.cnpj || "---";
+                
+                // Puxa o valor fixo correto do contrato cadastrado ou da folha
+                const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
                 const cardFixoValor = document.getElementById('pj-card-fixo-valor');
@@ -1643,7 +1648,20 @@
 
             if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            if (!encontrouAlgum && tbodyRegPJ) {
+            // Caso o usuário logado ainda não tenha folha gerada para esta competência mas tenha contrato, exibe os dados base do contrato para envio
+            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ) {
+                const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
+                if (cardFixoValor) cardFixoValor.innerText = `R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                
+                tbodyRegPJ.innerHTML = `
+                    <tr class="border-b">
+                        <td class="p-2.5"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
+                        <td class="p-2.5 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span></td>
+                        <td class="p-2.5"><input type="file" accept=".pdf,image/*" class="input-nf-reg-avulsa text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoLogado}"></td>
+                    </tr>
+                `;
+            } else if (!encontrouAlgum && tbodyRegPJ) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
         }
@@ -1651,22 +1669,32 @@
         selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
 
         document.getElementById('btn-enviar-todas-notas-pj').addEventListener('click', async () => {
-            const inputsReg = document.querySelectorAll('.input-nf-reg');
+            const inputsReg = document.querySelectorAll('.input-nf-reg, .input-nf-reg-avulsa');
             const inputsComp = document.querySelectorAll('.input-nf-comp');
             let atualizou = false;
+            const compDestino = selectCompetenciaPJ.value;
 
             for (let input of inputsReg) {
                 if (input.files && input.files[0]) {
                     const id = input.dataset.id;
                     const file = input.files[0];
+                    const c = contratosLocais[id] || {};
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
-                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/regular`), {
-                                nfArquivoBase64: reader.result,
-                                nfStatus: "Recebida ✔",
-                                statusPagamento: "Pronto para Pagar"
-                            });
+                            // Assegura que o registro exista na folha ao enviar avulso
+                            const snapshotFolha = await get(ref(db, `${pathFolhasDB}/${compDestino}/${id}`));
+                            let dadosFolhaPrestador = snapshotFolha.val() || {
+                                nome: c.nome || "Prestador",
+                                cnpj: c.cnpj || "",
+                                regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0 }
+                            };
+
+                            dadosFolhaPrestador.regular.nfArquivoBase64 = reader.result;
+                            dadosFolhaPrestador.regular.nfStatus = "Recebida ✔";
+                            dadosFolhaPrestador.regular.statusPagamento = "Pronto para Pagar";
+
+                            await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
                             atualizou = true;
                             resolve();
                         };
@@ -1683,7 +1711,7 @@
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
-                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/complementares_lista/${compId}`), {
+                            await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}/complementares_lista/${compId}`), {
                                 nfArquivoBase64: reader.result,
                                 nfStatus: "Recebida ✔",
                                 statusPagamento: "Pronto para Pagar"
@@ -1777,7 +1805,7 @@
                 if (fCC !== "todos" && departamento !== fCC) return;
 
                 if (fTipoFolha === "todas" || fTipoFolha === "Regular") {
-                    let valorRegFixo = parseFloat(dadosPrestador.regular?.valorFixo || 0);
+                    let valorRegFixo = parseFloat(contratoInfo.valorFixoMensal || dadosPrestador.regular?.valorFixo || 0);
                     let valorRegMotor = parseFloat(dadosPrestador.regular?.motorValor || 0);
                     let valRegTotal = valorRegFixo + valorRegMotor;
 
