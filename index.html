@@ -653,7 +653,7 @@
                                     <table class="w-full text-left border-collapse">
                                         <thead>
                                             <tr class="border-b text-xs font-bold text-amber-900">
-                                                <th class="p-2.5">Evento / Adicional</th>
+                                                <th class="p-2.5">Prestador / Evento / Adicional</th>
                                                 <th class="p-2.5">Valor Adicional</th>
                                                 <th class="p-2.5">Status Atual</th>
                                                 <th class="p-2.5">Anexar Nova Nota Fiscal</th>
@@ -702,7 +702,7 @@
                             <table class="w-full text-left border-collapse">
                                 <thead>
                                     <tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">
-                                        <th class="p-3">Competência</th>
+                                        <th class="p-3">Prestador / CNPJ</th>
                                         <th class="p-3">Valor Líquido</th>
                                         <th class="p-3">Status NF</th>
                                         <th class="p-3 text-center">Status Pagamento</th>
@@ -1531,29 +1531,44 @@
                 tabelaPgtos.innerHTML = "";
                 let temPgtos = false;
                 Object.entries(folhasLocais).forEach(([compKey, compObj]) => {
-                    Object.entries(compObj).forEach(([idF, fData]) => {
-                        // Se não for Master, filtra estritamente para o ID do contrato do usuário logado
-                        if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || idF === idContratoLogado) {
-                            temPgtos = true;
-                            let valTotal = parseFloat(fData.regular?.valorFixo || 0) + parseFloat(fData.regular?.motorValor || 0);
-                            let statusPg = fData.regular?.statusPagamento || "Aguardando";
-                            tabelaPgtos.innerHTML += `
-                                <tr class="border-b">
-                                    <td class="p-3 font-semibold">${compKey.replace('-', '/')}</td>
-                                    <td class="p-3 font-bold text-blue-950">R$ ${valTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    <td class="p-3">${fData.regular?.nfStatus || 'Aguardando'}</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold ${statusPg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusPg}</span></td>
-                                </tr>
-                            `;
-                        }
-                    });
+                    if (compKey === compPJ) {
+                        Object.entries(compObj).forEach(([idF, fData]) => {
+                            if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || idF === idContratoLogado) {
+                                temPgtos = true;
+                                let valTotal = parseFloat(fData.regular?.valorFixo || 0) + parseFloat(fData.regular?.motorValor || 0);
+                                let statusPg = fData.regular?.statusPagamento || "Aguardando";
+                                let nomePgt = fData.nome || dadosContratoLogado?.nome || "Prestador";
+                                let cnpjPgt = fData.cnpj || dadosContratoLogado?.cnpj || "---";
+
+                                tabelaPgtos.innerHTML += `
+                                    <tr class="border-b">
+                                        <td class="p-3"><b>${nomePgt}</b><br><small class="text-slate-500">${cnpjPgt}</small></td>
+                                        <td class="p-3 font-bold text-blue-950">R$ ${valTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3">${fData.regular?.nfStatus || 'Aguardando'}</td>
+                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold ${statusPg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusPg}</span></td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
                 });
-                if (!temPgtos) tabelaPgtos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum pagamento registrado.</td></tr>`;
+                if (!temPgtos && dadosContratoLogado) {
+                    let valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
+                    tabelaPgtos.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-3"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
+                            <td class="p-3 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            <td class="p-3">Aguardando</td>
+                            <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold bg-slate-100 text-slate-700">Aguardando NF</span></td>
+                        </tr>
+                    `;
+                } else if (!temPgtos) {
+                    tabelaPgtos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum pagamento registrado.</td></tr>`;
+                }
             }
 
-            // Exibir apenas os dados do próprio usuário logado na aba Enviar Nota
+            // Exibir estritamente apenas os dados do próprio usuário logado
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
-                // Filtro estrito: Se não for Master e o ID do contrato não for o do usuário, ignora
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && idContratoLogado !== idContratoFolha) {
                     return;
                 }
@@ -1561,8 +1576,6 @@
                 encontrouAlgum = true;
                 const nomeExibir = dadosFolha.nome || dadosContratoLogado?.nome || "Prestador";
                 const cnpjExibir = dadosFolha.cnpj || dadosContratoLogado?.cnpj || "---";
-                
-                // Puxa o valor fixo correto do contrato cadastrado ou da folha
                 const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
 
@@ -1635,7 +1648,7 @@
                         if (tbodyCompPJ) {
                             tbodyCompPJ.innerHTML += `
                                 <tr class="border-b bg-amber-50/20">
-                                    <td class="p-2.5"><b>${eventoNome}</b></td>
+                                    <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${eventoNome}</span></td>
                                     <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                     <td class="p-2.5">${badgeStatusComp}</td>
                                     <td class="p-2.5">${acaoCompPJ}</td>
@@ -1648,7 +1661,6 @@
 
             if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            // Caso o usuário logado ainda não tenha folha gerada para esta competência mas tenha contrato, exibe os dados base do contrato para envio
             if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ) {
                 const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
                 if (cardFixoValor) cardFixoValor.innerText = `R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
@@ -1682,7 +1694,6 @@
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
-                            // Assegura que o registro exista na folha ao enviar avulso
                             const snapshotFolha = await get(ref(db, `${pathFolhasDB}/${compDestino}/${id}`));
                             let dadosFolhaPrestador = snapshotFolha.val() || {
                                 nome: c.nome || "Prestador",
