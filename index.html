@@ -8,8 +8,8 @@
 
     <!-- TELA DE LOGIN / RECUPERAÇÃO / PRIMEIRO ACESSO -->
     <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
-            <div class="text-center mb-6">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200 space-y-4">
+            <div class="text-center mb-4">
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
                 <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa</p>
             </div>
@@ -17,12 +17,12 @@
             <form id="form-login-saas" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
-                    <input type="email" id="login-email-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
+                    <input type="email" id="login-email-saas" required placeholder="tuanicaraca@gmail.com" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
                     <div class="relative">
-                        <input type="password" id="login-senha-saas" required class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
+                        <input type="password" id="login-senha-saas" required placeholder="••••••••" class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                         <button type="button" onclick="toggleMostrarSenha()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm focus:outline-none" title="Mostrar/Ocultar Senha">
                             <span id="icone-olho">👁️</span>
                         </button>
@@ -33,6 +33,10 @@
                 </div>
                 <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">Entrar</button>
             </form>
+
+            <div class="border-t pt-3 text-center">
+                <button type="button" onclick="preencherLoginMaster()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold p-2.5 rounded-lg text-xs transition border">⚡ Preencher Acesso Master (Testes)</button>
+            </div>
         </div>
     </div>
 
@@ -738,6 +742,11 @@
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
+        window.preencherLoginMaster = () => {
+            document.getElementById('login-email-saas').value = EMAIL_MASTER_SISTEMA;
+            document.getElementById('login-senha-saas').value = "123456";
+        };
+
         function carregarIdentidadeVisualMenu() {
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             get(ref(db, pathInfo)).then((snapshot) => {
@@ -1442,9 +1451,9 @@
             const divContratos = document.getElementById('pj-conteudo-contratos');
             if (divContratos) {
                 if (dadosContratoLogado) {
-                    let botaoContratoAssinado = dadosContratoLogado.arquivoContratoBase64 ? `<div class="mt-3"><button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button></div>` : '';
+                    let botaoContratoAssinado = dadosContratoLogado.arquivoContratoBase64 ? `<div class="mt-4"><button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button></div>` : '';
                     divContratos.innerHTML = `
-                        <div class="p-4 border rounded-xl bg-slate-50 space-y-2">
+                        <div class="p-5 border rounded-xl bg-slate-50 space-y-2.5">
                             <p><b>Nome:</b> ${dadosContratoLogado.nome || '---'}</p>
                             <p><b>Razão Social:</b> ${dadosContratoLogado.razaoSocial || '---'}</p>
                             <p><b>CNPJ / CPF:</b> ${dadosContratoLogado.cnpj || dadosContratoLogado.cpf || '---'}</p>
@@ -1848,7 +1857,7 @@
                 if (tipo === "regular") {
                     await update(ref(db), { [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorValor`]: valor, [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorEvento`]: evento });
                 } else {
-                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise"}};
+                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise" });
                 }
                 alert("Lançamento aplicado com sucesso!");
                 document.getElementById('motorValor').value = "";
