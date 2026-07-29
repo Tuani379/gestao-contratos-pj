@@ -49,6 +49,26 @@
         </div>
     </div>
 
+    <!-- MODAL LIQUIDAR COM COMPROVANTE E AGENDAMENTO -->
+    <div id="modalLiquidar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border space-y-4">
+            <h3 class="text-lg font-bold text-blue-950">Liquidar Pagamento & Comprovante</h3>
+            <p class="text-xs text-slate-500">Informe a data do pagamento e anexe o comprovante bancário (TED/PIX).</p>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Data Efetiva do Pagamento:</label>
+                <input type="date" id="inputDataEfetivaPagamento" class="w-full p-2.5 border rounded-lg text-xs bg-slate-50 font-bold">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Anexar Comprovante (PDF ou Imagem):</label>
+                <input type="file" id="inputArquivoComprovante" accept=".pdf,image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:font-bold cursor-pointer">
+            </div>
+            <div class="flex justify-end gap-2 pt-2 border-t">
+                <button onclick="fecharModalLiquidar()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button id="btnConfirmarLiquidar" onclick="executarLiquidacaoComprovante()" class="px-5 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700">Confirmar Liquidação</button>
+            </div>
+        </div>
+    </div>
+
     <!-- BOTÃO FLUTUANTE ALINHADO NA BARRA BRANCA -->
     <button id="btn-mostrar-menu" onclick="toggleMenuLateral()" class="hidden fixed left-4 top-16 z-30 bg-blue-900 hover:bg-blue-800 text-white w-9 h-9 rounded-xl shadow-lg border border-blue-700 transition flex items-center justify-center font-bold text-sm" title="Expandir Menu">
         ➔
@@ -157,7 +177,7 @@
 
         <nav id="menu-rh" class="bg-white border-b shadow-sm">
             <div class="max-w-7xl mx-auto flex gap-8 px-6">
-                <button id="btn-dashboard" onclick="mostrarSecao('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-950 transition">Folha de Pagamento</button>
+                <button id="btn-dashboard" onclick="mostrarSecao('dashboard')" class="py-4 border-b-2 border-blue-600 text-sm font-bold text-blue-950 transition">Folha & Tesouraria</button>
                 <button id="btn-contratos" onclick="mostrarSecao('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Equipe e Contratos</button>
                 <button id="btn-documentos" onclick="mostrarSecao('documentos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">📁 Central de Documentos</button>
                 <button id="btn-relatorios" onclick="mostrarSecao('relatorios')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Relatórios</button>
@@ -166,7 +186,7 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- DASHBOARD (FOLHA DE PAGAMENTO) -->
+            <!-- DASHBOARD (FOLHA DE PAGAMENTO E TESOURARIA) -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
                     <div class="bg-white p-6 rounded-xl border shadow-sm">
@@ -181,10 +201,15 @@
                         <p class="text-sm font-bold text-amber-700 uppercase">Total Complementar</p>
                         <h3 id="cardTotalFolhaComplementar" class="text-3xl font-extrabold text-amber-600 mt-2">R$ 0,00</h3>
                     </div>
-                    <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm">
-                        <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
-                        <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
-                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar / Atualizar Folha</button>
+                    <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm flex flex-col justify-between">
+                        <div>
+                            <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
+                            <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
+                        </div>
+                        <div class="flex gap-2 mt-3">
+                            <button id="btn-gerar-folha" class="w-1/2 bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-bold py-2 px-2 rounded-lg transition shadow-sm">🔄 Gerar Folha</button>
+                            <button onclick="exportarLoteFinanceiroExcel()" class="w-1/2 bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold py-2 px-2 rounded-lg transition shadow-sm">📥 Exportar Lote</button>
+                        </div>
                     </div>
                 </div>
 
@@ -250,7 +275,7 @@
 
                 <!-- TABELA FOLHA REGULAR -->
                 <div class="p-6 bg-white rounded-xl border shadow-sm">
-                    <h2 class="text-xl font-bold text-blue-900 mb-4">Folha de Pagamento Mensal</h2>
+                    <h2 class="text-xl font-bold text-blue-900 mb-4">Folha de Pagamento & Tesouraria (Regular)</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -258,19 +283,20 @@
                                     <th class="p-3">Prestador</th>
                                     <th class="p-3">CNPJ</th>
                                     <th class="p-3">Valor a Pagar</th>
+                                    <th class="p-3 text-center">Programação / Vencimento</th>
                                     <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
-                                    <th class="p-3 text-center">Status Pagamento / Ações</th>
+                                    <th class="p-3 text-center">Status Tesouraria / Ações</th>
                                 </tr>
                             </thead>
-                            <tbody id="listaFolha"><tr><td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência...</td></tr></tbody>
+                            <tbody id="listaFolha"><tr><td colspan="7" class="p-4 text-center text-slate-400">Selecione uma competência...</td></tr></tbody>
                         </table>
                     </div>
                 </div>
 
                 <!-- TABELA FOLHA COMPLEMENTAR -->
                 <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
-                    <h2 class="text-xl font-bold text-amber-900">⚡ Folha Complementar</h2>
+                    <h2 class="text-xl font-bold text-amber-900">⚡ Folha Complementar / Adicionais</h2>
                     <div class="overflow-x-auto">
                         <table class="w-full text-left border-collapse">
                             <thead>
@@ -278,6 +304,7 @@
                                     <th class="p-3">Prestador / Evento</th>
                                     <th class="p-3">CNPJ</th>
                                     <th class="p-3">Valor Adicional</th>
+                                    <th class="p-3 text-center">Programação</th>
                                     <th class="p-3 text-center">NF</th>
                                     <th class="p-3 text-center">Visualizar</th>
                                     <th class="p-3 text-center">Status / Ações</th>
@@ -1506,7 +1533,7 @@
 
             const chavesFolha = Object.keys(baseFolhaMes);
             if (chavesFolha.length === 0) {
-                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência. Clique em 'Criar / Atualizar Folha'.</td></tr>`;
+                tbodyRegular.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência. Clique em 'Gerar Folha'.</td></tr>`;
                 document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
                 document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
                 containerComp.classList.add('hidden');
@@ -1519,14 +1546,21 @@
                 totalReg += subTotalReg;
 
                 let cnpjCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (f.cnpj || '---');
+                let dataVencimentoReg = f.regular?.dataVencimento || "";
 
                 let statusRegHTML = f.regular?.statusPagamento || "Em Análise";
+                let acoesTesourariaReg = "";
+
                 if (statusRegHTML === "Pago") {
-                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
+                    let botaoComprovante = f.regular?.comprovanteBase64 ? `<button class="btn-view-comprovante-reg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold ml-1" data-id="${key}">🧾 Recibo</button>` : '';
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovante}`;
+                    acoesTesourariaReg = `<button onclick="estornarPagamentoRegular('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold" title="Estornar Pagamento">↩️ Estornar</button>`;
                 } else if (f.regular?.nfStatus === "Recusada ❌") {
-                    statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Em Análise" || f.regular?.nfArquivoBase64) {
-                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
+                    statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Aguardando Reenvio</span>`;
+                    acoesTesourariaReg = `<button onclick="reprocessarNotaRegular('${key}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-bold">🔄 Reprocessar</button>`;
+                } else {
+                    statusRegHTML = `<button onclick="abrirModalLiquidarRegular('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm">💰 Liquidar</button>`;
+                    acoesTesourariaReg = `<button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir da Folha">🗑️</button>`;
                 }
 
                 let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
@@ -1537,6 +1571,9 @@
                         <td class="p-3 text-xs text-slate-600 font-medium">${cnpjCadastrado}</td>
                         <td class="p-3 font-bold text-blue-950">R$ ${subTotalReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                         <td class="p-3 text-center">
+                            <input type="date" class="input-vencimento-reg border rounded p-1 text-xs bg-white font-medium" data-id="${key}" value="${dataVencimentoReg}">
+                        </td>
+                        <td class="p-3 text-center">
                             <select class="select-nf-status-reg border rounded p-1 text-xs font-bold bg-white" data-id="${key}">
                                 <option value="Aguardando" ${f.regular?.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
                                 <option value="Recebida ✔" ${f.regular?.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
@@ -1544,9 +1581,9 @@
                             </select>
                         </td>
                         <td class="p-3 text-center">${botaoVisualizarReg}</td>
-                        <td class="p-3 text-center flex items-center justify-center gap-2">
+                        <td class="p-3 text-center space-x-1 flex items-center justify-center">
                             ${statusRegHTML}
-                            <button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir da Folha">🗑️</button>
+                            ${acoesTesourariaReg}
                         </td>
                     </tr>
                 `;
@@ -1556,14 +1593,21 @@
                         temComp = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
                         totalComp += valComp;
+                        let dataVencComp = cItem.dataVencimento || "";
 
                         let statusCompHTML = cItem.statusPagamento || "Em Análise";
+                        let acoesTesourariaComp = "";
+
                         if (statusCompHTML === "Pago") {
-                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
+                            let botaoComprovanteComp = cItem.comprovanteBase64 ? `<button class="btn-view-comprovante-comp bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold ml-1" data-id="${key}" data-comp-id="${idComp}">🧾 Recibo</button>` : '';
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovanteComp}`;
+                            acoesTesourariaComp = `<button onclick="estornarPagamentoComplementar('${key}', '${idComp}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">↩️ Estornar</button>`;
                         } else if (cItem.nfStatus === "Recusada ❌") {
-                            statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Em Análise" || cItem.nfArquivoBase64) {
-                            statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
+                            statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada</span>`;
+                            acoesTesourariaComp = `<button onclick="reprocessarNotaComplementar('${key}', '${idComp}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-bold">🔄 Reprocessar</button>`;
+                        } else {
+                            statusCompHTML = `<button onclick="abrirModalLiquidarComplementar('${key}', '${idComp}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm">💰 Liquidar</button>`;
+                            acoesTesourariaComp = `<button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">🗑️</button>`;
                         }
 
                         let botaoVisualizarComp = cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
@@ -1574,6 +1618,9 @@
                                 <td class="p-3 text-xs text-slate-600 font-medium">${cnpjCadastrado}</td>
                                 <td class="p-3 font-bold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                 <td class="p-3 text-center">
+                                    <input type="date" class="input-vencimento-comp border rounded p-1 text-xs bg-white font-medium" data-id="${key}" data-comp-id="${idComp}" value="${dataVencComp}">
+                                </td>
+                                <td class="p-3 text-center">
                                     <select class="select-nf-status-comp border rounded p-1 text-xs font-bold bg-white" data-id="${key}" data-comp-id="${idComp}">
                                         <option value="Aguardando" ${cItem.nfStatus === 'Aguardando' ? 'selected' : ''}>Aguardando ⏳</option>
                                         <option value="Recebida ✔" ${cItem.nfStatus === 'Recebida ✔' ? 'selected' : ''}>Recebida ✔</option>
@@ -1581,9 +1628,9 @@
                                     </select>
                                 </td>
                                 <td class="p-3 text-center">${botaoVisualizarComp}</td>
-                                <td class="p-3 text-center flex items-center justify-center gap-2">
+                                <td class="p-3 text-center space-x-1 flex items-center justify-center">
                                     ${statusCompHTML}
-                                    <button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir Lançamento">🗑️</button>
+                                    ${acoesTesourariaComp}
                                 </td>
                             </tr>
                         `;
@@ -1595,6 +1642,131 @@
             document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
         }
+
+        // Funções de Tesouraria Avançada (Liquidação com Comprovante e Estorno)
+        let itemLiquidandoAtual = null;
+
+        window.abrirModalLiquidarRegular = (id) => {
+            itemLiquidandoAtual = { tipo: 'regular', id };
+            document.getElementById('inputDataEfetivaPagamento').value = new Date().toISOString().split('T')[0];
+            document.getElementById('inputArquivoComprovante').value = "";
+            document.getElementById('modalLiquidar').classList.remove('hidden');
+        };
+
+        window.abrirModalLiquidarComplementar = (id, compId) => {
+            itemLiquidandoAtual = { tipo: 'complementar', id, compId };
+            document.getElementById('inputDataEfetivaPagamento').value = new Date().toISOString().split('T')[0];
+            document.getElementById('inputArquivoComprovante').value = "";
+            document.getElementById('modalLiquidar').classList.remove('hidden');
+        };
+
+        window.fecharModalLiquidar = () => {
+            document.getElementById('modalLiquidar').classList.add('hidden');
+            itemLiquidandoAtual = null;
+        };
+
+        window.executarLiquidacaoComprovante = async () => {
+            if (!itemLiquidandoAtual) return;
+            const dataPagamento = document.getElementById('inputDataEfetivaPagamento').value;
+            const fileInput = document.getElementById('inputArquivoComprovante');
+
+            const salvarNoBanco = async (comprovanteBase64Url = null) => {
+                const basePath = `${pathFolhasDB}/${competenciaSelecionada}/${itemLiquidandoAtual.id}`;
+                const pacoteUpdate = { statusPagamento: "Pago", dataPagamentoEfetivo: dataPagamento };
+                if (comprovanteBase64Url) pacoteUpdate.comprovanteBase64 = comprovanteBase64Url;
+
+                if (itemLiquidandoAtual.tipo === 'regular') {
+                    await update(ref(db, `${basePath}/regular`), pacoteUpdate);
+                } else {
+                    await update(ref(db, `${basePath}/complementares_lista/${itemLiquidandoAtual.compId}`), pacoteUpdate);
+                }
+                alert("Pagamento liquidado com sucesso!");
+                fecharModalLiquidar();
+            };
+
+            if (fileInput.files.length > 0) {
+                const reader = new FileReader();
+                reader.onloadend = async () => { await salvarNoBanco(reader.result); };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                await salvarNoBanco();
+            }
+        };
+
+        window.estornarPagamentoRegular = async (id) => {
+            if (confirm("Deseja estornar este pagamento e retornar o status para 'Em Análise'?")) {
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
+                alert("Pagamento estornado com sucesso!");
+            }
+        };
+
+        window.estornarPagamentoComplementar = async (id, compId) => {
+            if (confirm("Deseja estornar este pagamento complementar?")) {
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
+                alert("Pagamento estornado com sucesso!");
+            }
+        };
+
+        window.reprocessarNotaRegular = async (id) => {
+            if (confirm("Deseja reprocessar esta nota para permitir novo reenvio pelo prestador?")) {
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
+                alert("Nota reprocessada! O prestador já pode anexar uma nova versão.");
+            }
+        };
+
+        window.reprocessarNotaComplementar = async (id, compId) => {
+            if (confirm("Deseja reprocessar esta nota complementar?")) {
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
+                alert("Nota reprocessada com sucesso!");
+            }
+        };
+
+        window.exportarLoteFinanceiroExcel = () => {
+            const wb = XLSX.utils.book_new();
+            let dadosExportacao = [];
+            const folhaMes = folhasLocais[competenciaSelecionada] || {};
+
+            Object.entries(folhaMes).forEach(([idContrato, f]) => {
+                let nome = f.nome || "Prestador";
+                let cnpj = f.cnpj || contratosLocais[idContrato]?.cnpj || "---";
+                let valReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
+
+                dadosExportacao.push({
+                    "Competência": competenciaSelecionada.replace('-', '/'),
+                    "Prestador": nome,
+                    "CNPJ": cnpj,
+                    "Tipo": "Regular",
+                    "Vencimento": f.regular?.dataVencimento || "---",
+                    "Valor Líquido": valReg,
+                    "Status Tesouraria": f.regular?.statusPagamento || "Em Análise",
+                    "Data Pagamento": f.regular?.dataPagamentoEfetivo || "---"
+                });
+
+                if (f.complementares_lista) {
+                    Object.values(f.complementares_lista).forEach(cItem => {
+                        dadosExportacao.push({
+                            "Competência": competenciaSelecionada.replace('-', '/'),
+                            "Prestador": nome,
+                            "CNPJ": cnpj,
+                            "Tipo": `Complementar (${cItem.motorEvento || 'Adicional'})`,
+                            "Vencimento": cItem.dataVencimento || "---",
+                            "Valor Líquido": parseFloat(cItem.motorValor || 0),
+                            "Status Tesouraria": cItem.statusPagamento || "Em Análise",
+                            "Data Pagamento": cItem.dataPagamentoEfetivo || "---"
+                        });
+                    });
+                }
+            });
+
+            if (dadosExportacao.length === 0) {
+                alert("Nenhum dado financeiro para exportar nesta competência.");
+                return;
+            }
+
+            const ws = XLSX.utils.json_to_sheet(dadosExportacao);
+            XLSX.utils.book_append_sheet(wb, ws, "Lote Financeiro");
+            XLSX.writeFile(wb, `Lote_Financeiro_${competenciaSelecionada}.xlsx`);
+        };
 
         window.excluirItemFolhaRegular = async (idContrato) => {
             if (confirm("Deseja realmente remover este prestador da folha mensal desta competência?")) {
@@ -1621,6 +1793,17 @@
                 const compId = e.target.dataset.compId;
                 const novoStatus = e.target.value;
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { nfStatus: novoStatus });
+            }
+            if (e.target.classList.contains('input-vencimento-reg')) {
+                const id = e.target.dataset.id;
+                const novaData = e.target.value;
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { dataVencimento: novaData });
+            }
+            if (e.target.classList.contains('input-vencimento-comp')) {
+                const id = e.target.dataset.id;
+                const compId = e.target.dataset.compId;
+                const novaData = e.target.value;
+                await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { dataVencimento: novaData });
             }
         });
 
@@ -1688,6 +1871,8 @@
                 let statusPagamentoRegPJ = "Anexar NF";
                 if (statusPagamentoRegCorp === "Pago") {
                     statusPagamentoRegPJ = "Pago";
+                } else if (nfStatusCorp === "Recusada ❌") {
+                    statusPagamentoRegPJ = "NF Recusada / Reenviar";
                 } else if (temNfReg || nfStatusCorp === "Recebida ✔") {
                     statusPagamentoRegPJ = "Em Análise";
                 }
@@ -1695,12 +1880,14 @@
                 let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoRegPJ}</span>`;
                 if (statusPagamentoRegPJ === "Pago") {
                     badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                } else if (statusPagamentoRegPJ.includes("Recusada")) {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700">Recusada</span>`;
                 } else if (statusPagamentoRegPJ === "Em Análise") {
                     badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                 }
 
                 let acaoRegPJ = `<span class="text-slate-400">---</span>`;
-                if (dadosFolha.regular?.nfArquivoBase64) {
+                if (dadosFolha.regular?.nfArquivoBase64 && nfStatusCorp !== "Recusada ❌") {
                     acaoRegPJ = `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">`;
                 } else {
                     acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
@@ -1729,6 +1916,8 @@
                         let statusPagamentoCompPJ = "Anexar NF";
                         if (statusPagamentoCompCorp === "Pago") {
                             statusPagamentoCompPJ = "Pago";
+                        } else if (nfStatusCompCorp === "Recusada ❌") {
+                            statusPagamentoCompPJ = "Reenviar NF";
                         } else if (temNfComp || nfStatusCompCorp === "Recebida ✔") {
                             statusPagamentoCompPJ = "Em Análise";
                         }
@@ -1741,7 +1930,7 @@
                         }
 
                         let acaoCompPJ = `<span class="text-slate-400">---</span>`;
-                        if (cItem.nfArquivoBase64) {
+                        if (cItem.nfArquivoBase64 && nfStatusCompCorp !== "Recusada ❌") {
                             acaoCompPJ = `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         } else {
                             acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
@@ -1869,20 +2058,22 @@
                     win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
                 }
             }
-            if (e.target.classList.contains('btn-liquidar-reg')) {
+            if (e.target.classList.contains('btn-view-comprovante-reg')) {
                 const id = e.target.dataset.id;
-                try {
-                    await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { statusPagamento: "Pago" });
-                    alert("Pagamento liquidado com sucesso!");
-                } catch(err) { alert("Erro: " + err.message); }
+                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.regular?.comprovanteBase64;
+                if (arquivo) {
+                    const win = window.open();
+                    win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
             }
-            if (e.target.classList.contains('btn-liquidar-comp')) {
+            if (e.target.classList.contains('btn-view-comprovante-comp')) {
                 const id = e.target.dataset.id;
                 const compId = e.target.dataset.compId;
-                try {
-                    await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { statusPagamento: "Pago" });
-                    alert("Pagamento complementar liquidado com sucesso!");
-                } catch(err) { alert("Erro: " + err.message); }
+                const arquivo = folhasLocais[competenciaSelecionada]?.[id]?.complementares_lista?.[compId]?.comprovanteBase64;
+                if (arquivo) {
+                    const win = window.open();
+                    win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`);
+                }
             }
         });
 
@@ -1897,11 +2088,10 @@
 
             let contadorDocs = 0;
 
-            // 1. Varrer Contratos (Contratos Sociais / Prestação)
             Object.entries(contratosLocais).forEach(([id, c]) => {
                 if (c.excluidoLogico) return;
                 if (fPrestador !== "todos" && c.nome !== fPrestador) return;
-                if (fTipo === "Nota Fiscal") return; // Ignora se filtro for só NF
+                if (fTipo === "Nota Fiscal") return;
 
                 contadorDocs++;
                 let vigenciaFim = c.vigenciaFim || "";
@@ -1929,7 +2119,6 @@
                 `;
             });
 
-            // 2. Varrer Notas Fiscais da Competência Selecionada
             const folhaObj = folhasLocais[fComp] || {};
             Object.entries(folhaObj).forEach(([idPrestador, dadosFolha]) => {
                 const cInfo = contratosLocais[idPrestador] || {};
@@ -1937,9 +2126,8 @@
                 const cnpjPrestador = dadosFolha.cnpj || cInfo.cnpj || "---";
 
                 if (fPrestador !== "todos" && nomePrestador !== fPrestador) return;
-                if (fTipo === "Contrato") return; // Ignora se filtro for só Contrato
+                if (fTipo === "Contrato") return;
 
-                // Nota Regular
                 if (dadosFolha.regular?.nfArquivoBase64) {
                     contadorDocs++;
                     corpoDoc.innerHTML += `
@@ -1954,7 +2142,6 @@
                     `;
                 }
 
-                // Notas Complementares
                 if (dadosFolha.complementares_lista) {
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         if (cItem.nfArquivoBase64) {
