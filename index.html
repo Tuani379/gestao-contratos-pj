@@ -591,12 +591,11 @@
             <!-- PORTAL DO PRESTADOR -->
             <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
                 
-                <!-- Submenu da Etapa 5 -->
+                <!-- Submenu da Etapa 5 (Removida a aba Perfil) -->
                 <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
                     <div class="flex flex-wrap gap-1 md:gap-2">
                         <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
                         <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
-                        <button onclick="mudarSecaoPrestador('pj-perfil')" id="btn-pj-perfil" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Perfil</button>
                     </div>
                     <div class="px-2">
                         <select id="selectCompetenciaPJ" class="p-2 border rounded-xl bg-slate-50 text-xs font-bold text-blue-950"></select>
@@ -657,22 +656,12 @@
                     </div>
                 </div>
 
-                <!-- MEUS CONTRATOS (ENDEREÇO E CEP SEPARADOS) -->
+                <!-- MEUS CONTRATOS -->
                 <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
                         <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
                             <p class="text-slate-400">Carregando contrato...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- PERFIL (FOTO DO LADO DIREITO) -->
-                <div id="sec-pj-perfil" class="sec-pj hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4 max-w-xl">
-                        <h2 class="text-xl font-extrabold text-blue-950">Meu Perfil</h2>
-                        <div class="space-y-3 text-xs" id="pj-conteudo-perfil">
-                            <p class="text-slate-400">Carregando dados...</p>
                         </div>
                     </div>
                 </div>
@@ -737,7 +726,39 @@
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
-        function carregarIdentidadeVisualMenu() {
+        const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
+        const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
+
+        function carregarIdentidadeVisualMenu(modoPJ = false) {
+            if (modoPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                get(ref(db, pathContratosDB)).then((snapshot) => {
+                    const dados = snapshot.val() || {};
+                    let prestadorEncontrado = null;
+                    Object.values(dados).forEach(c => {
+                        if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                            prestadorEncontrado = c;
+                        }
+                    });
+                    if (prestadorEncontrado) {
+                        const nomePrestador = prestadorEncontrado.nome || "Prestador";
+                        document.getElementById('user-name').innerText = nomePrestador.toUpperCase();
+                        document.getElementById('dropdown-nome-usuario').innerText = nomePrestador;
+                        const avatarContainer = document.getElementById('user-avatar');
+                        if (prestadorEncontrado.fotoBase64) {
+                            avatarContainer.innerHTML = `<img src="${prestadorEncontrado.fotoBase64}" class="w-full h-full object-cover">`;
+                        } else {
+                            avatarContainer.innerText = nomePrestador.substring(0, 2).toUpperCase();
+                        }
+                        return;
+                    }
+                    carregarPadraoEmpresa();
+                });
+            } else {
+                carregarPadraoEmpresa();
+            }
+        }
+
+        function carregarPadraoEmpresa() {
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             get(ref(db, pathInfo)).then((snapshot) => {
                 const dados = snapshot.val() || {};
@@ -849,7 +870,7 @@
                     });
                 }
                 document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
-                carregarIdentidadeVisualMenu();
+                carregarIdentidadeVisualMenu(false);
                 carregarDadosPortalPrestador();
             } else {
                 document.getElementById('tela-login').classList.remove('hidden');
@@ -981,7 +1002,7 @@
                 localStorage.setItem('connectpj_empresa_nome', pacote.razaoSocial);
                 document.getElementById('dropdown-empresa-ativa').innerText = pacote.razaoSocial;
                 document.getElementById('label-empresa-topo').innerText = `Empresa: ${pacote.razaoSocial}`;
-                carregarIdentidadeVisualMenu();
+                carregarIdentidadeVisualMenu(false);
             };
 
             if (fileInput.files.length > 0) {
@@ -1018,6 +1039,7 @@
                 btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition";
                 document.getElementById('menu-rh').classList.remove('hidden');
                 document.getElementById('area-prestador').classList.add('hidden');
+                carregarIdentidadeVisualMenu(false);
                 mostrarSecao('dashboard');
             } else {
                 btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
@@ -1025,6 +1047,7 @@
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
+                carregarIdentidadeVisualMenu(true);
                 mudarSecaoPrestador('pj-enviar');
             }
         };
@@ -1033,7 +1056,7 @@
             document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${subId}`).classList.remove('hidden');
 
-            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-perfil'];
+            const botoes = ['btn-pj-enviar', 'btn-pj-contratos'];
             botoes.forEach(bId => {
                 const b = document.getElementById(bId);
                 if(b) {
@@ -1049,8 +1072,6 @@
 
         let contratosLocais = {};
         let folhasLocais = {};
-        const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
-        const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
 
         onValue(ref(db, pathContratosDB), (snapshot) => {
             contratosLocais = snapshot.val() || {};
@@ -1462,27 +1483,6 @@
                     divContratos.innerHTML = `<p class="text-slate-500">Logado como Administrador Master.</p>`;
                 } else {
                     divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado.</p>`;
-                }
-            }
-
-            const divPerfil = document.getElementById('pj-conteudo-perfil');
-            if (divPerfil) {
-                if (dadosContratoLogado) {
-                    let fotoPerfilHtml = dadosContratoLogado.fotoBase64 ? `<img src="${dadosContratoLogado.fotoBase64}" class="w-16 h-16 rounded-full object-cover border-2 border-blue-200 shadow-sm">` : `<div class="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center font-bold text-sm text-slate-600">${(dadosContratoLogado.nome || 'P').substring(0,2).toUpperCase()}</div>`;
-                    divPerfil.innerHTML = `
-                        <div class="flex justify-between items-start">
-                            <div class="space-y-2">
-                                <p><b>Nome:</b> ${dadosContratoLogado.nome}</p>
-                                <p><b>E-mail:</b> ${dadosContratoLogado.email || usuarioEmailLogado}</p>
-                                <p><b>CNPJ:</b> ${dadosContratoLogado.cnpj || '---'}</p>
-                                <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
-                                <p><b>Status:</b> <span class="text-green-700 font-bold">${dadosContratoLogado.status}</span></p>
-                            </div>
-                            <div>${fotoPerfilHtml}</div>
-                        </div>
-                    `;
-                } else {
-                    divPerfil.innerHTML = `<p><b>E-mail:</b> ${usuarioEmailLogado}</p><p><b>Perfil:</b> Administrador / Master</p>`;
                 }
             }
 
