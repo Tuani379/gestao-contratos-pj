@@ -1551,15 +1551,14 @@
                             ${botaoContratoAssinado}
                         </div>
                     `;
-                } else if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
-                    divContratos.innerHTML = `<p class="text-slate-500">Logado como Administrador Master.</p>`;
                 } else {
-                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado.</p>`;
+                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado a este e-mail.</p>`;
                 }
             }
 
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
-                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && idContratoLogado !== idContratoFolha) {
+                // CORREÇÃO: Restringe estritamente para exibir apenas o contrato logado (sem exceção de master)
+                if (idContratoLogado !== idContratoFolha) {
                     return;
                 }
 
