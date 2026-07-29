@@ -1511,13 +1511,11 @@
                 const cardFixoPg = document.getElementById('pj-card-fixo-pg');
                 if (cardFixoValor) cardFixoValor.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
                 if (cardFixoNf) cardFixoNf.innerText = statusNfRegExibir;
-                if (cardFixoPg) cardFixoPg.innerText = statusPagamentoReg;
+                if (cardFixoPg) cardFixoPg.innerText = statusPagamentoReg === "Pago" ? "Pago" : "Em Análise";
 
-                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoReg}</span>`;
+                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                 if (statusPagamentoReg === "Pago") {
                     badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
-                } else if (statusPagamentoReg === "Em Análise") {
-                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                 }
 
                 let acaoRegPJ = `<span class="text-slate-400">---</span>`;
@@ -1554,17 +1552,15 @@
                                     <h3 class="text-xl font-extrabold text-amber-950">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</h3>
                                     <div class="border-t pt-2 text-xs space-y-1">
                                         <p><b>Status NF:</b> <span class="text-slate-600">${statusNfCompExibir}</span></p>
-                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${statusPagamentoComp}</span></p>
+                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${statusPagamentoComp === "Pago" ? "Pago" : "Em Análise"}</span></p>
                                     </div>
                                 </div>
                             `;
                         }
 
-                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoComp}</span>`;
+                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                         if (statusPagamentoComp === "Pago") {
                             badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
-                        } else if (statusPagamentoComp === "Em Análise") {
-                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                         }
 
                         let acaoCompPJ = `<span class="text-slate-400">---</span>`;
