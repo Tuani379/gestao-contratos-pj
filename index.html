@@ -596,7 +596,6 @@
                     <div class="flex flex-wrap gap-1 md:gap-2">
                         <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
                         <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
-                        <button onclick="mudarSecaoPrestador('pj-pagamentos')" id="btn-pj-pagamentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Pagamentos</button>
                         <button onclick="mudarSecaoPrestador('pj-perfil')" id="btn-pj-perfil" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Perfil</button>
                     </div>
                     <div class="px-2">
@@ -612,8 +611,8 @@
                             <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Fixo Mensal</span>
                             <h3 id="pj-card-fixo-valor" class="text-xl font-extrabold text-blue-950">R$ 0,00</h3>
                             <div class="border-t pt-2 text-xs space-y-1">
-                                <p><b>Status NF:</b> <span id="pj-card-fixo-nf" class="text-slate-600">Aguardando</span></p>
-                                <p><b>Previsão:</b> <span id="pj-card-fixo-pg" class="text-emerald-700 font-semibold">Pendente</span></p>
+                                <p><b>Status NF:</b> <span id="pj-card-fixo-nf" class="text-slate-600">Anexar NF</span></p>
+                                <p><b>Previsão:</b> <span id="pj-card-fixo-pg" class="text-amber-700 font-semibold">Em Análise</span></p>
                             </div>
                         </div>
                         <div id="pj-card-comp-container" class="contents"></div>
@@ -678,28 +677,6 @@
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
                         <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
                             <p class="text-slate-400">Carregando contrato...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MEUS PAGAMENTOS -->
-                <div id="sec-pj-pagamentos" class="sec-pj hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
-                        <h2 class="text-xl font-extrabold text-blue-950">Histórico de Pagamentos</h2>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">
-                                        <th class="p-3">Prestador / CNPJ</th>
-                                        <th class="p-3">Valor Líquido</th>
-                                        <th class="p-3">Status NF</th>
-                                        <th class="p-3 text-center">Status Pagamento</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="pj-tabela-pagamentos" class="text-xs">
-                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
-                                </tbody>
-                            </table>
                         </div>
                     </div>
                 </div>
@@ -1070,13 +1047,15 @@
             document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${subId}`).classList.remove('hidden');
 
-            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
+            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-perfil'];
             botoes.forEach(bId => {
                 const b = document.getElementById(bId);
-                if (bId === `btn-${subId}`) {
-                    b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
-                } else {
-                    b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                if(b) {
+                    if (bId === `btn-${subId}`) {
+                        b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
+                    } else {
+                        b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                    }
                 }
             });
             carregarDadosPortalPrestador();
@@ -1341,12 +1320,12 @@
 
                 let cnpjCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (f.cnpj || '---');
 
-                let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
+                let statusRegHTML = f.regular?.statusPagamento || "Em Análise";
                 if (statusRegHTML === "Pago") {
                     statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                 } else if (f.regular?.nfStatus === "Recusada ❌") {
                     statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar" || f.regular?.nfArquivoBase64) {
+                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Em Análise" || f.regular?.nfArquivoBase64) {
                     statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
@@ -1378,12 +1357,12 @@
                         let valComp = parseFloat(cItem.motorValor || 0);
                         totalComp += valComp;
 
-                        let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
+                        let statusCompHTML = cItem.statusPagamento || "Em Análise";
                         if (statusCompHTML === "Pago") {
                             statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                         } else if (cItem.nfStatus === "Recusada ❌") {
                             statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar" || cItem.nfArquivoBase64) {
+                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Em Análise" || cItem.nfArquivoBase64) {
                             statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
                         }
 
@@ -1507,47 +1486,6 @@
                 }
             }
 
-            const tabelaPgtos = document.getElementById('pj-tabela-pagamentos');
-            if (tabelaPgtos) {
-                tabelaPgtos.innerHTML = "";
-                let temPgtos = false;
-                Object.entries(folhasLocais).forEach(([compKey, compObj]) => {
-                    if (compKey === compPJ) {
-                        Object.entries(compObj).forEach(([idF, fData]) => {
-                            if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || idF === idContratoLogado) {
-                                temPgtos = true;
-                                let valTotal = parseFloat(fData.regular?.valorFixo || 0) + parseFloat(fData.regular?.motorValor || 0);
-                                let statusPg = fData.regular?.statusPagamento || "Aguardando";
-                                let nomePgt = fData.nome || dadosContratoLogado?.nome || "Prestador";
-                                let cnpjPgt = fData.cnpj || dadosContratoLogado?.cnpj || "---";
-
-                                tabelaPgtos.innerHTML += `
-                                    <tr class="border-b">
-                                        <td class="p-3"><b>${nomePgt}</b><br><small class="text-slate-500">${cnpjPgt}</small></td>
-                                        <td class="p-3 font-bold text-blue-950">R$ ${valTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                        <td class="p-3">${fData.regular?.nfStatus || 'Aguardando'}</td>
-                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold ${statusPg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-slate-100 text-slate-700'}">${statusPg}</span></td>
-                                    </tr>
-                                `;
-                            }
-                        });
-                    }
-                });
-                if (!temPgtos && dadosContratoLogado) {
-                    let valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
-                    tabelaPgtos.innerHTML += `
-                        <tr class="border-b">
-                            <td class="p-3"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3">Aguardando</td>
-                            <td class="p-3 text-center"><span class="px-2 py-1 rounded text-[11px] font-bold bg-slate-100 text-slate-700">Aguardando NF</span></td>
-                        </tr>
-                    `;
-                } else if (!temPgtos) {
-                    tabelaPgtos.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum pagamento registrado.</td></tr>`;
-                }
-            }
-
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && idContratoLogado !== idContratoFolha) {
                     return;
@@ -1557,21 +1495,23 @@
                 const nomeExibir = dadosFolha.nome || dadosContratoLogado?.nome || "Prestador";
                 const cnpjExibir = dadosFolha.cnpj || dadosContratoLogado?.cnpj || "---";
                 const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
-                const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
-                const statusPagamentoReg = dadosFolha.regular?.statusPagamento || "Aguardando NF";
+                
+                const temNfReg = Boolean(dadosFolha.regular?.nfArquivoBase64);
+                const statusNfRegExibir = temNfReg ? "Nota Anexada" : "Anexar NF";
+                const statusPagamentoReg = dadosFolha.regular?.statusPagamento || "Em Análise";
 
                 const cardFixoValor = document.getElementById('pj-card-fixo-valor');
                 const cardFixoNf = document.getElementById('pj-card-fixo-nf');
                 const cardFixoPg = document.getElementById('pj-card-fixo-pg');
                 if (cardFixoValor) cardFixoValor.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-                if (cardFixoNf) cardFixoNf.innerText = nfStatusReg;
+                if (cardFixoNf) cardFixoNf.innerText = statusNfRegExibir;
                 if (cardFixoPg) cardFixoPg.innerText = statusPagamentoReg;
 
                 let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoReg}</span>`;
                 if (statusPagamentoReg === "Pago") {
                     badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
-                } else if (statusPagamentoReg === "Pronto para Pagar") {
-                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Pronto para Pagar</span>`;
+                } else if (statusPagamentoReg === "Em Análise") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                 }
 
                 let acaoRegPJ = `<span class="text-slate-400">---</span>`;
@@ -1596,8 +1536,10 @@
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let statusPagamentoComp = cItem.statusPagamento || "Aguardando NF";
+                        let statusPagamentoComp = cItem.statusPagamento || "Em Análise";
                         let eventoNome = cItem.motorEvento || 'Adicional';
+                        let temNfComp = Boolean(cItem.nfArquivoBase64);
+                        let statusNfCompExibir = temNfComp ? "Nota Anexada" : "Anexar NF";
 
                         if (containerCardComp) {
                             containerCardComp.innerHTML += `
@@ -1605,7 +1547,7 @@
                                     <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">${eventoNome}</span>
                                     <h3 class="text-xl font-extrabold text-amber-950">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</h3>
                                     <div class="border-t pt-2 text-xs space-y-1">
-                                        <p><b>Status NF:</b> <span class="text-slate-600">${cItem.nfStatus || "Aguardando"}</span></p>
+                                        <p><b>Status NF:</b> <span class="text-slate-600">${statusNfCompExibir}</span></p>
                                         <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${statusPagamentoComp}</span></p>
                                     </div>
                                 </div>
@@ -1615,8 +1557,8 @@
                         let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoComp}</span>`;
                         if (statusPagamentoComp === "Pago") {
                             badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
-                        } else if (statusPagamentoComp === "Pronto para Pagar") {
-                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Pronto para Pagar</span>`;
+                        } else if (statusPagamentoComp === "Em Análise") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                         }
 
                         let acaoCompPJ = `<span class="text-slate-400">---</span>`;
@@ -1642,19 +1584,24 @@
 
             if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ) {
+            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
                 const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
+                const cardFixoValor = document.getElementById('pj-card-fixo-valor');
+                const cardFixoNf = document.getElementById('pj-card-fixo-nf');
+                const cardFixoPg = document.getElementById('pj-card-fixo-pg');
                 if (cardFixoValor) cardFixoValor.innerText = `R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                if (cardFixoNf) cardFixoNf.innerText = "Anexar NF";
+                if (cardFixoPg) cardFixoPg.innerText = "Em Análise";
                 
                 tbodyRegPJ.innerHTML = `
                     <tr class="border-b">
                         <td class="p-2.5"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
                         <td class="p-2.5 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                         <td class="p-2.5"><input type="file" accept=".pdf,image/*" class="input-nf-reg-avulsa text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoLogado}"></td>
-                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span></td>
+                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span></td>
                     </tr>
                 `;
-            } else if (!encontrouAlgum && tbodyRegPJ) {
+            } else if (!encontrouAlgum && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
         }
@@ -1684,7 +1631,7 @@
 
                             dadosFolhaPrestador.regular.nfArquivoBase64 = reader.result;
                             dadosFolhaPrestador.regular.nfStatus = "Recebida ✔";
-                            dadosFolhaPrestador.regular.statusPagamento = "Pronto para Pagar";
+                            dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
                             atualizou = true;
@@ -1706,7 +1653,7 @@
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}/complementares_lista/${compId}`), {
                                 nfArquivoBase64: reader.result,
                                 nfStatus: "Recebida ✔",
-                                statusPagamento: "Pronto para Pagar"
+                                statusPagamento: "Em Análise"
                             });
                             atualizou = true;
                             resolve();
@@ -1898,7 +1845,7 @@
                     folhaExistente[id] = {
                         nome: c.nome, 
                         cnpj: c.cnpj || '',
-                        regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
+                        regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Em Análise" }
                     };
                 }
             });
@@ -1920,7 +1867,7 @@
                 if (tipo === "regular") {
                     await update(ref(db), { [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorValor`]: valor, [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorEvento`]: evento });
                 } else {
-                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Aguardando NF" });
+                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise" });
                 }
                 alert("Lançamento aplicado com sucesso!");
                 document.getElementById('motorValor').value = "";
