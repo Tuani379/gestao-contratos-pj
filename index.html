@@ -341,6 +341,13 @@
                                     <option value="Prestador">Prestador</option>
                                 </select>
                             </div>
+                            <div id="bloco-admin-prestador" class="hidden">
+                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Admin também é Prestador?</label>
+                                <select id="campoAdminEhPrestador" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
+                                    <option value="nao">Não</option>
+                                    <option value="sim">Sim</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Foto (Avatar):</label>
                                 <input type="file" id="campoFotoArquivo" accept="image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
@@ -722,6 +729,7 @@
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
         let usuarioEmailLogado = "";
         let perfilUsuarioLogado = "Administrador";
+        let modoVisualAtual = "rh";
 
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
@@ -782,9 +790,11 @@
             });
         }
 
-        function aplicarPermissoesPerfil(perfil) {
+        function aplicarPermissoesPerfil(perfil, adminEhPrestador = false) {
             perfilUsuarioLogado = perfil;
-            document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${perfil} ▾`;
+            
+            const badgeTipo = (modoVisualAtual === 'pj' && (perfil === 'Administrador' && adminEhPrestador)) ? 'Prestador' : perfil;
+            document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${badgeTipo} ▾`;
 
             const btnDashboard = document.getElementById('btn-dashboard');
             const btnContratos = document.getElementById('btn-contratos');
@@ -793,26 +803,35 @@
             const menuRh = document.getElementById('menu-btn-rh');
 
             if (perfil === 'Administrador') {
-                [btnDashboard, btnContratos, btnRelatorios, menuPj, menuRh].forEach(el => el.style.display = 'block');
+                [btnDashboard, btnContratos, btnRelatorios, menuRh].forEach(el => el.style.display = 'block');
+                if (adminEhPrestador) {
+                    menuPj.style.display = 'block';
+                } else {
+                    menuPj.style.display = 'none';
+                }
             } else if (perfil === 'Financeiro') {
                 btnDashboard.style.display = 'block';
                 btnRelatorios.style.display = 'block';
                 btnContratos.style.display = 'none';
+                menuPj.style.display = 'none';
                 mostrarSecao('dashboard');
             } else if (perfil === 'RH') {
                 btnDashboard.style.display = 'block';
                 btnContratos.style.display = 'block';
                 btnRelatorios.style.display = 'none';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Gestor') {
                 btnDashboard.style.display = 'none';
                 btnContratos.style.display = 'block';
                 btnRelatorios.style.display = 'block';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Jurídico') {
                 btnDashboard.style.display = 'none';
                 btnRelatorios.style.display = 'none';
                 btnContratos.style.display = 'block';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Prestador') {
                 mudarPainelModo('pj');
@@ -861,7 +880,7 @@
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
-                    aplicarPermissoesPerfil('Administrador');
+                    aplicarPermissoesPerfil('Administrador', true);
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
@@ -869,12 +888,14 @@
                     get(ref(db, pathContratosDB)).then((snapshot) => {
                         const dados = snapshot.val() || {};
                         let perfilEncontrado = 'Prestador';
+                        let adminPrestador = false;
                         Object.values(dados).forEach(c => {
                             if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
                                 perfilEncontrado = c.perfilTipo || 'Prestador';
+                                adminPrestador = (c.adminEhPrestador === 'sim');
                             }
                         });
-                        aplicarPermissoesPerfil(perfilEncontrado);
+                        aplicarPermissoesPerfil(perfilEncontrado, adminPrestador);
                     });
                 }
                 document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
@@ -1040,8 +1061,26 @@
         };
 
         window.mudarPainelModo = (modo) => {
+            modoVisualAtual = modo;
             const btnRh = document.getElementById('menu-btn-rh');
             const btnPj = document.getElementById('menu-btn-pj');
+
+            let adminPrestadorGlobal = false;
+            if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                adminPrestadorGlobal = true;
+            } else {
+                Object.values(contratosLocais).forEach(c => {
+                    if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && c.adminEhPrestador === 'sim') {
+                        adminPrestadorGlobal = true;
+                    }
+                });
+            }
+
+            if (perfilUsuarioLogado === 'Administrador') {
+                const badgeExibir = (modo === 'pj' && adminPrestadorGlobal) ? 'Prestador' : 'Administrador';
+                document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${badgeExibir} ▾`;
+            }
+
             if (modo === 'rh') {
                 btnRh.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
                 btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition";
@@ -1174,10 +1213,25 @@
             carregarDadosPortalPrestador();
         });
 
+        const campoPerfilTipoSelect = document.getElementById('campoPerfilTipo');
+        const blocoAdminPrestador = document.getElementById('bloco-admin-prestador');
+        
+        campoPerfilTipoSelect.addEventListener('change', () => {
+            if (campoPerfilTipoSelect.value === 'Administrador') {
+                blocoAdminPrestador.classList.remove('hidden');
+            } else {
+                blocoAdminPrestador.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = 'nao';
+            }
+        });
+
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
             ['campoNome','campoCpf','campoEmail','campoTelefone','campoContatoEmergencia','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoInscricaoEstadual','campoInscricaoMunicipal','campoCep','campoLogradouro','campoNumero','campoBairro','campoCidade','campoEstado','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoCargo','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('campoPerfilTipo').value = 'Administrador';
+            document.getElementById('campoAdminEhPrestador').value = 'nao';
+            blocoAdminPrestador.classList.remove('hidden');
             document.getElementById('campoFotoArquivo').value = "";
             document.getElementById('campoArquivoContrato').value = "";
             document.getElementById('modalCadastro').classList.remove('hidden');
@@ -1192,6 +1246,7 @@
             const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
                 const pacote = {
                     perfilTipo: document.getElementById('campoPerfilTipo').value,
+                    adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
                     nome: document.getElementById('campoNome').value,
                     cpf: document.getElementById('campoCpf').value,
                     email: document.getElementById('campoEmail').value,
@@ -1267,6 +1322,15 @@
             document.getElementById('tituloModal').innerText = "Editar Contrato / Cadastro";
             document.getElementById('btn-salvar-cadastro').dataset.editId = id;
             document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
+            
+            if (c.perfilTipo === 'Administrador') {
+                blocoAdminPrestador.classList.remove('hidden');
+                document.getElementById('campoAdminEhPrestador').value = c.adminEhPrestador || 'nao';
+            } else {
+                blocoAdminPrestador.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = 'nao';
+            }
+
             document.getElementById('campoNome').value = c.nome || "";
             document.getElementById('campoCpf').value = c.cpf || "";
             document.getElementById('campoEmail').value = c.email || "";
