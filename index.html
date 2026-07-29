@@ -172,7 +172,28 @@
                 <span class="text-slate-300">|</span>
                 <span id="data-atual-sistema" class="text-slate-600 font-medium text-xs"></span>
             </div>
-            <div class="text-xs text-slate-400 font-semibold">Conecta. Organiza. Simplifica.</div>
+            
+            <!-- ETAPA 11: CENTRAL DE NOTIFICAÇÕES (SININHO 🔔) -->
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <button onclick="toggleModalNotificacoes(event)" class="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center justify-center" title="Central de Notificações">
+                        🔔
+                        <span id="badge-contador-notif" class="absolute -top-1 -right-1 bg-red-600 text-white text-[10px] font-extrabold px-1.5 py-0.2 rounded-full hidden">0</span>
+                    </button>
+
+                    <!-- Dropdown de Notificações -->
+                    <div id="modal-notificacoes-dropdown" class="hidden absolute right-0 top-full mt-2 w-80 bg-white text-slate-800 rounded-2xl shadow-2xl border border-slate-200 p-4 z-50 text-left space-y-3">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <h3 class="font-extrabold text-xs text-blue-950 uppercase tracking-wide">🔔 Notificações e Eventos</h3>
+                            <button onclick="limparNotificacoes()" class="text-[10px] text-blue-600 hover:underline font-bold">Marcar lidas</button>
+                        </div>
+                        <div id="lista-notificacoes-container" class="space-y-2 max-h-64 overflow-y-auto text-xs">
+                            <p class="text-slate-400 text-center py-4">Nenhuma nova notificação.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="text-xs text-slate-400 font-semibold hidden md:block">Conecta. Organiza. Simplifica.</div>
+            </div>
         </div>
 
         <nav id="menu-rh" class="bg-white border-b shadow-sm">
@@ -904,6 +925,89 @@
 
         const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
         const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
+        const pathNotificacoesDB = empresaAtivaId === 'matriz' ? 'notificacoes_sistema' : `empresas_clientes_dados/${empresaAtivaId}/notificacoes_sistema`;
+
+        // Função Auxiliar para Disparo de Notificações Automáticas (Etapa 11)
+        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null) {
+            try {
+                await push(ref(db, pathNotificacoesDB), {
+                    titulo,
+                    mensagem,
+                    tipo,
+                    data: new Date().toISOString(),
+                    lida: false
+                });
+
+                if (destinatarioEmail && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
+                    await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
+                        to_email: destinatarioEmail,
+                        subject: `ConnectPJ - ${titulo}`,
+                        message: mensagem
+                    });
+                }
+            } catch (err) {
+                console.error("Erro ao registrar notificação:", err);
+            }
+        }
+
+        window.toggleModalNotificacoes = (e) => {
+            e.stopPropagation();
+            document.getElementById('modal-notificacoes-dropdown').classList.toggle('hidden');
+        };
+        document.addEventListener('click', () => {
+            const dropdownNotif = document.getElementById('modal-notificacoes-dropdown');
+            if(dropdownNotif) dropdownNotif.classList.add('hidden');
+        });
+
+        window.limparNotificacoes = async () => {
+            const snapshot = await get(ref(db, pathNotificacoesDB));
+            const notifs = snapshot.val() || {};
+            let updates = {};
+            Object.keys(notifs).forEach(key => {
+                updates[`${key}/lida`] = true;
+            });
+            if (Object.keys(updates).length > 0) {
+                await update(ref(db, pathNotificacoesDB), updates);
+            }
+        };
+
+        onValue(ref(db, pathNotificacoesDB), (snapshot) => {
+            const notifs = snapshot.val() || {};
+            const container = document.getElementById('lista-notificacoes-container');
+            const badgeContador = document.getElementById('badge-contador-notif');
+            container.innerHTML = "";
+
+            let naoLidas = 0;
+            const entradas = Object.entries(notifs).reverse();
+
+            if (entradas.length === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-4">Nenhuma notificação registrada.</p>`;
+                badgeContador.classList.add('hidden');
+                return;
+            }
+
+            entradas.forEach(([key, n]) => {
+                if (!n.lida) naoLidas++;
+                let corBorda = "border-blue-200 bg-blue-50/30";
+                if (n.tipo === 'alerta') corBorda = "border-amber-200 bg-amber-50/30";
+                if (n.tipo === 'sucesso') corBorda = "border-green-200 bg-green-50/30";
+
+                container.innerHTML += `
+                    <div class="p-2.5 border rounded-xl ${corBorda} ${n.lida ? 'opacity-60' : 'font-semibold'}">
+                        <p class="text-blue-950 font-bold">${n.titulo}</p>
+                        <p class="text-slate-600 text-[11px] mt-0.5">${n.mensagem}</p>
+                        <span class="text-[9px] text-slate-400 block mt-1">${new Date(n.data).toLocaleString('pt-BR')}</span>
+                    </div>
+                `;
+            });
+
+            if (naoLidas > 0) {
+                badgeContador.innerText = naoLidas;
+                badgeContador.classList.remove('hidden');
+            } else {
+                badgeContador.classList.add('hidden');
+            }
+        });
 
         function carregarIdentidadeVisualMenu(modoPJ = false) {
             const blocoEmpresaAtivaDropdown = document.getElementById('bloco-empresa-ativa-dropdown');
@@ -1123,6 +1227,10 @@
             const em = document.getElementById('inputNovoEmailEmpresa').value;
             if (!r || !c || !em) { alert("Preencha tudo!"); return; }
             await update(push(ref(db, 'empresas_clientes')), { razaoSocial: r, cnpj: c, emailResponsavel: em, status: "Ativo" });
+            
+            // Disparar Notificação Nova Empresa / Novo Usuário (Etapa 11)
+            await registrarNotificacao("Nova Empresa / Usuário", `A organização ${r} foi cadastrada com sucesso.`, "sucesso", em);
+
             alert("Empresa salva!"); fecharModalNovaEmpresaMaster();
         };
 
@@ -1520,6 +1628,8 @@
                         alert("Contrato atualizado com sucesso!");
                     } else {
                         await push(ref(db, pathContratosDB), pacote);
+                        // Disparar notificação de Novo Usuário (Etapa 11)
+                        await registrarNotificacao("Novo Usuário / Prestador", `O prestador ${pacote.nome} foi cadastrado com sucesso no sistema.`, "sucesso", pacote.email || pacote.emailCorp);
                         alert("Contrato cadastrado com sucesso!");
                     }
                     document.getElementById('modalCadastro').classList.add('hidden');
@@ -1870,6 +1980,11 @@
                 } else {
                     await update(ref(db, `${basePath}/complementares_lista/${itemLiquidandoAtual.compId}`), pacoteUpdate);
                 }
+
+                // Disparar Notificação de Pagamento Realizado (Etapa 11)
+                const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
+                await registrarNotificacao("Pagamento Realizado", `O pagamento de ${cInfo.nome || 'Prestador'} referente a competência ${competenciaSelecionada.replace('-', '/')} foi liquidado com sucesso.`, "sucesso", cInfo.email || cInfo.emailCorp);
+
                 alert("Pagamento liquidado com sucesso!");
                 fecharModalLiquidar();
             };
@@ -1900,6 +2015,11 @@
         window.reprocessarNotaRegular = async (id) => {
             if (confirm("Deseja reprocessar esta nota para permitir novo reenvio pelo prestador?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
+                
+                // Disparar Notificação de Nota Rejeitada (Etapa 11)
+                const cInfo = contratosLocais[id] || {};
+                await registrarNotificacao("Nota Rejeitada / Reprocessamento", `Sua Nota Fiscal na competência ${competenciaSelecionada.replace('-', '/')} foi recusada. Por favor, envie uma nova versão.`, "alerta", cInfo.email || cInfo.emailCorp);
+
                 alert("Nota reprocessada! O prestador já pode anexar uma nova versão.");
             }
         };
@@ -1977,6 +2097,11 @@
                 const id = e.target.dataset.id;
                 const novoStatus = e.target.value;
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: novoStatus });
+                
+                if (novoStatus === "Recebida ✔") {
+                    const cInfo = contratosLocais[id] || {};
+                    await registrarNotificacao("Nota Aprovada", `Sua Nota Fiscal na competência ${competenciaSelecionada.replace('-', '/')} foi aprovada pelo financeiro.`, "sucesso", cInfo.email || cInfo.emailCorp);
+                }
             }
             if (e.target.classList.contains('select-nf-status-comp')) {
                 const id = e.target.dataset.id;
@@ -2185,6 +2310,10 @@
                             dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
+                            
+                            // Disparar Notificação Nova Nota (Etapa 11)
+                            await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal referente à competência ${compDestino.replace('-', '/')}.`, "info");
+
                             atualizou = true;
                             resolve();
                         };
@@ -2198,6 +2327,7 @@
                     const id = input.dataset.id;
                     const compId = input.dataset.compId;
                     const file = input.files[0];
+                    const c = contratosLocais[id] || {};
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
@@ -2206,6 +2336,10 @@
                                 nfStatus: "Recebida ✔",
                                 statusPagamento: "Em Análise"
                             });
+
+                            // Disparar Notificação Nova Nota Complementar (Etapa 11)
+                            await registrarNotificacao("Nova Nota Fiscal (Complementar)", `O prestador ${c.nome || 'Prestador'} enviou uma Nota Fiscal complementar para a competência ${compDestino.replace('-', '/')}.`, "info");
+
                             atualizou = true;
                             resolve();
                         };
