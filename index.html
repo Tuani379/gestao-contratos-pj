@@ -1091,6 +1091,12 @@
             entradas.forEach(([key, c]) => {
                 if (c.excluidoLogico) return;
 
+                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                    if ((c.email || c.emailCorp || "").toLowerCase() !== usuarioEmailLogado) {
+                        return;
+                    }
+                }
+
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
                     motorSelect.appendChild(optA);
