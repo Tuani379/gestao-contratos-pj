@@ -596,7 +596,6 @@
                     <div class="flex flex-wrap gap-1 md:gap-2">
                         <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
                         <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
-                        <button onclick="mudarSecaoPrestador('pj-documentos')" id="btn-pj-documentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Documentos</button>
                         <button onclick="mudarSecaoPrestador('pj-pagamentos')" id="btn-pj-pagamentos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Pagamentos</button>
                         <button onclick="mudarSecaoPrestador('pj-perfil')" id="btn-pj-perfil" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Perfil</button>
                     </div>
@@ -636,8 +635,8 @@
                                             <tr class="border-b text-xs font-bold text-slate-600">
                                                 <th class="p-2.5">Prestador / CNPJ</th>
                                                 <th class="p-2.5">Valor Fixo</th>
-                                                <th class="p-2.5">Status Atual</th>
-                                                <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                                <th class="p-2.5">Anexar Nota Fiscal</th>
+                                                <th class="p-2.5">Status de Pagamento</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tabelaPrestadorRegular" class="text-xs">
@@ -655,8 +654,8 @@
                                             <tr class="border-b text-xs font-bold text-amber-900">
                                                 <th class="p-2.5">Prestador / Evento / Adicional</th>
                                                 <th class="p-2.5">Valor Adicional</th>
-                                                <th class="p-2.5">Status Atual</th>
-                                                <th class="p-2.5">Anexar Nova Nota Fiscal</th>
+                                                <th class="p-2.5">Anexar Nota Fiscal</th>
+                                                <th class="p-2.5">Status de Pagamento</th>
                                             </tr>
                                         </thead>
                                         <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
@@ -679,17 +678,6 @@
                         <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
                         <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
                             <p class="text-slate-400">Carregando contrato...</p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- MEUS DOCUMENTOS -->
-                <div id="sec-pj-documentos" class="sec-pj hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
-                        <h2 class="text-xl font-extrabold text-blue-950">Meus Documentos & Anexos</h2>
-                        <p class="text-xs text-slate-500">Visualize e baixe seu contrato assinado e demais documentos.</p>
-                        <div id="pj-conteudo-documentos" class="pt-2">
-                            <p class="text-slate-400 text-xs">Nenhum documento anexo encontrado.</p>
                         </div>
                     </div>
                 </div>
@@ -1082,7 +1070,7 @@
             document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
             document.getElementById(`sec-${subId}`).classList.remove('hidden');
 
-            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-documentos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
+            const botoes = ['btn-pj-enviar', 'btn-pj-contratos', 'btn-pj-pagamentos', 'btn-pj-perfil'];
             botoes.forEach(bId => {
                 const b = document.getElementById(bId);
                 if (bId === `btn-${subId}`) {
@@ -1484,6 +1472,7 @@
             const divContratos = document.getElementById('pj-conteudo-contratos');
             if (divContratos) {
                 if (dadosContratoLogado) {
+                    let botaoContratoAssinado = dadosContratoLogado.arquivoContratoBase64 ? `<div class="mt-3"><button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button></div>` : '';
                     divContratos.innerHTML = `
                         <div class="p-4 border rounded-xl bg-slate-50 space-y-2">
                             <p><b>Nome / Razão Social:</b> ${dadosContratoLogado.nome} (${dadosContratoLogado.razaoSocial || '---'})</p>
@@ -1493,21 +1482,13 @@
                             <p><b>Endereço:</b> ${dadosContratoLogado.logradouro || ''}, ${dadosContratoLogado.numero || ''} - ${dadosContratoLogado.bairro || ''}, ${dadosContratoLogado.cidade || ''}/${dadosContratoLogado.estado || ''} (CEP: ${dadosContratoLogado.cep || ''})</p>
                             <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
                             <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+                            ${botaoContratoAssinado}
                         </div>
                     `;
                 } else if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     divContratos.innerHTML = `<p class="text-slate-500">Logado como Administrador Master.</p>`;
                 } else {
                     divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado.</p>`;
-                }
-            }
-
-            const divDocs = document.getElementById('pj-conteudo-documentos');
-            if (divDocs) {
-                if (dadosContratoLogado && dadosContratoLogado.arquivoContratoBase64) {
-                    divDocs.innerHTML = `<button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button>`;
-                } else {
-                    divDocs.innerHTML = `<p class="text-slate-400 text-xs">Nenhum documento anexo.</p>`;
                 }
             }
 
@@ -1567,7 +1548,6 @@
                 }
             }
 
-            // Exibir estritamente apenas os dados do próprio usuário logado
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
                 if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && idContratoLogado !== idContratoFolha) {
                     return;
@@ -1578,19 +1558,20 @@
                 const cnpjExibir = dadosFolha.cnpj || dadosContratoLogado?.cnpj || "---";
                 const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+                const statusPagamentoReg = dadosFolha.regular?.statusPagamento || "Aguardando NF";
 
                 const cardFixoValor = document.getElementById('pj-card-fixo-valor');
                 const cardFixoNf = document.getElementById('pj-card-fixo-nf');
                 const cardFixoPg = document.getElementById('pj-card-fixo-pg');
                 if (cardFixoValor) cardFixoValor.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
                 if (cardFixoNf) cardFixoNf.innerText = nfStatusReg;
-                if (cardFixoPg) cardFixoPg.innerText = dadosFolha.regular?.statusPagamento || "Pendente";
+                if (cardFixoPg) cardFixoPg.innerText = statusPagamentoReg;
 
-                let badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">NF enviada</span>`;
-                if (nfStatusReg === "Recusada ❌") {
-                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
-                } else if (!dadosFolha.regular?.nfArquivoBase64) {
-                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoReg}</span>`;
+                if (statusPagamentoReg === "Pago") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                } else if (statusPagamentoReg === "Pronto para Pagar") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Pronto para Pagar</span>`;
                 }
 
                 let acaoRegPJ = `<span class="text-slate-400">---</span>`;
@@ -1605,8 +1586,8 @@
                         <tr class="border-b">
                             <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
                             <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-2.5">${badgeStatusReg}</td>
                             <td class="p-2.5">${acaoRegPJ}</td>
+                            <td class="p-2.5">${badgeStatusPagamentoReg}</td>
                         </tr>
                     `;
                 }
@@ -1615,7 +1596,7 @@
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let nfStatusComp = cItem.nfStatus || "Aguardando";
+                        let statusPagamentoComp = cItem.statusPagamento || "Aguardando NF";
                         let eventoNome = cItem.motorEvento || 'Adicional';
 
                         if (containerCardComp) {
@@ -1624,18 +1605,18 @@
                                     <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">${eventoNome}</span>
                                     <h3 class="text-xl font-extrabold text-amber-950">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</h3>
                                     <div class="border-t pt-2 text-xs space-y-1">
-                                        <p><b>Status NF:</b> <span class="text-slate-600">${nfStatusComp}</span></p>
-                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${cItem.statusPagamento || "Pendente"}</span></p>
+                                        <p><b>Status NF:</b> <span class="text-slate-600">${cItem.nfStatus || "Aguardando"}</span></p>
+                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${statusPagamentoComp}</span></p>
                                     </div>
                                 </div>
                             `;
                         }
 
-                        let badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Enviada ✔</span>`;
-                        if (nfStatusComp === "Recusada ❌") {
-                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
-                        } else if (!cItem.nfArquivoBase64) {
-                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoComp}</span>`;
+                        if (statusPagamentoComp === "Pago") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                        } else if (statusPagamentoComp === "Pronto para Pagar") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Pronto para Pagar</span>`;
                         }
 
                         let acaoCompPJ = `<span class="text-slate-400">---</span>`;
@@ -1650,8 +1631,8 @@
                                 <tr class="border-b bg-amber-50/20">
                                     <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${eventoNome}</span></td>
                                     <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    <td class="p-2.5">${badgeStatusComp}</td>
                                     <td class="p-2.5">${acaoCompPJ}</td>
+                                    <td class="p-2.5">${badgeStatusPagamentoComp}</td>
                                 </tr>
                             `;
                         }
@@ -1669,8 +1650,8 @@
                     <tr class="border-b">
                         <td class="p-2.5"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
                         <td class="p-2.5 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span></td>
                         <td class="p-2.5"><input type="file" accept=".pdf,image/*" class="input-nf-reg-avulsa text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoLogado}"></td>
+                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span></td>
                     </tr>
                 `;
             } else if (!encontrouAlgum && tbodyRegPJ) {
