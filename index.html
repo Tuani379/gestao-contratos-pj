@@ -605,19 +605,6 @@
 
                 <!-- TELA ENVIAR NOTA -->
                 <div id="sec-pj-enviar" class="sec-pj space-y-6">
-                    <!-- Cards de Resumo -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                        <div class="bg-white p-5 rounded-2xl border shadow-sm space-y-2">
-                            <span class="text-[10px] bg-blue-100 text-blue-800 px-2 py-0.5 rounded font-bold">Fixo Mensal</span>
-                            <h3 id="pj-card-fixo-valor" class="text-xl font-extrabold text-blue-950">R$ 0,00</h3>
-                            <div class="border-t pt-2 text-xs space-y-1">
-                                <p><b>Status NF:</b> <span id="pj-card-fixo-nf" class="text-slate-600">Anexar NF</span></p>
-                                <p><b>Previsão:</b> <span id="pj-card-fixo-pg" class="text-amber-700 font-semibold">Em Análise</span></p>
-                            </div>
-                        </div>
-                        <div id="pj-card-comp-container" class="contents"></div>
-                    </div>
-
                     <!-- Envio de Notas Fiscais -->
                     <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
                         <div>
@@ -1435,11 +1422,9 @@
             const tbodyRegPJ = document.getElementById('tabelaPrestadorRegular');
             const tbodyCompPJ = document.getElementById('tabelaPrestadorComplementar');
             const containerCompPJ = document.getElementById('containerPrestadorComp');
-            const containerCardComp = document.getElementById('pj-card-comp-container');
 
             if(tbodyRegPJ) tbodyRegPJ.innerHTML = "";
             if(tbodyCompPJ) tbodyCompPJ.innerHTML = "";
-            if(containerCardComp) containerCardComp.innerHTML = "";
 
             let idContratoLogado = null;
             let dadosContratoLogado = null;
@@ -1503,19 +1488,21 @@
                 const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                 
                 const temNfReg = Boolean(dadosFolha.regular?.nfArquivoBase64);
-                const statusNfRegExibir = temNfReg ? "Nota Anexada" : "Anexar NF";
-                const statusPagamentoReg = dadosFolha.regular?.statusPagamento || "Em Análise";
+                const statusPagamentoRegCorp = dadosFolha.regular?.statusPagamento || "Em Análise";
+                const nfStatusCorp = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                const cardFixoValor = document.getElementById('pj-card-fixo-valor');
-                const cardFixoNf = document.getElementById('pj-card-fixo-nf');
-                const cardFixoPg = document.getElementById('pj-card-fixo-pg');
-                if (cardFixoValor) cardFixoValor.innerText = `R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-                if (cardFixoNf) cardFixoNf.innerText = statusNfRegExibir;
-                if (cardFixoPg) cardFixoPg.innerText = statusPagamentoReg === "Pago" ? "Pago" : "Em Análise";
+                let statusPagamentoRegPJ = "Anexar NF";
+                if (statusPagamentoRegCorp === "Pago") {
+                    statusPagamentoRegPJ = "Pago";
+                } else if (temNfReg || nfStatusCorp === "Recebida ✔") {
+                    statusPagamentoRegPJ = "Em Análise";
+                }
 
-                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
-                if (statusPagamentoReg === "Pago") {
+                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoRegPJ}</span>`;
+                if (statusPagamentoRegPJ === "Pago") {
                     badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                } else if (statusPagamentoRegPJ === "Em Análise") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                 }
 
                 let acaoRegPJ = `<span class="text-slate-400">---</span>`;
@@ -1540,27 +1527,23 @@
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let statusPagamentoComp = cItem.statusPagamento || "Em Análise";
+                        let statusPagamentoCompCorp = cItem.statusPagamento || "Em Análise";
+                        let nfStatusCompCorp = cItem.nfStatus || "Aguardando";
                         let eventoNome = cItem.motorEvento || 'Adicional';
                         let temNfComp = Boolean(cItem.nfArquivoBase64);
-                        let statusNfCompExibir = temNfComp ? "Nota Anexada" : "Anexar NF";
 
-                        if (containerCardComp) {
-                            containerCardComp.innerHTML += `
-                                <div class="bg-white p-5 rounded-2xl border border-amber-200 bg-amber-50/10 shadow-sm space-y-2">
-                                    <span class="text-[10px] bg-amber-100 text-amber-900 px-2 py-0.5 rounded font-bold">${eventoNome}</span>
-                                    <h3 class="text-xl font-extrabold text-amber-950">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</h3>
-                                    <div class="border-t pt-2 text-xs space-y-1">
-                                        <p><b>Status NF:</b> <span class="text-slate-600">${statusNfCompExibir}</span></p>
-                                        <p><b>Previsão:</b> <span class="text-amber-700 font-semibold">${statusPagamentoComp === "Pago" ? "Pago" : "Em Análise"}</span></p>
-                                    </div>
-                                </div>
-                            `;
+                        let statusPagamentoCompPJ = "Anexar NF";
+                        if (statusPagamentoCompCorp === "Pago") {
+                            statusPagamentoCompPJ = "Pago";
+                        } else if (temNfComp || nfStatusCompCorp === "Recebida ✔") {
+                            statusPagamentoCompPJ = "Em Análise";
                         }
 
-                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
-                        if (statusPagamentoComp === "Pago") {
+                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoCompPJ}</span>`;
+                        if (statusPagamentoCompPJ === "Pago") {
                             badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                        } else if (statusPagamentoCompPJ === "Em Análise") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
                         }
 
                         let acaoCompPJ = `<span class="text-slate-400">---</span>`;
@@ -1588,19 +1571,12 @@
 
             if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
                 const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
-                const cardFixoValor = document.getElementById('pj-card-fixo-valor');
-                const cardFixoNf = document.getElementById('pj-card-fixo-nf');
-                const cardFixoPg = document.getElementById('pj-card-fixo-pg');
-                if (cardFixoValor) cardFixoValor.innerText = `R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-                if (cardFixoNf) cardFixoNf.innerText = "Anexar NF";
-                if (cardFixoPg) cardFixoPg.innerText = "Em Análise";
-                
                 tbodyRegPJ.innerHTML = `
                     <tr class="border-b">
                         <td class="p-2.5"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
                         <td class="p-2.5 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                         <td class="p-2.5"><input type="file" accept=".pdf,image/*" class="input-nf-reg-avulsa text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoLogado}"></td>
-                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span></td>
+                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Anexar NF</span></td>
                     </tr>
                 `;
             } else if (!encontrouAlgum && tbodyRegPJ && usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
