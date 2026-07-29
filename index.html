@@ -186,7 +186,7 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- DASHBOARD (FOLHA, TESOURARIA E DASHBOARD EXECUTIVO) -->
+            <!-- DASHBOARD (FOLHA, TESOURARIA, KPI EXECUTIVO E CENTRAL DE PENDÊNCIAS) -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 
                 <!-- ETAPA 9: DASHBOARD EXECUTIVO (KPIs & INDICADORES) -->
@@ -242,6 +242,59 @@
                             <div class="pt-2">
                                 <button onclick="exportarLoteFinanceiroExcel()" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white text-[10px] font-bold py-1.5 px-2 rounded-lg transition shadow-sm">📥 Exportar Lote</button>
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ETAPA 10: CENTRAL DE PENDÊNCIAS ACIONÁVEIS -->
+                <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
+                    <h3 class="text-sm font-extrabold text-blue-950 flex items-center gap-2">🔔 Central de Pendências e Alertas Operacionais</h3>
+                    <p class="text-xs text-slate-500">Clique em qualquer alerta para filtrar e resolver a pendência instantaneamente.</p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-5 gap-3 pt-1">
+                        <!-- Alerta 1: Notas Aguardando Aprovação -->
+                        <div onclick="atalhoPendencia('notas')" class="p-3 bg-red-50/60 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-red-900">Notas Pendentes</span>
+                                <span class="text-xs font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full" id="badge-pend-notas">0</span>
+                            </div>
+                            <p class="text-[10px] text-red-700 mt-2">Aguardando validação ou NF</p>
+                        </div>
+
+                        <!-- Alerta 2: Contratos Vencendo -->
+                        <div onclick="atalhoPendencia('contratos')" class="p-3 bg-amber-50/60 border border-amber-200 rounded-xl cursor-pointer hover:bg-amber-100/60 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-amber-900">Contratos Vencendo</span>
+                                <span class="text-xs font-extrabold bg-amber-600 text-white px-2 py-0.5 rounded-full" id="badge-pend-contratos">0</span>
+                            </div>
+                            <p class="text-[10px] text-amber-700 mt-2">Vigência expira em até 30d</p>
+                        </div>
+
+                        <!-- Alerta 3: Pagamentos para Hoje -->
+                        <div onclick="atalhoPendencia('pagamentos')" class="p-3 bg-emerald-50/60 border border-emerald-200 rounded-xl cursor-pointer hover:bg-emerald-100/60 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-emerald-900">Pagamentos Hoje</span>
+                                <span class="text-xs font-extrabold bg-emerald-600 text-white px-2 py-0.5 rounded-full" id="badge-pend-pagamentos">0</span>
+                            </div>
+                            <p class="text-[10px] text-emerald-700 mt-2">Vencimento programado hoje</p>
+                        </div>
+
+                        <!-- Alerta 4: Documentos Vencidos -->
+                        <div onclick="atalhoPendencia('documentos')" class="p-3 bg-red-50/60 border border-red-200 rounded-xl cursor-pointer hover:bg-red-100/60 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-red-900">Docs Vencidos</span>
+                                <span class="text-xs font-extrabold bg-red-600 text-white px-2 py-0.5 rounded-full" id="badge-pend-docs">0</span>
+                            </div>
+                            <p class="text-[10px] text-red-700 mt-2">Compliance de vigência</p>
+                        </div>
+
+                        <!-- Alerta 5: Prestadores sem Contrato Anexo -->
+                        <div onclick="atalhoPendencia('sem-contrato')" class="p-3 bg-blue-50/60 border border-blue-200 rounded-xl cursor-pointer hover:bg-blue-100/60 transition flex flex-col justify-between">
+                            <div class="flex justify-between items-center">
+                                <span class="text-[11px] font-bold text-blue-900">Sem Contrato Anexo</span>
+                                <span class="text-xs font-extrabold bg-blue-600 text-white px-2 py-0.5 rounded-full" id="badge-pend-semcontrato">0</span>
+                            </div>
+                            <p class="text-[10px] text-blue-700 mt-2">Falta PDF do contrato</p>
                         </div>
                     </div>
                 </div>
@@ -1554,17 +1607,23 @@
         function renderizarTabelasEstatísticas() {
             competenciaSelecionada = filtroCompetencia.value;
             
-            // --- CÁLCULOS DO DASHBOARD EXECUTIVO (ETAPA 9) ---
+            // --- CÁLCULOS DO DASHBOARD EXECUTIVO (ETAPA 9) & CENTRAL DE PENDÊNCIAS (ETAPA 10) ---
             let prestAtivos = 0, prestInativos = 0;
             let contAtivos = 0, contVencendo = 0, contEncerrados = 0;
+            let semContratoCount = 0;
             let hojeObj = new Date();
             let daqui30Dias = new Date();
             daqui30Dias.setDate(hojeObj.getDate() + 30);
+            let hojeString = hojeObj.toISOString().split('T')[0];
 
             Object.values(contratosLocais).forEach(c => {
                 if (c.excluidoLogico) return;
                 if (c.status === "Ativo") prestAtivos++; else prestInativos++;
                 if (c.status === "Ativo") contAtivos++; else contEncerrados++;
+
+                if (!c.arquivoContratoBase64 && c.status === "Ativo") {
+                    semContratoCount++;
+                }
 
                 if (c.vigenciaFim) {
                     let dataFim = new Date(c.vigenciaFim);
@@ -1585,9 +1644,10 @@
             const baseFolhaMes = folhasLocais[competenciaSelecionada] || {};
             let nfRecebidas = 0, nfPendentes = 0, nfAprovadas = 0;
             let totalReg = 0, totalComp = 0, pagosTotal = 0, pendentesTotal = 0;
+            let notasAguardandoAprovacaoCount = 0;
+            let pagamentosHojeCount = 0;
 
             Object.values(baseFolhaMes).forEach(f => {
-                // Regular
                 let valReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
                 totalReg += valReg;
                 if (f.regular?.nfArquivoBase64) nfRecebidas++; else nfPendentes++;
@@ -1595,7 +1655,14 @@
                 
                 if (f.regular?.statusPagamento === "Pago") pagosTotal += valReg; else pendentesTotal += valReg;
 
-                // Complementares
+                if (!f.regular?.nfArquivoBase64 || f.regular?.statusPagamento === "Em Análise") {
+                    notasAguardandoAprovacaoCount++;
+                }
+
+                if (f.regular?.dataVencimento === hojeString && f.regular?.statusPagamento !== "Pago") {
+                    pagamentosHojeCount++;
+                }
+
                 if (f.complementares_lista) {
                     Object.values(f.complementares_lista).forEach(cItem => {
                         let valC = parseFloat(cItem.motorValor || 0);
@@ -1604,6 +1671,14 @@
                         if (cItem.nfStatus === "Recebida ✔" || cItem.statusPagamento === "Pago") nfAprovadas++;
 
                         if (cItem.statusPagamento === "Pago") pagosTotal += valC; else pendentesTotal += valC;
+
+                        if (!cItem.nfArquivoBase64 || cItem.statusPagamento === "Em Análise") {
+                            notasAguardandoAprovacaoCount++;
+                        }
+
+                        if (cItem.dataVencimento === hojeString && cItem.statusPagamento !== "Pago") {
+                            pagamentosHojeCount++;
+                        }
                     });
                 }
             });
@@ -1624,6 +1699,13 @@
             });
             document.getElementById('kpi-doc-vencidos').innerText = docsVencidosCount;
             document.getElementById('kpi-doc-regular').innerText = docsVencidosCount === 0 ? "OK ✔" : "Atenção ⚠️";
+
+            // --- POPULAR BADGES DA CENTRAL DE PENDÊNCIAS (ETAPA 10) ---
+            document.getElementById('badge-pend-notas').innerText = notasAguardandoAprovacaoCount;
+            document.getElementById('badge-pend-contratos').innerText = contVencendo;
+            document.getElementById('badge-pend-pagamentos').innerText = pagamentosHojeCount;
+            document.getElementById('badge-pend-docs').innerText = docsVencidosCount;
+            document.getElementById('badge-pend-semcontrato').innerText = semContratoCount;
 
             // --- TABELAS DA FOLHA ---
             const tbodyRegular = document.getElementById('listaFolha');
@@ -1738,6 +1820,18 @@
 
             containerComp.classList.toggle('hidden', !temComp);
         }
+
+        // Funções de Atalho para a Central de Pendências (Etapa 10)
+        window.atalhoPendencia = (tipo) => {
+            if (tipo === 'notas' || tipo === 'pagamentos') {
+                mostrarSecao('dashboard');
+                window.scrollTo({ top: 400, behavior: 'smooth' });
+            } else if (tipo === 'contratos' || tipo === 'sem-contrato') {
+                mostrarSecao('contratos');
+            } else if (tipo === 'documentos') {
+                mostrarSecao('documentos');
+            }
+        };
 
         // Funções de Tesouraria Avançada (Liquidação com Comprovante e Estorno)
         let itemLiquidandoAtual = null;
