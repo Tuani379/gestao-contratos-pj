@@ -8,8 +8,8 @@
 
     <!-- TELA DE LOGIN / RECUPERAÇÃO / PRIMEIRO ACESSO -->
     <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200">
-            <div class="text-center mb-6">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200 space-y-4">
+            <div class="text-center mb-4">
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
                 <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa</p>
             </div>
@@ -17,12 +17,12 @@
             <form id="form-login-saas" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">E-mail</label>
-                    <input type="email" id="login-email-saas" required class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
+                    <input type="email" id="login-email-saas" required placeholder="seuemail@empresa.com" class="w-full p-3 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
                     <div class="relative">
-                        <input type="password" id="login-senha-saas" required class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
+                        <input type="password" id="login-senha-saas" required placeholder="••••••••" class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
                         <button type="button" onclick="toggleMostrarSenha()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm focus:outline-none" title="Mostrar/Ocultar Senha">
                             <span id="icone-olho">👁️</span>
                         </button>
@@ -76,12 +76,12 @@
                         </div>
                     </div>
                     <div class="space-y-3 pt-1">
-                        <div class="bg-slate-50 p-3 rounded-xl border border-slate-100">
+                        <div id="bloco-empresa-ativa-dropdown" class="bg-slate-50 p-3 rounded-xl border border-slate-100">
                             <p class="text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1">Empresa Ativa</p>
                             <p id="dropdown-empresa-ativa" class="text-xs font-bold text-blue-900">Carregando...</p>
                         </div>
                         <div class="space-y-1">
-                            <button onclick="abrirConfiguracoesEmpresa()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🏢 Informações da Empresa</button>
+                            <button id="menu-info-empresa" onclick="abrirConfiguracoesEmpresa()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🏢 Informações da Empresa</button>
                             <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔑 Alterar Senha</button>
                             <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔄 Trocar / Outras Contas</button>
                         </div>
@@ -183,7 +183,7 @@
                     <div class="bg-white p-6 rounded-xl border border-blue-200 bg-blue-50/10 shadow-sm">
                         <p class="text-sm font-bold text-blue-800 uppercase">Mês de Referência</p>
                         <select id="filtroCompetencia" class="text-xl font-extrabold text-blue-900 mt-2 bg-transparent border-none w-full cursor-pointer"></select>
-                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar Folha do Mês</button>
+                        <button id="btn-gerar-folha" class="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2 px-3 rounded-lg transition shadow-sm">🔄 Criar / Atualizar Folha</button>
                     </div>
                 </div>
 
@@ -191,6 +191,7 @@
                 <div id="modalGerarFolha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-xl w-full max-w-2xl p-6 overflow-y-auto max-h-[90vh]">
                         <h3 class="text-xl font-bold text-blue-900 mb-4">Selecionar Cadastros para a Folha</h3>
+                        <p class="text-xs text-slate-500 mb-3">Prestadores já existentes na folha mantêm seus dados e arquivos. Apenas novos cadastros serão incluídos.</p>
                         <div class="overflow-x-auto max-h-[40vh] border rounded-lg mb-4">
                             <table class="w-full text-left border-collapse">
                                 <thead>
@@ -206,7 +207,7 @@
                         </div>
                         <div class="flex justify-end gap-2">
                             <button id="btn-cancelar-gerar-folha" class="px-4 py-2 border rounded">Cancelar</button>
-                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar</button>
+                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar / Atualizar</button>
                         </div>
                     </div>
                 </div>
@@ -258,7 +259,7 @@
                                     <th class="p-3">Valor a Pagar</th>
                                     <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
-                                    <th class="p-3 text-center">Status Pagamento</th>
+                                    <th class="p-3 text-center">Status Pagamento / Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaFolha"><tr><td colspan="6" class="p-4 text-center text-slate-400">Selecione uma competência...</td></tr></tbody>
@@ -278,7 +279,7 @@
                                     <th class="p-3">Valor Adicional</th>
                                     <th class="p-3 text-center">NF</th>
                                     <th class="p-3 text-center">Visualizar</th>
-                                    <th class="p-3 text-center">Status</th>
+                                    <th class="p-3 text-center">Status / Ações</th>
                                 </tr>
                             </thead>
                             <tbody id="listaFolhaComplementar"></tbody>
@@ -292,7 +293,7 @@
                 <div class="flex justify-between items-center mb-6">
                     <div>
                         <h2 class="text-xl font-bold text-blue-900">Gestão de Equipe e Prestadores PJ</h2>
-                        <p class="text-xs text-slate-500">Visualize valores, vigências, aditivos, arquivos e alertas de vencimento.</p>
+                        <p class="text-xs text-slate-500">Visualize dados completos, vigências, aditivos, arquivos e alertas de vencimento.</p>
                     </div>
                     <div class="flex gap-2">
                         <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">📊 Exportar Excel</button>
@@ -306,25 +307,24 @@
                             <tr>
                                 <th class="p-3">Foto</th>
                                 <th class="p-3">Nome Completo</th>
-                                <th class="p-3">Tipo / Perfil</th>
-                                <th class="p-3">Vigência (Início - Fim)</th>
-                                <th class="p-3">Alerta Vencimento</th>
+                                <th class="p-3">Perfil</th>
+                                <th class="p-3">E-mail / Telefone</th>
+                                <th class="p-3">Razão Social / CNPJ</th>
+                                <th class="p-3">Vigência</th>
                                 <th class="p-3">Valor Fixo</th>
                                 <th class="p-3">Centro de Custo</th>
-                                <th class="p-3">Responsável</th>
-                                <th class="p-3">Aditivos</th>
                                 <th class="p-3">Arquivos</th>
                                 <th class="p-3">Status</th>
                                 <th class="p-3 text-center">Ações</th>
                             </tr>
                         </thead>
                         <tbody id="listaContratos" class="text-xs">
-                            <tr><td colspan="12" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
+                            <tr><td colspan="11" class="p-4 text-center text-slate-400">Carregando dados...</td></tr>
                         </tbody>
                     </table>
                 </div>
 
-                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO -->
+                <!-- MODAL CADASTRO / EDIÇÃO COMPLETO SEPARADO -->
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-2xl w-full max-w-4xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
                         <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato</h3>
@@ -341,6 +341,13 @@
                                     <option value="Prestador">Prestador</option>
                                 </select>
                             </div>
+                            <div id="bloco-admin-prestador" class="hidden">
+                                <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Admin também é Prestador?</label>
+                                <select id="campoAdminEhPrestador" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
+                                    <option value="nao">Não</option>
+                                    <option value="sim">Sim</option>
+                                </select>
+                            </div>
                             <div>
                                 <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Foto (Avatar):</label>
                                 <input type="file" id="campoFotoArquivo" accept="image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
@@ -351,37 +358,57 @@
                             </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Dados Pessoais e Empresa PJ</h4>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                <input id="campoNome" type="text" placeholder="Nome Completo *" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCNPJ" type="text" placeholder="CNPJ" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                        <!-- 1. DADOS PESSOAIS -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">👤 1. Dados Pessoais</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <input id="campoNome" type="text" placeholder="Nome Completo *" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCpf" type="text" placeholder="CPF" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEmail" type="text" placeholder="E-mail Pessoal" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoTelefone" type="text" placeholder="Telefone / Celular" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoContatoEmergencia" type="text" placeholder="Contato de Emergência (Nome/Tel)" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white">
                             </div>
                         </div>
 
-                        <div class="space-y-3 border-t pt-4">
-                            <h4 class="font-bold text-xs text-slate-500 uppercase tracking-wider">Vigência, Valores e Governança</h4>
+                        <!-- 2. DADOS DA EMPRESA PJ -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">🏢 2. Dados da Empresa PJ & Endereço</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                <input id="campoRazaoSocial" type="text" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCNPJ" type="text" placeholder="CNPJ Completo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEmailCorp" type="text" placeholder="E-mail Corporativo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoInscricaoEstadual" type="text" placeholder="Inscrição Estadual" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoInscricaoMunicipal" type="text" placeholder="Inscrição Municipal" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCep" type="text" placeholder="CEP" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoLogradouro" type="text" placeholder="Logradouro / Endereço" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoNumero" type="text" placeholder="Número" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoBairro" type="text" placeholder="Bairro" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoCidade" type="text" placeholder="Cidade" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoEstado" type="text" placeholder="Estado (UF)" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+
+                        <!-- 3. VIGÊNCIA, VALORES E GOVERNANÇA -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">⚖️ 3. Vigência, Valores e Governança</h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Início da Vigência:</label>
-                                    <input id="campoVigenciaInicio" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                    <input id="campoVigenciaInicio" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 </div>
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Término da Vigência:</label>
-                                    <input id="campoVigenciaFim" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
+                                    <input id="campoVigenciaFim" type="date" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 </div>
                                 <div class="md:col-span-2">
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Valor Fixo Mensal (R$):</label>
-                                    <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 font-bold text-blue-950">
+                                    <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950">
                                 </div>
-                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <input id="campoAditivos" type="text" placeholder="Aditivos (Ex: Aditivo 01 - Reajuste)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                                <select id="campoStatus" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
+                                <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <input id="campoAditivos" type="text" placeholder="Aditivos" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                <select id="campoStatus" class="w-full md:col-span-2 p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                                 </select>
@@ -463,13 +490,13 @@
             <section id="secao-info-empresa" class="hidden bg-white p-8 rounded-2xl border shadow-sm modo-rh-secao max-w-4xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
-                        <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🏢 Informações da Empresa & Assinatura</h2>
-                        <p class="text-xs text-slate-500 mt-1">Gerencie os dados cadastrais, plano ativo, limites e módulos contratados da organização.</p>
+                        <h2 id="titulo-info-empresa" class="text-xl font-bold text-blue-950 flex items-center gap-2">🏢 Informações da Empresa & Assinatura</h2>
+                        <p id="subtitulo-info-empresa" class="text-xs text-slate-500 mt-1">Gerencie os dados cadastrais, plano ativo, limites e módulos contratados da organização.</p>
                     </div>
-                    <button onclick="mostrarSecao('dashboard')" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
+                    <button onclick="voltarSecaoAposInfoEmpresa()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div id="bloco-cards-topo-empresa" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="bg-blue-50/50 p-4 rounded-xl border border-blue-200">
                         <p class="text-[11px] font-bold text-blue-800 uppercase">Plano Contratado</p>
                         <h3 class="text-lg font-extrabold text-blue-950 mt-1">ConnectPJ Enterprise</h3>
@@ -488,7 +515,7 @@
                 </div>
 
                 <!-- CARD 1: LOGO -->
-                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                <div id="bloco-card-logo" class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <div class="flex justify-between items-center cursor-pointer select-none" onclick="toggleBlocoEmpresa('bloco-logo', 'seta-logo')">
                         <div>
                             <h3 class="font-bold text-slate-800 text-sm">Logo da empresa</h3>
@@ -501,7 +528,7 @@
                             <div id="preview-logo-container" class="w-20 h-20 rounded-full border-2 border-dashed border-slate-300 flex items-center justify-center bg-slate-50 overflow-hidden">
                                 <span class="text-xs text-slate-400 font-bold">LOGO</span>
                             </div>
-                            <div>
+                            <div id="container-input-logo">
                                 <input type="file" id="inputArquivoLogo" accept="image/*" class="text-xs text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-700 cursor-pointer">
                             </div>
                         </div>
@@ -549,7 +576,7 @@
                 </div>
 
                 <!-- CARD 4: MÓDULOS CONTRATADOS & UPSELL -->
-                <div class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
+                <div id="bloco-modulos-empresa" class="border rounded-2xl p-6 bg-white shadow-sm space-y-4">
                     <h3 class="font-bold text-slate-800 text-sm flex items-center gap-2">🧩 Módulos Contratados e Futuras Expansões</h3>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
                         <div class="p-3 border rounded-xl bg-green-50/30 border-green-200 flex justify-between items-center">
@@ -563,74 +590,96 @@
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-3 pt-2">
+                <div id="container-btn-salvar-empresa" class="flex justify-end gap-3 pt-2">
                     <button onclick="salvarInformacoesEmpresa()" class="bg-blue-900 hover:bg-blue-800 text-white font-bold px-6 py-2.5 rounded-xl text-xs transition shadow-md">Salvar Alterações</button>
                 </div>
             </section>
 
             <!-- PORTAL DO PRESTADOR -->
-            <section id="area-prestador" class="hidden max-w-4xl mx-auto p-8 bg-white rounded-2xl border shadow-sm space-y-6">
-                <div class="border-b pb-4 flex justify-between items-center">
-                    <div>
-                        <h2 class="text-xl font-extrabold text-blue-950">Portal do Prestador / Membro</h2>
-                        <p class="text-xs text-slate-500 mt-1">Consulte seus valores e envie as Notas Fiscais correspondentes.</p>
+            <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
+                
+                <!-- Submenu da Etapa 5 (Sem a aba Perfil) -->
+                <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
+                    <div class="flex flex-wrap gap-1 md:gap-2">
+                        <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
+                        <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
                     </div>
-                    <div>
-                        <label class="block text-[11px] font-bold text-slate-600 mb-1">Mês de Referência:</label>
-                        <select id="selectCompetenciaPJ" class="p-2 border rounded-lg bg-slate-50 text-xs font-bold text-blue-950"></select>
+                    <div class="px-2">
+                        <select id="selectCompetenciaPJ" class="p-2 border rounded-xl bg-slate-50 text-xs font-bold text-blue-950"></select>
+                    </div>
+                </div>
+
+                <!-- TELA ENVIAR NOTA -->
+                <div id="sec-pj-enviar" class="sec-pj space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
+                        <div>
+                            <h2 class="text-xl font-extrabold text-blue-950">Envio de Notas Fiscais</h2>
+                            <p class="text-xs text-slate-500 mt-1">Anexe as Notas Fiscais correspondentes à competência selecionada.</p>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
+                                <h3 class="font-bold text-blue-900 text-sm">📄 Folha Regular (Honorário Fixo Mensal)</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b text-xs font-bold text-slate-600">
+                                                <th class="p-2.5">Prestador / CNPJ</th>
+                                                <th class="p-2.5">Valor Fixo</th>
+                                                <th class="p-2.5">Anexar Nota Fiscal</th>
+                                                <th class="p-2.5">Status de Pagamento</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPrestadorRegular" class="text-xs">
+                                            <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 space-y-3">
+                                <h3 class="font-bold text-amber-900 text-sm">⚡ Folha Complementar / Adicionais</h3>
+                                <div class="overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr class="border-b text-xs font-bold text-amber-900">
+                                                <th class="p-2.5">Prestador / Evento / Adicional</th>
+                                                <th class="p-2.5">Valor Adicional</th>
+                                                <th class="p-2.5">Anexar Nota Fiscal</th>
+                                                <th class="p-2.5">Status de Pagamento</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4 border-t">
+                            <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                                📤 Enviar Notas Fiscais Anexadas
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="space-y-6">
-                    <div class="border rounded-xl p-5 bg-white shadow-sm space-y-3">
-                        <h3 class="font-bold text-blue-900 text-sm flex items-center gap-2">📄 Folha Regular (Honorário Fixo Mensal)</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-slate-50 border-b text-xs font-bold text-slate-600">
-                                        <th class="p-2.5">Prestador / CNPJ</th>
-                                        <th class="p-2.5">Valor Fixo</th>
-                                        <th class="p-2.5">Status Atual</th>
-                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPrestadorRegular" class="text-xs">
-                                    <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>
-                                </tbody>
-                            </table>
+                <!-- MEUS CONTRATOS -->
+                <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
+                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
+                        <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
+                        <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
+                            <p class="text-slate-400">Carregando contrato...</p>
                         </div>
-                    </div>
-
-                    <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 shadow-sm space-y-3">
-                        <h3 class="font-bold text-amber-900 text-sm flex items-center gap-2">⚡ Folha Complementar</h3>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left border-collapse">
-                                <thead>
-                                    <tr class="bg-amber-100/50 border-b text-xs font-bold text-amber-900">
-                                        <th class="p-2.5">Prestador / Evento</th>
-                                        <th class="p-2.5">Valor Adicional</th>
-                                        <th class="p-2.5">Status Atual</th>
-                                        <th class="p-2.5">Anexar Nova Nota Fiscal</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-end pt-4 border-t">
-                        <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
-                            📤 Enviar Notas Fiscais Anexadas
-                        </button>
                     </div>
                 </div>
+
             </section>
         </main>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -680,11 +729,49 @@
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
         let usuarioEmailLogado = "";
         let perfilUsuarioLogado = "Administrador";
+        let modoVisualAtual = "rh";
 
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
 
-        function carregarIdentidadeVisualMenu() {
+        const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
+        const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
+
+        function carregarIdentidadeVisualMenu(modoPJ = false) {
+            const blocoEmpresaAtivaDropdown = document.getElementById('bloco-empresa-ativa-dropdown');
+
+            if (modoPJ) {
+                if (blocoEmpresaAtivaDropdown) blocoEmpresaAtivaDropdown.style.display = 'none';
+
+                get(ref(db, pathContratosDB)).then((snapshot) => {
+                    const dados = snapshot.val() || {};
+                    let prestadorEncontrado = null;
+                    Object.values(dados).forEach(c => {
+                        if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                            prestadorEncontrado = c;
+                        }
+                    });
+                    if (prestadorEncontrado) {
+                        const nomePrestador = prestadorEncontrado.nome || "Prestador";
+                        document.getElementById('user-name').innerText = nomePrestador.toUpperCase();
+                        document.getElementById('dropdown-nome-usuario').innerText = nomePrestador;
+                        const avatarContainer = document.getElementById('user-avatar');
+                        if (prestadorEncontrado.fotoBase64) {
+                            avatarContainer.innerHTML = `<img src="${prestadorEncontrado.fotoBase64}" class="w-full h-full object-cover">`;
+                        } else {
+                            avatarContainer.innerText = nomePrestador.substring(0, 2).toUpperCase();
+                        }
+                        return;
+                    }
+                    carregarPadraoEmpresa();
+                });
+            } else {
+                if (blocoEmpresaAtivaDropdown) blocoEmpresaAtivaDropdown.style.display = 'block';
+                carregarPadraoEmpresa();
+            }
+        }
+
+        function carregarPadraoEmpresa() {
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             get(ref(db, pathInfo)).then((snapshot) => {
                 const dados = snapshot.val() || {};
@@ -700,9 +787,11 @@
             });
         }
 
-        function aplicarPermissoesPerfil(perfil) {
+        function aplicarPermissoesPerfil(perfil, adminEhPrestador = false) {
             perfilUsuarioLogado = perfil;
-            document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${perfil} ▾`;
+            
+            const badgeTipo = (modoVisualAtual === 'pj' && (perfil === 'Administrador' && adminEhPrestador)) ? 'Prestador' : perfil;
+            document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${badgeTipo} ▾`;
 
             const btnDashboard = document.getElementById('btn-dashboard');
             const btnContratos = document.getElementById('btn-contratos');
@@ -711,26 +800,35 @@
             const menuRh = document.getElementById('menu-btn-rh');
 
             if (perfil === 'Administrador') {
-                [btnDashboard, btnContratos, btnRelatorios, menuPj, menuRh].forEach(el => el.style.display = 'block');
+                [btnDashboard, btnContratos, btnRelatorios, menuRh].forEach(el => el.style.display = 'block');
+                if (adminEhPrestador) {
+                    menuPj.style.display = 'block';
+                } else {
+                    menuPj.style.display = 'none';
+                }
             } else if (perfil === 'Financeiro') {
                 btnDashboard.style.display = 'block';
                 btnRelatorios.style.display = 'block';
                 btnContratos.style.display = 'none';
+                menuPj.style.display = 'none';
                 mostrarSecao('dashboard');
             } else if (perfil === 'RH') {
                 btnDashboard.style.display = 'block';
                 btnContratos.style.display = 'block';
                 btnRelatorios.style.display = 'none';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Gestor') {
                 btnDashboard.style.display = 'none';
                 btnContratos.style.display = 'block';
                 btnRelatorios.style.display = 'block';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Jurídico') {
                 btnDashboard.style.display = 'none';
                 btnRelatorios.style.display = 'none';
                 btnContratos.style.display = 'block';
+                menuPj.style.display = 'none';
                 mostrarSecao('contratos');
             } else if (perfil === 'Prestador') {
                 mudarPainelModo('pj');
@@ -779,7 +877,7 @@
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
-                    aplicarPermissoesPerfil('Administrador');
+                    aplicarPermissoesPerfil('Administrador', true);
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
@@ -787,16 +885,18 @@
                     get(ref(db, pathContratosDB)).then((snapshot) => {
                         const dados = snapshot.val() || {};
                         let perfilEncontrado = 'Prestador';
+                        let adminPrestador = false;
                         Object.values(dados).forEach(c => {
                             if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
                                 perfilEncontrado = c.perfilTipo || 'Prestador';
+                                adminPrestador = (c.adminEhPrestador === 'sim');
                             }
                         });
-                        aplicarPermissoesPerfil(perfilEncontrado);
+                        aplicarPermissoesPerfil(perfilEncontrado, adminPrestador);
                     });
                 }
                 document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
-                carregarIdentidadeVisualMenu();
+                carregarIdentidadeVisualMenu(false);
                 carregarDadosPortalPrestador();
             } else {
                 document.getElementById('tela-login').classList.remove('hidden');
@@ -865,19 +965,56 @@
             }
         };
 
+        window.voltarSecaoAposInfoEmpresa = () => {
+            if (modoVisualAtual === 'pj') {
+                document.getElementById('secao-info-empresa').classList.add('hidden');
+                document.getElementById('area-prestador').classList.remove('hidden');
+                mudarSecaoPrestador('pj-enviar');
+            } else {
+                mostrarSecao('dashboard');
+            }
+        };
+
         window.abrirConfiguracoesEmpresa = () => {
-            if (perfilUsuarioLogado !== 'Administrador') { alert("Acesso restrito a Administradores."); return; }
             ['dashboard', 'contratos', 'relatorios', 'secao-info-empresa', 'area-prestador'].forEach(s => document.getElementById(s).classList.add('hidden'));
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
-            
-            let qtdContratosAtivos = 0;
-            Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdContratosAtivos++; });
-            document.getElementById('info-qtd-contratos').innerText = `${qtdContratosAtivos} / 50`;
+
+            const isPrestadorOuModoPJ = (modoVisualAtual === 'pj' || perfilUsuarioLogado === 'Prestador');
+
+            const tituloInfo = document.getElementById('titulo-info-empresa');
+            const subtituloInfo = document.getElementById('subtitulo-info-empresa');
+            const blocoCardsTop = document.getElementById('bloco-cards-topo-empresa');
+            const blocoCardLogo = document.getElementById('bloco-card-logo');
+            const blocoModulos = document.getElementById('bloco-modulos-empresa');
+            const containerBtnSalvar = document.getElementById('container-btn-salvar-empresa');
+            const containerInputLogo = document.getElementById('container-input-logo');
+
+            if (isPrestadorOuModoPJ) {
+                if(tituloInfo) tituloInfo.innerText = "🏢 Informações da Empresa Contratante";
+                if(subtituloInfo) subtituloInfo.innerText = "Consulte os dados cadastrais da empresa para fins de emissão de Nota Fiscal.";
+                if(blocoCardsTop) blocoCardsTop.classList.add('hidden');
+                if(blocoCardLogo) blocoCardLogo.classList.add('hidden');
+                if(blocoModulos) blocoModulos.classList.add('hidden');
+                if(containerBtnSalvar) containerBtnSalvar.classList.add('hidden');
+            } else {
+                if(tituloInfo) tituloInfo.innerText = "🏢 Informações da Empresa & Assinatura";
+                if(subtituloInfo) subtituloInfo.innerText = "Gerencie os dados cadastrais, plano ativo, limites e módulos contratados da organização.";
+                if(blocoCardsTop) blocoCardsTop.classList.remove('hidden');
+                if(blocoCardLogo) blocoCardLogo.classList.remove('hidden');
+                if(blocoModulos) blocoModulos.classList.remove('hidden');
+                if(containerBtnSalvar) containerBtnSalvar.classList.remove('hidden');
+
+                let qtdContratosAtivos = 0;
+                Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdContratosAtivos++; });
+                document.getElementById('info-qtd-contratos').innerText = `${qtdContratosAtivos} / 50`;
+            }
 
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             get(ref(db, pathInfo)).then((snapshot) => {
                 const dados = snapshot.val() || {};
+                const idsInputs = ['emp-cnpj', 'emp-ie', 'emp-im', 'emp-razaoSocial', 'emp-nomeFantasia', 'emp-ramo', 'emp-telefone', 'emp-cep', 'emp-logradouro', 'emp-numero', 'emp-complemento', 'emp-bairro', 'emp-cidade', 'emp-estado'];
+                
                 document.getElementById('emp-cnpj').value = dados.cnpj || (empresaAtivaId === 'matriz' ? '42.563.021/0001-70' : '');
                 document.getElementById('emp-ie').value = dados.ie || '';
                 document.getElementById('emp-im').value = dados.im || '';
@@ -894,13 +1031,32 @@
                 document.getElementById('emp-cidade').value = dados.cidade || '';
                 document.getElementById('emp-estado').value = dados.estado || '';
 
-                if (dados.logoBase64) {
+                idsInputs.forEach(idInput => {
+                    const el = document.getElementById(idInput);
+                    if (el) {
+                        if (isPrestadorOuModoPJ) {
+                            el.setAttribute('readonly', true);
+                            el.classList.add('bg-slate-100', 'cursor-not-allowed');
+                            el.classList.remove('bg-slate-50');
+                        } else {
+                            el.removeAttribute('readonly');
+                            el.classList.remove('bg-slate-100', 'cursor-not-allowed');
+                            el.classList.add('bg-slate-50');
+                        }
+                    }
+                });
+
+                if (dados.logoBase64 && !isPrestadorOuModoPJ) {
                     document.getElementById('preview-logo-container').innerHTML = `<img src="${dados.logoBase64}" class="w-full h-full object-contain">`;
                 }
             });
         };
 
         window.salvarInformacoesEmpresa = async () => {
+            if (modoVisualAtual === 'pj' || perfilUsuarioLogado === 'Prestador') {
+                alert("Acesso restrito. Prestadores não podem alterar dados da empresa.");
+                return;
+            }
             const pathInfo = empresaAtivaId === 'matriz' ? 'configuracoes_empresa_matriz' : `empresas_clientes_dados/${empresaAtivaId}/configuracoes_empresa`;
             const fileInput = document.getElementById('inputArquivoLogo');
             
@@ -928,7 +1084,7 @@
                 localStorage.setItem('connectpj_empresa_nome', pacote.razaoSocial);
                 document.getElementById('dropdown-empresa-ativa').innerText = pacote.razaoSocial;
                 document.getElementById('label-empresa-topo').innerText = `Empresa: ${pacote.razaoSocial}`;
-                carregarIdentidadeVisualMenu();
+                carregarIdentidadeVisualMenu(false);
             };
 
             if (fileInput.files.length > 0) {
@@ -958,13 +1114,32 @@
         };
 
         window.mudarPainelModo = (modo) => {
+            modoVisualAtual = modo;
             const btnRh = document.getElementById('menu-btn-rh');
             const btnPj = document.getElementById('menu-btn-pj');
+
+            let adminPrestadorGlobal = false;
+            if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                adminPrestadorGlobal = true;
+            } else {
+                Object.values(contratosLocais).forEach(c => {
+                    if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && c.adminEhPrestador === 'sim') {
+                        adminPrestadorGlobal = true;
+                    }
+                });
+            }
+
+            if (perfilUsuarioLogado === 'Administrador') {
+                const badgeExibir = (modo === 'pj' && adminPrestadorGlobal) ? 'Prestador' : 'Administrador';
+                document.getElementById('badge-tipo-usuario').innerText = `Perfil: ${badgeExibir} ▾`;
+            }
+
             if (modo === 'rh') {
                 btnRh.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
                 btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold text-blue-300 hover:bg-blue-900/50 transition";
                 document.getElementById('menu-rh').classList.remove('hidden');
                 document.getElementById('area-prestador').classList.add('hidden');
+                carregarIdentidadeVisualMenu(false);
                 mostrarSecao('dashboard');
             } else {
                 btnPj.className = "w-full text-left px-3 py-2 rounded-lg text-xs font-bold bg-blue-900 text-white transition";
@@ -972,14 +1147,31 @@
                 document.getElementById('menu-rh').classList.add('hidden');
                 document.querySelectorAll('.modo-rh-secao').forEach(s => s.classList.add('hidden'));
                 document.getElementById('area-prestador').classList.remove('hidden');
-                carregarDadosPortalPrestador();
+                carregarIdentidadeVisualMenu(true);
+                mudarSecaoPrestador('pj-enviar');
             }
+        };
+
+        window.mudarSecaoPrestador = (subId) => {
+            document.querySelectorAll('.sec-pj').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`sec-${subId}`).classList.remove('hidden');
+
+            const botoes = ['btn-pj-enviar', 'btn-pj-contratos'];
+            botoes.forEach(bId => {
+                const b = document.getElementById(bId);
+                if(b) {
+                    if (bId === `btn-${subId}`) {
+                        b.className = "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition";
+                    } else {
+                        b.className = "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
+                    }
+                }
+            });
+            carregarDadosPortalPrestador();
         };
 
         let contratosLocais = {};
         let folhasLocais = {};
-        const pathContratosDB = empresaAtivaId === 'matriz' ? 'contratos' : `empresas_clientes_dados/${empresaAtivaId}/contratos`;
-        const pathFolhasDB = empresaAtivaId === 'matriz' ? 'folhas_pagamento' : `empresas_clientes_dados/${empresaAtivaId}/folhas_pagamento`;
 
         onValue(ref(db, pathContratosDB), (snapshot) => {
             contratosLocais = snapshot.val() || {};
@@ -996,7 +1188,7 @@
 
             const entradas = Object.entries(contratosLocais);
             if (entradas.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="12" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
                 return;
             }
 
@@ -1005,6 +1197,12 @@
 
             entradas.forEach(([key, c]) => {
                 if (c.excluidoLogico) return;
+
+                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase()) {
+                    if ((c.email || c.emailCorp || "").toLowerCase() !== usuarioEmailLogado) {
+                        return;
+                    }
+                }
 
                 if (c.status === "Ativo") {
                     let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
@@ -1024,27 +1222,6 @@
                 let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
-                // Cálculo de Vencimento e Alertas
-                let alertaHTML = '<span class="text-slate-400">Sem término</span>';
-                if (c.vigenciaFim) {
-                    const hoje = new Date();
-                    const fimContrato = new Date(c.vigenciaFim);
-                    const diffTempo = fimContrato - hoje;
-                    const diffDias = Math.ceil(diffTempo / (1000 * 60 * 60 * 24));
-
-                    if (diffDias < 0) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-800">Vencido ❌</span>`;
-                    } else if (diffDias <= 7) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-700 animate-pulse">Vence em ${diffDias} dias 🚨</span>`;
-                    } else if (diffDias <= 15) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-amber-100 text-amber-800">Vence em ${diffDias} dias ⏳</span>`;
-                    } else if (diffDias <= 30) {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-blue-100 text-blue-800">Vence em ${diffDias} dias ⚠️</span>`;
-                    } else {
-                        alertaHTML = `<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-green-100 text-green-800">Em dia (${diffDias} dias)</span>`;
-                    }
-                }
-
                 let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : '---';
                 let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
 
@@ -1053,18 +1230,17 @@
                         <td class="p-3">${fotoHtml}</td>
                         <td class="p-3 font-semibold">${c.nome || '---'}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
+                        <td class="p-3 text-slate-600">${c.email || c.emailCorp || '---'}<br><small>${c.telefone || ''}</small></td>
+                        <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
                         <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
-                        <td class="p-3">${alertaHTML}</td>
                         <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.gestorDireto || '---'}</td>
-                        <td class="p-3 text-slate-600">${c.aditivos || '---'}</td>
                         <td class="p-3 text-center">${botaoAnexoContrato}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         <td class="p-3 text-center space-x-1">
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
                             <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
-                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-800 px-2 py-1 rounded text-xs font-bold">Excluir</button>
+                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
                         </td>
                     </tr>
                 `;
@@ -1090,10 +1266,25 @@
             carregarDadosPortalPrestador();
         });
 
+        const campoPerfilTipoSelect = document.getElementById('campoPerfilTipo');
+        const blocoAdminPrestador = document.getElementById('bloco-admin-prestador');
+        
+        campoPerfilTipoSelect.addEventListener('change', () => {
+            if (campoPerfilTipoSelect.value === 'Administrador') {
+                blocoAdminPrestador.classList.remove('hidden');
+            } else {
+                blocoAdminPrestador.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = 'nao';
+            }
+        });
+
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoRazaoSocial','campoCNPJ','campoCargo','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
+            ['campoNome','campoCpf','campoEmail','campoTelefone','campoContatoEmergencia','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoInscricaoEstadual','campoInscricaoMunicipal','campoCep','campoLogradouro','campoNumero','campoBairro','campoCidade','campoEstado','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoCargo','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
+            document.getElementById('campoPerfilTipo').value = 'Administrador';
+            document.getElementById('campoAdminEhPrestador').value = 'nao';
+            blocoAdminPrestador.classList.remove('hidden');
             document.getElementById('campoFotoArquivo').value = "";
             document.getElementById('campoArquivoContrato').value = "";
             document.getElementById('modalCadastro').classList.remove('hidden');
@@ -1108,11 +1299,23 @@
             const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
                 const pacote = {
                     perfilTipo: document.getElementById('campoPerfilTipo').value,
+                    adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
                     nome: document.getElementById('campoNome').value,
                     cpf: document.getElementById('campoCpf').value,
                     email: document.getElementById('campoEmail').value,
+                    telefone: document.getElementById('campoTelefone').value,
+                    contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
                     razaoSocial: document.getElementById('campoRazaoSocial').value,
                     cnpj: document.getElementById('campoCNPJ').value,
+                    emailCorp: document.getElementById('campoEmailCorp').value,
+                    inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
+                    inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
+                    cep: document.getElementById('campoCep').value,
+                    logradouro: document.getElementById('campoLogradouro').value,
+                    numero: document.getElementById('campoNumero').value,
+                    bairro: document.getElementById('campoBairro').value,
+                    cidade: document.getElementById('campoCidade').value,
+                    estado: document.getElementById('campoEstado').value,
                     cargo: document.getElementById('campoCargo').value,
                     vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
                     vigenciaFim: document.getElementById('campoVigenciaFim').value,
@@ -1172,11 +1375,31 @@
             document.getElementById('tituloModal').innerText = "Editar Contrato / Cadastro";
             document.getElementById('btn-salvar-cadastro').dataset.editId = id;
             document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
+            
+            if (c.perfilTipo === 'Administrador') {
+                blocoAdminPrestador.classList.remove('hidden');
+                document.getElementById('campoAdminEhPrestador').value = c.adminEhPrestador || 'nao';
+            } else {
+                blocoAdminPrestador.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = 'nao';
+            }
+
             document.getElementById('campoNome').value = c.nome || "";
             document.getElementById('campoCpf').value = c.cpf || "";
             document.getElementById('campoEmail').value = c.email || "";
+            document.getElementById('campoTelefone').value = c.telefone || "";
+            document.getElementById('campoContatoEmergencia').value = c.contatoEmergencia || "";
             document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
             document.getElementById('campoCNPJ').value = c.cnpj || "";
+            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
+            document.getElementById('campoInscricaoEstadual').value = c.inscricaoEstadual || "";
+            document.getElementById('campoInscricaoMunicipal').value = c.inscricaoMunicipal || "";
+            document.getElementById('campoCep').value = c.cep || "";
+            document.getElementById('campoLogradouro').value = c.logradouro || "";
+            document.getElementById('campoNumero').value = c.numero || "";
+            document.getElementById('campoBairro').value = c.bairro || "";
+            document.getElementById('campoCidade').value = c.cidade || "";
+            document.getElementById('campoEstado').value = c.estado || "";
             document.getElementById('campoCargo').value = c.cargo || "";
             document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
             document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
@@ -1221,7 +1444,7 @@
 
             const chavesFolha = Object.keys(baseFolhaMes);
             if (chavesFolha.length === 0) {
-                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência.</td></tr>`;
+                tbodyRegular.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma folha inicializada para esta competência. Clique em 'Criar / Atualizar Folha'.</td></tr>`;
                 document.getElementById('cardTotalFolha').innerText = "R$ 0,00";
                 document.getElementById('cardTotalFolhaComplementar').innerText = "R$ 0,00";
                 containerComp.classList.add('hidden');
@@ -1235,13 +1458,13 @@
 
                 let cnpjCadastrado = (contratosLocais[key]?.cnpj && contratosLocais[key].cnpj.trim() !== "") ? contratosLocais[key].cnpj : (f.cnpj || '---');
 
-                let statusRegHTML = f.regular?.statusPagamento || "Aguardando NF";
+                let statusRegHTML = f.regular?.statusPagamento || "Em Análise";
                 if (statusRegHTML === "Pago") {
-                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                 } else if (f.regular?.nfStatus === "Recusada ❌") {
                     statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Pronto para Pagar" || f.regular?.nfArquivoBase64) {
-                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
+                } else if (f.regular?.nfStatus === "Recebida ✔" || statusRegHTML === "Em Análise" || f.regular?.nfArquivoBase64) {
+                    statusRegHTML = `<button class="btn-liquidar-reg bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">💰 Liquidar</button>`;
                 }
 
                 let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
@@ -1259,7 +1482,10 @@
                             </select>
                         </td>
                         <td class="p-3 text-center">${botaoVisualizarReg}</td>
-                        <td class="p-3 text-center">${statusRegHTML}</td>
+                        <td class="p-3 text-center flex items-center justify-center gap-2">
+                            ${statusRegHTML}
+                            <button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir da Folha">🗑️</button>
+                        </td>
                     </tr>
                 `;
 
@@ -1269,12 +1495,12 @@
                         let valComp = parseFloat(cItem.motorValor || 0);
                         totalComp += valComp;
 
-                        let statusCompHTML = cItem.statusPagamento || "Aguardando NF";
+                        let statusCompHTML = cItem.statusPagamento || "Em Análise";
                         if (statusCompHTML === "Pago") {
-                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>`;
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>`;
                         } else if (cItem.nfStatus === "Recusada ❌") {
                             statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada / Corrigir</span>`;
-                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Pronto para Pagar" || cItem.nfArquivoBase64) {
+                        } else if (cItem.nfStatus === "Recebida ✔" || statusCompHTML === "Em Análise" || cItem.nfArquivoBase64) {
                             statusCompHTML = `<button class="btn-liquidar-comp bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">💰 Liquidar</button>`;
                         }
 
@@ -1293,7 +1519,10 @@
                                     </select>
                                 </td>
                                 <td class="p-3 text-center">${botaoVisualizarComp}</td>
-                                <td class="p-3 text-center">${statusCompHTML}</td>
+                                <td class="p-3 text-center flex items-center justify-center gap-2">
+                                    ${statusCompHTML}
+                                    <button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold" title="Excluir Lançamento">🗑️</button>
+                                </td>
                             </tr>
                         `;
                     });
@@ -1304,6 +1533,20 @@
             document.getElementById('cardTotalFolhaComplementar').innerText = `R$ ${totalComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             containerComp.classList.toggle('hidden', !temComp);
         }
+
+        window.excluirItemFolhaRegular = async (idContrato) => {
+            if (confirm("Deseja realmente remover este prestador da folha mensal desta competência?")) {
+                await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}`));
+                alert("Registro removido da folha com sucesso!");
+            }
+        };
+
+        window.excluirItemFolhaComplementar = async (idContrato, idComp) => {
+            if (confirm("Deseja realmente excluir este lançamento complementar?")) {
+                await remove(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista/${idComp}`));
+                alert("Lançamento complementar removido com sucesso!");
+            }
+        };
 
         document.addEventListener('change', async (e) => {
             if (e.target.classList.contains('select-nf-status-reg')) {
@@ -1325,13 +1568,15 @@
             const tbodyCompPJ = document.getElementById('tabelaPrestadorComplementar');
             const containerCompPJ = document.getElementById('containerPrestadorComp');
 
-            tbodyRegPJ.innerHTML = "";
-            tbodyCompPJ.innerHTML = "";
+            if(tbodyRegPJ) tbodyRegPJ.innerHTML = "";
+            if(tbodyCompPJ) tbodyCompPJ.innerHTML = "";
 
             let idContratoLogado = null;
+            let dadosContratoLogado = null;
             Object.entries(contratosLocais).forEach(([id, c]) => {
                 if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
                     idContratoLogado = id;
+                    dadosContratoLogado = c;
                 }
             });
 
@@ -1339,71 +1584,134 @@
             let encontrouAlgum = false;
             let temComplementarGeral = false;
 
+            const divContratos = document.getElementById('pj-conteudo-contratos');
+            if (divContratos) {
+                if (dadosContratoLogado) {
+                    let botaoContratoAssinado = dadosContratoLogado.arquivoContratoBase64 ? `<div class="mt-4"><button class="btn-view-arquivo-contrato bg-blue-600 text-white px-4 py-2 rounded-xl text-xs font-bold shadow-sm" data-id="${idContratoLogado}">📄 Visualizar Contrato Assinado</button></div>` : '';
+                    divContratos.innerHTML = `
+                        <div class="p-5 border rounded-xl bg-slate-50 space-y-2.5">
+                            <p><b>Nome:</b> ${dadosContratoLogado.nome || '---'}</p>
+                            <p><b>Razão Social:</b> ${dadosContratoLogado.razaoSocial || '---'}</p>
+                            <p><b>CNPJ / CPF:</b> ${dadosContratoLogado.cnpj || dadosContratoLogado.cpf || '---'}</p>
+                            <p><b>E-mail Pessoal:</b> ${dadosContratoLogado.email || '---'}</p>
+                            <p><b>E-mail Corporativo:</b> ${dadosContratoLogado.emailCorp || '---'}</p>
+                            <p><b>Telefone:</b> ${dadosContratoLogado.telefone || '---'}</p>
+                            <p><b>Contato de Emergência:</b> ${dadosContratoLogado.contatoEmergencia || '---'}</p>
+                            <p><b>Endereço:</b> ${dadosContratoLogado.logradouro || '---'}, ${dadosContratoLogado.numero || ''} - ${dadosContratoLogado.bairro || ''}, ${dadosContratoLogado.cidade || ''}/${dadosContratoLogado.estado || ''}</p>
+                            <p><b>CEP:</b> ${dadosContratoLogado.cep || '---'}</p>
+                            <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
+                            <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+                            ${botaoContratoAssinado}
+                        </div>
+                    `;
+                } else {
+                    divContratos.innerHTML = `<p class="text-slate-400">Nenhum contrato vinculado a este e-mail.</p>`;
+                }
+            }
+
             Object.entries(folhaCompetencia).forEach(([idContratoFolha, dadosFolha]) => {
-                if (usuarioEmailLogado !== EMAIL_MASTER_SISTEMA.toLowerCase() && perfilUsuarioLogado === 'Prestador' && idContratoLogado !== idContratoFolha) {
+                if (idContratoLogado !== idContratoFolha) {
                     return;
                 }
 
                 encontrouAlgum = true;
-                const nomeExibir = dadosFolha.nome || "Prestador";
-                const cnpjExibir = dadosFolha.cnpj || "---";
-                const valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
-                const nfStatusReg = dadosFolha.regular?.nfStatus || "Aguardando";
+                const nomeExibir = dadosFolha.nome || dadosContratoLogado?.nome || "Prestador";
+                const cnpjExibir = dadosFolha.cnpj || dadosContratoLogado?.cnpj || "---";
+                const valReg = parseFloat(dadosContratoLogado?.valorFixoMensal || dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
+                
+                const temNfReg = Boolean(dadosFolha.regular?.nfArquivoBase64);
+                const statusPagamentoRegCorp = dadosFolha.regular?.statusPagamento || "Em Análise";
+                const nfStatusCorp = dadosFolha.regular?.nfStatus || "Aguardando";
 
-                let badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">NF enviada</span>`;
-                if (nfStatusReg === "Recusada ❌") {
-                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
-                } else if (!dadosFolha.regular?.nfArquivoBase64) {
-                    badgeStatusReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                let statusPagamentoRegPJ = "Anexar NF";
+                if (statusPagamentoRegCorp === "Pago") {
+                    statusPagamentoRegPJ = "Pago";
+                } else if (temNfReg || nfStatusCorp === "Recebida ✔") {
+                    statusPagamentoRegPJ = "Em Análise";
                 }
 
-                let acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
+                let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoRegPJ}</span>`;
+                if (statusPagamentoRegPJ === "Pago") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                } else if (statusPagamentoRegPJ === "Em Análise") {
+                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
+                }
+
+                let acaoRegPJ = `<span class="text-slate-400">---</span>`;
                 if (dadosFolha.regular?.nfArquivoBase64) {
                     acaoRegPJ = `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">`;
+                } else {
+                    acaoRegPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
                 }
 
-                tbodyRegPJ.innerHTML += `
-                    <tr class="border-b">
-                        <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
-                        <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-2.5">${badgeStatusReg}</td>
-                        <td class="p-2.5">${acaoRegPJ}</td>
-                    </tr>
-                `;
+                if (tbodyRegPJ) {
+                    tbodyRegPJ.innerHTML += `
+                        <tr class="border-b">
+                            <td class="p-2.5"><b>${nomeExibir}</b><br><small class="text-slate-500">${cnpjExibir}</small></td>
+                            <td class="p-2.5 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            <td class="p-2.5">${acaoRegPJ}</td>
+                            <td class="p-2.5">${badgeStatusPagamentoReg}</td>
+                        </tr>
+                    `;
+                }
 
                 if (dadosFolha.complementares_lista) {
                     Object.entries(dadosFolha.complementares_lista).forEach(([idComp, cItem]) => {
                         temComplementarGeral = true;
                         let valComp = parseFloat(cItem.motorValor || 0);
-                        let nfStatusComp = cItem.nfStatus || "Aguardando";
+                        let statusPagamentoCompCorp = cItem.statusPagamento || "Em Análise";
+                        let nfStatusCompCorp = cItem.nfStatus || "Aguardando";
+                        let eventoNome = cItem.motorEvento || 'Adicional';
+                        let temNfComp = Boolean(cItem.nfArquivoBase64);
 
-                        let badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-emerald-100 text-emerald-800">Enviada ✔</span>`;
-                        if (nfStatusComp === "Recusada ❌") {
-                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700 animate-pulse">Ajustar NF</span>`;
-                        } else if (!cItem.nfArquivoBase64) {
-                            badgeStatusComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Aguardando NF</span>`;
+                        let statusPagamentoCompPJ = "Anexar NF";
+                        if (statusPagamentoCompCorp === "Pago") {
+                            statusPagamentoCompPJ = "Pago";
+                        } else if (temNfComp || nfStatusCompCorp === "Recebida ✔") {
+                            statusPagamentoCompPJ = "Em Análise";
                         }
 
-                        let acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoCompPJ}</span>`;
+                        if (statusPagamentoCompPJ === "Pago") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                        } else if (statusPagamentoCompPJ === "Em Análise") {
+                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
+                        }
+
+                        let acaoCompPJ = `<span class="text-slate-400">---</span>`;
                         if (cItem.nfArquivoBase64) {
                             acaoCompPJ = `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
+                        } else {
+                            acaoCompPJ = `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
                         }
 
-                        tbodyCompPJ.innerHTML += `
-                            <tr class="border-b bg-amber-50/20">
-                                <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1 py-0.5 rounded font-bold">${cItem.motorEvento || 'Adicional'}</span></td>
-                                <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                <td class="p-2.5">${badgeStatusComp}</td>
-                                <td class="p-2.5">${acaoCompPJ}</td>
-                            </tr>
-                        `;
+                        if (tbodyCompPJ) {
+                            tbodyCompPJ.innerHTML += `
+                                <tr class="border-b bg-amber-50/20">
+                                    <td class="p-2.5"><b>${nomeExibir}</b><br><span class="text-[10px] bg-amber-100 text-amber-800 px-1.5 py-0.5 rounded font-bold">${eventoNome}</span></td>
+                                    <td class="p-2.5 font-bold text-amber-800">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    <td class="p-2.5">${acaoCompPJ}</td>
+                                    <td class="p-2.5">${badgeStatusPagamentoComp}</td>
+                                </tr>
+                            `;
+                        }
                     });
                 }
             });
 
-            containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
+            if (containerCompPJ) containerCompPJ.classList.toggle('hidden', !temComplementarGeral);
 
-            if (!encontrouAlgum) {
+            if (!encontrouAlgum && dadosContratoLogado && tbodyRegPJ) {
+                const valRegContrato = parseFloat(dadosContratoLogado.valorFixoMensal || 0);
+                tbodyRegPJ.innerHTML = `
+                    <tr class="border-b">
+                        <td class="p-2.5"><b>${dadosContratoLogado.nome}</b><br><small class="text-slate-500">${dadosContratoLogado.cnpj || '---'}</small></td>
+                        <td class="p-2.5 font-bold text-blue-950">R$ ${valRegContrato.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                        <td class="p-2.5"><input type="file" accept=".pdf,image/*" class="input-nf-reg-avulsa text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoLogado}"></td>
+                        <td class="p-2.5"><span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">Anexar NF</span></td>
+                    </tr>
+                `;
+            } else if (!encontrouAlgum && tbodyRegPJ) {
                 tbodyRegPJ.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro para esta competência.</td></tr>`;
             }
         }
@@ -1411,22 +1719,31 @@
         selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
 
         document.getElementById('btn-enviar-todas-notas-pj').addEventListener('click', async () => {
-            const inputsReg = document.querySelectorAll('.input-nf-reg');
+            const inputsReg = document.querySelectorAll('.input-nf-reg, .input-nf-reg-avulsa');
             const inputsComp = document.querySelectorAll('.input-nf-comp');
             let atualizou = false;
+            const compDestino = selectCompetenciaPJ.value;
 
             for (let input of inputsReg) {
                 if (input.files && input.files[0]) {
                     const id = input.dataset.id;
                     const file = input.files[0];
+                    const c = contratosLocais[id] || {};
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
-                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/regular`), {
-                                nfArquivoBase64: reader.result,
-                                nfStatus: "Recebida ✔",
-                                statusPagamento: "Pronto para Pagar"
-                            });
+                            const snapshotFolha = await get(ref(db, `${pathFolhasDB}/${compDestino}/${id}`));
+                            let dadosFolhaPrestador = snapshotFolha.val() || {
+                                nome: c.nome || "Prestador",
+                                cnpj: c.cnpj || "",
+                                regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0 }
+                            };
+
+                            dadosFolhaPrestador.regular.nfArquivoBase64 = reader.result;
+                            dadosFolhaPrestador.regular.nfStatus = "Recebida ✔";
+                            dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
+
+                            await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
                             atualizou = true;
                             resolve();
                         };
@@ -1443,10 +1760,10 @@
                     await new Promise((resolve) => {
                         const reader = new FileReader();
                         reader.onloadend = async () => {
-                            await update(ref(db, `${pathFolhasDB}/${selectCompetenciaPJ.value}/${id}/complementares_lista/${compId}`), {
+                            await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}/complementares_lista/${compId}`), {
                                 nfArquivoBase64: reader.result,
                                 nfStatus: "Recebida ✔",
-                                statusPagamento: "Pronto para Pagar"
+                                statusPagamento: "Em Análise"
                             });
                             atualizou = true;
                             resolve();
@@ -1537,7 +1854,7 @@
                 if (fCC !== "todos" && departamento !== fCC) return;
 
                 if (fTipoFolha === "todas" || fTipoFolha === "Regular") {
-                    let valorRegFixo = parseFloat(dadosPrestador.regular?.valorFixo || 0);
+                    let valorRegFixo = parseFloat(contratoInfo.valorFixoMensal || dadosPrestador.regular?.valorFixo || 0);
                     let valorRegMotor = parseFloat(dadosPrestador.regular?.motorValor || 0);
                     let valRegTotal = valorRegFixo + valorRegMotor;
 
@@ -1623,20 +1940,28 @@
             modal.classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-gerar-folha').addEventListener('click', () => document.getElementById('modalGerarFolha').classList.add('hidden'));
+        
         document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
             const checkboxes = document.querySelectorAll('.chk-folha:checked');
             const compDestino = filtroCompetencia.value;
-            let pacote = {};
+            
+            const snapshotAtual = await get(ref(db, `${pathFolhasDB}/${compDestino}`));
+            let folhaExistente = snapshotAtual.val() || {};
+            
             checkboxes.forEach(chk => {
                 const id = chk.value;
                 const c = contratosLocais[id];
-                pacote[`${pathFolhasDB}/${compDestino}/${id}`] = {
-                    nome: c.nome, cnpj: c.cnpj || '',
-                    regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Aguardando NF" }
-                };
+                if (!folhaExistente[id]) {
+                    folhaExistente[id] = {
+                        nome: c.nome, 
+                        cnpj: c.cnpj || '',
+                        regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Em Análise" }
+                    };
+                }
             });
-            await update(ref(db), pacote);
-            alert("Folha gerada com sucesso!");
+
+            await update(ref(db, `${pathFolhasDB}/${compDestino}`), folhaExistente);
+            alert("Folha gerada/atualizada com sucesso! Novos contratos foram adicionados e os existentes mantidos.");
             document.getElementById('modalGerarFolha').classList.add('hidden');
         });
 
@@ -1652,7 +1977,7 @@
                 if (tipo === "regular") {
                     await update(ref(db), { [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorValor`]: valor, [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorEvento`]: evento });
                 } else {
-                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Aguardando NF" });
+                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise" });
                 }
                 alert("Lançamento aplicado com sucesso!");
                 document.getElementById('motorValor').value = "";
