@@ -120,7 +120,7 @@
         </div>
     </aside>
 
-    <!-- MODAL SELETOR DE EMPRESAS (SEM O BOTÃO "+ NOVA EMPRESA") -->
+    <!-- MODAL SELETOR DE EMPRESAS -->
     <div id="modalSeletorEmpresas" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharSeletorEmpresas()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
@@ -189,10 +189,9 @@
 
         <main class="flex-1 overflow-y-auto p-6 bg-slate-50">
             
-            <!-- DASHBOARD (FOLHA, TESOURARIA, KPI EXECUTIVO E CENTRAL DE PENDÊNCIAS) -->
+            <!-- DASHBOARD -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 
-                <!-- DASHBOARD EXECUTIVO (KPIs & INDICADORES) -->
                 <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                     <div class="flex justify-between items-center border-b pb-3">
                         <div>
@@ -205,14 +204,12 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
-                        <!-- 1. Prestadores -->
                         <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
                             <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Prestadores</p>
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Ativos:</span><span id="kpi-prest-ativos" class="font-bold text-green-700">0</span></div>
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Inativos:</span><span id="kpi-prest-inativos" class="font-bold text-red-600">0</span></div>
                         </div>
 
-                        <!-- 2. Contratos -->
                         <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
                             <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Contratos</p>
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Ativos:</span><span id="kpi-cont-ativos" class="font-bold text-blue-900">0</span></div>
@@ -220,7 +217,6 @@
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Encerrados:</span><span id="kpi-cont-encerrados" class="font-bold text-slate-600">0</span></div>
                         </div>
 
-                        <!-- 3. Notas Fiscais -->
                         <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
                             <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Notas Fiscais (Mês)</p>
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Recebidas:</span><span id="kpi-nf-recebidas" class="font-bold text-blue-700">0</span></div>
@@ -228,7 +224,6 @@
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Aprovadas:</span><span id="kpi-nf-aprovadas" class="font-bold text-emerald-700">0</span></div>
                         </div>
 
-                        <!-- 4. Financeiro -->
                         <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
                             <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Financeiro (Mês)</p>
                             <div class="text-xs text-slate-600">Valor do Mês:</div>
@@ -237,7 +232,6 @@
                             <div class="flex justify-between items-center text-[11px]"><span class="text-amber-700 font-semibold">Pendentes:</span><span id="kpi-fin-pendentes" class="font-bold text-amber-700">R$ 0,00</span></div>
                         </div>
 
-                        <!-- 5. Documentos / Compliance -->
                         <div class="bg-slate-50 p-4 rounded-xl border space-y-1">
                             <p class="text-[11px] font-extrabold text-slate-500 uppercase tracking-wider">Compliance Docs</p>
                             <div class="flex justify-between items-center text-xs"><span class="text-slate-600">Regularidade:</span><span id="kpi-doc-regular" class="font-bold text-green-700">OK</span></div>
@@ -249,7 +243,6 @@
                     </div>
                 </div>
 
-                <!-- CENTRAL DE PENDÊNCIAS ACIONÁVEIS -->
                 <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
                     <h3 class="text-sm font-extrabold text-blue-950 flex items-center gap-2">🔔 Central de Pendências e Alertas Operacionais</h3>
                     <p class="text-xs text-slate-500">Clique em qualquer alerta para filtrar e resolver a pendência instantaneamente.</p>
@@ -326,7 +319,6 @@
                     </div>
                 </div>
 
-                <!-- MOTOR FINANCEIRO -->
                 <div class="bg-white p-6 rounded-xl border shadow-sm">
                     <h2 class="text-lg font-bold text-blue-900 mb-2">⚙️ Motor Financeiro: Ajustes e Lançamentos</h2>
                     <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 items-end mt-4">
@@ -361,7 +353,6 @@
                     </div>
                 </div>
 
-                <!-- TABELA FOLHA REGULAR -->
                 <div class="p-6 bg-white rounded-xl border shadow-sm">
                     <h2 class="text-xl font-bold text-blue-900 mb-4">Folha de Pagamento & Tesouraria (Regular)</h2>
                     <div class="overflow-x-auto">
@@ -382,7 +373,6 @@
                     </div>
                 </div>
 
-                <!-- TABELA FOLHA COMPLEMENTAR -->
                 <div id="containerFolhaComplementar" class="hidden p-6 bg-white rounded-xl border border-amber-200 bg-amber-50/5 shadow-sm space-y-6">
                     <h2 class="text-xl font-bold text-amber-900">⚡ Folha Complementar / Adicionais</h2>
                     <div class="overflow-x-auto">
@@ -474,7 +464,6 @@
                             </div>
                         </div>
 
-                        <!-- 1. DADOS PESSOAIS -->
                         <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
                             <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">👤 1. Dados Pessoais</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -486,7 +475,6 @@
                             </div>
                         </div>
 
-                        <!-- 2. DADOS DA EMPRESA PJ -->
                         <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
                             <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">🏢 2. Dados da Empresa PJ & Endereço</h4>
                             <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -504,7 +492,6 @@
                             </div>
                         </div>
 
-                        <!-- 3. VIGÊNCIA, VALORES E GOVERNANÇA -->
                         <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
                             <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">⚖️ 3. Vigência, Valores e Governança</h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
@@ -544,7 +531,7 @@
                 </div>
             </section>
 
-            <!-- CENTRAL DE DOCUMENTOS (AUDITORIA E VALIDADE) -->
+            <!-- CENTRAL DE DOCUMENTOS -->
             <section id="documentos" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">📁 Central de Documentos & Compliance</h2>
@@ -592,7 +579,7 @@
                 </div>
             </section>
 
-            <!-- RELATÓRIOS CONSOLIDADOS -->
+            <!-- RELATÓRIOS -->
             <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div class="flex justify-between items-center border-b pb-4">
                     <div>
@@ -654,7 +641,7 @@
                 </div>
             </section>
 
-            <!-- SEÇÃO DE AUDITORIA E LOGS -->
+            <!-- AUDITORIA -->
             <section id="auditoria" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div class="flex justify-between items-center">
                     <div>
@@ -684,7 +671,7 @@
                 </div>
             </section>
 
-            <!-- CENTRAL DE CONFIGURAÇÕES UNIFICADA (7 SUB-ABAS) -->
+            <!-- CENTRAL DE CONFIGURAÇÕES -->
             <section id="secao-info-empresa" class="hidden bg-white p-6 rounded-2xl border shadow-sm modo-rh-secao max-w-5xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -694,7 +681,6 @@
                     <button onclick="voltarSecaoAposInfoEmpresa()" class="text-xs bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold px-3 py-1.5 rounded-lg transition">✕ Voltar</button>
                 </div>
 
-                <!-- Sub-abas da Etapa 14 -->
                 <div class="grid grid-cols-2 md:grid-cols-7 gap-1.5 bg-slate-100 p-1.5 rounded-2xl border text-[11px] font-bold">
                     <button onclick="mudarSubAbaConfig('geral')" id="subaba-btn-geral" class="py-2 px-2 rounded-xl bg-blue-900 text-white transition text-center shadow-sm">1. Geral</button>
                     <button onclick="mudarSubAbaConfig('usuarios')" id="subaba-btn-usuarios" class="py-2 px-2 rounded-xl text-slate-700 hover:bg-white transition text-center">2. Usuários</button>
@@ -705,7 +691,6 @@
                     <button onclick="mudarSubAbaConfig('seguranca')" id="subaba-btn-seguranca" class="py-2 px-2 rounded-xl text-slate-700 hover:bg-white transition text-center">7. Segurança</button>
                 </div>
 
-                <!-- SUB-ABA 1: GERAL (Logo & Dados) -->
                 <div id="subaba-conteudo-geral" class="subaba-conteudo space-y-6 pt-2">
                     <div class="border rounded-2xl p-6 bg-slate-50/50 space-y-4">
                         <h3 class="font-bold text-blue-950 text-sm">Logotipo Corporativo</h3>
@@ -747,7 +732,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 2: USUÁRIOS E ACESSOS -->
                 <div id="subaba-conteudo-usuarios" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="flex justify-between items-center bg-slate-50 p-4 rounded-xl border">
                         <div>
@@ -771,7 +755,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 3: PERMISSÕES -->
                 <div id="subaba-conteudo-permissoes" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="bg-blue-50 p-4 rounded-xl border border-blue-200">
                         <h3 class="font-bold text-blue-950 text-sm">Matriz de Permissões por Perfil</h3>
@@ -802,7 +785,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 4: INTEGRAÇÕES -->
                 <div id="subaba-conteudo-integracoes" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="p-5 border rounded-2xl bg-white space-y-3">
                         <div class="flex justify-between items-center">
@@ -823,7 +805,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 5: PLANO CONTRATADO -->
                 <div id="subaba-conteudo-plano" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div class="bg-blue-900 text-white p-6 rounded-2xl shadow-md space-y-2">
@@ -845,7 +826,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 6: NOTIFICAÇÕES -->
                 <div id="subaba-conteudo-notificacoes" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-blue-950 text-sm">Preferências de Alertas Automáticos</h3>
@@ -857,7 +837,6 @@
                     </div>
                 </div>
 
-                <!-- SUB-ABA 7: SEGURANÇA -->
                 <div id="subaba-conteudo-seguranca" class="subaba-conteudo hidden space-y-4 pt-2">
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-blue-950 text-sm">Segurança de Acesso e Auditoria</h3>
@@ -1354,7 +1333,6 @@
             }
         };
 
-        // LÓGICA DAS SUB-ABAS DE CONFIGURAÇÕES (ETAPA 14)
         window.mudarSubAbaConfig = (subAba) => {
             const abas = ['geral', 'usuarios', 'permissoes', 'integracoes', 'plano', 'notificacoes', 'seguranca'];
             abas.forEach(a => {
@@ -1620,7 +1598,8 @@
                         <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
                         <td class="p-3 text-center">${botaoAnexoContrato}</td>
                         <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                        <td class="p-3 text-center space-x-1 flex justify-center">
+                        <td class="p-3 text-center space-x-1 flex justify-center items-center">
+                            <button onclick="reenviarConvitePrimeiroAcesso('${key}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-2 py-1 rounded text-xs font-bold" title="Reenviar Convite de Primeiro Acesso">📨 Convite</button>
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
                             <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
                             <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
@@ -1652,6 +1631,32 @@
             atualizarCentralDocumentos();
             carregarDadosPortalPrestador();
         });
+
+        // FUNÇÃO DE REENVIAR CONVITE DE PRIMEIRO ACESSO
+        window.reenviarConvitePrimeiroAcesso = async (id) => {
+            const c = contratosLocais[id];
+            if (!c) return;
+            const emailDestino = c.email || c.emailCorp;
+            if (!emailDestino) {
+                alert("Este cadastro não possui e-mail cadastrado!");
+                return;
+            }
+
+            if (confirm(`Deseja reenviar o convite de primeiro acesso para ${c.nome} (${emailDestino})?`)) {
+                try {
+                    await registrarNotificacao(
+                        "Convite de Primeiro Acesso",
+                        `Olá ${c.nome}, você foi convidado(a) a acessar a plataforma ${empresaAtivaNome} no ConnectPJ. Utilize seu e-mail para redefinir a senha e acessar o portal.`,
+                        "sucesso",
+                        emailDestino
+                    );
+                    await registrarAuditoria("Contratos", "Reenvio de Convite", c.nome, "-", emailDestino);
+                    alert(`Convite de primeiro acesso enviado com sucesso para ${emailDestino}!`);
+                } catch (error) {
+                    alert("Erro ao enviar convite: " + error.message);
+                }
+            }
+        };
 
         const campoPerfilTipoSelect = document.getElementById('campoPerfilTipo');
         const blocoAdminPrestador = document.getElementById('bloco-admin-prestador');
