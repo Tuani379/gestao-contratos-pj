@@ -101,7 +101,7 @@
                             <p id="dropdown-empresa-ativa" class="text-xs font-bold text-blue-900">Carregando...</p>
                         </div>
                         <div class="space-y-1">
-                            <button id="menu-info-empresa" onclick="abrirConfiguracoesEmpresa()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">⚙️ Configurações (Etapa 14)</button>
+                            <button id="menu-info-empresa" onclick="abrirConfiguracoesEmpresa()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">⚙️ Configurações</button>
                             <button onclick="abrirModalTrocarSenha()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔑 Alterar Senha</button>
                             <button id="menu-trocar-outras-contas" onclick="abrirSeletorEmpresas()" class="w-full text-left px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-blue-50 rounded-lg transition">🔄 Trocar / Outras Contas</button>
                         </div>
@@ -120,35 +120,15 @@
         </div>
     </aside>
 
-    <!-- MODAL SELETOR DE EMPRESAS -->
+    <!-- MODAL SELETOR DE EMPRESAS (SEM O BOTÃO "+ NOVA EMPRESA") -->
     <div id="modalSeletorEmpresas" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border relative max-h-[85vh] overflow-y-auto">
             <button onclick="fecharSeletorEmpresas()" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
-            <div class="flex justify-between items-center mb-4">
-                <div>
-                    <h2 class="text-xl font-extrabold text-slate-900 mb-1">Empresas Cadastradas</h2>
-                    <p class="text-xs text-slate-500">Gerencie e alterne entre as organizações do grupo.</p>
-                </div>
-                <!-- Botão restrito apenas ao dono do ConnectPJ -->
-                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="hidden bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">+ Nova Empresa</button>
+            <div class="mb-4">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-1">Empresas Cadastradas</h2>
+                <p class="text-xs text-slate-500">Gerencie e alterne entre as organizações do grupo.</p>
             </div>
             <div class="space-y-3" id="listaEmpresasDisponiveis"></div>
-        </div>
-    </div>
-
-    <!-- MODAL NOVA EMPRESA -->
-    <div id="modalNovaEmpresaMaster" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold text-blue-950 mb-3">Cadastrar Nova Empresa Cliente</h3>
-            <div class="space-y-3 mb-4">
-                <input type="text" id="inputNovaRazaoSocial" placeholder="Razão Social" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                <input type="text" id="inputNovoCnpj" placeholder="CNPJ" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-                <input type="email" id="inputNovoEmailEmpresa" placeholder="E-mail do Administrador" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50">
-            </div>
-            <div class="flex justify-end gap-2">
-                <button onclick="fecharModalNovaEmpresaMaster()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button id="btnSalvarEmpresaMaster" onclick="salvarNovaEmpresaMaster()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar</button>
-            </div>
         </div>
     </div>
 
@@ -1292,8 +1272,6 @@
                 document.getElementById('tela-login').classList.add('hidden');
                 usuarioEmailLogado = (user.email || "").toLowerCase();
                 
-                const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
-                
                 if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
                         empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
@@ -1301,11 +1279,9 @@
                         localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
-                    if(btnNovaEmpresaMaster) btnNovaEmpresaMaster.classList.remove('hidden'); // Exibe apenas para o dono do ConnectPJ
                     aplicarPermissoesPerfil('Administrador', true);
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
-                    if(btnNovaEmpresaMaster) btnNovaEmpresaMaster.classList.add('hidden'); // Oculta para administradores comuns
                     
                     get(ref(db, pathContratosDB)).then((snapshot) => {
                         const dados = snapshot.val() || {};
@@ -1367,21 +1343,6 @@
         };
         window.fecharSeletorEmpresas = () => { document.getElementById('modalSeletorEmpresas').classList.add('hidden'); };
         window.alternarEmpresaAtiva = (id, nome) => { localStorage.setItem('connectpj_empresa_ativa', id); localStorage.setItem('connectpj_empresa_nome', nome); location.reload(); };
-
-        window.abrirModalNovaEmpresaMaster = () => { document.getElementById('modalNovaEmpresaMaster').classList.remove('hidden'); };
-        window.fecharModalNovaEmpresaMaster = () => { document.getElementById('modalNovaEmpresaMaster').classList.add('hidden'); };
-        window.salvarNovaEmpresaMaster = async () => {
-            const r = document.getElementById('inputNovaRazaoSocial').value;
-            const c = document.getElementById('inputNovoCnpj').value;
-            const em = document.getElementById('inputNovoEmailEmpresa').value;
-            if (!r || !c || !em) { alert("Preencha tudo!"); return; }
-            await update(push(ref(db, 'empresas_clientes')), { razaoSocial: r, cnpj: c, emailResponsavel: em, status: "Ativo" });
-            
-            await registrarNotificacao("Nova Empresa / Usuário", `A organização ${r} foi cadastrada com sucesso.`, "sucesso", em);
-            await registrarAuditoria("SaaS Master", "Nova Empresa", r, "-", `CNPJ: ${c}`);
-
-            alert("Empresa salva!"); fecharModalNovaEmpresaMaster();
-        };
 
         window.voltarSecaoAposInfoEmpresa = () => {
             if (modoVisualAtual === 'pj') {
