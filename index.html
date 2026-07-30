@@ -1013,7 +1013,7 @@
             }
         }
 
-        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null, nomeDestinatario = "Usuário") {
+        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null, nomeDestinatario = "Usuário", senhaProvisoria = null) {
             try {
                 await push(ref(db, pathNotificacoesDB), {
                     titulo,
@@ -1029,7 +1029,7 @@
                         to_name: nomeDestinatario,
                         subject: `ConnectPJ - ${titulo}`,
                         message: mensagem,
-                        valentia: mensagem
+                        senha_provisoria: senhaProvisoria || "---"
                     });
                 }
             } catch (err) {
@@ -1646,15 +1646,23 @@
 
             if (confirm(`Deseja reenviar o convite de primeiro acesso para ${c.nome} (${emailDestino})?`)) {
                 try {
+                    // AQUI ENTRA A SENHA PROVISÓRIA NO REENVIO
+                    const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                    
+                    // Atualiza no banco para marcar que ele precisa trocar a senha no próximo login
+                    await update(ref(db, `${pathContratosDB}/${id}`), { senhaTemporaria: true });
+
                     await registrarNotificacao(
                         "Convite de Primeiro Acesso",
-                        `Olá ${c.nome}, você foi convidado(a) a acessar a plataforma ${empresaAtivaNome} no ConnectPJ. Utilize seu e-mail para redefinir a senha e acessar o portal.`,
+                        `Olá ${c.nome}, você foi convidado(a) a acessar a plataforma ${empresaAtivaNome} no ConnectPJ. Senha provisória: ${senhaProvisoria}`,
                         "sucesso",
                         emailDestino,
-                        c.nome
+                        c.nome,
+                        senhaProvisoria
                     );
+                    
                     await registrarAuditoria("Contratos", "Reenvio de Convite", c.nome, "-", emailDestino);
-                    alert(`Convite de primeiro acesso enviado com sucesso para ${emailDestino}!`);
+                    alert(`Convite enviado com sucesso para ${emailDestino}!\nNova senha provisória: ${senhaProvisoria}`);
                 } catch (error) {
                     alert("Erro ao enviar convite: " + error.message);
                 }
@@ -1688,10 +1696,13 @@
             const arquivoContratoInput = document.getElementById('campoArquivoContrato');
             
             const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
+                const emailInput = document.getElementById('campoEmail').value || document.getElementById('campoEmailCorp').value;
+                const nomeInput = document.getElementById('campoNome').value;
+                
                 const pacote = {
                     perfilTipo: document.getElementById('campoPerfilTipo').value,
                     adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
-                    nome: document.getElementById('campoNome').value,
+                    nome: nomeInput,
                     cpf: document.getElementById('campoCpf').value,
                     email: document.getElementById('campoEmail').value,
                     telefone: document.getElementById('campoTelefone').value,
@@ -1732,10 +1743,24 @@
                         await registrarAuditoria("Contratos", "Edição", pacote.nome, "Dados Antigos", "Dados Atualizados");
                         alert("Contrato atualizado com sucesso!");
                     } else {
+                        // AQUI ENTRA A SENHA PROVISÓRIA NO NOVO CADASTRO
+                        const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                        pacote.senhaTemporaria = true; // Marca para forçar a troca no primeiro login
+
+                        if (emailInput) {
+                            await registrarNotificacao(
+                                "Convite de Primeiro Acesso",
+                                `Olá ${nomeInput}, seu acesso foi liberado. Senha provisória: ${senhaProvisoria}`,
+                                "sucesso",
+                                emailInput,
+                                nomeInput,
+                                senhaProvisoria
+                            );
+                        }
+
                         await push(ref(db, pathContratosDB), pacote);
-                        await registrarNotificacao("Novo Usuário / Prestador", `O prestador ${pacote.nome} foi cadastrado com sucesso.`, "sucesso", pacote.email || pacote.emailCorp, pacote.nome);
-                        await registrarAuditoria("Contratos", "Criação", pacote.nome, "-", "Novo Cadastro");
-                        alert("Contrato cadastrado com sucesso!");
+                        await registrarAuditoria("Contratos", "Criação", pacote.nome, "-", "Novo Cadastro com Senha Provisória");
+                        alert(`Contrato cadastrado com sucesso!\nSenha provisória enviada: ${senhaProvisoria}`);
                     }
                     document.getElementById('modalCadastro').classList.add('hidden');
                 } catch (error) { alert("Erro ao salvar: " + error.message); }
