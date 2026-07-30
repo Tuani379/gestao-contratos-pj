@@ -935,7 +935,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
-        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
         const dataHojeObj = new Date();
@@ -1743,11 +1743,17 @@
                         await registrarAuditoria("Contratos", "Edição", pacote.nome, "Dados Antigos", "Dados Atualizados");
                         alert("Contrato atualizado com sucesso!");
                     } else {
-                        // AQUI ENTRA A SENHA PROVISÓRIA NO NOVO CADASTRO
+                        // GERA A SENHA PROVISÓRIA E CRIA A CONTA NO FIREBASE AUTH
                         const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
-                        pacote.senhaTemporaria = true; // Marca para forçar a troca no primeiro login
+                        pacote.senhaTemporaria = true;
 
                         if (emailInput) {
+                            try {
+                                await createUserWithEmailAndPassword(auth, emailInput, senhaProvisoria);
+                            } catch (authError) {
+                                console.warn("Aviso Auth:", authError.message);
+                            }
+
                             await registrarNotificacao(
                                 "Convite de Primeiro Acesso",
                                 `Olá ${nomeInput}, seu acesso foi liberado. Senha provisória: ${senhaProvisoria}`,
