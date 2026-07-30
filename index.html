@@ -129,7 +129,8 @@
                     <h2 class="text-xl font-extrabold text-slate-900 mb-1">Empresas Cadastradas</h2>
                     <p class="text-xs text-slate-500">Gerencie e alterne entre as organizações do grupo.</p>
                 </div>
-                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">+ Nova Empresa</button>
+                <!-- Botão restrito apenas ao dono do ConnectPJ -->
+                <button id="btn-modal-nova-empresa-master" onclick="abrirModalNovaEmpresaMaster()" class="hidden bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold px-3 py-2 rounded-xl transition">+ Nova Empresa</button>
             </div>
             <div class="space-y-3" id="listaEmpresasDisponiveis"></div>
         </div>
@@ -173,7 +174,7 @@
                 <span id="data-atual-sistema" class="text-slate-600 font-medium text-xs"></span>
             </div>
             
-            <!-- ETAPA 11: CENTRAL DE NOTIFICAÇÕES (SININHO 🔔) -->
+            <!-- CENTRAL DE NOTIFICAÇÕES (SININHO 🔔) -->
             <div class="flex items-center gap-4">
                 <div class="relative">
                     <button onclick="toggleModalNotificacoes(event)" class="relative p-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center justify-center" title="Central de Notificações">
@@ -202,7 +203,6 @@
                 <button id="btn-contratos" onclick="mostrarSecao('contratos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">Equipe e Contratos</button>
                 <button id="btn-documentos" onclick="mostrarSecao('documentos')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">📁 Central de Documentos</button>
                 <button id="btn-relatorios" onclick="mostrarSecao('relatorios')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition">📊 Relatórios</button>
-                <!-- ETAPA 12: ABA AUDITORIA -->
                 <button id="btn-auditoria" onclick="mostrarSecao('auditoria')" class="py-4 border-b-2 border-transparent text-sm font-bold text-slate-500 hover:text-slate-900 transition hidden">🛡️ Auditoria</button>
             </div>
         </nav>
@@ -212,7 +212,7 @@
             <!-- DASHBOARD (FOLHA, TESOURARIA, KPI EXECUTIVO E CENTRAL DE PENDÊNCIAS) -->
             <section id="dashboard" class="space-y-6 modo-rh-secao">
                 
-                <!-- ETAPA 9: DASHBOARD EXECUTIVO (KPIs & INDICADORES) -->
+                <!-- DASHBOARD EXECUTIVO (KPIs & INDICADORES) -->
                 <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                     <div class="flex justify-between items-center border-b pb-3">
                         <div>
@@ -269,7 +269,7 @@
                     </div>
                 </div>
 
-                <!-- ETAPA 10: CENTRAL DE PENDÊNCIAS ACIONÁVEIS -->
+                <!-- CENTRAL DE PENDÊNCIAS ACIONÁVEIS -->
                 <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
                     <h3 class="text-sm font-extrabold text-blue-950 flex items-center gap-2">🔔 Central de Pendências e Alertas Operacionais</h3>
                     <p class="text-xs text-slate-500">Clique em qualquer alerta para filtrar e resolver a pendência instantaneamente.</p>
@@ -564,7 +564,7 @@
                 </div>
             </section>
 
-            <!-- ETAPA 7: CENTRAL DE DOCUMENTOS (AUDITORIA E VALIDADE) -->
+            <!-- CENTRAL DE DOCUMENTOS (AUDITORIA E VALIDADE) -->
             <section id="documentos" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div>
                     <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">📁 Central de Documentos & Compliance</h2>
@@ -612,7 +612,7 @@
                 </div>
             </section>
 
-            <!-- ETAPA 13: RELATÓRIOS CONSOLIDADOS -->
+            <!-- RELATÓRIOS CONSOLIDADOS -->
             <section id="relatorios" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div class="flex justify-between items-center border-b pb-4">
                     <div>
@@ -674,7 +674,7 @@
                 </div>
             </section>
 
-            <!-- ETAPA 12: SEÇÃO DE AUDITORIA E LOGS -->
+            <!-- SEÇÃO DE AUDITORIA E LOGS -->
             <section id="auditoria" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
                 <div class="flex justify-between items-center">
                     <div>
@@ -704,7 +704,7 @@
                 </div>
             </section>
 
-            <!-- ETAPA 14: CENTRAL DE CONFIGURAÇÕES UNIFICADA (7 SUB-ABAS) -->
+            <!-- CENTRAL DE CONFIGURAÇÕES UNIFICADA (7 SUB-ABAS) -->
             <section id="secao-info-empresa" class="hidden bg-white p-6 rounded-2xl border shadow-sm modo-rh-secao max-w-5xl mx-auto space-y-6">
                 <div class="flex justify-between items-start border-b pb-4">
                     <div>
@@ -1292,6 +1292,8 @@
                 document.getElementById('tela-login').classList.add('hidden');
                 usuarioEmailLogado = (user.email || "").toLowerCase();
                 
+                const btnNovaEmpresaMaster = document.getElementById('btn-modal-nova-empresa-master');
+                
                 if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
                         empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
@@ -1299,11 +1301,11 @@
                         localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
-                    document.getElementById('btn-modal-nova-empresa-master').style.display = 'block';
+                    if(btnNovaEmpresaMaster) btnNovaEmpresaMaster.classList.remove('hidden'); // Exibe apenas para o dono do ConnectPJ
                     aplicarPermissoesPerfil('Administrador', true);
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
-                    document.getElementById('btn-modal-nova-empresa-master').style.display = 'none';
+                    if(btnNovaEmpresaMaster) btnNovaEmpresaMaster.classList.add('hidden'); // Oculta para administradores comuns
                     
                     get(ref(db, pathContratosDB)).then((snapshot) => {
                         const dados = snapshot.val() || {};
@@ -1391,7 +1393,7 @@
             }
         };
 
-        // --- ETAPA 14: LÓGICA DAS SUB-ABAS DE CONFIGURAÇÕES ---
+        // LÓGICA DAS SUB-ABAS DE CONFIGURAÇÕES (ETAPA 14)
         window.mudarSubAbaConfig = (subAba) => {
             const abas = ['geral', 'usuarios', 'permissoes', 'integracoes', 'plano', 'notificacoes', 'seguranca'];
             abas.forEach(a => {
@@ -1444,7 +1446,7 @@
             document.getElementById('menu-rh').classList.add('hidden');
             document.getElementById('secao-info-empresa').classList.remove('hidden');
 
-            mudarSubAbaConfig('geral'); // Inicia na sub-aba 1 (Geral)
+            mudarSubAbaConfig('geral');
 
             let qtdContratosAtivos = 0;
             Object.values(contratosLocais).forEach(c => { if (c.status === "Ativo" && !c.excluidoLogico) qtdContratosAtivos++; });
