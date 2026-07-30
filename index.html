@@ -965,7 +965,7 @@
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
         const EMAILJS_SERVICE_ID = "service_6zgnfmb";
-        const EMAILJS_TEMPLATE_ID = "template_pbvu4jp";
+        const EMAILJS_TEMPLATE_ID = "template_bvvnbfs";
         if (EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") emailjs.init(EMAILJS_PUBLIC_KEY);
 
         const firebaseConfig = {
@@ -1013,7 +1013,7 @@
             }
         }
 
-        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null) {
+        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null, nomeDestinatario = "Usuário") {
             try {
                 await push(ref(db, pathNotificacoesDB), {
                     titulo,
@@ -1026,8 +1026,10 @@
                 if (destinatarioEmail && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         to_email: destinatarioEmail,
+                        to_name: nomeDestinatario,
                         subject: `ConnectPJ - ${titulo}`,
-                        message: mensagem
+                        message: mensagem,
+                        valentia: mensagem
                     });
                 }
             } catch (err) {
@@ -1632,7 +1634,7 @@
             carregarDadosPortalPrestador();
         });
 
-        // FUNÇÃO DE REENVIAR CONVITE DE PRIMEIRO ACESSO
+        // FUNÇÃO DE REENVIAR CONVITE DE PRIMEIRO ACESSO ATUALIZADA
         window.reenviarConvitePrimeiroAcesso = async (id) => {
             const c = contratosLocais[id];
             if (!c) return;
@@ -1648,7 +1650,8 @@
                         "Convite de Primeiro Acesso",
                         `Olá ${c.nome}, você foi convidado(a) a acessar a plataforma ${empresaAtivaNome} no ConnectPJ. Utilize seu e-mail para redefinir a senha e acessar o portal.`,
                         "sucesso",
-                        emailDestino
+                        emailDestino,
+                        c.nome
                     );
                     await registrarAuditoria("Contratos", "Reenvio de Convite", c.nome, "-", emailDestino);
                     alert(`Convite de primeiro acesso enviado com sucesso para ${emailDestino}!`);
@@ -1730,7 +1733,7 @@
                         alert("Contrato atualizado com sucesso!");
                     } else {
                         await push(ref(db, pathContratosDB), pacote);
-                        await registrarNotificacao("Novo Usuário / Prestador", `O prestador ${pacote.nome} foi cadastrado com sucesso.`, "sucesso", pacote.email || pacote.emailCorp);
+                        await registrarNotificacao("Novo Usuário / Prestador", `O prestador ${pacote.nome} foi cadastrado com sucesso.`, "sucesso", pacote.email || pacote.emailCorp, pacote.nome);
                         await registrarAuditoria("Contratos", "Criação", pacote.nome, "-", "Novo Cadastro");
                         alert("Contrato cadastrado com sucesso!");
                     }
@@ -2032,7 +2035,7 @@
 
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
                 await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (${dataPagamento})`);
-                await registrarNotificacao("Pagamento Realizado", `O pagamento de ${cInfo.nome || 'Prestador'} foi liquidado com sucesso.`, "sucesso", cInfo.email || cInfo.emailCorp);
+                await registrarNotificacao("Pagamento Realizado", `O pagamento de ${cInfo.nome || 'Prestador'} foi liquidado com sucesso.`, "sucesso", cInfo.email || cInfo.emailCorp, cInfo.nome);
 
                 alert("Pagamento liquidado com sucesso!");
                 fecharModalLiquidar();
@@ -2066,7 +2069,7 @@
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: "Aguardando", nfArquivoBase64: "" });
                 const cInfo = contratosLocais[id] || {};
                 await registrarAuditoria("Tesouraria", "Reprocessar NF", cInfo.nome || id, "Recusada", "Aguardando Reenvio");
-                await registrarNotificacao("Nota Rejeitada", `Sua Nota Fiscal foi recusada. Envie uma nova versão.`, "alerta", cInfo.email || cInfo.emailCorp);
+                await registrarNotificacao("Nota Rejeitada", `Sua Nota Fiscal foi recusada. Envie uma nova versão.`, "alerta", cInfo.email || cInfo.emailCorp, cInfo.nome);
                 alert("Nota reprocessada com sucesso!");
             }
         };
@@ -2131,7 +2134,7 @@
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { nfStatus: novoStatus });
                 const cInfo = contratosLocais[id] || {};
                 await registrarAuditoria("Tesouraria", "Status NF", cInfo.nome || id, statusAntigo, novoStatus);
-                if (novoStatus === "Recebida ✔") await registrarNotificacao("Nota Aprovada", `Sua Nota Fiscal foi aprovada.`, "sucesso", cInfo.email || cInfo.emailCorp);
+                if (novoStatus === "Recebida ✔") await registrarNotificacao("Nota Aprovada", `Sua Nota Fiscal foi aprovada.`, "sucesso", cInfo.email || cInfo.emailCorp, cInfo.nome);
             }
             if (e.target.classList.contains('select-nf-status-comp')) {
                 const id = e.target.dataset.id; const compId = e.target.dataset.compId; const novoStatus = e.target.value;
@@ -2295,7 +2298,7 @@
                             dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
-                            await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info");
+                            await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", null, c.nome);
                             await registrarAuditoria("Portal PJ", "Envio de Nota", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
                             atualizou = true; resolve();
@@ -2314,7 +2317,7 @@
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}/complementares_lista/${compId}`), {
                                 nfArquivoBase64: reader.result, nfStatus: "Recebida ✔", statusPagamento: "Em Análise"
                             });
-                            await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info");
+                            await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info", null, c.nome);
                             atualizou = true; resolve();
                         };
                         reader.readAsDataURL(file);
