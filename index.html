@@ -618,8 +618,6 @@
                         <label class="block font-bold text-slate-700 mb-1">Status / Filtro Específico</label>
                         <select id="relFiltroStatusEspecifico" class="w-full p-2 border rounded bg-white">
                             <option value="todos">-- Todos --</option>
-                            <option value="Ativo">Ativo / Regular</option>
-                            <option value="Inativo">Inativo / Bloqueado</option>
                         </select>
                     </div>
                 </div>
@@ -630,7 +628,7 @@
                             <tr id="relatorio-cabecalho-tabela" class="bg-blue-950 text-white text-[11px] font-bold"></tr>
                         </thead>
                         <tbody id="tabelaRelatorioCorpo" class="text-xs">
-                            <tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>
+                            <tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-100 border-t font-bold text-xs">
@@ -2629,6 +2627,23 @@
                 blocoCentroCusto.style.display = (tipo === 'contratos') ? 'none' : 'block';
             }
 
+            // ATUALIZAR OPÇÕES DO SELECT DE STATUS ESPECÍFICO CONFORME A ABA
+            const selectStatus = document.getElementById('relFiltroStatusEspecifico');
+            if (selectStatus) {
+                selectStatus.innerHTML = '<option value="todos">-- Todos --</option>';
+                if (tipo === 'prestadores' || tipo === 'contratos') {
+                    selectStatus.innerHTML += `
+                        <option value="Ativo">Ativo / Regular</option>
+                        <option value="Inativo">Inativo / Bloqueado</option>
+                    `;
+                } else if (tipo === 'pagamentos') {
+                    selectStatus.innerHTML += `
+                        <option value="Pago">Pago</option>
+                        <option value="Em Análise">Em Análise</option>
+                    `;
+                }
+            }
+
             atualizarRelatoriosEtapa13();
         };
 
@@ -2730,8 +2745,7 @@
 
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                     let stReg = dadosFolha.regular?.statusPagamento || "Em Análise";
-                    if (fStatus === "Ativo" && stReg !== "Pago") return;
-                    if (fStatus === "Inativo" && stReg === "Pago") return;
+                    if (fStatus !== "todos" && stReg !== fStatus) return;
 
                     registrosCont++;
                     if (stReg === "Pago") somaTotal += valReg;
@@ -2755,8 +2769,7 @@
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
                             let stC = cItem.statusPagamento || "Em Análise";
-                            if (fStatus === "Ativo" && stC !== "Pago") return;
-                            if (fStatus === "Inativo" && stC === "Pago") return;
+                            if (fStatus !== "todos" && stC !== fStatus) return;
 
                             registrosCont++;
                             if (stC === "Pago") somaTotal += valC;
