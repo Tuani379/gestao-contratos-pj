@@ -1057,14 +1057,20 @@
             const notifs = snapshot.val() || {};
             let updates = {};
             Object.entries(notifs).forEach(([key, n]) => {
-                const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
-                if (ehAdmin) {
-                    if (n.destinatarioEmail === "geral" || n.titulo === "Nova Nota Fiscal" || n.titulo === "Nova Nota Fiscal (Comp.)") {
+                if (modoVisualAtual === 'pj') {
+                    if (n.destinatarioEmail && n.destinatarioEmail.toLowerCase() === usuarioEmailLogado) {
                         updates[`${key}/lida`] = true;
                     }
                 } else {
-                    if (n.destinatarioEmail === usuarioEmailLogado) {
-                        updates[`${key}/lida`] = true;
+                    const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+                    if (ehAdmin) {
+                        if (n.destinatarioEmail === "geral" || n.titulo === "Nova Nota Fiscal" || n.titulo === "Nova Nota Fiscal (Comp.)") {
+                            updates[`${key}/lida`] = true;
+                        }
+                    } else {
+                        if (n.destinatarioEmail === usuarioEmailLogado) {
+                            updates[`${key}/lida`] = true;
+                        }
                     }
                 }
             });
@@ -1120,14 +1126,17 @@
             let countExibidas = 0;
 
             entradas.forEach(([key, n]) => {
-                const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+                const dest = (n.destinatarioEmail || "").toLowerCase();
 
-                if (ehAdmin) {
-                    if (n.destinatarioEmail && n.destinatarioEmail !== "geral" && n.destinatarioEmail !== usuarioEmailLogado) {
+                if (modoVisualAtual === 'pj') {
+                    if (dest !== usuarioEmailLogado) {
                         return;
                     }
                 } else {
-                    if (n.destinatarioEmail && n.destinatarioEmail !== "geral" && n.destinatarioEmail !== usuarioEmailLogado) {
+                    if (dest === usuarioEmailLogado && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
+                        return;
+                    }
+                    if (dest && dest !== "geral" && dest !== usuarioEmailLogado) {
                         return;
                     }
                 }
@@ -1644,7 +1653,6 @@
             entradas.forEach(([key, c]) => {
                 if (c.excluidoLogico) return;
 
-                // Permite ver todos se for Administrador ou o e-mail master, senão filtra apenas o próprio
                 const ehAdminGeral = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || perfilUsuarioLogado === 'Administrador');
                 if (!ehAdminGeral) {
                     if ((c.email || c.emailCorp || "").toLowerCase() !== usuarioEmailLogado) return;
@@ -1781,7 +1789,6 @@
 
             if (!nomeInput) { alert("Nome obrigatório!"); return; }
 
-            // VALIDAÇÃO DIRETA NO BANCO DE DADOS CONTRA DUPLICAÇÃO DE E-MAIL E CNPJ
             try {
                 const snapshotBanco = await get(ref(db, pathContratosDB));
                 const dadosBanco = snapshotBanco.val() || {};
