@@ -831,9 +831,9 @@
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-blue-950 text-sm">Preferências de Alertas Automáticos</h3>
                         <div class="space-y-3 text-xs">
-                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 rounded text-blue-600"> <span>Enviar e-mail de alerta quando faltar 30 dias para o vencimento de um contrato.</span></label>
-                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 rounded text-blue-600"> <span>Notificar financeiro quando um prestador anexar nova Nota Fiscal.</span></label>
-                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" checked class="w-4 h-4 rounded text-blue-600"> <span>Notificar prestador por e-mail quando sua Nota Fiscal for aprovada ou recusada.</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-vencimento" class="w-4 h-4 rounded text-blue-600"> <span>Enviar e-mail de alerta quando faltar 30 dias para o vencimento de um contrato.</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-nf-anexada" class="w-4 h-4 rounded text-blue-600"> <span>Notificar financeiro quando um prestador anexar nova Nota Fiscal.</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-nf-aprovada" class="w-4 h-4 rounded text-blue-600"> <span>Notificar prestador por e-mail quando sua Nota Fiscal for aprovada ou recusada.</span></label>
                         </div>
                     </div>
                 </div>
@@ -983,7 +983,6 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        // INSTÂNCIA SECUNDÁRIA DO AUTH PARA CRIAÇÃO DE USUÁRIOS SEM DERRUBAR O ADMIN LOGADO
         const appSecundario = initializeApp(firebaseConfig, "AppSecundarioCriacao");
         const authSecundario = getAuth(appSecundario);
 
@@ -1130,12 +1129,10 @@
                 const dest = (n.destinatarioEmail || "").toLowerCase();
 
                 if (modoVisualAtual === 'pj') {
-                    // RIGOROSO: No Portal do Prestador, exibe SOMENTE notificações cujo destinatarioEmail seja exatamente o e-mail do prestador logado
                     if (dest !== usuarioEmailLogado) {
                         return;
                     }
                 } else {
-                    // Modo RH / Administrador
                     const ehAdminOuRh = (perfilUsuarioLogado === 'Administrador' || perfilUsuarioLogado === 'RH' || perfilUsuarioLogado === 'Financeiro' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
                     if (ehAdminOuRh) {
                         if (dest !== "admin" && dest !== "geral" && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
@@ -1292,7 +1289,6 @@
 
         window.fazerLogout = () => { signOut(auth).then(() => { document.getElementById('tela-login').classList.remove('hidden'); }); };
 
-        // VERIFICAÇÃO OBRIGATÓRIA DE SENHA PROVISÓRIA NO PRIMEIRO ACESSO
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('tela-login').classList.add('hidden');
@@ -1510,6 +1506,11 @@
                 document.getElementById('emp-cidade').value = dados.cidade || '';
                 document.getElementById('emp-estado').value = dados.estado || '';
 
+                // CARREGAR CONFIGURAÇÕES DE NOTIFICAÇÕES
+                document.getElementById('config-notif-vencimento').checked = dados.notifVencimento !== false;
+                document.getElementById('config-notif-nf-anexada').checked = dados.notifNfAnexada !== false;
+                document.getElementById('config-notif-nf-aprovada').checked = dados.notifNfAprovada !== false;
+
                 if (dados.logoBase64) {
                     document.getElementById('preview-logo-container').innerHTML = `<img src="${dados.logoBase64}" class="w-full h-full object-contain">`;
                 }
@@ -1535,7 +1536,10 @@
                     complemento: document.getElementById('emp-complemento').value,
                     bairro: document.getElementById('emp-bairro').value,
                     cidade: document.getElementById('emp-cidade').value,
-                    estado: document.getElementById('emp-estado').value
+                    estado: document.getElementById('emp-estado').value,
+                    notifVencimento: document.getElementById('config-notif-vencimento').checked,
+                    notifNfAnexada: document.getElementById('config-notif-nf-anexada').checked,
+                    notifNfAprovada: document.getElementById('config-notif-nf-aprovada').checked
                 };
                 if (logoBase64Url) pacote.logoBase64 = logoBase64Url;
 
@@ -2191,7 +2195,6 @@
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
                 await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (${dataPagamento})`);
                 
-                // Direciona notificação exclusivamente para o e-mail do prestador logado
                 await registrarNotificacao(
                     "Pagamento Realizado", 
                     `Informamos que o seu pagamento referente à competência foi liquidado em ${dataPagamento.split('-').reverse().join('/')}. O comprovante encontra-se disponível no portal.`, 
@@ -2463,10 +2466,8 @@
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
                             
-                            // Notifica o Admin na central dele
                             await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", "admin", c.nome);
                             
-                            // Notifica exclusivamente o próprio prestador logado sobre o envio da nota dele
                             const emailPrestadorLogado = c.email || c.emailCorp || usuarioEmailLogado;
                             await registrarNotificacao("Nota Enviada com Sucesso", `Sua Nota Fiscal foi enviada com sucesso e está em análise.`, "sucesso", emailPrestadorLogado, c.nome);
 
@@ -2514,7 +2515,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-nf-comp')) {
-                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.nfArquivoBase64;
+                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compid]?.nfArquivoBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-reg')) {
@@ -2522,7 +2523,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-comp')) {
-                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.comprovanteBase64;
+                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compid]?.comprovanteBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
         });
