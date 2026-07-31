@@ -2639,11 +2639,18 @@
                         <option value="Complementar">NF Complementar</option>
                     `;
                 }
+            } else if (tipo === 'documentos') {
+                if (labelCentroCusto) labelCentroCusto.innerText = "Tipo de Documento";
+                if (selectCentroCusto) {
+                    selectCentroCusto.innerHTML = `
+                        <option value="todos">-- Todos os Tipos --</option>
+                        <option value="Contrato">Contrato Social / Prestação</option>
+                    `;
+                }
             } else if (tipo === 'contratos') {
                 // Contratos esconde o bloco
             } else {
                 if (labelCentroCusto) labelCentroCusto.innerText = "Centro de Custo";
-                // Recarrega centros de custo normais
                 let centrosCustoSet = new Set();
                 Object.values(contratosLocais).forEach(c => {
                     if (!c.excluidoLogico && c.departamento) centrosCustoSet.add(c.departamento.trim());
@@ -2678,6 +2685,12 @@
                         <option value="Recebida">Recebida ✔</option>
                         <option value="Aguardando">Aguardando ⏳</option>
                         <option value="Recusada">Recusada ❌</option>
+                    `;
+                } else if (tipo === 'documentos') {
+                    if(labelStatus) labelStatus.innerText = "Status Compliance";
+                    selectStatus.innerHTML += `
+                        <option value="Regular">Regular Válido ✔</option>
+                        <option value="Vencida">Vigência Vencida ⚠️</option>
                     `;
                 } else {
                     if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
@@ -2791,7 +2804,6 @@
                     if (fPrestador !== "todos" && nome !== fPrestador) return;
                     if (fCC !== "todos" && centroCustoPrestador !== fCC) return;
 
-                    // REGULAR
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                     let stRegBruto = dadosFolha.regular?.statusPagamento || "Em Análise";
                     let stRegExibicao = (stRegBruto === "Pago") ? "Pago" : "À Liquidar";
@@ -2822,7 +2834,6 @@
                         `;
                     }
 
-                    // COMPLEMENTARES
                     if (dadosFolha.complementares_lista) {
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
@@ -2874,26 +2885,21 @@
                     if (dadosFolha.regular) {
                         let statusNfReg = dadosFolha.regular?.nfStatus || "Aguardando";
                         
-                        // Aplica filtro de Tipo de Nota (fCC agora assume o papel de Tipo de Nota)
-                        if (fCC === "Regular" && false) { /* Mantém */ }
-                        if (fCC === "Complementar") { /* Pula regular se filtrado só complementar */ }
-                        else {
-                            let passaTipo = (fCC === "todos" || fCC === "Regular");
-                            let passaStatus = (fStatus === "todos" || statusNfReg.toLowerCase().includes(fStatus.toLowerCase()));
+                        let passaTipo = (fCC === "todos" || fCC === "Regular");
+                        let passaStatus = (fStatus === "todos" || statusNfReg.toLowerCase().includes(fStatus.toLowerCase()));
 
-                            if (passaTipo && passaStatus) {
-                                registrosCont++;
-                                let temAnexo = dadosFolha.regular?.nfArquivoBase64 ? "Sim ✔" : "Não";
-                                corpoRelatorio.innerHTML += `
-                                    <tr class="border-b hover:bg-slate-50">
-                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
-                                        <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
-                                        <td class="p-3">Nota Fiscal Regular</td>
-                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfReg.includes('Recebida') || statusNfReg.includes('Aprovada') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfReg}</span></td>
-                                        <td class="p-3 text-center font-bold text-blue-900">${temAnexo}</td>
-                                    </tr>
-                                `;
-                            }
+                        if (passaTipo && passaStatus) {
+                            registrosCont++;
+                            let temAnexo = dadosFolha.regular?.nfArquivoBase64 ? "Sim ✔" : "Não";
+                            corpoRelatorio.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                    <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
+                                    <td class="p-3">Nota Fiscal Regular</td>
+                                    <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfReg.includes('Recebida') || statusNfReg.includes('Aprovada') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfReg}</span></td>
+                                    <td class="p-3 text-center font-bold text-blue-900">${temAnexo}</td>
+                                </tr>
+                            `;
                         }
                     }
 
@@ -2930,19 +2936,28 @@
                     if (c.excluidoLogico) return;
                     if (fPrestador !== "todos" && c.nome !== fPrestador) return;
 
-                    registrosCont++;
                     let vigenciaFim = c.vigenciaFim || "Indeterminada";
-                    let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800";
-                    if (c.vigenciaFim && new Date(c.vigenciaFim) < new Date()) { statusComp = "Vigência Vencida ⚠️"; corStatus = "bg-red-100 text-red-800"; }
+                    let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
+                    if (c.vigenciaFim && new Date(c.vigenciaFim) < new Date()) { 
+                        statusComp = "Vigência Vencida ⚠️"; 
+                        corStatus = "bg-red-100 text-red-800"; 
+                        statusCurto = "Vencida";
+                    }
 
-                    corpoRelatorio.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
-                            <td class="p-3">Contrato Social / Prestação</td>
-                            <td class="p-3">${vigenciaFim !== 'Indeterminada' ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                            <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
-                        </tr>
-                    `;
+                    let passaTipo = (fCC === "todos" || fCC === "Contrato");
+                    let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
+
+                    if (passaTipo && passaStatus) {
+                        registrosCont++;
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                                <td class="p-3">Contrato Social / Prestação</td>
+                                <td class="p-3">${vigenciaFim !== 'Indeterminada' ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                                <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
+                            </tr>
+                        `;
+                    }
                 });
                 totalGeralEl.innerText = `${registrosCont} Documentos`;
 
