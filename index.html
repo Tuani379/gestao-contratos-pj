@@ -1297,6 +1297,8 @@
                     document.getElementById('btnCancelarTrocarSenha').style.display = 'none';
                     modalTrocar.classList.remove('hidden');
                     modalTrocar.dataset.idContratoTroca = idContratoEncontrado;
+                } else {
+                    document.getElementById('modalTrocarSenha').classList.add('hidden');
                 }
 
                 aplicarPermissoesPerfil(perfilEncontrado, adminPrestador);
@@ -1335,7 +1337,18 @@
                 await updatePassword(auth.currentUser, s);
                 
                 const modalTrocar = document.getElementById('modalTrocarSenha');
-                const idContratoTroca = modalTrocar.dataset.idContratoTroca;
+                let idContratoTroca = modalTrocar.dataset.idContratoTroca;
+
+                if (!idContratoTroca) {
+                    const snapshotContratos = await get(ref(db, pathContratosDB));
+                    const dados = snapshotContratos.val() || {};
+                    Object.entries(dados).forEach(([id, c]) => {
+                        if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                            idContratoTroca = id;
+                        }
+                    });
+                }
+
                 if (idContratoTroca) {
                     await update(ref(db, `${pathContratosDB}/${idContratoTroca}`), { senhaTemporaria: false });
                 }
@@ -1344,7 +1357,10 @@
                 alert("Senha alterada com sucesso!");
                 document.getElementById('inputNovaSenha').value = "";
                 fecharModalTrocarSenha();
-                location.reload();
+                
+                if(auth.currentUser) {
+                    auth.currentUser.getIdToken(true);
+                }
             } catch (error) { alert("Erro: " + error.message); }
         };
 
@@ -1734,26 +1750,38 @@
             
             const emailInput = (document.getElementById('campoEmail').value || document.getElementById('campoEmailCorp').value || "").trim().toLowerCase();
             const nomeInput = document.getElementById('campoNome').value;
+            const cnpjInput = (document.getElementById('campoCNPJ').value || "").trim();
 
             if (!nomeInput) { alert("Nome obrigatório!"); return; }
 
-            // VALIDAÇÃO CONTRA DUPLICAÇÃO DE E-MAIL
-            if (emailInput) {
-                let emailDuplicado = false;
-                Object.entries(contratosLocais).forEach(([idExistente, cExistente]) => {
+            // VALIDAÇÃO DIRETA NO BANCO DE DADOS CONTRA DUPLICAÇÃO DE E-MAIL E CNPJ
+            try {
+                const snapshotBanco = await get(ref(db, pathContratosDB));
+                const dadosBanco = snapshotBanco.val() || {};
+                
+                let duplicadoMsg = "";
+                Object.entries(dadosBanco).forEach(([idExistente, cExistente]) => {
                     if (editId && idExistente === editId) return; // Ignora o próprio registro em edição
                     if (cExistente.excluidoLogico) return;
-                    const emailExistente1 = (cExistente.email || "").trim().toLowerCase();
-                    const emailExistente2 = (cExistente.emailCorp || "").trim().toLowerCase();
-                    if ((emailExistente1 && emailExistente1 === emailInput) || (emailExistente2 && emailExistente2 === emailInput)) {
-                        emailDuplicado = true;
+
+                    const email1 = (cExistente.email || "").trim().toLowerCase();
+                    const email2 = (cExistente.emailCorp || "").trim().toLowerCase();
+                    const cnpjExistente = (cExistente.cnpj || "").trim();
+
+                    if (emailInput && (email1 === emailInput || email2 === emailInput)) {
+                        duplicadoMsg = `O e-mail "${emailInput}" já está cadastrado para outro usuário!`;
+                    }
+                    if (cnpjInput && cnpjExistente && cnpjExistente === cnpjInput) {
+                        duplicadoMsg = `O CNPJ "${cnpjInput}" já está cadastrado no sistema!`;
                     }
                 });
 
-                if (emailDuplicado) {
-                    alert(`Erro: O e-mail "${emailInput}" já está cadastrado para outro usuário no sistema!`);
+                if (duplicadoMsg) {
+                    alert("Erro de Duplicidade: " + duplicadoMsg);
                     return;
                 }
+            } catch (err) {
+                console.error("Erro ao validar duplicidade no banco:", err);
             }
 
             const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
@@ -1766,7 +1794,7 @@
                     telefone: document.getElementById('campoTelefone').value,
                     contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
                     razaoSocial: document.getElementById('campoRazaoSocial').value,
-                    cnpj: document.getElementById('campoCNPJ').value,
+                    cnpj: cnpjInput,
                     emailCorp: document.getElementById('campoEmailCorp').value,
                     inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
                     inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
@@ -1804,7 +1832,6 @@
 
                         if (emailInput) {
                             try {
-                                // CRIAÇÃO USANDO A INSTÂNCIA SECUNDÁRIA PARA NÃO DERRUBAR O ADMIN LOGADO
                                 await createUserWithEmailAndPassword(authSecundario, emailInput, senhaProvisoria);
                             } catch (authError) {
                                 console.warn("Aviso Auth:", authError.message);
