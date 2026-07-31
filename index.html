@@ -1130,11 +1130,12 @@
                 const dest = (n.destinatarioEmail || "").toLowerCase();
 
                 if (modoVisualAtual === 'pj') {
+                    // No Portal do Prestador, exibe EXCLUSIVAMENTE notificações cujo destinatarioEmail seja o e-mail do usuário logado
                     if (dest !== usuarioEmailLogado) {
                         return;
                     }
                 } else {
-                    // Modo RH / Administrador: exibir apenas notificações para admin/geral ou notas fiscais enviadas
+                    // Modo RH / Administrador
                     const ehAdminOuRh = (perfilUsuarioLogado === 'Administrador' || perfilUsuarioLogado === 'RH' || perfilUsuarioLogado === 'Financeiro' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
                     if (ehAdminOuRh) {
                         if (dest !== "admin" && dest !== "geral" && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
@@ -2460,7 +2461,13 @@
                             dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
+                            
+                            // Notifica o admin que a NF foi enviada
                             await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", "admin", c.nome);
+                            
+                            // Opcional: Se quiser registrar uma cópia de confirmação para o próprio prestador
+                            await registrarNotificacao("Nota Enviada com Sucesso", `Sua Nota Fiscal foi enviada e está em análise.`, "sucesso", c.email || c.emailCorp, c.nome);
+
                             await registrarAuditoria("Portal PJ", "Envio de Nota", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
                             atualizou = true; resolve();
@@ -2480,6 +2487,7 @@
                                 nfArquivoBase64: reader.result, nfStatus: "Recebida ✔", statusPagamento: "Em Análise"
                             });
                             await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info", "admin", c.nome);
+                            await registrarNotificacao("Nota Complementar Enviada", `Sua NF complementar foi enviada e está em análise.`, "sucesso", c.email || c.emailCorp, c.nome);
                             atualizou = true; resolve();
                         };
                         reader.readAsDataURL(file);
