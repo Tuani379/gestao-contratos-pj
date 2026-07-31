@@ -132,14 +132,15 @@
         </div>
     </div>
 
-    <!-- MODAL TROCAR SENHA -->
-    <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold text-blue-950 mb-3">Alterar Senha</h3>
-            <input type="password" id="inputNovaSenha" placeholder="Nova Senha (mín. 6 caracteres)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4 outline-none focus:ring-2 focus:ring-blue-600">
-            <div class="flex justify-end gap-2">
-                <button onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar</button>
+    <!-- MODAL TROCAR SENHA / PRIMEIRO ACESSO OBRIGATÓRIO -->
+    <div id="modalTrocarSenha" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[70]">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border space-y-3">
+            <h3 id="tituloModalTrocarSenha" class="text-lg font-bold text-blue-950 mb-1">Alterar Senha</h3>
+            <p id="textoModalTrocarSenha" class="text-xs text-slate-500 mb-2">Por segurança, altere sua senha provisória para continuar.</p>
+            <input type="password" id="inputNovaSenha" placeholder="Nova Senha (mín. 6 caracteres)" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-3 outline-none focus:ring-2 focus:ring-blue-600">
+            <div id="botoesModalTrocarSenha" class="flex justify-end gap-2">
+                <button id="btnCancelarTrocarSenha" onclick="fecharModalTrocarSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
+                <button onclick="salvarNovaSenha()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold">Salvar Senha</button>
             </div>
         </div>
     </div>
@@ -1248,11 +1249,17 @@
 
         window.fazerLogout = () => { signOut(auth).then(() => { document.getElementById('tela-login').classList.remove('hidden'); }); };
 
+        // VERIFICAÇÃO OBRIGATÓRIA DE SENHA PROVISÓRIA NO PRIMEIRO ACESSO
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 document.getElementById('tela-login').classList.add('hidden');
                 usuarioEmailLogado = (user.email || "").toLowerCase();
                 
+                let perfilEncontrado = 'Prestador';
+                let adminPrestador = false;
+                let idContratoEncontrado = null;
+                let temSenhaTemporaria = false;
+
                 if (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase()) {
                     if (!localStorage.getItem('connectpj_empresa_ativa')) {
                         empresaAtivaId = "matriz"; empresaAtivaNome = "CONNECTPJ MATRIZ";
@@ -1260,23 +1267,36 @@
                         localStorage.setItem('connectpj_empresa_nome', "CONNECTPJ MATRIZ");
                     }
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'block';
-                    aplicarPermissoesPerfil('Administrador', true);
+                    perfilEncontrado = 'Administrador';
+                    adminPrestador = true;
                 } else {
                     document.getElementById('menu-trocar-outras-contas').parentElement.style.display = 'none';
                     
-                    get(ref(db, pathContratosDB)).then((snapshot) => {
-                        const dados = snapshot.val() || {};
-                        let perfilEncontrado = 'Prestador';
-                        let adminPrestador = false;
-                        Object.values(dados).forEach(c => {
-                            if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
-                                perfilEncontrado = c.perfilTipo || 'Prestador';
-                                adminPrestador = (c.adminEhPrestador === 'sim');
+                    const snapshotContratos = await get(ref(db, pathContratosDB));
+                    const dados = snapshotContratos.val() || {};
+                    Object.entries(dados).forEach(([id, c]) => {
+                        if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
+                            perfilEncontrado = c.perfilTipo || 'Prestador';
+                            adminPrestador = (c.adminEhPrestador === 'sim');
+                            idContratoEncontrado = id;
+                            if (c.senhaTemporaria === true) {
+                                temSenhaTemporaria = true;
                             }
-                        });
-                        aplicarPermissoesPerfil(perfilEncontrado, adminPrestador);
+                        }
                     });
                 }
+
+                // Intercepta e exige a alteração da senha no primeiro acesso
+                if (temSenhaTemporaria && idContratoEncontrado) {
+                    const modalTrocar = document.getElementById('modalTrocarSenha');
+                    document.getElementById('tituloModalTrocarSenha').innerText = "Primeiro Acesso - Altere sua Senha";
+                    document.getElementById('textoModalTrocarSenha').innerText = "Você está acessando com uma senha provisória. É obrigatório criar uma nova senha para continuar.";
+                    document.getElementById('btnCancelarTrocarSenha').style.display = 'none'; // Impede fechar
+                    modalTrocar.classList.remove('hidden');
+                    modalTrocar.dataset.idContratoTroca = idContratoEncontrado;
+                }
+
+                aplicarPermissoesPerfil(perfilEncontrado, adminPrestador);
                 document.getElementById('dropdown-email-usuario').innerText = usuarioEmailLogado;
                 carregarIdentidadeVisualMenu(false);
                 carregarDadosPortalPrestador();
@@ -1295,16 +1315,34 @@
         window.toggleMenuPerfil = (e) => { e.stopPropagation(); document.getElementById('modal-perfil-detalhes').classList.toggle('hidden'); };
         document.addEventListener('click', () => { document.getElementById('modal-perfil-detalhes').classList.add('hidden'); });
 
-        window.abrirModalTrocarSenha = () => { document.getElementById('modalTrocarSenha').classList.remove('hidden'); };
+        window.abrirModalTrocarSenha = () => { 
+            const modalTrocar = document.getElementById('modalTrocarSenha');
+            document.getElementById('tituloModalTrocarSenha').innerText = "Alterar Senha";
+            document.getElementById('textoModalTrocarSenha').innerText = "Insira sua nova senha corporativa.";
+            document.getElementById('btnCancelarTrocarSenha').style.display = 'block';
+            modalTrocar.removeAttribute('data-id-contrato-troca');
+            modalTrocar.classList.remove('hidden'); 
+        };
         window.fecharModalTrocarSenha = () => { document.getElementById('modalTrocarSenha').classList.add('hidden'); };
+        
         window.salvarNovaSenha = async () => {
             const s = document.getElementById('inputNovaSenha').value;
             if (!s || s.length < 6) { alert("A senha deve ter no mínimo 6 caracteres!"); return; }
             try {
                 await updatePassword(auth.currentUser, s);
+                
+                // Se for o primeiro acesso obrigatório, remove a flag no banco
+                const modalTrocar = document.getElementById('modalTrocarSenha');
+                const idContratoTroca = modalTrocar.dataset.idContratoTroca;
+                if (idContratoTroca) {
+                    await update(ref(db, `${pathContratosDB}/${idContratoTroca}`), { senhaTemporaria: false });
+                }
+
                 await registrarAuditoria("Perfil", "Alterar Senha", usuarioEmailLogado, "-", "Senha Atualizada");
                 alert("Senha alterada com sucesso!");
+                document.getElementById('inputNovaSenha').value = "";
                 fecharModalTrocarSenha();
+                location.reload();
             } catch (error) { alert("Erro: " + error.message); }
         };
 
@@ -1634,7 +1672,6 @@
             carregarDadosPortalPrestador();
         });
 
-        // FUNÇÃO DE REENVIAR CONVITE DE PRIMEIRO ACESSO ATUALIZADA
         window.reenviarConvitePrimeiroAcesso = async (id) => {
             const c = contratosLocais[id];
             if (!c) return;
@@ -1646,10 +1683,8 @@
 
             if (confirm(`Deseja reenviar o convite de primeiro acesso para ${c.nome} (${emailDestino})?`)) {
                 try {
-                    // AQUI ENTRA A SENHA PROVISÓRIA NO REENVIO
                     const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
                     
-                    // Atualiza no banco para marcar que ele precisa trocar a senha no próximo login
                     await update(ref(db, `${pathContratosDB}/${id}`), { senhaTemporaria: true });
 
                     await registrarNotificacao(
@@ -1743,7 +1778,6 @@
                         await registrarAuditoria("Contratos", "Edição", pacote.nome, "Dados Antigos", "Dados Atualizados");
                         alert("Contrato atualizado com sucesso!");
                     } else {
-                        // GERA A SENHA PROVISÓRIA E CRIA A CONTA NO FIREBASE AUTH
                         const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
                         pacote.senhaTemporaria = true;
 
