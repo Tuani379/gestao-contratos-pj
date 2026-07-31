@@ -983,6 +983,10 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
+        // INSTÂNCIA SECUNDÁRIA DO AUTH PARA CRIAÇÃO DE USUÁRIOS SEM DERRUBAR O ADMIN LOGADO
+        const appSecundario = initializeApp(firebaseConfig, "AppSecundarioCriacao");
+        const authSecundario = getAuth(appSecundario);
+
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
         let usuarioEmailLogado = "";
@@ -1286,12 +1290,11 @@
                     });
                 }
 
-                // Intercepta e exige a alteração da senha no primeiro acesso
                 if (temSenhaTemporaria && idContratoEncontrado) {
                     const modalTrocar = document.getElementById('modalTrocarSenha');
                     document.getElementById('tituloModalTrocarSenha').innerText = "Primeiro Acesso - Altere sua Senha";
                     document.getElementById('textoModalTrocarSenha').innerText = "Você está acessando com uma senha provisória. É obrigatório criar uma nova senha para continuar.";
-                    document.getElementById('btnCancelarTrocarSenha').style.display = 'none'; // Impede fechar
+                    document.getElementById('btnCancelarTrocarSenha').style.display = 'none';
                     modalTrocar.classList.remove('hidden');
                     modalTrocar.dataset.idContratoTroca = idContratoEncontrado;
                 }
@@ -1331,7 +1334,6 @@
             try {
                 await updatePassword(auth.currentUser, s);
                 
-                // Se for o primeiro acesso obrigatório, remove a flag no banco
                 const modalTrocar = document.getElementById('modalTrocarSenha');
                 const idContratoTroca = modalTrocar.dataset.idContratoTroca;
                 if (idContratoTroca) {
@@ -1783,7 +1785,8 @@
 
                         if (emailInput) {
                             try {
-                                await createUserWithEmailAndPassword(auth, emailInput, senhaProvisoria);
+                                // CRIAÇÃO USANDO A INSTÂNCIA SECUNDÁRIA PARA NÃO DERRUBAR O ADMIN LOGADO
+                                await createUserWithEmailAndPassword(authSecundario, emailInput, senhaProvisoria);
                             } catch (authError) {
                                 console.warn("Aviso Auth:", authError.message);
                             }
