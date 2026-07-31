@@ -2755,67 +2755,69 @@
                     if (fPrestador !== "todos" && nome !== fPrestador) return;
                     if (fCC !== "todos" && centroCustoPrestador !== fCC) return;
 
+                    // REGULAR
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                     let stRegBruto = dadosFolha.regular?.statusPagamento || "Em Análise";
                     let stRegExibicao = (stRegBruto === "Pago") ? "Pago" : "À Liquidar";
                     
-                    if (fStatus !== "todos") {
-                        if (fStatus === "À Liquidar") {
-                            if (stRegExibicao !== "À Liquidar") return;
-                        } else if (stRegExibicao !== fStatus) {
-                            return;
-                        }
+                    let passaFiltroReg = true;
+                    if (fStatus === "Pago") {
+                        passaFiltroReg = (stRegBruto === "Pago");
+                    } else if (fStatus === "À Liquidar") {
+                        passaFiltroReg = (stRegBruto !== "Pago");
                     }
 
-                    registrosCont++;
-                    somaTotal += valReg;
+                    if (passaFiltroReg) {
+                        registrosCont++;
+                        somaTotal += valReg;
+                        let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stRegExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stRegExibicao}</span>`;
 
-                    let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stRegExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stRegExibicao}</span>`;
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                <td class="p-3 font-bold text-slate-900">${nome}</td>
+                                <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
+                                <td class="p-3">Regular</td>
+                                <td class="p-3">${dadosFolha.regular?.dataVencimento || '---'}</td>
+                                <td class="p-3">${dadosFolha.regular?.dataPagamentoEfetivo || '---'}</td>
+                                <td class="p-3 text-right font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-3 text-center">${badgeStatusReg}</td>
+                            </tr>
+                        `;
+                    }
 
-                    corpoRelatorio.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
-                            <td class="p-3 font-bold text-slate-900">${nome}</td>
-                            <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
-                            <td class="p-3">Regular</td>
-                            <td class="p-3">${dadosFolha.regular?.dataVencimento || '---'}</td>
-                            <td class="p-3">${dadosFolha.regular?.dataPagamentoEfetivo || '---'}</td>
-                            <td class="p-3 text-right font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-center">${badgeStatusReg}</td>
-                        </tr>
-                    `;
-
+                    // COMPLEMENTARES
                     if (dadosFolha.complementares_lista) {
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
                             let stCBruto = cItem.statusPagamento || "Em Análise";
                             let stCExibicao = (stCBruto === "Pago") ? "Pago" : "À Liquidar";
                             
-                            if (fStatus !== "todos") {
-                                if (fStatus === "À Liquidar") {
-                                    if (stCExibicao !== "À Liquidar") return;
-                                } else if (stCExibicao !== fStatus) {
-                                    return;
-                                }
+                            let passaFiltroComp = true;
+                            if (fStatus === "Pago") {
+                                passaFiltroComp = (stCBruto === "Pago");
+                            } else if (fStatus === "À Liquidar") {
+                                passaFiltroComp = (stCBruto !== "Pago");
                             }
 
-                            registrosCont++;
-                            somaTotal += valC;
+                            if (passaFiltroComp) {
+                                registrosCont++;
+                                somaTotal += valC;
+                                let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stCExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stCExibicao}</span>`;
 
-                            let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stCExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stCExibicao}</span>`;
-
-                            corpoRelatorio.innerHTML += `
-                                <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
-                                    <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
-                                    <td class="p-3 font-bold text-slate-900">${nome}</td>
-                                    <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
-                                    <td class="p-3">Complementar (${cItem.motorEvento || 'Adicional'})</td>
-                                    <td class="p-3">${cItem.dataVencimento || '---'}</td>
-                                    <td class="p-3">${cItem.dataPagamentoEfetivo || '---'}</td>
-                                    <td class="p-3 text-right font-bold text-amber-800">R$ ${valC.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    <td class="p-3 text-center">${badgeStatusComp}</td>
-                                </tr>
-                            `;
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
+                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3 font-bold text-slate-900">${nome}</td>
+                                        <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
+                                        <td class="p-3">Complementar (${cItem.motorEvento || 'Adicional'})</td>
+                                        <td class="p-3">${cItem.dataVencimento || '---'}</td>
+                                        <td class="p-3">${cItem.dataPagamentoEfetivo || '---'}</td>
+                                        <td class="p-3 text-right font-bold text-amber-800">R$ ${valC.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-center">${badgeStatusComp}</td>
+                                    </tr>
+                                `;
+                            }
                         });
                     }
                 });
@@ -2940,7 +2942,7 @@
                                         <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
                                         <td class="p-3">${departamento}</td>
                                         <td class="p-3 font-medium text-amber-700">Complementar</td>
-                                        <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
                                         <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                     </tr>
                                 `;
