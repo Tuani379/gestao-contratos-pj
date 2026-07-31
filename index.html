@@ -606,7 +606,7 @@
                         <label class="block font-bold text-slate-700 mb-1">Competência Referência</label>
                         <select id="relFiltroCompetencia" class="w-full p-2 border rounded bg-white font-bold text-blue-900"></select>
                     </div>
-                    <div>
+                    <div id="bloco-filtro-centro-custo">
                         <label class="block font-bold text-slate-700 mb-1">Centro de Custo</label>
                         <select id="relFiltroCentroCusto" class="w-full p-2 border rounded bg-white"><option value="todos">-- Todos os Centros --</option></select>
                     </div>
@@ -2622,6 +2622,13 @@
             });
 
             document.getElementById('bloco-filtro-competencia').style.display = (tipo === 'prestadores' || tipo === 'contratos' || tipo === 'documentos') ? 'none' : 'block';
+            
+            // Ocultar filtro de centro de custo na aba de Contratos
+            const blocoCentroCusto = document.getElementById('bloco-filtro-centro-custo');
+            if (blocoCentroCusto) {
+                blocoCentroCusto.style.display = (tipo === 'contratos') ? 'none' : 'block';
+            }
+
             atualizarRelatoriosEtapa13();
         };
 
@@ -2652,7 +2659,7 @@
                     
                     if (fStatus !== "todos") {
                         if (fStatus === "Inativo") {
-                            if (!c.status || !c.status.includes("Inativo")) return;
+                            if (!c.status || (!c.status.toLowerCase().includes("inativo") && !c.status.toLowerCase().includes("bloqueado"))) return;
                         } else {
                             if (c.status !== fStatus) return;
                         }
@@ -2679,8 +2686,14 @@
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
                     if (fPrestador !== "todos" && c.nome !== fPrestador) return;
-                    if (fCC !== "todos" && c.departamento !== fCC) return;
-                    if (fStatus !== "todos" && c.status !== fStatus) return;
+                    
+                    if (fStatus !== "todos") {
+                        if (fStatus === "Inativo") {
+                            if (!c.status || (!c.status.toLowerCase().includes("inativo") && !c.status.toLowerCase().includes("bloqueado"))) return;
+                        } else {
+                            if (c.status !== fStatus) return;
+                        }
+                    }
 
                     registrosCont++;
                     let val = parseFloat(c.valorFixoMensal || 0); somaTotal += val;
