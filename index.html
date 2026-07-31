@@ -2149,7 +2149,7 @@
 
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
                 await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (${dataPagamento})`);
-                await registrarNotificacao("Pagamento Realizado", `O pagamento de ${cInfo.nome || 'Prestador'} foi liquidado com sucesso.`, "sucesso", cInfo.email || cInfo.emailCorp, cInfo.nome);
+                await registrarNotificacao("Pagamento Realizado", `Olá ${cInfo.nome || 'Prestador'}, informamos que o seu pagamento referente à competência foi liquidado em ${dataPagamento.split('-').reverse().join('/')}. O comprovante encontra-se disponível no portal.`, "sucesso", cInfo.email || cInfo.emailCorp, cInfo.nome, "");
 
                 alert("Pagamento liquidado com sucesso!");
                 fecharModalLiquidar();
