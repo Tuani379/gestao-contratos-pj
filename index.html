@@ -607,7 +607,7 @@
                         <select id="relFiltroCompetencia" class="w-full p-2 border rounded bg-white font-bold text-blue-900"></select>
                     </div>
                     <div id="bloco-filtro-centro-custo">
-                        <label class="block font-bold text-slate-700 mb-1">Centro de Custo</label>
+                        <label id="label-filtro-centro-custo" class="block font-bold text-slate-700 mb-1">Centro de Custo</label>
                         <select id="relFiltroCentroCusto" class="w-full p-2 border rounded bg-white"><option value="todos">-- Todos os Centros --</option></select>
                     </div>
                     <div>
@@ -2623,8 +2623,37 @@
             document.getElementById('bloco-filtro-competencia').style.display = (tipo === 'prestadores' || tipo === 'contratos' || tipo === 'documentos') ? 'none' : 'block';
             
             const blocoCentroCusto = document.getElementById('bloco-filtro-centro-custo');
+            const labelCentroCusto = document.getElementById('label-filtro-centro-custo');
+            const selectCentroCusto = document.getElementById('relFiltroCentroCusto');
+
             if (blocoCentroCusto) {
                 blocoCentroCusto.style.display = (tipo === 'contratos') ? 'none' : 'block';
+            }
+
+            if (tipo === 'notas') {
+                if (labelCentroCusto) labelCentroCusto.innerText = "Tipo de Nota";
+                if (selectCentroCusto) {
+                    selectCentroCusto.innerHTML = `
+                        <option value="todos">-- Todos os Tipos --</option>
+                        <option value="Regular">Nota Fiscal Regular</option>
+                        <option value="Complementar">NF Complementar</option>
+                    `;
+                }
+            } else if (tipo === 'contratos') {
+                // Contratos esconde o bloco
+            } else {
+                if (labelCentroCusto) labelCentroCusto.innerText = "Centro de Custo";
+                // Recarrega centros de custo normais
+                let centrosCustoSet = new Set();
+                Object.values(contratosLocais).forEach(c => {
+                    if (!c.excluidoLogico && c.departamento) centrosCustoSet.add(c.departamento.trim());
+                });
+                if (selectCentroCusto) {
+                    selectCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
+                    centrosCustoSet.forEach(cc => {
+                        selectCentroCusto.innerHTML += `<option value="${cc}">${cc}</option>`;
+                    });
+                }
             }
 
             const selectStatus = document.getElementById('relFiltroStatusEspecifico');
@@ -2642,6 +2671,13 @@
                     selectStatus.innerHTML += `
                         <option value="Pago">Pago</option>
                         <option value="À Liquidar">À Liquidar</option>
+                    `;
+                } else if (tipo === 'notas') {
+                    if(labelStatus) labelStatus.innerText = "Status da NF";
+                    selectStatus.innerHTML += `
+                        <option value="Recebida">Recebida ✔</option>
+                        <option value="Aguardando">Aguardando ⏳</option>
+                        <option value="Recusada">Recusada ❌</option>
                     `;
                 } else {
                     if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
@@ -2836,36 +2872,50 @@
                     if (fPrestador !== "todos" && nome !== fPrestador) return;
 
                     if (dadosFolha.regular) {
-                        registrosCont++;
                         let statusNfReg = dadosFolha.regular?.nfStatus || "Aguardando";
-                        let temAnexo = dadosFolha.regular?.nfArquivoBase64 ? "Sim ✔" : "Não";
+                        
+                        // Aplica filtro de Tipo de Nota (fCC agora assume o papel de Tipo de Nota)
+                        if (fCC === "Regular" && false) { /* Mantém */ }
+                        if (fCC === "Complementar") { /* Pula regular se filtrado só complementar */ }
+                        else {
+                            let passaTipo = (fCC === "todos" || fCC === "Regular");
+                            let passaStatus = (fStatus === "todos" || statusNfReg.toLowerCase().includes(fStatus.toLowerCase()));
 
-                        corpoRelatorio.innerHTML += `
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
-                                <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
-                                <td class="p-3">Nota Fiscal Regular</td>
-                                <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfReg.includes('Recebida') || statusNfReg.includes('Aprovada') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfReg}</span></td>
-                                <td class="p-3 text-center font-bold text-blue-900">${temAnexo}</td>
-                            </tr>
-                        `;
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                let temAnexo = dadosFolha.regular?.nfArquivoBase64 ? "Sim ✔" : "Não";
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
+                                        <td class="p-3">Nota Fiscal Regular</td>
+                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfReg.includes('Recebida') || statusNfReg.includes('Aprovada') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfReg}</span></td>
+                                        <td class="p-3 text-center font-bold text-blue-900">${temAnexo}</td>
+                                    </tr>
+                                `;
+                            }
+                        }
                     }
 
                     if (dadosFolha.complementares_lista) {
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
-                            registrosCont++;
                             let statusNfC = cItem.nfStatus || "Aguardando";
-                            let temAnexoC = cItem.nfArquivoBase64 ? "Sim ✔" : "Não";
+                            let passaTipo = (fCC === "todos" || fCC === "Complementar");
+                            let passaStatus = (fStatus === "todos" || statusNfC.toLowerCase().includes(fStatus.toLowerCase()));
 
-                            corpoRelatorio.innerHTML += `
-                                <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
-                                    <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
-                                    <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
-                                    <td class="p-3">NF Complementar (${cItem.motorEvento || 'Adicional'})</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfC.includes('Recebida') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfC}</span></td>
-                                    <td class="p-3 text-center font-bold text-blue-900">${temAnexoC}</td>
-                                </tr>
-                            `;
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                let temAnexoC = cItem.nfArquivoBase64 ? "Sim ✔" : "Não";
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
+                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
+                                        <td class="p-3">NF Complementar (${cItem.motorEvento || 'Adicional'})</td>
+                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfC.includes('Recebida') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfC}</span></td>
+                                        <td class="p-3 text-center font-bold text-blue-900">${temAnexoC}</td>
+                                    </tr>
+                                `;
+                            }
                         });
                     }
                 });
