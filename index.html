@@ -2731,8 +2731,17 @@
 
             } else if (tipoRelatorioAtualEtapa13 === 'pagamentos') {
                 cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR PAGO</th><th class="p-3 text-center">STATUS</th>`;
+                
+                // Mudar dinamicamente o texto do rodapé conforme o filtro de status selecionado
+                if (fStatus === "Pago") {
+                    colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
+                } else if (fStatus === "Em Análise") {
+                    colTotalLabel.innerText = "TOTAL PAGAMENTOS EM ANÁLISE:";
+                } else {
+                    colTotalLabel.innerText = "TOTAL GERAL DE PAGAMENTOS:";
+                }
+
                 colTotalLabel.setAttribute('colspan', '7');
-                colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
 
                 const folhaMes = folhasLocais[fComp] || {};
                 Object.entries(folhaMes).forEach(([idPrestador, dadosFolha]) => {
@@ -2748,7 +2757,7 @@
                     if (fStatus !== "todos" && stReg !== fStatus) return;
 
                     registrosCont++;
-                    if (stReg === "Pago") somaTotal += valReg;
+                    somaTotal += valReg;
 
                     let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stReg}</span>`;
 
@@ -2772,7 +2781,7 @@
                             if (fStatus !== "todos" && stC !== fStatus) return;
 
                             registrosCont++;
-                            if (stC === "Pago") somaTotal += valC;
+                            somaTotal += valC;
 
                             let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stC === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stC}</span>`;
 
@@ -2914,12 +2923,12 @@
                                         <td class="p-3 font-medium text-amber-700">Complementar</td>
                                         <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                         <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    </tr>
-                                `;
-                            }
-                        });
-                    }
-                });
+                                                    </tr>
+                                                `;
+                                            }
+                                        });
+                                    }
+                                });
                 totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             }
 
