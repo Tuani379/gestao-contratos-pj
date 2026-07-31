@@ -2692,6 +2692,17 @@
                         <option value="Regular">Regular Válido ✔</option>
                         <option value="Vencida">Vigência Vencida ⚠️</option>
                     `;
+                } else if (tipo === 'financeiro') {
+                    if(labelStatus) labelStatus.innerText = "Tipo de Folha / Composição";
+                    selectStatus.innerHTML += `
+                        <option value="Regular">Regular (Honorário Fixo)</option>
+                        <option value="Complementar">Complementar (Adicionais)</option>
+                        <option value="Bônus por Performance">Bônus por Performance</option>
+                        <option value="Comissão de Vendas">Comissão de Vendas</option>
+                        <option value="Hora Extra">Hora Extra</option>
+                        <option value="Reembolso de Despesas">Reembolso de Despesas</option>
+                        <option value="Adiantamento Salarial">Adiantamento Salarial</option>
+                    `;
                 } else {
                     if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
                 }
@@ -2979,7 +2990,17 @@
                     let valorRegMotor = parseFloat(dadosFolha.regular?.motorValor || 0);
                     let valRegTotal = valorRegFixo + valorRegMotor;
 
-                    if (valRegTotal > 0) {
+                    let passaFiltroReg = true;
+                    if (fStatus === "Complementar") passaFiltroReg = false;
+                    else if (fStatus === "Regular") passaFiltroReg = true;
+                    else if (fStatus && fStatus !== "todos") {
+                        if (fStatus !== "Regular" && fStatus !== "Complementar") {
+                            let eventoReg = dadosFolha.regular?.motorEvento || "";
+                            if (!eventoReg.toLowerCase().includes(fStatus.toLowerCase())) passaFiltroReg = false;
+                        }
+                    }
+
+                    if (valRegTotal > 0 && passaFiltroReg) {
                         somaTotal += valRegTotal; registrosCont++;
                         let composicaoTexto = `Honorário Fixo: R$ ${valorRegFixo.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
                         if (valorRegMotor > 0) composicaoTexto += ` + ${dadosFolha.regular?.motorEvento || 'Ajuste'}: R$ ${valorRegMotor.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
@@ -2999,7 +3020,15 @@
                     if (dadosFolha.complementares_lista) {
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valComp = parseFloat(cItem.motorValor || 0);
-                            if (valComp > 0) {
+                            let eventoComp = cItem.motorEvento || 'Adicional';
+
+                            let passaFiltroComp = true;
+                            if (fStatus === "Regular") passaFiltroComp = false;
+                            else if (fStatus && fStatus !== "todos" && fStatus !== "Complementar") {
+                                if (!eventoComp.toLowerCase().includes(fStatus.toLowerCase())) passaFiltroComp = false;
+                            }
+
+                            if (valComp > 0 && passaFiltroComp) {
                                 somaTotal += valComp; registrosCont++;
                                 corpoRelatorio.innerHTML += `
                                     <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
@@ -3007,7 +3036,7 @@
                                         <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
                                         <td class="p-3">${departamento}</td>
                                         <td class="p-3 font-medium text-amber-700">Complementar</td>
-                                        <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-xs text-slate-600">${eventoComp}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                         <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                     </tr>
                                 `;
