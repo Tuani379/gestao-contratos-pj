@@ -1501,7 +1501,6 @@
                 document.getElementById('emp-cidade').value = dados.cidade || '';
                 document.getElementById('emp-estado').value = dados.estado || '';
 
-                // CARREGAR CONFIGURAÇÕES DE NOTIFICAÇÕES
                 document.getElementById('config-notif-vencimento').checked = dados.notifVencimento !== false;
                 document.getElementById('config-notif-nf-anexada').checked = dados.notifNfAnexada !== false;
                 document.getElementById('config-notif-nf-aprovada').checked = dados.notifNfAprovada !== false;
@@ -2621,13 +2620,11 @@
 
             document.getElementById('bloco-filtro-competencia').style.display = (tipo === 'prestadores' || tipo === 'contratos' || tipo === 'documentos') ? 'none' : 'block';
             
-            // Ocultar filtro de centro de custo na aba de Contratos
             const blocoCentroCusto = document.getElementById('bloco-filtro-centro-custo');
             if (blocoCentroCusto) {
                 blocoCentroCusto.style.display = (tipo === 'contratos') ? 'none' : 'block';
             }
 
-            // ATUALIZAR OPÇÕES DO SELECT DE STATUS ESPECÍFICO CONFORME A ABA
             const selectStatus = document.getElementById('relFiltroStatusEspecifico');
             if (selectStatus) {
                 selectStatus.innerHTML = '<option value="todos">-- Todos --</option>';
@@ -2732,7 +2729,6 @@
             } else if (tipoRelatorioAtualEtapa13 === 'pagamentos') {
                 cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR PAGO</th><th class="p-3 text-center">STATUS</th>`;
                 
-                // Mudar dinamicamente o texto do rodapé conforme o filtro de status selecionado
                 if (fStatus === "Pago") {
                     colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
                 } else if (fStatus === "Em Análise") {
@@ -2754,7 +2750,14 @@
 
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                     let stReg = dadosFolha.regular?.statusPagamento || "Em Análise";
-                    if (fStatus !== "todos" && stReg !== fStatus) return;
+                    
+                    if (fStatus !== "todos") {
+                        if (fStatus === "Em Análise") {
+                            if (stReg !== "Em Análise" && stReg !== "Pendente" && stReg !== "Aguardando") return;
+                        } else if (stReg !== fStatus) {
+                            return;
+                        }
+                    }
 
                     registrosCont++;
                     somaTotal += valReg;
@@ -2778,7 +2781,14 @@
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
                             let stC = cItem.statusPagamento || "Em Análise";
-                            if (fStatus !== "todos" && stC !== fStatus) return;
+                            
+                            if (fStatus !== "todos") {
+                                if (fStatus === "Em Análise") {
+                                    if (stC !== "Em Análise" && stC !== "Pendente" && stC !== "Aguardando") return;
+                                } else if (stC !== fStatus) {
+                                    return;
+                                }
+                            }
 
                             registrosCont++;
                             somaTotal += valC;
@@ -2923,12 +2933,12 @@
                                         <td class="p-3 font-medium text-amber-700">Complementar</td>
                                         <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                         <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                                    </tr>
-                                                `;
-                                            }
-                                        });
-                                    }
-                                });
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
+                });
                 totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             }
 
