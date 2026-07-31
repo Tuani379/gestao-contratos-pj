@@ -383,8 +383,8 @@
                                     <th class="p-3">Prestador / Evento</th>
                                     <th class="p-3">CNPJ</th>
                                     <th class="p-3">Valor Adicional</th>
-                                    <th class="p-3 text-center">Programação</th>
-                                    <th class="p-3 text-center">NF</th>
+                                    <th class="p-3 text-center">Programação / Vencimento</th>
+                                    <th class="p-3 text-center">Nota Fiscal (NF)</th>
                                     <th class="p-3 text-center">Visualizar</th>
                                     <th class="p-3 text-center">Status / Ações</th>
                                 </tr>
@@ -615,7 +615,7 @@
                         <select id="relFiltroPrestador" class="w-full p-2 border rounded bg-white"><option value="todos">-- Todos os Prestadores --</option></select>
                     </div>
                     <div>
-                        <label class="block font-bold text-slate-700 mb-1">Status / Filtro Específico</label>
+                        <label id="label-filtro-especifico" class="block font-bold text-slate-700 mb-1">Status de Pagamento</label>
                         <select id="relFiltroStatusEspecifico" class="w-full p-2 border rounded bg-white">
                             <option value="todos">-- Todos --</option>
                         </select>
@@ -2075,18 +2075,18 @@
                 let acoesTesourariaReg = "";
 
                 if (statusRegHTML === "Pago") {
-                    let botaoComprovante = f.regular?.comprovanteBase64 ? `<button class="btn-view-comprovante-reg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold ml-1" data-id="${key}">🧾 Recibo</button>` : '';
-                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovante}`;
-                    acoesTesourariaReg = `<button onclick="estornarPagamentoRegular('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">↩️ Estornar</button>`;
+                    let botaoComprovante = f.regular?.comprovanteBase64 ? `<button class="btn-view-comprovante-reg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded text-xs font-bold ml-1 transition" data-id="${key}">🧾 Recibo</button>` : '';
+                    statusRegHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovante}`;
+                    acoesTesourariaReg = `<button onclick="estornarPagamentoRegular('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded text-xs font-bold transition">↩️ Estornar</button>`;
                 } else if (f.regular?.nfStatus === "Recusada ❌") {
-                    statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada</span>`;
-                    acoesTesourariaReg = `<button onclick="reprocessarNotaRegular('${key}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-bold">🔄 Reprocessar</button>`;
+                    statusRegHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded border border-red-200">NF Recusada</span>`;
+                    acoesTesourariaReg = `<button onclick="reprocessarNotaRegular('${key}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2.5 py-1 rounded text-xs font-bold transition">🔄 Reprocessar</button>`;
                 } else {
-                    statusRegHTML = `<button onclick="abrirModalLiquidarRegular('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2 py-1 rounded text-xs font-bold transition shadow-sm">💰 Liquidar</button>`;
-                    acoesTesourariaReg = `<button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">🗑️</button>`;
+                    statusRegHTML = `<button onclick="abrirModalLiquidarRegular('${key}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm">💰 Liquidar</button>`;
+                    acoesTesourariaReg = `<button onclick="excluirItemFolhaRegular('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold transition">🗑️ Excluir</button>`;
                 }
 
-                let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
+                let botaoVisualizarReg = f.regular?.nfArquivoBase64 ? `<button class="btn-view-nf-reg bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
 
                 tbodyRegular.innerHTML += `
                     <tr class="border-b text-sm hover:bg-slate-50">
@@ -2115,18 +2115,18 @@
                         let acoesTesourariaComp = "";
 
                         if (statusCompHTML === "Pago") {
-                            let botaoComprovanteComp = cItem.comprovanteBase64 ? `<button class="btn-view-comprovante-comp bg-emerald-50 text-emerald-700 border border-emerald-200 px-2 py-0.5 rounded text-[11px] font-bold ml-1" data-id="${key}" data-comp-id="${idComp}">🧾 Recibo</button>` : '';
-                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovanteComp}`;
-                            acoesTesourariaComp = `<button onclick="estornarPagamentoComplementar('${key}', '${idComp}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">↩️ Estornar</button>`;
+                            let botaoComprovanteComp = cItem.comprovanteBase64 ? `<button class="btn-view-comprovante-comp bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded text-xs font-bold ml-1 transition" data-id="${key}" data-comp-id="${idComp}">🧾 Recibo</button>` : '';
+                            statusCompHTML = `<span class="bg-green-100 text-green-800 px-2.5 py-1 rounded font-bold text-xs">Pago</span>${botaoComprovanteComp}`;
+                            acoesTesourariaComp = `<button onclick="estornarPagamentoComplementar('${key}', '${idComp}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded text-xs font-bold transition">↩️ Estornar</button>`;
                         } else if (cItem.nfStatus === "Recusada ❌") {
-                            statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2 py-1 rounded border border-red-200">NF Recusada</span>`;
-                            acoesTesourariaComp = `<button onclick="reprocessarNotaComplementar('${key}', '${idComp}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2 py-1 rounded text-xs font-bold">🔄 Reprocessar</button>`;
+                            statusCompHTML = `<span class="text-xs font-bold text-red-600 bg-red-50 px-2.5 py-1 rounded border border-red-200">NF Recusada</span>`;
+                            acoesTesourariaComp = `<button onclick="reprocessarNotaComplementar('${key}', '${idComp}')" class="bg-blue-100 hover:bg-blue-200 text-blue-800 px-2.5 py-1 rounded text-xs font-bold transition">🔄 Reprocessar</button>`;
                         } else {
                             statusCompHTML = `<button onclick="abrirModalLiquidarComplementar('${key}', '${idComp}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-2.5 py-1 rounded text-xs font-bold transition shadow-sm">💰 Liquidar</button>`;
-                            acoesTesourariaComp = `<button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">🗑️</button>`;
+                            acoesTesourariaComp = `<button onclick="excluirItemFolhaComplementar('${key}', '${idComp}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2.5 py-1 rounded text-xs font-bold transition">🗑️ Excluir</button>`;
                         }
 
-                        let botaoVisualizarComp = cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold transition" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
+                        let botaoVisualizarComp = cItem.nfArquivoBase64 ? `<button class="btn-view-nf-comp bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 px-3 py-1 rounded text-xs font-bold transition shadow-sm" data-id="${key}" data-comp-id="${idComp}">📄 Abrir</button>` : '<span class="text-slate-400">---</span>';
 
                         tbodyComplementar.innerHTML += `
                             <tr class="border-b text-sm bg-amber-50/20 hover:bg-amber-50/50">
@@ -2509,7 +2509,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-nf-comp')) {
-                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compid]?.nfArquivoBase64;
+                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.nfArquivoBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-reg')) {
@@ -2517,7 +2517,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-comp')) {
-                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compid]?.comprovanteBase64;
+                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.comprovanteBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
         });
@@ -2626,18 +2626,23 @@
             }
 
             const selectStatus = document.getElementById('relFiltroStatusEspecifico');
+            const labelStatus = document.getElementById('label-filtro-especifico');
             if (selectStatus) {
                 selectStatus.innerHTML = '<option value="todos">-- Todos --</option>';
                 if (tipo === 'prestadores' || tipo === 'contratos') {
+                    if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
                     selectStatus.innerHTML += `
                         <option value="Ativo">Ativo / Regular</option>
                         <option value="Inativo">Inativo / Bloqueado</option>
                     `;
                 } else if (tipo === 'pagamentos') {
+                    if(labelStatus) labelStatus.innerText = "Status de Pagamento";
                     selectStatus.innerHTML += `
                         <option value="Pago">Pago</option>
                         <option value="Em Análise">Em Análise</option>
                     `;
+                } else {
+                    if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
                 }
             }
 
