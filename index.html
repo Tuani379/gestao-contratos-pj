@@ -983,9 +983,6 @@
         const db = getDatabase(app);
         const auth = getAuth(app);
 
-        const appSecundario = initializeApp(firebaseConfig, "AppSecundarioCriacao");
-        const authSecundario = getAuth(appSecundario);
-
         let empresaAtivaId = localStorage.getItem('connectpj_empresa_ativa') || "matriz";
         let empresaAtivaNome = localStorage.getItem('connectpj_empresa_nome') || "CONNECTPJ MATRIZ";
         let usuarioEmailLogado = "";
@@ -1877,7 +1874,7 @@
 
                         if (emailInput) {
                             try {
-                                await createUserWithEmailAndPassword(authSecundario, emailInput, senhaProvisoria);
+                                await createUserWithEmailAndPassword(auth, emailInput, senhaProvisoria);
                             } catch (authError) {
                                 console.warn("Aviso Auth:", authError.message);
                             }
@@ -2874,7 +2871,7 @@
                                         <td class="p-3">${departamento}</td>
                                         <td class="p-3 font-medium text-amber-700">Complementar</td>
                                         <td class="p-3 text-xs text-slate-600">${cItem.motorEvento || 'Adicional'}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                        <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR',e {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                     </tr>
                                 `;
                             }
