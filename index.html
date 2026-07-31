@@ -634,7 +634,7 @@
                         </tbody>
                         <tfoot>
                             <tr class="bg-slate-100 border-t font-bold text-xs">
-                                <td id="relatorio-coluna-total-label" colspan="5" class="p-3 text-right text-slate-700 uppercase tracking-wider">TOTAL CONSOLIDADO:</td>
+                                <td id="relatorio-coluna-total-label" colspan="7" class="p-3 text-right text-slate-700 uppercase tracking-wider">TOTAL CONSOLIDADO:</td>
                                 <td id="relatorioTotalGeral" class="p-3 text-right text-blue-950 text-sm">R$ 0,00</td>
                             </tr>
                         </tfoot>
@@ -2650,6 +2650,7 @@
 
             if (tipoRelatorioAtualEtapa13 === 'prestadores') {
                 cabecalho.innerHTML = `<th class="p-3">NOME COMPLETO</th><th class="p-3">PERFIL</th><th class="p-3">E-MAIL / TELEFONE</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '5');
                 colTotalLabel.innerText = "TOTAL PRESTADORES ATIVOS:";
 
                 Object.values(contratosLocais).forEach(c => {
@@ -2681,6 +2682,7 @@
 
             } else if (tipoRelatorioAtualEtapa13 === 'contratos') {
                 cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">VIGÊNCIA</th><th class="p-3">VALOR FIXO MENSAL</th><th class="p-3">ADITIVOS</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '5');
                 colTotalLabel.innerText = "VALOR TOTAL CONTRATOS:";
 
                 Object.values(contratosLocais).forEach(c => {
@@ -2713,32 +2715,39 @@
                 totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
 
             } else if (tipoRelatorioAtualEtapa13 === 'pagamentos') {
-                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR PAGO</th><th class="p-3 text-center">STATUS</th>`;
+                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR PAGO</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '7');
                 colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
 
                 const folhaMes = folhasLocais[fComp] || {};
                 Object.entries(folhaMes).forEach(([idPrestador, dadosFolha]) => {
                     const cInfo = contratosLocais[idPrestador] || {};
                     const nome = dadosFolha.nome || cInfo.nome || "Prestador";
+                    const centroCustoPrestador = cInfo.departamento || "---";
+
                     if (fPrestador !== "todos" && nome !== fPrestador) return;
-                    if (fCC !== "todos" && cInfo.departamento !== fCC) return;
+                    if (fCC !== "todos" && centroCustoPrestador !== fCC) return;
 
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
                     let stReg = dadosFolha.regular?.statusPagamento || "Em Análise";
                     if (fStatus === "Ativo" && stReg !== "Pago") return;
+                    if (fStatus === "Inativo" && stReg === "Pago") return;
 
                     registrosCont++;
                     if (stReg === "Pago") somaTotal += valReg;
+
+                    let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stReg}</span>`;
 
                     corpoRelatorio.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
                             <td class="p-3 font-bold text-slate-900">${nome}</td>
+                            <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
                             <td class="p-3">Regular</td>
                             <td class="p-3">${dadosFolha.regular?.dataVencimento || '---'}</td>
                             <td class="p-3">${dadosFolha.regular?.dataPagamentoEfetivo || '---'}</td>
                             <td class="p-3 text-right font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${stReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stReg}</span></td>
+                            <td class="p-3 text-center">${badgeStatusReg}</td>
                         </tr>
                     `;
 
@@ -2747,19 +2756,23 @@
                             let valC = parseFloat(cItem.motorValor || 0);
                             let stC = cItem.statusPagamento || "Em Análise";
                             if (fStatus === "Ativo" && stC !== "Pago") return;
+                            if (fStatus === "Inativo" && stC === "Pago") return;
 
                             registrosCont++;
                             if (stC === "Pago") somaTotal += valC;
+
+                            let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stC === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stC}</span>`;
 
                             corpoRelatorio.innerHTML += `
                                 <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
                                     <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
                                     <td class="p-3 font-bold text-slate-900">${nome}</td>
+                                    <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
                                     <td class="p-3">Complementar (${cItem.motorEvento || 'Adicional'})</td>
                                     <td class="p-3">${cItem.dataVencimento || '---'}</td>
                                     <td class="p-3">${cItem.dataPagamentoEfetivo || '---'}</td>
                                     <td class="p-3 text-right font-bold text-amber-800">R$ ${valC.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${stC === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stC}</span></td>
+                                    <td class="p-3 text-center">${badgeStatusComp}</td>
                                 </tr>
                             `;
                         });
@@ -2769,6 +2782,7 @@
 
             } else if (tipoRelatorioAtualEtapa13 === 'notas') {
                 cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR / CNPJ</th><th class="p-3">TIPO NOTA</th><th class="p-3 text-center">STATUS NF</th><th class="p-3 text-center">ANEXO</th>`;
+                colTotalLabel.setAttribute('colspan', '4');
                 colTotalLabel.innerText = "TOTAL NOTAS PROCESSADAS:";
 
                 const folhaMes = folhasLocais[fComp] || {};
@@ -2816,6 +2830,7 @@
 
             } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
                 cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">TIPO DOCUMENTO</th><th class="p-3">VIGÊNCIA / VALIDADE</th><th class="p-3 text-center">STATUS COMPLIANCE</th>`;
+                colTotalLabel.setAttribute('colspan', '3');
                 colTotalLabel.innerText = "TOTAL DOCUMENTOS:";
 
                 Object.values(contratosLocais).forEach(c => {
@@ -2840,6 +2855,7 @@
 
             } else if (tipoRelatorioAtualEtapa13 === 'financeiro') {
                 cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO DE FOLHA</th><th class="p-3">COMPOSIÇÃO</th><th class="p-3 text-right">LÍQUIDO PAGO/APROVADO</th>`;
+                colTotalLabel.setAttribute('colspan', '5');
                 colTotalLabel.innerText = "TOTAL CONSOLIDADO GERAL:";
 
                 const folhaMes = folhasLocais[fComp] || {};
@@ -2894,7 +2910,7 @@
                 totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             }
 
-            if (registrosCont === 0) corpoRelatorio.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+            if (registrosCont === 0) corpoRelatorio.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         }
 
         ['relFiltroCompetencia', 'relFiltroCentroCusto', 'relFiltroPrestador', 'relFiltroStatusEspecifico'].forEach(id => {
