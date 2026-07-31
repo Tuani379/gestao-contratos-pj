@@ -1018,18 +1018,18 @@
             }
         }
 
-        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = null, nomeDestinatario = "Usuário", senhaProvisoria = null) {
+        async function registrarNotificacao(titulo, mensagem, tipo = 'info', destinatarioEmail = "admin", nomeDestinatario = "Usuário", senhaProvisoria = null) {
             try {
                 await push(ref(db, pathNotificacoesDB), {
                     titulo,
                     mensagem,
                     tipo,
-                    destinatarioEmail: destinatarioEmail ? destinatarioEmail.toLowerCase() : "geral",
+                    destinatarioEmail: destinatarioEmail ? destinatarioEmail.toLowerCase() : "admin",
                     data: new Date().toISOString(),
                     lida: false
                 });
 
-                if (destinatarioEmail && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
+                if (destinatarioEmail && destinatarioEmail !== "admin" && destinatarioEmail !== "geral" && EMAILJS_PUBLIC_KEY && EMAILJS_PUBLIC_KEY !== "SUA_PUBLIC_KEY") {
                     await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
                         to_email: destinatarioEmail,
                         to_name: nomeDestinatario,
@@ -1057,18 +1057,19 @@
             const notifs = snapshot.val() || {};
             let updates = {};
             Object.entries(notifs).forEach(([key, n]) => {
+                const dest = (n.destinatarioEmail || "").toLowerCase();
                 if (modoVisualAtual === 'pj') {
-                    if (n.destinatarioEmail && n.destinatarioEmail.toLowerCase() === usuarioEmailLogado) {
+                    if (dest === usuarioEmailLogado) {
                         updates[`${key}/lida`] = true;
                     }
                 } else {
                     const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
                     if (ehAdmin) {
-                        if (n.destinatarioEmail === "geral" || n.titulo === "Nova Nota Fiscal" || n.titulo === "Nova Nota Fiscal (Comp.)") {
+                        if (dest === "admin" || dest === "geral" || n.titulo === "Nova Nota Fiscal" || n.titulo === "Nova Nota Fiscal (Comp.)") {
                             updates[`${key}/lida`] = true;
                         }
                     } else {
-                        if (n.destinatarioEmail === usuarioEmailLogado) {
+                        if (dest === usuarioEmailLogado) {
                             updates[`${key}/lida`] = true;
                         }
                     }
@@ -1133,11 +1134,16 @@
                         return;
                     }
                 } else {
-                    if (dest === usuarioEmailLogado && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
-                        return;
-                    }
-                    if (dest && dest !== "geral" && dest !== usuarioEmailLogado) {
-                        return;
+                    // Modo RH / Administrador: exibir apenas notificações para admin/geral ou notas fiscais enviadas
+                    const ehAdminOuRh = (perfilUsuarioLogado === 'Administrador' || perfilUsuarioLogado === 'RH' || perfilUsuarioLogado === 'Financeiro' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+                    if (ehAdminOuRh) {
+                        if (dest !== "admin" && dest !== "geral" && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
+                            return;
+                        }
+                    } else {
+                        if (dest !== usuarioEmailLogado) {
+                            return;
+                        }
                     }
                 }
 
@@ -2454,7 +2460,7 @@
                             dadosFolhaPrestador.regular.statusPagamento = "Em Análise";
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
-                            await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", null, c.nome);
+                            await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", "admin", c.nome);
                             await registrarAuditoria("Portal PJ", "Envio de Nota", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
                             atualizou = true; resolve();
@@ -2473,7 +2479,7 @@
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}/complementares_lista/${compId}`), {
                                 nfArquivoBase64: reader.result, nfStatus: "Recebida ✔", statusPagamento: "Em Análise"
                             });
-                            await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info", null, c.nome);
+                            await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info", "admin", c.nome);
                             atualizou = true; resolve();
                         };
                         reader.readAsDataURL(file);
