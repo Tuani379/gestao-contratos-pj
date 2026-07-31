@@ -1130,7 +1130,7 @@
                 const dest = (n.destinatarioEmail || "").toLowerCase();
 
                 if (modoVisualAtual === 'pj') {
-                    // No Portal do Prestador, exibe EXCLUSIVAMENTE notificações cujo destinatarioEmail seja o e-mail do usuário logado
+                    // RIGOROSO: No Portal do Prestador, exibe SOMENTE notificações cujo destinatarioEmail seja exatamente o e-mail do prestador logado
                     if (dest !== usuarioEmailLogado) {
                         return;
                     }
@@ -2191,9 +2191,10 @@
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
                 await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (${dataPagamento})`);
                 
+                // Direciona notificação exclusivamente para o e-mail do prestador logado
                 await registrarNotificacao(
                     "Pagamento Realizado", 
-                    `Olá ${cInfo.nome || 'Prestador'}, informamos que o seu pagamento referente à competência foi liquidado em ${dataPagamento.split('-').reverse().join('/')}. O comprovante encontra-se disponível no portal.`, 
+                    `Informamos que o seu pagamento referente à competência foi liquidado em ${dataPagamento.split('-').reverse().join('/')}. O comprovante encontra-se disponível no portal.`, 
                     "sucesso", 
                     cInfo.email || cInfo.emailCorp, 
                     cInfo.nome, 
@@ -2462,11 +2463,12 @@
 
                             await update(ref(db, `${pathFolhasDB}/${compDestino}/${id}`), dadosFolhaPrestador);
                             
-                            // Notifica o admin que a NF foi enviada
+                            // Notifica o Admin na central dele
                             await registrarNotificacao("Nova Nota Fiscal", `O prestador ${c.nome || 'Prestador'} enviou a Nota Fiscal.`, "info", "admin", c.nome);
                             
-                            // Opcional: Se quiser registrar uma cópia de confirmação para o próprio prestador
-                            await registrarNotificacao("Nota Enviada com Sucesso", `Sua Nota Fiscal foi enviada e está em análise.`, "sucesso", c.email || c.emailCorp, c.nome);
+                            // Notifica exclusivamente o próprio prestador logado sobre o envio da nota dele
+                            const emailPrestadorLogado = c.email || c.emailCorp || usuarioEmailLogado;
+                            await registrarNotificacao("Nota Enviada com Sucesso", `Sua Nota Fiscal foi enviada com sucesso e está em análise.`, "sucesso", emailPrestadorLogado, c.nome);
 
                             await registrarAuditoria("Portal PJ", "Envio de Nota", c.nome || "Prestador", "Sem Anexo", "Anexo Enviado");
 
@@ -2487,7 +2489,10 @@
                                 nfArquivoBase64: reader.result, nfStatus: "Recebida ✔", statusPagamento: "Em Análise"
                             });
                             await registrarNotificacao("Nova Nota Fiscal (Comp.)", `O prestador ${c.nome || 'Prestador'} enviou NF complementar.`, "info", "admin", c.nome);
-                            await registrarNotificacao("Nota Complementar Enviada", `Sua NF complementar foi enviada e está em análise.`, "sucesso", c.email || c.emailCorp, c.nome);
+                            
+                            const emailPrestadorLogado = c.email || c.emailCorp || usuarioEmailLogado;
+                            await registrarNotificacao("Nota Complementar Enviada", `Sua NF complementar foi enviada e está em análise.`, "sucesso", emailPrestadorLogado, c.nome);
+
                             atualizou = true; resolve();
                         };
                         reader.readAsDataURL(file);
