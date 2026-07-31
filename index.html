@@ -821,7 +821,7 @@
                         </div>
                         <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-2">
                             <p class="text-[11px] font-extrabold text-slate-400 uppercase tracking-wider">Usuários Administrativos</p>
-                            <h3 class="text-3xl font-extrabold text-slate-900">1 / 10</h3>
+                            <h3 id="config-info-qtd-usuarios" class="text-3xl font-extrabold text-slate-900">1 / 10</h3>
                             <p class="text-xs text-slate-500">Acessos corporativos ativos</p>
                         </div>
                     </div>
@@ -1024,6 +1024,7 @@
                     titulo,
                     mensagem,
                     tipo,
+                    destinatarioEmail: destinatarioEmail ? destinatarioEmail.toLowerCase() : "geral",
                     data: new Date().toISOString(),
                     lida: false
                 });
@@ -1055,8 +1056,17 @@
             const snapshot = await get(ref(db, pathNotificacoesDB));
             const notifs = snapshot.val() || {};
             let updates = {};
-            Object.keys(notifs).forEach(key => {
-                updates[`${key}/lida`] = true;
+            Object.entries(notifs).forEach(([key, n]) => {
+                const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+                if (ehAdmin) {
+                    if (n.destinatarioEmail === "geral" || n.titulo === "Nova Nota Fiscal" || n.titulo === "Nova Nota Fiscal (Comp.)") {
+                        updates[`${key}/lida`] = true;
+                    }
+                } else {
+                    if (n.destinatarioEmail === usuarioEmailLogado) {
+                        updates[`${key}/lida`] = true;
+                    }
+                }
             });
             if (Object.keys(updates).length > 0) {
                 await update(ref(db, pathNotificacoesDB), updates);
@@ -1102,18 +1112,27 @@
             const notifs = snapshot.val() || {};
             const container = document.getElementById('lista-notificacoes-container');
             const badgeContador = document.getElementById('badge-contador-notif');
+            if(!container) return;
             container.innerHTML = "";
 
             let naoLidas = 0;
             const entradas = Object.entries(notifs).reverse();
-
-            if (entradas.length === 0) {
-                container.innerHTML = `<p class="text-slate-400 text-center py-4">Nenhuma notificação registrada.</p>`;
-                badgeContador.classList.add('hidden');
-                return;
-            }
+            let countExibidas = 0;
 
             entradas.forEach(([key, n]) => {
+                const ehAdmin = (perfilUsuarioLogado === 'Administrador' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+
+                if (ehAdmin) {
+                    if (n.destinatarioEmail && n.destinatarioEmail !== "geral" && n.destinatarioEmail !== usuarioEmailLogado) {
+                        return;
+                    }
+                } else {
+                    if (n.destinatarioEmail && n.destinatarioEmail !== "geral" && n.destinatarioEmail !== usuarioEmailLogado) {
+                        return;
+                    }
+                }
+
+                countExibidas++;
                 if (!n.lida) naoLidas++;
                 let corBorda = "border-blue-200 bg-blue-50/30";
                 if (n.tipo === 'alerta') corBorda = "border-amber-200 bg-amber-50/30";
@@ -1127,6 +1146,10 @@
                     </div>
                 `;
             });
+
+            if (countExibidas === 0) {
+                container.innerHTML = `<p class="text-slate-400 text-center py-4">Nenhuma notificação registrada.</p>`;
+            }
 
             if (naoLidas > 0) {
                 badgeContador.innerText = naoLidas;
@@ -1436,6 +1459,8 @@
                     </tr>
                 `;
             });
+            const configInfoQtdUsuarios = document.getElementById('config-info-qtd-usuarios');
+            if(configInfoQtdUsuarios) configInfoQtdUsuarios.innerText = `${qtdAtivos} / 10`;
         }
 
         window.abrirConfiguracoesEmpresa = () => {
