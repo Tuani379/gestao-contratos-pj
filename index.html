@@ -1732,10 +1732,31 @@
             const arquivoFotoInput = document.getElementById('campoFotoArquivo');
             const arquivoContratoInput = document.getElementById('campoArquivoContrato');
             
+            const emailInput = (document.getElementById('campoEmail').value || document.getElementById('campoEmailCorp').value || "").trim().toLowerCase();
+            const nomeInput = document.getElementById('campoNome').value;
+
+            if (!nomeInput) { alert("Nome obrigatório!"); return; }
+
+            // VALIDAÇÃO CONTRA DUPLICAÇÃO DE E-MAIL
+            if (emailInput) {
+                let emailDuplicado = false;
+                Object.entries(contratosLocais).forEach(([idExistente, cExistente]) => {
+                    if (editId && idExistente === editId) return; // Ignora o próprio registro em edição
+                    if (cExistente.excluidoLogico) return;
+                    const emailExistente1 = (cExistente.email || "").trim().toLowerCase();
+                    const emailExistente2 = (cExistente.emailCorp || "").trim().toLowerCase();
+                    if ((emailExistente1 && emailExistente1 === emailInput) || (emailExistente2 && emailExistente2 === emailInput)) {
+                        emailDuplicado = true;
+                    }
+                });
+
+                if (emailDuplicado) {
+                    alert(`Erro: O e-mail "${emailInput}" já está cadastrado para outro usuário no sistema!`);
+                    return;
+                }
+            }
+
             const executarSalvamento = async (fotoBase64Url = null, contratoBase64Url = null) => {
-                const emailInput = document.getElementById('campoEmail').value || document.getElementById('campoEmailCorp').value;
-                const nomeInput = document.getElementById('campoNome').value;
-                
                 const pacote = {
                     perfilTipo: document.getElementById('campoPerfilTipo').value,
                     adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
@@ -1768,8 +1789,6 @@
                 };
                 if (fotoBase64Url) pacote.fotoBase64 = fotoBase64Url;
                 if (contratoBase64Url) pacote.arquivoContratoBase64 = contratoBase64Url;
-
-                if (!pacote.nome) { alert("Nome obrigatório!"); return; }
 
                 try {
                     if (editId) {
