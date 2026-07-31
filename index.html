@@ -494,7 +494,7 @@
                         </div>
 
                         <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
-                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">⚖️ 3. Vigência, Valores e Governança</h4>
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">⚖️ 3. Vigência, Valores, Reajuste e Governança</h4>
                             <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                                 <div>
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Início da Vigência:</label>
@@ -508,6 +508,18 @@
                                     <label class="block text-[11px] font-bold text-slate-600 mb-1">Valor Fixo Mensal (R$):</label>
                                     <input id="campoValorFixoMensal" type="number" placeholder="Ex: 5000" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950">
                                 </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Mês/Ano Reajuste:</label>
+                                    <input id="campoMesAnoReajuste" type="text" placeholder="Ex: 07/2027" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Índice Reajuste:</label>
+                                    <select id="campoIndiceReajuste" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-slate-700">
+                                        <option value="IPCA">IPCA</option>
+                                        <option value="IGP-M">IGP-M</option>
+                                        <option value="Fixado em Acordo">Fixado em Acordo</option>
+                                    </select>
+                                </div>
                                 <input id="campoCargo" type="text" placeholder="Cargo" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 <input id="campoDepartamento" type="text" placeholder="Centro de Custo (Ex: 105 - Tech)" class="w-full p-2.5 border rounded-lg text-sm bg-white">
                                 <input id="campoGestorDireto" type="text" placeholder="Responsável / Gestor" class="w-full p-2.5 border rounded-lg text-sm bg-white">
@@ -516,6 +528,27 @@
                                     <option value="Ativo">Ativo</option>
                                     <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                                 </select>
+                            </div>
+                        </div>
+
+                        <!-- 4. DOCUMENTOS MÚLTIPLOS DE COMPLIANCE COM VALIDADE ESPECÍFICA -->
+                        <div class="space-y-3 bg-slate-50/60 p-4 rounded-xl border">
+                            <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-1">📁 4. Documentos de Compliance (Validade Individual)</h4>
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end">
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Selecionar Arquivos:</label>
+                                    <input type="file" id="campoDocsMultiplos" multiple accept=".pdf,image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
+                                </div>
+                                <div>
+                                    <label class="block text-[11px] font-bold text-slate-600 mb-1">Validade dos Documentos:</label>
+                                    <input type="date" id="campoValidadeDocsMultiplos" class="w-full p-2.5 border rounded-lg text-sm bg-white">
+                                </div>
+                                <div>
+                                    <button type="button" onclick="adicionarDocumentoComplianceLista()" class="w-full bg-slate-800 text-white font-bold py-2.5 px-4 rounded-xl text-xs hover:bg-slate-700 transition">➕ Adicionar Documento</button>
+                                </div>
+                            </div>
+                            <div id="lista-docs-compliance-preview" class="space-y-2 pt-2 text-xs">
+                                <span class="text-slate-400">Nenhum documento adicional anexado.</span>
                             </div>
                         </div>
 
@@ -829,9 +862,10 @@
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-4">
                         <h3 class="font-bold text-blue-950 text-sm">Preferências de Alertas Automáticos</h3>
                         <div class="space-y-3 text-xs">
-                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-vencimento" class="w-4 h-4 rounded text-blue-600"> <span>Enviar e-mail de alerta quando faltar 30 dias para o vencimento de um contrato.</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-vencimento" class="w-4 h-4 rounded text-blue-600"> <span>Enviar e-mail de alerta quando faltar 30 dias para o reajuste anual (Gestores, Administradores, Financeiro, Jurídico e RH).</span></label>
                             <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-nf-anexada" class="w-4 h-4 rounded text-blue-600"> <span>Notificar financeiro quando um prestador anexar nova Nota Fiscal.</span></label>
                             <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-nf-aprovada" class="w-4 h-4 rounded text-blue-600"> <span>Notificar prestador por e-mail quando sua Nota Fiscal for aprovada ou recusada.</span></label>
+                            <label class="flex items-center gap-3 cursor-pointer"><input type="checkbox" id="config-notif-diaria-20" class="w-4 h-4 rounded text-blue-600"> <span>Automação Cloud Function (a partir do dia 20): Disparo diário automático de relatório para Financeiro, Administradores e Gestores sobre prestadores sem NF, além de cobrança diária aos prestadores inadimplentes.</span></label>
                         </div>
                     </div>
                 </div>
@@ -987,6 +1021,7 @@
         let perfilUsuarioLogado = "Administrador";
         let modoVisualAtual = "rh";
         let tipoRelatorioAtualEtapa13 = "prestadores"; 
+        let documentosComplianceTemporarios = [];
 
         document.getElementById('dropdown-empresa-ativa').innerText = empresaAtivaNome;
         document.getElementById('label-empresa-topo').innerText = `Empresa: ${empresaAtivaNome}`;
@@ -1128,7 +1163,7 @@
                         return;
                     }
                 } else {
-                    const ehAdminOuRh = (perfilUsuarioLogado === 'Administrador' || perfilUsuarioLogado === 'RH' || perfilUsuarioLogado === 'Financeiro' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
+                    const ehAdminOuRh = (perfilUsuarioLogado === 'Administrador' || perfilUsuarioLogado === 'RH' || perfilUsuarioLogado === 'Financeiro' || perfilUsuarioLogado === 'Gestor' || perfilUsuarioLogado === 'Jurídico' || usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase());
                     if (ehAdminOuRh) {
                         if (dest !== "admin" && dest !== "geral" && n.titulo !== "Nova Nota Fiscal" && n.titulo !== "Nova Nota Fiscal (Comp.)") {
                             return;
@@ -1504,6 +1539,7 @@
                 document.getElementById('config-notif-vencimento').checked = dados.notifVencimento !== false;
                 document.getElementById('config-notif-nf-anexada').checked = dados.notifNfAnexada !== false;
                 document.getElementById('config-notif-nf-aprovada').checked = dados.notifNfAprovada !== false;
+                document.getElementById('config-notif-diaria-20').checked = dados.notifDiaria20 !== false;
 
                 if (dados.logoBase64) {
                     document.getElementById('preview-logo-container').innerHTML = `<img src="${dados.logoBase64}" class="w-full h-full object-contain">`;
@@ -1533,7 +1569,8 @@
                     estado: document.getElementById('emp-estado').value,
                     notifVencimento: document.getElementById('config-notif-vencimento').checked,
                     notifNfAnexada: document.getElementById('config-notif-nf-anexada').checked,
-                    notifNfAprovada: document.getElementById('config-notif-nf-aprovada').checked
+                    notifNfAprovada: document.getElementById('config-notif-nf-aprovada').checked,
+                    notifDiaria20: document.getElementById('config-notif-diaria-20').checked
                 };
                 if (logoBase64Url) pacote.logoBase64 = logoBase64Url;
 
@@ -1770,15 +1807,66 @@
             else { blocoAdminPrestador.classList.add('hidden'); document.getElementById('campoAdminEhPrestador').value = 'nao'; }
         });
 
+        window.adicionarDocumentoComplianceLista = () => {
+            const fileInput = document.getElementById('campoDocsMultiplos');
+            const dataValidadeInput = document.getElementById('campoValidadeDocsMultiplos');
+            if (fileInput.files.length === 0) { alert("Selecione pelo menos um arquivo!"); return; }
+            if (!dataValidadeInput.value) { alert("Informe a data de validade dos documentos!"); return; }
+
+            for (let file of fileInput.files) {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    documentosComplianceTemporarios.push({
+                        nomeArquivo: file.name,
+                        validade: dataValidadeInput.value,
+                        arquivoBase64: reader.result
+                    });
+                    renderizarPreviewDocsCompliance();
+                };
+                reader.readAsDataURL(file);
+            }
+            fileInput.value = "";
+        };
+
+        function renderizarPreviewDocsCompliance() {
+            const container = document.getElementById('lista-docs-compliance-preview');
+            if (!container) return;
+            if (documentosComplianceTemporarios.length === 0) {
+                container.innerHTML = `<span class="text-slate-400">Nenhum documento adicional anexado.</span>`;
+                return;
+            }
+            container.innerHTML = "";
+            documentosComplianceTemporarios.forEach((doc, idx) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 border rounded-lg">
+                        <span><b>${doc.nomeArquivo}</b> (Validade: ${doc.validade.split('-').reverse().join('/')})</span>
+                        <button type="button" onclick="removerDocumentoComplianceTemporario(${idx})" class="text-red-600 font-bold hover:underline">Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.removerDocumentoComplianceTemporario = (idx) => {
+            documentosComplianceTemporarios.splice(idx, 1);
+            renderizarPreviewDocsCompliance();
+        };
+
         document.getElementById('btn-abrir-cadastro').addEventListener('click', () => {
             document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
             document.getElementById('btn-salvar-cadastro').removeAttribute('data-edit-id');
-            ['campoNome','campoCpf','campoEmail','campoTelefone','campoContatoEmergencia','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoInscricaoEstadual','campoInscricaoMunicipal','campoCep','campoLogradouro','campoNumero','campoBairro','campoCidade','campoEstado','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoCargo','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes'].forEach(id => document.getElementById(id).value = '');
+            ['campoNome','campoCpf','campoEmail','campoTelefone','campoContatoEmergencia','campoRazaoSocial','campoCNPJ','campoEmailCorp','campoInscricaoEstadual','campoInscricaoMunicipal','campoCep','campoLogradouro','campoNumero','campoBairro','campoCidade','campoEstado','campoVigenciaInicio','campoVigenciaFim','campoValorFixoMensal','campoMesAnoReajuste','campoCargo','campoDepartamento','campoGestorDireto','campoAditivos','campoHistoricoAlteracoes','campoValidadeDocsMultiplos'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = '';
+            });
             document.getElementById('campoPerfilTipo').value = 'Administrador';
             document.getElementById('campoAdminEhPrestador').value = 'nao';
+            document.getElementById('campoIndiceReajuste').value = 'IPCA';
             blocoAdminPrestador.classList.remove('hidden');
             document.getElementById('campoFotoArquivo').value = "";
             document.getElementById('campoArquivoContrato').value = "";
+            document.getElementById('campoDocsMultiplos').value = "";
+            documentosComplianceTemporarios = [];
+            renderizarPreviewDocsCompliance();
             document.getElementById('modalCadastro').classList.remove('hidden');
         });
         document.getElementById('btn-cancelar-cadastro').addEventListener('click', () => document.getElementById('modalCadastro').classList.add('hidden'));
@@ -1847,11 +1935,14 @@
                     vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
                     vigenciaFim: document.getElementById('campoVigenciaFim').value,
                     valorFixoMensal: document.getElementById('campoValorFixoMensal').value,
+                    mesAnoReajuste: document.getElementById('campoMesAnoReajuste').value,
+                    indiceReajuste: document.getElementById('campoIndiceReajuste').value,
                     departamento: document.getElementById('campoDepartamento').value,
                     gestorDireto: document.getElementById('campoGestorDireto').value,
                     aditivos: document.getElementById('campoAditivos').value,
                     historicoAlteracoes: document.getElementById('campoHistoricoAlteracoes').value,
                     status: document.getElementById('campoStatus').value,
+                    documentosCompliance: documentosComplianceTemporarios,
                     excluidoLogico: false
                 };
                 if (fotoBase64Url) pacote.fotoBase64 = fotoBase64Url;
@@ -1861,6 +1952,9 @@
                     if (editId) {
                         if(!pacote.arquivoContratoBase64 && contratosLocais[editId]?.arquivoContratoBase64) {
                             pacote.arquivoContratoBase64 = contratosLocais[editId].arquivoContratoBase64;
+                        }
+                        if(documentosComplianceTemporarios.length === 0 && contratosLocais[editId]?.documentosCompliance) {
+                            pacote.documentosCompliance = contratosLocais[editId].documentosCompliance;
                         }
                         await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
                         await registrarAuditoria("Contratos", "Edição", pacote.nome, "Dados Antigos", "Dados Atualizados");
@@ -1945,11 +2039,17 @@
             document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
             document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
             document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+            document.getElementById('campoMesAnoReajuste').value = c.mesAnoReajuste || "";
+            document.getElementById('campoIndiceReajuste').value = c.indiceReajuste || "IPCA";
             document.getElementById('campoDepartamento').value = c.departamento || "";
             document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
             document.getElementById('campoAditivos').value = c.aditivos || "";
             document.getElementById('campoHistoricoAlteracoes').value = c.historicoAlteracoes || "";
             document.getElementById('campoStatus').value = c.status || "Ativo";
+            
+            documentosComplianceTemporarios = c.documentosCompliance ? [...c.documentosCompliance] : [];
+            renderizarPreviewDocsCompliance();
+
             document.getElementById('modalCadastro').classList.remove('hidden');
         };
 
@@ -2040,7 +2140,14 @@
 
             let docsVencidosCount = 0;
             Object.values(contratosLocais).forEach(c => {
-                if (!c.excluidoLogico && c.vigenciaFim && new Date(c.vigenciaFim) < hojeObj) docsVencidosCount++;
+                if (!c.excluidoLogico) {
+                    if (c.vigenciaFim && new Date(c.vigenciaFim) < hojeObj) docsVencidosCount++;
+                    if (c.documentosCompliance && Array.isArray(c.documentosCompliance)) {
+                        c.documentosCompliance.forEach(d => {
+                            if (d.validade && new Date(d.validade) < hojeObj) docsVencidosCount++;
+                        });
+                    }
+                }
             });
             document.getElementById('kpi-doc-vencidos').innerText = docsVencidosCount;
             document.getElementById('kpi-doc-regular').innerText = docsVencidosCount === 0 ? "OK ✔" : "Atenção ⚠️";
@@ -2347,6 +2454,7 @@
                             <p><b>CEP:</b> ${dadosContratoLogado.cep || '---'}</p>
                             <p><b>Vigência:</b> ${dadosContratoLogado.vigenciaInicio || '---'} até ${dadosContratoLogado.vigenciaFim || '---'}</p>
                             <p><b>Valor Fixo Mensal:</b> R$ ${parseFloat(dadosContratoLogado.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</p>
+                            <p><b>Reajuste (Mês/Índice):</b> ${dadosContratoLogado.mesAnoReajuste || '---'} (${dadosContratoLogado.indiceReajuste || 'IPCA'})</p>
                             ${botaoContratoAssinado}
                         </div>
                     `;
@@ -2533,30 +2641,52 @@
             const fTipo = document.getElementById('docFiltroTipo').value;
             const fComp = document.getElementById('docFiltroCompetencia').value;
             let contadorDocs = 0;
+            let hojeObj = new Date();
 
             Object.entries(contratosLocais).forEach(([id, c]) => {
                 if (c.excluidoLogico) return;
                 if (fPrestador !== "todos" && c.nome !== fPrestador) return;
                 if (fTipo === "Nota Fiscal") return;
 
-                contadorDocs++;
-                let vigenciaFim = c.vigenciaFim || "";
-                let statusCompliance = `<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular Válido</span>`;
-                if (vigenciaFim && new Date(vigenciaFim) < new Date()) {
-                    statusCompliance = `<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-[10px]">Vigência Vencida ⚠️</span>`;
+                if (c.arquivoContratoBase64) {
+                    contadorDocs++;
+                    let vigenciaFim = c.vigenciaFim || "";
+                    let statusCompliance = `<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular Válido</span>`;
+                    if (vigenciaFim && new Date(vigenciaFim) < hojeObj) {
+                        statusCompliance = `<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-[10px]">Vigência Vencida ⚠️</span>`;
+                    }
+                    corpoDoc.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-3"><b>${c.nome || '---'}</b><br><small class="text-slate-500">${c.cnpj || '---'}</small></td>
+                            <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-800 rounded font-bold text-[10px]">Contrato de Prestação</span></td>
+                            <td class="p-3 text-slate-600">Permanente / Geral</td>
+                            <td class="p-3 text-slate-600">${vigenciaFim ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                            <td class="p-3 text-center">${statusCompliance}</td>
+                            <td class="p-3 text-center"><button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold" data-id="${id}">📄 Abrir Contrato</button></td>
+                        </tr>
+                    `;
                 }
-                let acaoArquivo = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold" data-id="${id}">📄 Abrir Contrato</button>` : `<span class="text-slate-400">Sem Contrato Anexo</span>`;
 
-                corpoDoc.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3"><b>${c.nome || '---'}</b><br><small class="text-slate-500">${c.cnpj || '---'}</small></td>
-                        <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-800 rounded font-bold text-[10px]">Contrato de Prestação</span></td>
-                        <td class="p-3 text-slate-600">Permanente / Geral</td>
-                        <td class="p-3 text-slate-600">${vigenciaFim ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                        <td class="p-3 text-center">${statusCompliance}</td>
-                        <td class="p-3 text-center">${acaoArquivo}</td>
-                    </tr>
-                `;
+                if (c.documentosCompliance && Array.isArray(c.documentosCompliance)) {
+                    c.documentosCompliance.forEach(doc => {
+                        contadorDocs++;
+                        let valDoc = doc.validade || "";
+                        let statusComplianceDoc = `<span class="px-2 py-1 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular Válido</span>`;
+                        if (valDoc && new Date(valDoc) < hojeObj) {
+                            statusComplianceDoc = `<span class="px-2 py-1 bg-red-100 text-red-800 rounded font-bold text-[10px]">Vencido ⚠️</span>`;
+                        }
+                        corpoDoc.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3"><b>${c.nome || '---'}</b><br><small class="text-slate-500">${c.cnpj || '---'}</small></td>
+                                <td class="p-3"><span class="px-2 py-0.5 bg-indigo-50 text-indigo-800 rounded font-bold text-[10px]">${doc.nomeArquivo}</span></td>
+                                <td class="p-3 text-slate-600">Compliance Adicional</td>
+                                <td class="p-3 text-slate-600">${valDoc ? valDoc.split('-').reverse().join('/') : '---'}</td>
+                                <td class="p-3 text-center">${statusComplianceDoc}</td>
+                                <td class="p-3 text-center"><a href="${doc.arquivoBase64}" target="_blank" class="bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded text-xs font-bold inline-block">📄 Abrir Doc</a></td>
+                            </tr>
+                        `;
+                    });
+                }
             });
 
             const folhaObj = folhasLocais[fComp] || {};
@@ -2760,8 +2890,8 @@
                 totalGeralEl.innerText = `${registrosCont} Cadastros`;
 
             } else if (tipoRelatorioAtualEtapa13 === 'contratos') {
-                cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">VIGÊNCIA</th><th class="p-3">VALOR FIXO MENSAL</th><th class="p-3">ADITIVOS</th><th class="p-3 text-center">STATUS</th>`;
-                colTotalLabel.setAttribute('colspan', '5');
+                cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">VIGÊNCIA</th><th class="p-3">VALOR FIXO MENSAL</th><th class="p-3">MÊS/ANO REAJUSTE</th><th class="p-3">ÍNDICE REAJUSTE</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '6');
                 colTotalLabel.innerText = "VALOR TOTAL CONTRATOS:";
 
                 Object.values(contratosLocais).forEach(c => {
@@ -2779,6 +2909,8 @@
                     registrosCont++;
                     let val = parseFloat(c.valorFixoMensal || 0); somaTotal += val;
                     let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : 'Indeterminada';
+                    let mesReajusteExibir = c.mesAnoReajuste || '---';
+                    let indiceReajusteExibir = c.indiceReajuste || 'IPCA';
 
                     corpoRelatorio.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
@@ -2786,7 +2918,8 @@
                             <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
                             <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
                             <td class="p-3 font-extrabold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-slate-600">${c.aditivos || 'Nenhum'}</td>
+                            <td class="p-3 text-slate-700">${mesReajusteExibir}</td>
+                            <td class="p-3 text-slate-700 font-bold">${indiceReajusteExibir}</td>
                             <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         </tr>
                     `;
@@ -2943,31 +3076,59 @@
                 colTotalLabel.setAttribute('colspan', '3');
                 colTotalLabel.innerText = "TOTAL DOCUMENTOS:";
 
+                let hojeObj = new Date();
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
                     if (fPrestador !== "todos" && c.nome !== fPrestador) return;
 
-                    let vigenciaFim = c.vigenciaFim || "Indeterminada";
-                    let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
-                    if (c.vigenciaFim && new Date(c.vigenciaFim) < new Date()) { 
-                        statusComp = "Vigência Vencida ⚠️"; 
-                        corStatus = "bg-red-100 text-red-800"; 
-                        statusCurto = "Vencida";
+                    if (c.arquivoContratoBase64) {
+                        let vigenciaFim = c.vigenciaFim || "Indeterminada";
+                        let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
+                        if (c.vigenciaFim && new Date(c.vigenciaFim) < hojeObj) { 
+                            statusComp = "Vigência Vencida ⚠️"; 
+                            corStatus = "bg-red-100 text-red-800"; 
+                            statusCurto = "Vencida";
+                        }
+                        let passaTipo = (fCC === "todos" || fCC === "Contrato");
+                        let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
+
+                        if (passaTipo && passaStatus) {
+                            registrosCont++;
+                            corpoRelatorio.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                                    <td class="p-3">Contrato Social / Prestação</td>
+                                    <td class="p-3">${vigenciaFim !== 'Indeterminada' ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                                    <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
+                                </tr>
+                            `;
+                        }
                     }
 
-                    let passaTipo = (fCC === "todos" || fCC === "Contrato");
-                    let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
+                    if (c.documentosCompliance && Array.isArray(c.documentosCompliance)) {
+                        c.documentosCompliance.forEach(doc => {
+                            let valDoc = doc.validade || "---";
+                            let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
+                            if (doc.validade && new Date(doc.validade) < hojeObj) {
+                                statusComp = "Vencido ⚠️";
+                                corStatus = "bg-red-100 text-red-800";
+                                statusCurto = "Vencida";
+                            }
+                            let passaTipo = (fCC === "todos" || fCC === "Contrato");
+                            let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
 
-                    if (passaTipo && passaStatus) {
-                        registrosCont++;
-                        corpoRelatorio.innerHTML += `
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
-                                <td class="p-3">Contrato Social / Prestação</td>
-                                <td class="p-3">${vigenciaFim !== 'Indeterminada' ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                                <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
-                            </tr>
-                        `;
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                                        <td class="p-3">${doc.nomeArquivo}</td>
+                                        <td class="p-3">${valDoc !== '---' ? valDoc.split('-').reverse().join('/') : '---'}</td>
+                                        <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
+                                    </tr>
+                                `;
+                            }
+                        });
                     }
                 });
                 totalGeralEl.innerText = `${registrosCont} Documentos`;
