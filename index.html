@@ -2187,7 +2187,7 @@
                 else await update(ref(db, `${basePath}/complementares_lista/${itemLiquidandoAtual.compId}`), pacoteUpdate);
 
                 const cInfo = contratosLocais[itemLiquidandoAtual.id] || {};
-                await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "Em Análise", `Pago (${dataPagamento})`);
+                await registrarAuditoria("Tesouraria", "Liquidação", cInfo.nome || itemLiquidandoAtual.id, "À Liquidar", `Pago (${dataPagamento})`);
                 
                 await registrarNotificacao(
                     "Pagamento Realizado", 
@@ -2212,7 +2212,7 @@
         window.estornarPagamentoRegular = async (id) => {
             if (confirm("Deseja estornar este pagamento?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/regular`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
-                await registrarAuditoria("Tesouraria", "Estorno", contratosLocais[id]?.nome || id, "Pago", "Em Análise");
+                await registrarAuditoria("Tesouraria", "Estorno", contratosLocais[id]?.nome || id, "Pago", "À Liquidar");
                 alert("Pagamento estornado com sucesso!");
             }
         };
@@ -2220,7 +2220,7 @@
         window.estornarPagamentoComplementar = async (id, compId) => {
             if (confirm("Deseja estornar este pagamento complementar?")) {
                 await update(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${id}/complementares_lista/${compId}`), { statusPagamento: "Em Análise", comprovanteBase64: null, dataPagamentoEfetivo: null });
-                await registrarAuditoria("Tesouraria", "Estorno Comp.", contratosLocais[id]?.nome || id, "Pago", "Em Análise");
+                await registrarAuditoria("Tesouraria", "Estorno Comp.", contratosLocais[id]?.nome || id, "Pago", "À Liquidar");
                 alert("Pagamento estornado com sucesso!");
             }
         };
@@ -2251,19 +2251,21 @@
                 let nome = f.nome || "Prestador";
                 let cnpj = f.cnpj || contratosLocais[idContrato]?.cnpj || "---";
                 let valReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
+                let stRegTexto = (f.regular?.statusPagamento === "Pago") ? "Pago" : "À Liquidar";
 
                 dadosExportacao.push({
                     "Competência": competenciaSelecionada.replace('-', '/'), "Prestador": nome, "CNPJ": cnpj, "Tipo": "Regular",
                     "Vencimento": f.regular?.dataVencimento || "---", "Valor Líquido": valReg,
-                    "Status Tesouraria": f.regular?.statusPagamento || "Em Análise", "Data Pagamento": f.regular?.dataPagamentoEfetivo || "---"
+                    "Status Tesouraria": stRegTexto, "Data Pagamento": f.regular?.dataPagamentoEfetivo || "---"
                 });
 
                 if (f.complementares_lista) {
                     Object.values(f.complementares_lista).forEach(cItem => {
+                        let stCompTexto = (cItem.statusPagamento === "Pago") ? "Pago" : "À Liquidar";
                         dadosExportacao.push({
                             "Competência": competenciaSelecionada.replace('-', '/'), "Prestador": nome, "CNPJ": cnpj, "Tipo": `Complementar (${cItem.motorEvento || 'Adicional'})`,
                             "Vencimento": cItem.dataVencimento || "---", "Valor Líquido": parseFloat(cItem.motorValor || 0),
-                            "Status Tesouraria": cItem.statusPagamento || "Em Análise", "Data Pagamento": cItem.dataPagamentoEfetivo || "---"
+                            "Status Tesouraria": stCompTexto, "Data Pagamento": cItem.dataPagamentoEfetivo || "---"
                         });
                     });
                 }
@@ -2366,12 +2368,12 @@
                 let statusPagamentoRegPJ = "Anexar NF";
                 if (statusPagamentoRegCorp === "Pago") statusPagamentoRegPJ = "Pago";
                 else if (nfStatusCorp === "Recusada ❌") statusPagamentoRegPJ = "NF Recusada / Reenviar";
-                else if (temNfReg || nfStatusCorp === "Recebida ✔") statusPagamentoRegPJ = "Em Análise";
+                else if (temNfReg || nfStatusCorp === "Recebida ✔") statusPagamentoRegPJ = "À Liquidar";
 
                 let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoRegPJ}</span>`;
                 if (statusPagamentoRegPJ === "Pago") badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
                 else if (statusPagamentoRegPJ.includes("Recusada")) badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700">Recusada</span>`;
-                else if (statusPagamentoRegPJ === "Em Análise") badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
+                else if (statusPagamentoRegPJ === "À Liquidar") badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
 
                 let acaoRegPJ = dadosFolha.regular?.nfArquivoBase64 && nfStatusCorp !== "Recusada ❌" ? `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">` : `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
 
@@ -2398,11 +2400,11 @@
                         let statusPagamentoCompPJ = "Anexar NF";
                         if (statusPagamentoCompCorp === "Pago") statusPagamentoCompPJ = "Pago";
                         else if (nfStatusCompCorp === "Recusada ❌") statusPagamentoCompPJ = "Reenviar NF";
-                        else if (temNfComp || nfStatusCompCorp === "Recebida ✔") statusPagamentoCompPJ = "Em Análise";
+                        else if (temNfComp || nfStatusCompCorp === "Recebida ✔") statusPagamentoCompPJ = "À Liquidar";
 
                         let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoCompPJ}</span>`;
                         if (statusPagamentoCompPJ === "Pago") badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
-                        else if (statusPagamentoCompPJ === "Em Análise") badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">Em Análise</span>`;
+                        else if (statusPagamentoCompPJ === "À Liquidar") badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
 
                         let acaoCompPJ = cItem.nfArquivoBase64 && nfStatusCompCorp !== "Recusada ❌" ? `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">` : `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
 
@@ -2509,7 +2511,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-nf-comp')) {
-                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.nfArquivoBase64;
+                const arquivo = folhasLocais[selectCompetenciaPJ.value || competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compID]?.nfArquivoBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-reg')) {
@@ -2517,7 +2519,7 @@
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
             if (e.target.classList.contains('btn-view-comprovante-comp')) {
-                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compId]?.comprovanteBase64;
+                const arquivo = folhasLocais[competenciaSelecionada]?.[e.target.dataset.id]?.complementares_lista?.[e.target.dataset.compID]?.comprovanteBase64;
                 if (arquivo) { const win = window.open(); win.document.write(`<iframe src="${arquivo}" frameborder="0" style="border:0; top:0; left:0; bottom:0; right:0; width:100%; height:100%;" allowfullscreen></iframe>`); }
             }
         });
@@ -2639,7 +2641,7 @@
                     if(labelStatus) labelStatus.innerText = "Status de Pagamento";
                     selectStatus.innerHTML += `
                         <option value="Pago">Pago</option>
-                        <option value="Em Análise">Em Análise</option>
+                        <option value="À Liquidar">À Liquidar</option>
                     `;
                 } else {
                     if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
@@ -2732,12 +2734,12 @@
                 totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
 
             } else if (tipoRelatorioAtualEtapa13 === 'pagamentos') {
-                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR PAGO</th><th class="p-3 text-center">STATUS</th>`;
+                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR</th><th class="p-3 text-center">STATUS</th>`;
                 
                 if (fStatus === "Pago") {
                     colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
-                } else if (fStatus === "Em Análise") {
-                    colTotalLabel.innerText = "TOTAL PAGAMENTOS EM ANÁLISE:";
+                } else if (fStatus === "À Liquidar") {
+                    colTotalLabel.innerText = "TOTAL PAGAMENTOS À LIQUIDAR:";
                 } else {
                     colTotalLabel.innerText = "TOTAL GERAL DE PAGAMENTOS:";
                 }
@@ -2754,12 +2756,13 @@
                     if (fCC !== "todos" && centroCustoPrestador !== fCC) return;
 
                     let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
-                    let stReg = dadosFolha.regular?.statusPagamento || "Em Análise";
+                    let stRegBruto = dadosFolha.regular?.statusPagamento || "Em Análise";
+                    let stRegExibicao = (stRegBruto === "Pago") ? "Pago" : "À Liquidar";
                     
                     if (fStatus !== "todos") {
-                        if (fStatus === "Em Análise") {
-                            if (stReg !== "Em Análise" && stReg !== "Pendente" && stReg !== "Aguardando") return;
-                        } else if (stReg !== fStatus) {
+                        if (fStatus === "À Liquidar") {
+                            if (stRegExibicao !== "À Liquidar") return;
+                        } else if (stRegExibicao !== fStatus) {
                             return;
                         }
                     }
@@ -2767,7 +2770,7 @@
                     registrosCont++;
                     somaTotal += valReg;
 
-                    let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stReg === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stReg}</span>`;
+                    let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stRegExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stRegExibicao}</span>`;
 
                     corpoRelatorio.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
@@ -2785,12 +2788,13 @@
                     if (dadosFolha.complementares_lista) {
                         Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
-                            let stC = cItem.statusPagamento || "Em Análise";
+                            let stCBruto = cItem.statusPagamento || "Em Análise";
+                            let stCExibicao = (stCBruto === "Pago") ? "Pago" : "À Liquidar";
                             
                             if (fStatus !== "todos") {
-                                if (fStatus === "Em Análise") {
-                                    if (stC !== "Em Análise" && stC !== "Pendente" && stC !== "Aguardando") return;
-                                } else if (stC !== fStatus) {
+                                if (fStatus === "À Liquidar") {
+                                    if (stCExibicao !== "À Liquidar") return;
+                                } else if (stCExibicao !== fStatus) {
                                     return;
                                 }
                             }
@@ -2798,7 +2802,7 @@
                             registrosCont++;
                             somaTotal += valC;
 
-                            let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stC === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stC}</span>`;
+                            let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stCExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stCExibicao}</span>`;
 
                             corpoRelatorio.innerHTML += `
                                 <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
