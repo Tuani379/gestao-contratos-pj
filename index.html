@@ -680,12 +680,20 @@
 
             <!-- AUDITORIA -->
             <section id="auditoria" class="hidden bg-white p-6 rounded-xl border shadow-sm modo-rh-secao space-y-6">
-                <div class="flex justify-between items-center">
+                <div class="flex flex-wrap justify-between items-center gap-4">
                     <div>
                         <h2 class="text-xl font-bold text-blue-950 flex items-center gap-2">🛡️ Central de Auditoria e Logs Imutáveis</h2>
                         <p class="text-xs text-slate-500 mt-1">Registro contínuo de todas as alterações, edições de contrato, lançamentos financeiros e acessos.</p>
                     </div>
-                    <button onclick="exportarAuditoriaExcel()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded text-xs transition shadow-sm flex items-center justify-center gap-1.5">📥 Exportar Logs Seguros</button>
+                    <div class="flex items-center gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-600 mb-1">Competência (Mês/Ano):</label>
+                            <select id="auditoriaFiltroCompetencia" class="p-2 border rounded-xl text-xs bg-white font-bold text-blue-900 shadow-sm"></select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="exportarAuditoriaExcel()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm flex items-center justify-center gap-1.5 h-[34px]">📥 Exportar Logs Seguros</button>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="overflow-x-auto border rounded-xl">
@@ -986,9 +994,13 @@
         const selectCompetenciaPJ = document.getElementById('selectCompetenciaPJ');
         const relFiltroCompetencia = document.getElementById('relFiltroCompetencia');
         const docFiltroCompetencia = document.getElementById('docFiltroCompetencia');
+        const auditoriaFiltroCompetencia = document.getElementById('auditoriaFiltroCompetencia');
         
-        filtroCompetencia.innerHTML = ''; selectCompetenciaPJ.innerHTML = ''; relFiltroCompetencia.innerHTML = ''; docFiltroCompetencia.innerHTML = '';
+        filtroCompetencia.innerHTML = ''; selectCompetenciaPJ.innerHTML = ''; relFiltroCompetencia.innerHTML = ''; docFiltroCompetencia.innerHTML = ''; auditoriaFiltroCompetencia.innerHTML = '';
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
+
+        const optTodasAuditoria = document.createElement('option'); optTodasAuditoria.value = "todos"; optTodasAuditoria.innerText = "-- Todas as Competências --";
+        auditoriaFiltroCompetencia.appendChild(optTodasAuditoria);
 
         nomeMeses.forEach((nome, index) => {
             const numeroMes = String(index + 1).padStart(2, '0');
@@ -997,8 +1009,9 @@
             const opt2 = document.createElement('option'); opt2.value = valorCompetencia; opt2.innerText = `${nome} / ${anoAtualSistema}`;
             const opt3 = document.createElement('option'); opt3.value = valorCompetencia; opt3.innerText = `${nome} / ${anoAtualSistema}`;
             const opt4 = document.createElement('option'); opt4.value = valorCompetencia; opt4.innerText = `${nome} / ${anoAtualSistema}`;
+            const opt5 = document.createElement('option'); opt5.value = valorCompetencia; opt5.innerText = `${nome} / ${anoAtualSistema}`;
             if (numeroMes === mesAtualSistema) { opt1.selected = true; opt2.selected = true; opt3.selected = true; opt4.selected = true; }
-            filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2); relFiltroCompetencia.appendChild(opt3); docFiltroCompetencia.appendChild(opt4);
+            filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2); relFiltroCompetencia.appendChild(opt3); docFiltroCompetencia.appendChild(opt4); auditoriaFiltroCompetencia.appendChild(opt5);
         });
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
@@ -1114,23 +1127,36 @@
             }
         };
 
+        let cacheLogsAuditoria = {};
+
         onValue(ref(db, pathAuditoriaDB), (snapshot) => {
-            const logs = snapshot.val() || {};
+            cacheLogsAuditoria = snapshot.val() || {};
+            renderizarTabelaAuditoria();
+        });
+
+        function renderizarTabelaAuditoria() {
             const corpoAuditoria = document.getElementById('tabelaAuditoriaCorpo');
+            const filtroCompAuditoria = document.getElementById('auditoriaFiltroCompetencia').value;
             if(!corpoAuditoria) return;
 
             corpoAuditoria.innerHTML = "";
-            const entradas = Object.entries(logs).reverse();
-
-            if (entradas.length === 0) {
-                corpoAuditoria.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum log registrado até o momento.</td></tr>`;
-                return;
-            }
+            const entradas = Object.entries(cacheLogsAuditoria).reverse();
+            let countExibidos = 0;
 
             entradas.forEach(([key, log]) => {
+                const dataLogObj = new Date(log.dataHora);
+                
+                if (filtroCompAuditoria !== "todos") {
+                    const mesLog = String(dataLogObj.getMonth() + 1).padStart(2, '0');
+                    const anoLog = dataLogObj.getFullYear();
+                    const compLog = `${mesLog}-${anoLog}`;
+                    if (compLog !== filtroCompAuditoria) return;
+                }
+
+                countExibidos++;
                 corpoAuditoria.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 font-semibold text-slate-600">${new Date(log.dataHora).toLocaleString('pt-BR')}</td>
+                        <td class="p-3 font-semibold text-slate-600">${dataLogObj.toLocaleString('pt-BR')}</td>
                         <td class="p-3 font-bold text-slate-800">${log.usuario}</td>
                         <td class="p-3"><span class="px-2.5 py-1 bg-slate-100 border text-slate-700 rounded-lg text-[10px] font-extrabold uppercase">${log.modulo}</span></td>
                         <td class="p-3 font-bold text-blue-900">${log.acao}</td>
@@ -1140,7 +1166,13 @@
                     </tr>
                 `;
             });
-        });
+
+            if (countExibidos === 0) {
+                corpoAuditoria.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum log registrado para esta competência.</td></tr>`;
+            }
+        }
+
+        document.getElementById('auditoriaFiltroCompetencia').addEventListener('change', renderizarTabelaAuditoria);
 
         window.exportarAuditoriaExcel = () => {
             const tabela = document.getElementById("tabela-auditoria-export");
@@ -1614,6 +1646,7 @@
             if(id === 'relatorios') atualizarRelatoriosEtapa13();
             if(id === 'dashboard') renderizarTabelasEstatísticas();
             if(id === 'documentos') atualizarCentralDocumentos();
+            if(id === 'auditoria') renderizarTabelaAuditoria();
         };
 
         window.mudarPainelModo = (modo) => {
