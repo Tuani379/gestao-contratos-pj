@@ -899,84 +899,163 @@
                 </div>
             </section>
 
-            <!-- PORTAL DO PRESTADOR -->
-            <section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
-                
-                <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
-                    <div class="flex flex-wrap gap-1 md:gap-2">
-                        <button onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
-                        <button onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Contratos</button>
-                    </div>
-                    <div class="px-2">
-                        <select id="selectCompetenciaPJ" class="p-2 border rounded-xl bg-slate-50 text-xs font-bold text-blue-950"></select>
-                    </div>
-                </div>
-
-                <div id="sec-pj-enviar" class="sec-pj space-y-6">
-                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
-                        <div>
-                            <h2 class="text-xl font-extrabold text-blue-950">Envio de Notas Fiscais</h2>
-                            <p class="text-xs text-slate-500 mt-1">Anexe as Notas Fiscais correspondentes à competência selecionada.</p>
-                        </div>
-
-                        <div class="space-y-4">
-                            <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
-                                <h3 class="font-bold text-blue-900 text-sm">📄 Folha Regular (Honorário Fixo Mensal)</h3>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr class="border-b text-xs font-bold text-slate-600">
-                                                <th class="p-2.5">Prestador / CNPJ</th>
-                                                <th class="p-2.5">Valor Fixo</th>
-                                                <th class="p-2.5">Anexar Nota Fiscal</th>
-                                                <th class="p-2.5">Status de Pagamento</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelaPrestadorRegular" class="text-xs">
-                                            <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-
-                            <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 space-y-3">
-                                <h3 class="font-bold text-amber-900 text-sm">⚡ Folha Complementar / Adicionais</h3>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full text-left border-collapse">
-                                        <thead>
-                                            <tr class="border-b text-xs font-bold text-amber-900">
-                                                <th class="p-2.5">Prestador / Evento / Adicional</th>
-                                                <th class="p-2.5">Valor Adicional</th>
-                                                <th class="p-2.5">Anexar Nota Fiscal</th>
-                                                <th class="p-2.5">Status de Pagamento</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex justify-end pt-4 border-t">
-                            <button id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
-                                📤 Enviar Notas Fiscais Anexadas
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
-                    <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-4">
-                        <h2 class="text-xl font-extrabold text-blue-950">Meus Contratos</h2>
-                        <div id="pj-conteudo-contratos" class="space-y-3 text-xs text-slate-700">
-                            <p class="text-slate-400">Carregando contrato...</p>
-                        </div>
-                    </div>
-                </div>
-
-            </section>
-        </main>
+           <!-- PORTAL DO PRESTADOR -->
+<section id="area-prestador" class="hidden max-w-5xl mx-auto p-6 space-y-6">
+    
+    <div class="bg-white p-3 rounded-2xl border shadow-sm flex flex-wrap gap-2 items-center justify-between">
+        <div class="flex flex-wrap gap-1 md:gap-2">
+            <button type="button" onclick="mudarSecaoPrestador('pj-enviar')" id="btn-pj-enviar" class="px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition">Enviar Nota</button>
+            <button type="button" onclick="mudarSecaoPrestador('pj-contratos')" id="btn-pj-contratos" class="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition">Meus Dados & Contrato</button>
+        </div>
+        <div class="px-2">
+            <select id="selectCompetenciaPJ" class="p-2 border rounded-xl bg-slate-50 text-xs font-bold text-blue-950"></select>
+        </div>
     </div>
+
+    <div id="sec-pj-enviar" class="sec-pj space-y-6">
+        <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
+            <div>
+                <h2 class="text-xl font-extrabold text-blue-950">Envio de Notas Fiscais</h2>
+                <p class="text-xs text-slate-500 mt-1">Anexe as Notas Fiscais correspondentes à competência selecionada.</p>
+            </div>
+
+            <div class="space-y-4">
+                <div class="border rounded-xl p-5 bg-slate-50 space-y-3">
+                    <h3 class="font-bold text-blue-900 text-sm">📄 Folha Regular (Honorário Fixo Mensal)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b text-xs font-bold text-slate-600">
+                                    <th class="p-2.5">Prestador / CNPJ</th>
+                                    <th class="p-2.5">Valor Fixo</th>
+                                    <th class="p-2.5">Anexar Nota Fiscal</th>
+                                    <th class="p-2.5">Status de Pagamento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaPrestadorRegular" class="text-xs">
+                                <tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum registro.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="containerPrestadorComp" class="hidden border border-amber-200 rounded-xl p-5 bg-amber-50/10 space-y-3">
+                    <h3 class="font-bold text-amber-900 text-sm">⚡ Folha Complementar / Adicionais</h3>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b text-xs font-bold text-amber-900">
+                                    <th class="p-2.5">Prestador / Evento / Adicional</th>
+                                    <th class="p-2.5">Valor Adicional</th>
+                                    <th class="p-2.5">Anexar Nota Fiscal</th>
+                                    <th class="p-2.5">Status de Pagamento</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex justify-end pt-4 border-t">
+                <button type="button" id="btn-enviar-todas-notas-pj" class="bg-green-600 hover:bg-green-700 text-white font-bold px-8 py-3 rounded-xl text-sm transition shadow-md flex items-center gap-2">
+                    📤 Enviar Notas Fiscais Anexadas
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="sec-pj-contratos" class="sec-pj hidden space-y-6">
+        <div class="bg-white rounded-2xl p-8 border shadow-sm space-y-6">
+            <div>
+                <h2 class="text-xl font-extrabold text-blue-950">Meus Dados & Contrato</h2>
+                <p class="text-xs text-slate-500 mt-1">Visualize suas informações contratuais, atualize seus dados cadastrais, altere sua foto e gerencie seus documentos de compliance.</p>
+            </div>
+
+            <!-- 1. FOTO E CONTRATO PRINCIPAL -->
+            <div class="bg-blue-50/50 p-5 rounded-2xl border border-blue-200 space-y-4">
+                <h3 class="font-extrabold text-xs text-blue-950 uppercase tracking-wider border-b pb-2">🖼️ Foto de Perfil & Contrato Assinado</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
+                    <div class="flex items-center gap-4">
+                        <div id="pj-preview-foto-container" class="w-16 h-16 rounded-full bg-slate-200 overflow-hidden border-2 border-blue-300 flex items-center justify-center font-bold text-slate-700 shadow-sm">--</div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-700 mb-1">Alterar Foto (Avatar):</label>
+                            <input type="file" id="pjCampoNovaFoto" accept="image/*" class="text-xs text-slate-500 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
+                        </div>
+                    </div>
+                    <div id="pj-bloco-botao-contrato" class="flex md:justify-end">
+                        <span class="text-xs text-slate-400">Contrato não anexado.</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. DADOS PESSOAIS E DA EMPRESA PJ (EDITÁVEIS) -->
+            <div class="bg-slate-50/60 p-5 rounded-2xl border space-y-4">
+                <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-2">👤 2. Dados Pessoais e da Empresa PJ (Editáveis)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
+                    <div><label class="block font-bold text-slate-600 mb-1">Nome Completo</label><input type="text" id="pj-campo-nome" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">CPF</label><input type="text" id="pj-campo-cpf" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">E-mail Pessoal</label><input type="text" id="pj-campo-email" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Telefone / Celular</label><input type="text" id="pj-campo-telefone" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div class="md:col-span-2"><label class="block font-bold text-slate-600 mb-1">Contato de Emergência</label><input type="text" id="pj-campo-emergencia" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    
+                    <div><label class="block font-bold text-slate-600 mb-1">Razão Social</label><input type="text" id="pj-campo-razaosocial" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">CNPJ</label><input type="text" id="pj-campo-cnpj" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">E-mail Corporativo</label><input type="text" id="pj-campo-emailcorp" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Inscrição Estadual</label><input type="text" id="pj-campo-ie" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Inscrição Municipal</label><input type="text" id="pj-campo-im" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">CEP</label><input type="text" id="pj-campo-cep" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div class="md:col-span-2"><label class="block font-bold text-slate-600 mb-1">Logradouro / Endereço</label><input type="text" id="pj-campo-logradouro" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Número</label><input type="text" id="pj-campo-numero" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Bairro</label><input type="text" id="pj-campo-bairro" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Cidade</label><input type="text" id="pj-campo-cidade" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                    <div><label class="block font-bold text-slate-600 mb-1">Estado (UF)</label><input type="text" id="pj-campo-estado" class="w-full p-2.5 border rounded-lg bg-white"></div>
+                </div>
+                <div class="flex justify-end pt-2">
+                    <button type="button" onclick="salvarDadosPrestadorPortal()" class="bg-blue-900 hover:bg-blue-800 text-white font-bold px-5 py-2.5 rounded-xl text-xs transition shadow-md">Salvar Alterações Cadastrais</button>
+                </div>
+            </div>
+
+            <!-- 3. VIGÊNCIA, VALORES E GOVERNANÇA (SOMENTE LEITURA) -->
+            <div class="bg-slate-50/60 p-5 rounded-2xl border space-y-4">
+                <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-2">⚖️ 3. Vigência, Valores e Governança (Somente Leitura)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3 text-xs">
+                    <div><label class="block font-bold text-slate-500 mb-1">Início da Vigência</label><input type="text" id="pj-view-vigencia-inicio" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Término da Vigência</label><input type="text" id="pj-view-vigencia-fim" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div class="md:col-span-2"><label class="block font-bold text-slate-500 mb-1">Valor Fixo Mensal</label><input type="text" id="pj-view-valor-fixo" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-bold text-blue-950 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Mês/Ano Reajuste</label><input type="text" id="pj-view-reajuste-mes" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Índice Reajuste</label><input type="text" id="pj-view-reajuste-indice" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Cargo / Função</label><input type="text" id="pj-view-cargo" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Centro de Custo</label><input type="text" id="pj-view-departamento" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Gestor Responsável</label><input type="text" id="pj-view-gestor" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-semibold text-slate-700 cursor-not-allowed"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1">Status Contratual</label><input type="text" id="pj-view-status" readonly class="w-full p-2.5 border rounded-lg bg-slate-100 font-bold text-green-700 cursor-not-allowed"></div>
+                </div>
+            </div>
+
+            <!-- 4. DOCUMENTOS DE COMPLIANCE (VISUALIZAR E ADICIONAR) -->
+            <div class="bg-slate-50/60 p-5 rounded-2xl border space-y-4">
+                <h4 class="font-bold text-xs text-blue-950 uppercase tracking-wider border-b pb-2">📁 4. Documentos de Compliance (Visualizar e Adicionar Novos)</h4>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 items-end text-xs">
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Selecionar Novos Arquivos:</label>
+                        <input type="file" id="pj-campo-novo-doc-file" multiple accept=".pdf,image/*" class="w-full text-xs text-slate-500 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-600 mb-1">Validade dos Documentos:</label>
+                        <input type="date" id="pj-campo-novo-doc-validade" class="w-full p-2.5 border rounded-lg bg-white">
+                    </div>
+                    <div>
+                        <button type="button" onclick="adicionarDocumentoCompliancePrestadorPortal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs transition">➕ Anexar Documento</button>
+                    </div>
+                </div>
+                <div id="pj-lista-docs-compliance-container" class="space-y-2 pt-2 text-xs">
+                    <span class="text-slate-400">Nenhum documento adicional anexado.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</section>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
