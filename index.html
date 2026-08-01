@@ -1,13 +1,10 @@
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
+<!DOCTYPE html><html lang="pt-BR"><head>
     <meta charset="UTF-8">
     <title>ConnectPJ - Sistema Multiempresa e Gestão de Perfis</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-</head>
-<body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
+</head><body class="bg-slate-50 font-sans flex h-screen overflow-hidden">
 
     <!-- TELA DE LOGIN / RECUPERAÇÃO / PRIMEIRO ACESSO -->
     <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
@@ -932,7 +929,7 @@
                                     <th class="p-2.5">Prestador / CNPJ</th>
                                     <th class="p-2.5">Valor Fixo</th>
                                     <th class="p-2.5">Anexar Nota Fiscal</th>
-                                    <th class="p-2.5">Status de Pagamento / Recibo</th>
+                                    <th class="p-2.5">Status de Pagamento</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaPrestadorRegular" class="text-xs">
@@ -951,7 +948,7 @@
                                     <th class="p-2.5">Prestador / Evento / Adicional</th>
                                     <th class="p-2.5">Valor Adicional</th>
                                     <th class="p-2.5">Anexar Nota Fiscal</th>
-                                    <th class="p-2.5">Status de Pagamento / Recibo</th>
+                                    <th class="p-2.5">Status de Pagamento</th>
                                 </tr>
                             </thead>
                             <tbody id="tabelaPrestadorComplementar" class="text-xs"></tbody>
@@ -2599,14 +2596,9 @@
                 else if (temNfReg || nfStatusCorp === "Recebida ✔") statusPagamentoRegPJ = "À Liquidar";
 
                 let badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoRegPJ}</span>`;
-                if (statusPagamentoRegPJ === "Pago") {
-                    let botaoComprovanteRegPJ = dadosFolha.regular?.comprovanteBase64 ? `<button class="btn-view-comprovante-reg bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded text-xs font-bold ml-1 transition" data-id="${idContratoFolha}">🧾 Recibo</button>` : '';
-                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>${botaoComprovanteRegPJ}`;
-                } else if (statusPagamentoRegPJ.includes("Recusada")) {
-                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700">Recusada</span>`;
-                } else if (statusPagamentoRegPJ === "À Liquidar") {
-                    badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
-                }
+                if (statusPagamentoRegPJ === "Pago") badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                else if (statusPagamentoRegPJ.includes("Recusada")) badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-red-100 text-red-700">Recusada</span>`;
+                else if (statusPagamentoRegPJ === "À Liquidar") badgeStatusPagamentoReg = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
 
                 let acaoRegPJ = dadosFolha.regular?.nfArquivoBase64 && nfStatusCorp !== "Recusada ❌" ? `<button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}">` : `<input type="file" accept=".pdf,image/*" class="input-nf-reg text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}">`;
 
@@ -2636,12 +2628,8 @@
                         else if (temNfComp || nfStatusCompCorp === "Recebida ✔") statusPagamentoCompPJ = "À Liquidar";
 
                         let badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-slate-100 text-slate-700">${statusPagamentoCompPJ}</span>`;
-                        if (statusPagamentoCompPJ === "Pago") {
-                            let botaoComprovanteCompPJ = cItem.comprovanteBase64 ? `<button class="btn-view-comprovante-comp bg-emerald-50 text-emerald-700 border border-emerald-200 px-2.5 py-1 rounded text-xs font-bold ml-1 transition" data-id="${idContratoFolha}" data-comp-id="${idComp}">🧾 Recibo</button>` : '';
-                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>${botaoComprovanteCompPJ}`;
-                        } else if (statusPagamentoCompPJ === "À Liquidar") {
-                            badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
-                        }
+                        if (statusPagamentoCompPJ === "Pago") badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-green-100 text-green-800">Pago</span>`;
+                        else if (statusPagamentoCompPJ === "À Liquidar") badgeStatusPagamentoComp = `<span class="px-2.5 py-1 rounded font-bold text-xs bg-amber-100 text-amber-800">À Liquidar</span>`;
 
                         let acaoCompPJ = cItem.nfArquivoBase64 && nfStatusCompCorp !== "Recusada ❌" ? `<button class="btn-view-nf-comp text-xs text-blue-600 font-bold hover:underline" data-id="${idContratoFolha}" data-comp-id="${idComp}">Ver Nota</button> | <input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-700 font-semibold cursor-pointer ml-1" data-id="${idContratoFolha}" data-comp-id="${idComp}">` : `<input type="file" accept=".pdf,image/*" class="input-nf-comp text-xs text-slate-500 file:py-1 file:px-2.5 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold cursor-pointer" data-id="${idContratoFolha}" data-comp-id="${idComp}">`;
 
@@ -2948,6 +2936,7 @@
                     `;
                 }
             } else if (tipo === 'contratos') {
+                // Contratos esconde o bloco centro de custo
             } else {
                 if (labelCentroCusto) labelCentroCusto.innerText = "Centro de Custo";
                 let centrosCustoSet = new Set();
@@ -2981,266 +2970,449 @@
                 } else if (tipo === 'notas') {
                     if(labelStatus) labelStatus.innerText = "Status da NF";
                     selectStatus.innerHTML += `
-                        <option value="Recebida ✔">Recebida ✔</option>
+                        <option value="Recebida">Recebida ✔</option>
                         <option value="Aguardando">Aguardando ⏳</option>
-                        <option value="Recusada ❌">Recusada ❌</option>
+                        <option value="Recusada">Recusada ❌</option>
                     `;
                 } else if (tipo === 'documentos') {
-                    if(labelStatus) labelStatus.innerText = "Status de Compliance";
+                    if(labelStatus) labelStatus.innerText = "Status Compliance";
                     selectStatus.innerHTML += `
-                        <option value="Regular">Regular Válido</option>
-                        <option value="Vencido">Vencido ⚠️</option>
+                        <option value="Regular">Regular Válido ✔</option>
+                        <option value="Vencida">Vigência Vencida ⚠️</option>
                     `;
                 } else if (tipo === 'financeiro') {
-                    if(labelStatus) labelStatus.innerText = "Agrupamento";
+                    if(labelStatus) labelStatus.innerText = "Tipo de Folha / Composição";
                     selectStatus.innerHTML += `
-                        <option value="geral">Consolidado Geral</option>
-                        <option value="centro">Por Centro de Custo</option>
+                        <option value="Regular">Regular (Honorário Fixo)</option>
+                        <option value="Complementar">Complementar (Adicionais)</option>
+                        <option value="Bônus por Performance">Bônus por Performance</option>
+                        <option value="Comissão de Vendas">Comissão de Vendas</option>
+                        <option value="Hora Extra">Hora Extra</option>
+                        <option value="Reembolso de Despesas">Reembolso de Despesas</option>
+                        <option value="Adiantamento Salarial">Adiantamento Salarial</option>
                     `;
+                } else {
+                    if(labelStatus) labelStatus.innerText = "Status / Filtro Específico";
                 }
             }
+
             atualizarRelatoriosEtapa13();
         };
 
         function atualizarRelatoriosEtapa13() {
-            const cabecalhoTabela = document.getElementById('relatorio-cabecalho-tabela');
-            const corpoTabela = document.getElementById('tabelaRelatorioCorpo');
-            const labelTotal = document.getElementById('relatorio-coluna-total-label');
+            const corpoRelatorio = document.getElementById('tabelaRelatorioCorpo');
+            const cabecalho = document.getElementById('relatorio-cabecalho-tabela');
+            const colTotalLabel = document.getElementById('relatorio-coluna-total-label');
             const totalGeralEl = document.getElementById('relatorioTotalGeral');
-            if(!cabecalhoTabela || !corpoTabela) return;
+            
+            if(!corpoRelatorio || !cabecalho) return;
+            corpoRelatorio.innerHTML = "";
 
-            cabecalhoTabela.innerHTML = "";
-            corpoTabela.innerHTML = "";
-
-            const fComp = relFiltroCompetencia.value || competenciaSelecionada;
+            const fComp = document.getElementById('relFiltroCompetencia').value;
             const fCC = document.getElementById('relFiltroCentroCusto').value;
-            const fPrest = document.getElementById('relFiltroPrestador').value;
+            const fPrestador = document.getElementById('relFiltroPrestador').value;
             const fStatus = document.getElementById('relFiltroStatusEspecifico').value;
 
-            let linhasDados = [];
-            let somaTotalValores = 0;
-            let mostrarTotalMonetario = false;
+            let registrosCont = 0, somaTotal = 0;
 
             if (tipoRelatorioAtualEtapa13 === 'prestadores') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Nome</th><th class="p-3">CPF</th><th class="p-3">E-mail</th><th class="p-3">Telefone</th><th class="p-3">Cargo</th><th class="p-3">Centro de Custo</th><th class="p-3 text-center">Status</th>`;
+                cabecalho.innerHTML = `<th class="p-3">NOME COMPLETO</th><th class="p-3">PERFIL</th><th class="p-3">E-MAIL / TELEFONE</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '5');
+                colTotalLabel.innerText = "TOTAL PRESTADORES ATIVOS:";
+
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
-                    if (fPrest !== "todos" && c.nome !== fPrest) return;
+                    if (fPrestador !== "todos" && c.nome !== fPrestador) return;
                     if (fCC !== "todos" && c.departamento !== fCC) return;
+                    
                     if (fStatus !== "todos") {
-                        if (fStatus === 'Ativo' && c.status !== 'Ativo') return;
-                        if (fStatus === 'Inativo' && c.status === 'Ativo') return;
+                        if (fStatus === "Inativo") {
+                            if (!c.status || (!c.status.toLowerCase().includes("inativo") && !c.status.toLowerCase().includes("bloqueado"))) return;
+                        } else {
+                            if (c.status !== fStatus) return;
+                        }
                     }
-                    linhasDados.push(`
+
+                    registrosCont++;
+                    corpoRelatorio.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome || '---'}</td>
-                            <td class="p-3">${c.cpf || '---'}</td>
-                            <td class="p-3">${c.email || '---'}</td>
-                            <td class="p-3">${c.telefone || '---'}</td>
-                            <td class="p-3">${c.cargo || '---'}</td>
-                            <td class="p-3">${c.departamento || '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status==='Ativo'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${c.status}</span></td>
+                            <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                            <td class="p-3"><span class="px-2 py-0.5 bg-blue-50 text-blue-800 rounded font-bold text-[10px]">${c.perfilTipo || 'Prestador'}</span></td>
+                            <td class="p-3 text-slate-600">${c.email || c.emailCorp || '---'}<br><small>${c.telefone || ''}</small></td>
+                            <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
+                            <td class="p-3 text-slate-700">${c.departamento || '---'}</td>
+                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         </tr>
-                    `);
+                    `;
                 });
+                totalGeralEl.innerText = `${registrosCont} Cadastros`;
+
             } else if (tipoRelatorioAtualEtapa13 === 'contratos') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Prestador</th><th class="p-3">Razão Social / CNPJ</th><th class="p-3">Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3">Índice</th><th class="p-3 text-center">Status</th>`;
-                const fReajuste = document.getElementById('relFiltroMesAnoReajuste')?.value || "";
-                const fIndice = document.getElementById('relFiltroIndiceReajuste')?.value || "todos";
+                cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">RAZÃO SOCIAL / CNPJ</th><th class="p-3">VIGÊNCIA</th><th class="p-3">VALOR FIXO MENSAL</th><th class="p-3">MÊS/ANO REAJUSTE</th><th class="p-3">ÍNDICE REAJUSTE</th><th class="p-3 text-center">STATUS</th>`;
+                colTotalLabel.setAttribute('colspan', '6');
+                colTotalLabel.innerText = "VALOR TOTAL CONTRATOS:";
+
+                const inputMesReajusteFiltro = document.getElementById('relFiltroMesAnoReajuste');
+                const selectIndiceReajusteFiltro = document.getElementById('relFiltroIndiceReajuste');
+                const valMesReajuste = inputMesReajusteFiltro ? inputMesReajusteFiltro.value.trim().toLowerCase() : "";
+                const valIndiceReajuste = selectIndiceReajusteFiltro ? selectIndiceReajusteFiltro.value : "todos";
 
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
-                    if (fPrest !== "todos" && c.nome !== fPrest) return;
-                    if (fReajuste && !(c.mesAnoReajuste || "").includes(fReajuste)) return;
-                    if (fIndice !== "todos" && c.indiceReajuste !== fIndice) return;
-                    if (fStatus !== "todos") {
-                        if (fStatus === 'Ativo' && c.status !== 'Ativo') return;
-                        if (fStatus === 'Inativo' && c.status === 'Ativo') return;
+                    if (fPrestador !== "todos" && c.nome !== fPrestador) return;
+                    
+                    if (valMesReajuste) {
+                        const mesReajusteContrato = (c.mesAnoReajuste || "").trim().toLowerCase();
+                        if (!mesReajusteContrato.includes(valMesReajuste)) return;
                     }
-                    let val = parseFloat(c.valorFixoMensal || 0);
-                    somaTotalValores += val; mostrarTotalMonetario = true;
 
-                    linhasDados.push(`
+                    if (valIndiceReajuste !== "todos") {
+                        const indiceContrato = (c.indiceReajuste || "IPCA").trim();
+                        if (indiceContrato !== valIndiceReajuste) return;
+                    }
+
+                    if (fStatus !== "todos") {
+                        if (fStatus === "Inativo") {
+                            if (!c.status || (!c.status.toLowerCase().includes("inativo") && !c.status.toLowerCase().includes("bloqueado"))) return;
+                        } else {
+                            if (c.status !== fStatus) return;
+                        }
+                    }
+
+                    registrosCont++;
+                    let val = parseFloat(c.valorFixoMensal || 0); somaTotal += val;
+                    let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : 'Indeterminada';
+                    let mesReajusteExibir = c.mesAnoReajuste || '---';
+                    let indiceReajusteExibir = c.indiceReajuste || 'IPCA';
+
+                    corpoRelatorio.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome || '---'}</td>
-                            <td class="p-3">${c.razaoSocial || '---'}<br><small>${c.cnpj || ''}</small></td>
-                            <td class="p-3">${c.vigenciaInicio || ''} até ${c.vigenciaFim || ''}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3">${c.mesAnoReajuste || '---'}</td>
-                            <td class="p-3">${c.indiceReajuste || '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${c.status==='Ativo'?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}">${c.status}</span></td>
+                            <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                            <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
+                            <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
+                            <td class="p-3 font-extrabold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            <td class="p-3 text-slate-700">${mesReajusteExibir}</td>
+                            <td class="p-3 text-slate-700 font-bold">${indiceReajusteExibir}</td>
+                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                         </tr>
-                    `);
+                    `;
                 });
+                totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
             } else if (tipoRelatorioAtualEtapa13 === 'pagamentos') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Competência</th><th class="p-3">Prestador</th><th class="p-3">Tipo</th><th class="p-3">Vencimento</th><th class="p-3">Valor Líquido</th><th class="p-3 text-center">Status Tesouraria</th><th class="p-3">Data Pagamento</th>`;
-                const folhaObj = folhasLocais[fComp] || {};
-                Object.entries(folhaObj).forEach(([idC, f]) => {
-                    const cInfo = contratosLocais[idC] || {};
-                    if (fPrest !== "todos" && f.nome !== fPrest) return;
-                    if (fCC !== "todos" && cInfo.departamento !== fCC) return;
+                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO</th><th class="p-3">VENCIMENTO</th><th class="p-3">DATA EFETIVA PAGTO</th><th class="p-3 text-right">VALOR</th><th class="p-3 text-center">STATUS</th>`;
+                
+                if (fStatus === "Pago") {
+                    colTotalLabel.innerText = "TOTAL PAGAMENTOS LIQUIDADOS:";
+                } else if (fStatus === "À Liquidar") {
+                    colTotalLabel.innerText = "TOTAL PAGAMENTOS À LIQUIDAR:";
+                } else {
+                    colTotalLabel.innerText = "TOTAL GERAL DE PAGAMENTOS:";
+                }
 
-                    let valReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
-                    let stReg = f.regular?.statusPagamento || "Em Análise";
-                    if (fStatus !== "todos" && stReg !== fStatus) return;
+                colTotalLabel.setAttribute('colspan', '7');
 
-                    somaTotalValores += valReg; mostrarTotalMonetario = true;
-                    linhasDados.push(`
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${fComp.replace('-','/')}</td>
-                            <td class="p-3">${f.nome}</td>
-                            <td class="p-3">Regular</td>
-                            <td class="p-3">${f.regular?.dataVencimento || '---'}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${stReg==='Pago'?'bg-green-100 text-green-800':'bg-amber-100 text-amber-800'}">${stReg}</span></td>
-                            <td class="p-3">${f.regular?.dataPagamentoEfetivo || '---'}</td>
-                        </tr>
-                    `);
+                const folhaMes = folhasLocais[fComp] || {};
+                Object.entries(folhaMes).forEach(([idPrestador, dadosFolha]) => {
+                    const cInfo = contratosLocais[idPrestador] || {};
+                    const nome = dadosFolha.nome || cInfo.nome || "Prestador";
+                    const centroCustoPrestador = cInfo.departamento || "---";
 
-                    if (f.complementares_lista) {
-                        Object.values(f.complementares_lista).forEach(cItem => {
+                    if (fPrestador !== "todos" && nome !== fPrestador) return;
+                    if (fCC !== "todos" && centroCustoPrestador !== fCC) return;
+
+                    let valReg = parseFloat(dadosFolha.regular?.valorFixo || 0) + parseFloat(dadosFolha.regular?.motorValor || 0);
+                    let stRegBruto = dadosFolha.regular?.statusPagamento || "Em Análise";
+                    let stRegExibicao = (stRegBruto === "Pago") ? "Pago" : "À Liquidar";
+                    
+                    let passaFiltroReg = true;
+                    if (fStatus === "Pago") {
+                        passaFiltroReg = (stRegBruto === "Pago");
+                    } else if (fStatus === "À Liquidar") {
+                        passaFiltroReg = (stRegBruto !== "Pago");
+                    }
+
+                    if (passaFiltroReg) {
+                        registrosCont++;
+                        somaTotal += valReg;
+                        let badgeStatusReg = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stRegExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stRegExibicao}</span>`;
+
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                <td class="p-3 font-bold text-slate-900">${nome}</td>
+                                <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
+                                <td class="p-3">Regular</td>
+                                <td class="p-3">${dadosFolha.regular?.dataVencimento || '---'}</td>
+                                <td class="p-3">${dadosFolha.regular?.dataPagamentoEfetivo || '---'}</td>
+                                <td class="p-3 text-right font-bold text-blue-950">R$ ${valReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-3 text-center">${badgeStatusReg}</td>
+                            </tr>
+                        `;
+                    }
+
+                    if (dadosFolha.complementares_lista) {
+                        Object.values(dadosFolha.complementares_lista).forEach(cItem => {
                             let valC = parseFloat(cItem.motorValor || 0);
-                            let stComp = cItem.statusPagamento || "Em Análise";
-                            if (fStatus !== "todos" && stComp !== fStatus) return;
-                            somaTotalValores += valC;
+                            let stCBruto = cItem.statusPagamento || "Em Análise";
+                            let stCExibicao = (stCBruto === "Pago") ? "Pago" : "À Liquidar";
+                            
+                            let passaFiltroComp = true;
+                            if (fStatus === "Pago") {
+                                passaFiltroComp = (stCBruto === "Pago");
+                            } else if (fStatus === "À Liquidar") {
+                                passaFiltroComp = (stCBruto !== "Pago");
+                            }
 
-                            linhasDados.push(`
-                                <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
-                                    <td class="p-3 font-bold">${fComp.replace('-','/')}</td>
-                                    <td class="p-3">${f.nome}</td>
-                                    <td class="p-3">Comp. (${cItem.motorEvento || 'Adicional'})</td>
-                                    <td class="p-3">${cItem.dataVencimento || '---'}</td>
-                                    <td class="p-3 font-bold text-amber-800">R$ ${valC.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${stComp==='Pago'?'bg-green-100 text-green-800':'bg-amber-100 text-amber-800'}">${stComp}</span></td>
-                                    <td class="p-3">${cItem.dataPagamentoEfetivo || '---'}</td>
-                                </tr>
-                            `);
+                            if (passaFiltroComp) {
+                                registrosCont++;
+                                somaTotal += valC;
+                                let badgeStatusComp = `<span class="px-2 py-0.5 rounded font-bold text-[10px] ${stCExibicao === 'Pago' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${stCExibicao}</span>`;
+
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
+                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3 font-bold text-slate-900">${nome}</td>
+                                        <td class="p-3 text-slate-700">${centroCustoPrestador}</td>
+                                        <td class="p-3">Complementar (${cItem.motorEvento || 'Adicional'})</td>
+                                        <td class="p-3">${cItem.dataVencimento || '---'}</td>
+                                        <td class="p-3">${cItem.dataPagamentoEfetivo || '---'}</td>
+                                        <td class="p-3 text-right font-bold text-amber-800">R$ ${valC.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-center">${badgeStatusComp}</td>
+                                    </tr>
+                                `;
+                            }
                         });
                     }
                 });
+                totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
             } else if (tipoRelatorioAtualEtapa13 === 'notas') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Competência</th><th class="p-3">Prestador</th><th class="p-3">Tipo de Nota</th><th class="p-3 text-center">Status da NF</th><th class="p-3 text-center">Ação</th>`;
-                const folhaObj = folhasLocais[fComp] || {};
-                Object.entries(folhaObj).forEach(([idC, f]) => {
-                    const cInfo = contratosLocais[idC] || {};
-                    if (fPrest !== "todos" && f.nome !== fPrest) return;
-                    if (fCC !== "todos") {
-                        if (fCC === 'Regular' && !f.regular?.nfArquivoBase64) return;
-                        if (fCC === 'Complementar' && !f.complementares_lista) return;
+                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR / CNPJ</th><th class="p-3">TIPO NOTA</th><th class="p-3 text-center">STATUS NF</th><th class="p-3 text-center">ANEXO</th>`;
+                colTotalLabel.setAttribute('colspan', '4');
+                colTotalLabel.innerText = "TOTAL NOTAS PROCESSADAS:";
+
+                const folhaMes = folhasLocais[fComp] || {};
+                Object.entries(folhaMes).forEach(([idPrestador, dadosFolha]) => {
+                    const cInfo = contratosLocais[idPrestador] || {};
+                    const nome = dadosFolha.nome || cInfo.nome || "Prestador";
+                    const cnpj = dadosFolha.cnpj || cInfo.cnpj || "---";
+                    if (fPrestador !== "todos" && nome !== fPrestador) return;
+
+                    if (dadosFolha.regular) {
+                        let statusNfReg = dadosFolha.regular?.nfStatus || "Aguardando";
+                        
+                        let passaTipo = (fCC === "todos" || fCC === "Regular");
+                        let passaStatus = (fStatus === "todos" || statusNfReg.toLowerCase().includes(fStatus.toLowerCase()));
+
+                        if (passaTipo && passaStatus) {
+                            registrosCont++;
+                            let temAnexo = dadosFolha.regular?.nfArquivoBase64 ? "Sim ✔" : "Não";
+                            corpoRelatorio.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                    <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
+                                    <td class="p-3">Nota Fiscal Regular</td>
+                                    <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfReg.includes('Recebida') || statusNfReg.includes('Aprovada') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfReg}</span></td>
+                                    <td class="p-3 text-center font-bold text-blue-900">${temAnexo}</td>
+                                </tr>
+                            `;
+                        }
                     }
 
-                    let nfStReg = f.regular?.nfStatus || "Aguardando";
-                    if (fStatus !== "todos" && nfStReg !== fStatus) return;
+                    if (dadosFolha.complementares_lista) {
+                        Object.values(dadosFolha.complementares_lista).forEach(cItem => {
+                            let statusNfC = cItem.nfStatus || "Aguardando";
+                            let passaTipo = (fCC === "todos" || fCC === "Complementar");
+                            let passaStatus = (fStatus === "todos" || statusNfC.toLowerCase().includes(fStatus.toLowerCase()));
 
-                    if (f.regular?.nfArquivoBase64) {
-                        linhasDados.push(`
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${fComp.replace('-','/')}</td>
-                                <td class="p-3">${f.nome}</td>
-                                <td class="p-3">Regular</td>
-                                <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${nfStReg==='Recebida ✔'?'bg-green-100 text-green-800':'bg-amber-100 text-amber-800'}">${nfStReg}</span></td>
-                                <td class="p-3 text-center"><button class="btn-view-nf-reg text-xs text-blue-600 font-bold hover:underline" data-id="${idC}">📄 Abrir</button></td>
-                            </tr>
-                        `);
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                let temAnexoC = cItem.nfArquivoBase64 ? "Sim ✔" : "Não";
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
+                                        <td class="p-3 font-bold">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3"><b>${nome}</b><br><small>${cnpj}</small></td>
+                                        <td class="p-3">NF Complementar (${cItem.motorEvento || 'Adicional'})</td>
+                                        <td class="p-3 text-center"><span class="px-2 py-1 rounded font-bold text-xs ${statusNfC.includes('Recebida') ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800'}">${statusNfC}</span></td>
+                                        <td class="p-3 text-center font-bold text-blue-900">${temAnexoC}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
                     }
                 });
-            } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Prestador</th><th class="p-3">Documento / Categoria</th><th class="p-3">Validade</th><th class="p-3 text-center">Status Compliance</th>`;
-                const fNomeDoc = document.getElementById('relFiltroNomeDoc')?.value.toLowerCase() || "";
-                const fMesAnoVal = document.getElementById('relFiltroMesAnoValidade')?.value || "";
-                let hojeObj = new Date();
+                totalGeralEl.innerText = `${registrosCont} Documentos Fiscais`;
 
+            } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
+                cabecalho.innerHTML = `<th class="p-3">PRESTADOR</th><th class="p-3">TIPO DOCUMENTO / NOME</th><th class="p-3">VIGÊNCIA / VALIDADE</th><th class="p-3 text-center">STATUS COMPLIANCE</th>`;
+                colTotalLabel.setAttribute('colspan', '3');
+                colTotalLabel.innerText = "TOTAL DOCUMENTOS:";
+
+                const inputNomeDocFiltro = document.getElementById('relFiltroNomeDoc');
+                const inputMesAnoValidadeFiltro = document.getElementById('relFiltroMesAnoValidade');
+                const valNomeDoc = inputNomeDocFiltro ? inputNomeDocFiltro.value.trim().toLowerCase() : "";
+                const valMesAnoValidade = inputMesAnoValidadeFiltro ? inputMesAnoValidadeFiltro.value : ""; // formato YYYY-MM
+
+                let hojeObj = new Date();
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
-                    if (fPrest !== "todos" && c.nome !== fPrest) return;
+                    if (fPrestador !== "todos" && c.nome !== fPrestador) return;
 
                     if (c.arquivoContratoBase64) {
-                        if (fCC !== "todos" && !("contrato".includes(fCC.toLowerCase()))) return;
-                        if (fNomeDoc && !"contrato social prestação".includes(fNomeDoc)) return;
-                        
-                        let vigFim = c.vigenciaFim || "";
-                        if (fMesAnoVal && !vigFim.includes(fMesAnoVal)) return;
+                        let nomeDocItem = "Contrato Social / Prestação";
+                        if (valNomeDoc && !nomeDocItem.toLowerCase().includes(valNomeDoc)) {
+                            // Pula se o nome não bater
+                        } else {
+                            let vigenciaFim = c.vigenciaFim || "Indeterminada";
+                            
+                            if (valMesAnoValidade && vigenciaFim !== "Indeterminada") {
+                                const anoMesValidadeContrato = vigenciaFim.substring(0, 7); // YYYY-MM
+                                if (anoMesValidadeContrato !== valMesAnoValidade) {
+                                    // Pula se o mês/ano de validade não bater
+                                    return;
+                                }
+                            } else if (valMesAnoValidade && vigenciaFim === "Indeterminada") {
+                                return;
+                            }
 
-                        let isVencido = vigFim && new Date(vigFim) < hojeObj;
-                        if (fStatus === 'Regular' && isVencido) return;
-                        if (fStatus === 'Vencido' && !isVencido) return;
+                            let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
+                            if (c.vigenciaFim && new Date(c.vigenciaFim) < hojeObj) { 
+                                statusComp = "Vigência Vencida ⚠️"; 
+                                corStatus = "bg-red-100 text-red-800"; 
+                                statusCurto = "Vencida";
+                            }
+                            let passaTipo = (fCC === "todos" || fCC === "Contrato");
+                            let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
 
-                        linhasDados.push(`
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${c.nome}</td>
-                                <td class="p-3">Contrato de Prestação</td>
-                                <td class="p-3">${vigFim ? vigFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                                <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVencido?'bg-red-100 text-red-800':'bg-green-100 text-green-800'}">${isVencido?'Vencido ⚠️':'Regular'}</span></td>
-                            </tr>
-                        `);
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                                        <td class="p-3">${nomeDocItem}</td>
+                                        <td class="p-3">${vigenciaFim !== 'Indeterminada' ? vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                                        <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
+                                    </tr>
+                                `;
+                            }
+                        }
                     }
 
-                    if (c.documentosCompliance) {
-                        c.documentosCompliance.forEach(d => {
-                            if (fCC !== "todos" && !d.nomeArquivo.toLowerCase().includes(fCC.toLowerCase())) return;
-                            if (fNomeDoc && !d.nomeArquivo.toLowerCase().includes(fNomeDoc)) return;
-                            let valD = d.validade || "";
-                            if (fMesAnoVal && !valD.includes(fMesAnoVal)) return;
+                    if (c.documentosCompliance && Array.isArray(c.documentosCompliance)) {
+                        c.documentosCompliance.forEach(doc => {
+                            let nomeDocItem = doc.nomeArquivo || "Compliance Adicional";
+                            if (valNomeDoc && !nomeDocItem.toLowerCase().includes(valNomeDoc)) return;
 
-                            let isVencido = valD && new Date(valD) < hojeObj;
-                            if (fStatus === 'Regular' && isVencido) return;
-                            if (fStatus === 'Vencido' && !isVencido) return;
+                            let valDoc = doc.validade || "---";
+                            if (valMesAnoValidade && valDoc !== "---") {
+                                const anoMesValidadeDoc = valDoc.substring(0, 7); // YYYY-MM
+                                if (anoMesValidadeDoc !== valMesAnoValidade) return;
+                            } else if (valMesAnoValidade && valDoc === "---") {
+                                return;
+                            }
 
-                            linhasDados.push(`
-                                <tr class="border-b hover:bg-slate-50">
-                                    <td class="p-3 font-bold">${c.nome}</td>
-                                    <td class="p-3">${d.nomeArquivo}</td>
-                                    <td class="p-3">${valD ? valD.split('-').reverse().join('/') : '---'}</td>
-                                    <td class="p-3 text-center"><span class="px-2 py-0.5 rounded text-[10px] font-bold ${isVencido?'bg-red-100 text-red-800':'bg-green-100 text-green-800'}">${isVencido?'Vencido ⚠️':'Regular'}</span></td>
-                                </tr>
-                            `);
+                            let statusComp = "Regular Válido ✔", corStatus = "bg-green-100 text-green-800", statusCurto = "Regular";
+                            if (doc.validade && new Date(doc.validade) < hojeObj) {
+                                statusComp = "Vencido ⚠️";
+                                corStatus = "bg-red-100 text-red-800";
+                                statusCurto = "Vencida";
+                            }
+                            let passaTipo = (fCC === "todos" || fCC === "Contrato");
+                            let passaStatus = (fStatus === "todos" || (fStatus === "Regular" && statusCurto === "Regular") || (fStatus === "Vencida" && statusCurto === "Vencida"));
+
+                            if (passaTipo && passaStatus) {
+                                registrosCont++;
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold text-slate-900">${c.nome || '---'}</td>
+                                        <td class="p-3">${nomeDocItem}</td>
+                                        <td class="p-3">${valDoc !== '---' ? valDoc.split('-').reverse().join('/') : '---'}</td>
+                                        <td class="p-3 text-center"><span class="px-2.5 py-1 rounded font-bold text-xs ${corStatus}">${statusComp}</span></td>
+                                    </tr>
+                                `;
+                            }
                         });
                     }
                 });
+                totalGeralEl.innerText = `${registrosCont} Documentos`;
+
             } else if (tipoRelatorioAtualEtapa13 === 'financeiro') {
-                cabecalhoTabela.innerHTML = `<th class="p-3">Competência</th><th class="p-3">Centro de Custo / Prestador</th><th class="p-3 text-right">Total Regular</th><th class="p-3 text-right">Total Complementar</th><th class="p-3 text-right">Total Geral</th>`;
-                const folhaObj = folhasLocais[fComp] || {};
-                let somatorioGeralMes = 0;
-                mostrarTotalMonetario = true;
+                cabecalho.innerHTML = `<th class="p-3">COMPETÊNCIA</th><th class="p-3">PRESTADOR</th><th class="p-3">CENTRO DE CUSTO</th><th class="p-3">TIPO DE FOLHA</th><th class="p-3">COMPOSIÇÃO</th><th class="p-3 text-right">LÍQUIDO PAGO/APROVADO</th>`;
+                colTotalLabel.setAttribute('colspan', '5');
+                colTotalLabel.innerText = "TOTAL CONSOLIDADO GERAL:";
 
-                Object.entries(folhaObj).forEach(([idC, f]) => {
-                    const cInfo = contratosLocais[idC] || {};
-                    if (fPrest !== "todos" && f.nome !== fPrest) return;
-                    if (fCC !== "todos" && cInfo.departamento !== fCC) return;
+                const folhaMes = folhasLocais[fComp] || {};
+                Object.entries(folhaMes).forEach(([idPrestador, dadosFolha]) => {
+                    const contratoInfo = contratosLocais[idPrestador] || {};
+                    const nomePrestador = dadosFolha.nome || contratoInfo.nome || "Desconhecido";
+                    const departamento = contratoInfo.departamento || "Prestador";
 
-                    let vReg = parseFloat(f.regular?.valorFixo || 0) + parseFloat(f.regular?.motorValor || 0);
-                    let vComp = 0;
-                    if (f.complementares_lista) {
-                        Object.values(f.complementares_lista).forEach(ci => vComp += parseFloat(ci.motorValor || 0));
+                    if (fPrestador !== "todos" && nomePrestador !== fPrestador) return;
+                    if (fCC !== "todos" && departamento !== fCC) return;
+
+                    let valorRegFixo = parseFloat(contratoInfo.valorFixoMensal || dadosFolha.regular?.valorFixo || 0);
+                    let valorRegMotor = parseFloat(dadosFolha.regular?.motorValor || 0);
+                    let valRegTotal = valorRegFixo + valorRegMotor;
+
+                    let passaFiltroReg = true;
+                    if (fStatus === "Complementar") passaFiltroReg = false;
+                    else if (fStatus === "Regular") passaFiltroReg = true;
+                    else if (fStatus && fStatus !== "todos") {
+                        if (fStatus !== "Regular" && fStatus !== "Complementar") {
+                            let eventoReg = dadosFolha.regular?.motorEvento || "";
+                            if (!eventoReg.toLowerCase().includes(fStatus.toLowerCase())) passaFiltroReg = false;
+                        }
                     }
-                    let vTotalLinha = vReg + vComp;
-                    somatorioGeralMes += vTotalLinha;
-                    somaTotalValores = somatorioGeralMes;
 
-                    linhasDados.push(`
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${fComp.replace('-','/')}</td>
-                            <td class="p-3"><b>${f.nome}</b><br><small class="text-slate-500">${cInfo.departamento || 'Geral'}</small></td>
-                            <td class="p-3 text-right text-blue-950 font-bold">R$ ${vReg.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-right text-amber-700 font-bold">R$ ${vComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-right text-slate-900 font-extrabold">R$ ${vTotalLinha.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        </tr>
-                    `);
+                    if (valRegTotal > 0 && passaFiltroReg) {
+                        somaTotal += valRegTotal; registrosCont++;
+                        let composicaoTexto = `Honorário Fixo: R$ ${valorRegFixo.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+                        if (valorRegMotor > 0) composicaoTexto += ` + ${dadosFolha.regular?.motorEvento || 'Ajuste'}: R$ ${valorRegMotor.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
+
+                        corpoRelatorio.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-medium">${fComp.replace('-', '/')}</td>
+                                <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
+                                <td class="p-3">${departamento}</td>
+                                <td class="p-3 font-medium">Regular</td>
+                                <td class="p-3 text-xs text-slate-600">${composicaoTexto}</td>
+                                <td class="p-3 text-right font-extrabold text-blue-950">R$ ${valRegTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                            </tr>
+                        `;
+                    }
+
+                    if (dadosFolha.complementares_lista) {
+                        Object.values(dadosFolha.complementares_lista).forEach(cItem => {
+                            let valComp = parseFloat(cItem.motorValor || 0);
+                            let eventoComp = cItem.motorEvento || 'Adicional';
+
+                            let passaFiltroComp = true;
+                            if (fStatus === "Regular") passaFiltroComp = false;
+                            else if (fStatus && fStatus !== "todos" && fStatus !== "Complementar") {
+                                if (!eventoComp.toLowerCase().includes(fStatus.toLowerCase())) passaFiltroComp = false;
+                            }
+
+                            if (valComp > 0 && passaFiltroComp) {
+                                somaTotal += valComp; registrosCont++;
+                                corpoRelatorio.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50 bg-amber-50/10">
+                                        <td class="p-3 font-medium">${fComp.replace('-', '/')}</td>
+                                        <td class="p-3 font-bold text-slate-900">${nomePrestador}</td>
+                                        <td class="p-3">${departamento}</td>
+                                        <td class="p-3 font-medium text-amber-700">Complementar</td>
+                                        <td class="p-3 text-xs text-slate-600">${eventoComp}: R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                        <td class="p-3 text-right font-extrabold text-amber-700">R$ ${valComp.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                    </tr>
+                                `;
+                            }
+                        });
+                    }
                 });
+                totalGeralEl.innerText = `R$ ${somaTotal.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
             }
 
-            if (linhasDados.length > 0) {
-                corpoTabela.innerHTML = linhasDados.join('');
-            } else {
-                corpoTabela.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado para estes filtros.</td></tr>`;
-            }
-
-            if (mostrarTotalMonetario) {
-                totalGeralEl.parentElement.style.display = 'table-row';
-                totalGeralEl.innerText = `R$ ${somaTotalValores.toLocaleString('pt-BR', {minimumFractionDigits:2})}`;
-            } else {
-                totalGeralEl.parentElement.style.display = 'none';
-            }
+            if (registrosCont === 0) corpoRelatorio.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
         }
 
         ['relFiltroCompetencia', 'relFiltroCentroCusto', 'relFiltroPrestador', 'relFiltroStatusEspecifico'].forEach(id => {
@@ -3248,97 +3420,68 @@
         });
 
         document.getElementById('btn-exportar-relatorio-etapa13').addEventListener('click', () => {
-            const tabela = document.querySelector("#relatorios table");
-            const livro = XLSX.utils.table_to_book(tabela, { sheet: "Relatorio" });
-            XLSX.writeFile(livro, `Relatorio_${tipoRelatorioAtualEtapa13}_ConnectPJ.xlsx`);
+            XLSX.writeFile(XLSX.utils.table_to_book(document.querySelector("#relatorios table")), `Relatorio_${tipoRelatorioAtualEtapa13.toUpperCase()}_ConnectPJ.xlsx`);
         });
 
-        window.salvarDadosPrestadorPortal = async () => {
-            let idContratoLogado = null;
-            Object.entries(contratosLocais).forEach(([id, c]) => {
-                if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
-                    idContratoLogado = id;
+        document.getElementById('btn-exportar-contratos-excel').addEventListener('click', () => {
+            XLSX.writeFile(XLSX.utils.table_to_book(document.getElementById("tabela-contratos-export")), "Equipe_Contratos_ConnectPJ.xlsx");
+        });
+
+        document.getElementById('btn-gerar-folha').addEventListener('click', () => {
+            const modal = document.getElementById('modalGerarFolha');
+            const tbody = document.getElementById('listaContratosParaFolha');
+            tbody.innerHTML = "";
+            Object.entries(contratosLocais).forEach(([key, c]) => {
+                if (c.status === "Ativo" && !c.excluidoLogico) {
+                    tbody.innerHTML += `<tr><td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-folha"></td><td class="p-2">${c.nome}</td><td class="p-2 text-xs">${c.cnpj || '---'}</td><td class="p-2 text-right">R$ ${parseFloat(c.valorFixoMensal||0).toLocaleString('pt-BR')}</td></tr>`;
                 }
             });
-
-            if (!idContratoLogado) { alert("Cadastro não localizado!"); return; }
-
-            const pacoteUpdate = {
-                nome: document.getElementById('pj-campo-nome').value,
-                cpf: document.getElementById('pj-campo-cpf').value,
-                email: document.getElementById('pj-campo-email').value,
-                telefone: document.getElementById('pj-campo-telefone').value,
-                contatoEmergencia: document.getElementById('pj-campo-emergencia').value,
-                razaoSocial: document.getElementById('pj-campo-razaosocial').value,
-                cnpj: document.getElementById('pj-campo-cnpj').value,
-                emailCorp: document.getElementById('pj-campo-emailcorp').value,
-                inscricaoEstadual: document.getElementById('pj-campo-ie').value,
-                inscricaoMunicipal: document.getElementById('pj-campo-im').value,
-                cep: document.getElementById('pj-campo-cep').value,
-                logradouro: document.getElementById('pj-campo-logradouro').value,
-                numero: document.getElementById('pj-campo-numero').value,
-                bairro: document.getElementById('pj-campo-bairro').value,
-                cidade: document.getElementById('pj-campo-cidade').value,
-                estado: document.getElementById('pj-campo-estado').value
-            };
-
-            const fotoInput = document.getElementById('pjCampoNovaFoto');
-            if (fotoInput.files.length > 0) {
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    pacoteUpdate.fotoBase64 = reader.result;
-                    await update(ref(db, `${pathContratosDB}/${idContratoLogado}`), pacoteUpdate);
-                    await registrarAuditoria("Portal PJ", "Atualização Cadastral", pacoteUpdate.nome, "-", "Dados Atualizados");
-                    alert("Dados salvos com sucesso!");
-                    location.reload();
-                };
-                reader.readAsDataURL(fotoInput.files[0]);
-            } else {
-                await update(ref(db, `${pathContratosDB}/${idContratoLogado}`), pacoteUpdate);
-                await registrarAuditoria("Portal PJ", "Atualização Cadastral", pacoteUpdate.nome, "-", "Dados Atualizados");
-                alert("Dados salvos com sucesso!");
-            }
-        };
-
-        window.adicionarDocumentoCompliancePrestadorPortal = async () => {
-            let idContratoLogado = null; let dadosContratoLog = null;
-            Object.entries(contratosLocais).forEach(([id, c]) => {
-                if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
-                    idContratoLogado = id; dadosContratoLog = c;
-                }
-            });
-
-            if (!idContratoLogado) return;
-            const fileInput = document.getElementById('pj-campo-novo-doc-file');
-            const validadeInput = document.getElementById('pj-campo-novo-doc-validade');
-
-            if (fileInput.files.length === 0) { alert("Selecione o arquivo!"); return; }
-            if (!validadeInput.value) { alert("Informe a validade!"); return; }
-
-            let listaDocs = dadosContratoLog.documentosCompliance ? [...dadosContratoLog.documentosCompliance] : [];
-
-            for (let file of fileInput.files) {
-                await new Promise((resolve) => {
-                    const reader = new FileReader();
-                    reader.onloadend = () => {
-                        listaDocs.push({
-                            nomeArquivo: file.name,
-                            validade: validadeInput.value,
-                            arquivoBase64: reader.result
-                        });
-                        resolve();
+            modal.classList.remove('hidden');
+        });
+        document.getElementById('btn-cancelar-gerar-folha').addEventListener('click', () => document.getElementById('modalGerarFolha').classList.add('hidden'));
+        
+        document.getElementById('btn-confirmar-gerar-folha').addEventListener('click', async () => {
+            const checkboxes = document.querySelectorAll('.chk-folha:checked');
+            const compDestino = filtroCompetencia.value;
+            const snapshotAtual = await get(ref(db, `${pathFolhasDB}/${compDestino}`));
+            let folhaExistente = snapshotAtual.val() || {};
+            
+            checkboxes.forEach(chk => {
+                const id = chk.value; const c = contratosLocais[id];
+                if (!folhaExistente[id]) {
+                    folhaExistente[id] = {
+                        nome: c.nome, cnpj: c.cnpj || '',
+                        regular: { valorFixo: parseFloat(c.valorFixoMensal || 0), motorValor: 0, nfStatus: "Aguardando", statusPagamento: "Em Análise" }
                     };
-                    reader.readAsDataURL(file);
-                });
-            }
+                }
+            });
 
-            await update(ref(db, `${pathContratosDB}/${idContratoLogado}`), { documentosCompliance: listaDocs });
-            await registrarAuditoria("Portal PJ", "Envio Documento Compliance", dadosContratoLog.nome || "Prestador", "-", "Novo Doc Adicionado");
-            alert("Documento anexado com sucesso!");
-            fileInput.value = ""; validadeInput.value = "";
-            carregarDadosPortalPrestador();
-        };
+            await update(ref(db, `${pathFolhasDB}/${compDestino}`), folhaExistente);
+            alert("Folha gerada/atualizada com sucesso!");
+            document.getElementById('modalGerarFolha').classList.add('hidden');
+        });
 
+        document.getElementById('btn-aplicar-motor').addEventListener('click', async () => {
+            const idContrato = document.getElementById('motorContrato').value;
+            const tipo = document.getElementById('motorTipo').value;
+            const evento = document.getElementById('motorEvento').value;
+            const valor = parseFloat(document.getElementById('motorValor').value || 0);
+
+            if (!idContrato || valor <= 0) { alert("Selecione o membro e informe um valor!"); return; }
+            const cInfo = contratosLocais[idContrato] || {};
+
+            try {
+                if (tipo === "regular") {
+                    await update(ref(db), { [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorValor`]: valor, [`${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/regular/motorEvento`]: evento });
+                } else {
+                    await push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/${idContrato}/complementares_lista`), { motorValor: valor, motorEvento: evento, nfStatus: "Aguardando", nfArquivoBase64: "", statusPagamento: "Em Análise" });
+                }
+                await registrarAuditoria("Motor Financeiro", "Lançamento", cInfo.nome || idContrato, "-", `${tipo.toUpperCase()} - ${evento}: R$ ${valor}`);
+                alert("Lançamento aplicado com sucesso!");
+                document.getElementById('motorValor').value = "";
+            } catch (error) { alert("Erro ao aplicar: " + error.message); }
+        });
+
+        document.getElementById('filtroCompetencia').addEventListener('change', renderizarTabelasEstatísticas);
     </script>
-</body>
-</html>
+</body></html>
