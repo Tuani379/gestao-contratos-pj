@@ -8,7 +8,7 @@
 
     <!-- TELA DE LOGIN / RECUPERAÇÃO / PRIMEIRO ACESSO -->
     <div id="tela-login" class="bg-slate-100 font-sans h-screen flex flex-col justify-center items-center fixed inset-0 z-50">
-        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200 space-y-4">
+        <div class="bg-white p-8 rounded-2xl shadow-xl w-full max-w-md border border-slate-200 space-y-4 relative z-10">
             <div class="text-center mb-4">
                 <h1 class="text-2xl font-extrabold text-blue-950 tracking-tight">ConnectPJ</h1>
                 <p class="text-xs text-slate-500 mt-1">Plataforma SaaS Multiempresa & Master</p>
@@ -23,28 +23,28 @@
                     <label class="block text-xs font-bold text-slate-700 mb-1">Senha</label>
                     <div class="relative">
                         <input type="password" id="login-senha-saas" required placeholder="••••••••" class="w-full p-3 pr-10 border rounded-lg text-sm bg-slate-50 focus:ring-2 focus:ring-blue-600 outline-none">
-                        <button type="button" onclick="toggleMostrarSenha()" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm focus:outline-none" title="Mostrar/Ocultar Senha">
+                        <button type="button" id="btn-toggle-senha" class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 text-sm focus:outline-none cursor-pointer p-1" title="Mostrar/Ocultar Senha">
                             <span id="icone-olho">👁️</span>
                         </button>
                     </div>
                 </div>
                 <div class="flex justify-between items-center text-xs">
-                    <button type="button" onclick="abrirModalEsqueceuSenha()" class="text-blue-600 hover:underline font-semibold">Esqueceu sua senha?</button>
+                    <button type="button" id="btn-esqueceu-senha" class="text-blue-600 hover:underline font-semibold cursor-pointer">Esqueceu sua senha?</button>
                 </div>
-                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md">Entrar</button>
+                <button type="submit" class="w-full bg-blue-900 hover:bg-blue-800 text-white font-bold p-3 rounded-lg text-sm transition shadow-md cursor-pointer">Entrar</button>
             </form>
         </div>
     </div>
 
     <!-- MODAL RECUPERAÇÃO DE SENHA -->
-    <div id="modalEsqueceuSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[60]">
-        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border">
-            <h3 class="text-lg font-bold text-blue-950 mb-2">Recuperar Senha</h3>
-            <p class="text-xs text-slate-500 mb-4">Insira seu e-mail cadastrado para receber o link de redefinição.</p>
-            <input type="email" id="inputEmailRecuperacao" placeholder="seuemail@empresa.com" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-4 outline-none focus:ring-2 focus:ring-blue-600">
-            <div class="flex justify-end gap-2">
-                <button onclick="fecharModalEsqueceuSenha()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button onclick="enviarEmailRecuperacao()" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800">Enviar Link</button>
+    <div id="modalEsqueceuSenha" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border space-y-4">
+            <h3 class="text-lg font-bold text-blue-950 mb-1">Recuperar Senha</h3>
+            <p class="text-xs text-slate-500 mb-2">Insira seu e-mail cadastrado para receber o link de redefinição.</p>
+            <input type="email" id="inputEmailRecuperacao" placeholder="seuemail@empresa.com" class="w-full p-2.5 border rounded-lg text-sm bg-slate-50 mb-2 outline-none focus:ring-2 focus:ring-blue-600">
+            <div class="flex justify-end gap-2 pt-2">
+                <button type="button" id="btn-fechar-modal-rec" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600 cursor-pointer">Cancelar</button>
+                <button type="button" id="btn-enviar-link-rec" class="px-4 py-2 bg-blue-900 text-white rounded-lg text-xs font-bold hover:bg-blue-800 cursor-pointer">Enviar Link</button>
             </div>
         </div>
     </div>
@@ -1060,7 +1060,7 @@
 </section>
 
 <!-- ========================================== -->
-<!-- 👑 PAINEL DE SUPERADMIN MASTER (NOVO)     -->
+<!-- 👑 PAINEL DE SUPERADMIN MASTER           -->
 <!-- ========================================== -->
 <section id="area-superadmin" class="hidden max-w-7xl mx-auto p-6 space-y-6">
     <div class="bg-blue-950 text-white p-6 rounded-2xl shadow-lg flex justify-between items-center">
@@ -1118,9 +1118,7 @@
             </div>
             <button onclick="abrirModalCriarPlano()" class="bg-blue-900 hover:bg-blue-800 text-white font-bold px-4 py-2.5 rounded-xl text-xs transition shadow-md">+ Criar Novo Plano</button>
         </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="listaCardsPlanosSuper">
-            <!-- Renderizado via JS -->
-        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="listaCardsPlanosSuper"></div>
     </div>
 
     <!-- 3. ADMINISTRADORES -->
@@ -1634,24 +1632,31 @@
             } catch (error) { alert("Erro ao entrar: " + error.message); }
         });
 
-        window.toggleMostrarSenha = () => {
+        // Configuração segura e direta de Eventos para evitar travamentos de clique
+        document.getElementById('btn-toggle-senha').addEventListener('click', () => {
             const inputSenha = document.getElementById('login-senha-saas');
             const iconeOlho = document.getElementById('icone-olho');
             if (inputSenha.type === 'password') { inputSenha.type = 'text'; iconeOlho.innerText = '🙈'; }
             else { inputSenha.type = 'password'; iconeOlho.innerText = '👁️'; }
-        };
+        });
 
-        window.abrirModalEsqueceuSenha = () => { document.getElementById('modalEsqueceuSenha').classList.remove('hidden'); };
-        window.fecharModalEsqueceuSenha = () => { document.getElementById('modalEsqueceuSenha').classList.add('hidden'); };
-        window.enviarEmailRecuperacao = async () => {
+        document.getElementById('btn-esqueceu-senha').addEventListener('click', () => {
+            document.getElementById('modalEsqueceuSenha').classList.remove('hidden');
+        });
+
+        document.getElementById('btn-fechar-modal-rec').addEventListener('click', () => {
+            document.getElementById('modalEsqueceuSenha').classList.add('hidden');
+        });
+
+        document.getElementById('btn-enviar-link-rec').addEventListener('click', async () => {
             const email = document.getElementById('inputEmailRecuperacao').value;
             if (!email) { alert("Informe seu e-mail!"); return; }
             try {
                 await sendPasswordResetEmail(auth, email);
                 alert("E-mail de recuperação enviado com sucesso!");
-                fecharModalEsqueceuSenha();
+                document.getElementById('modalEsqueceuSenha').classList.add('hidden');
             } catch (error) { alert("Erro: " + error.message); }
-        };
+        });
 
         window.fazerLogout = () => { signOut(auth).then(() => { document.getElementById('tela-login').classList.remove('hidden'); }); };
 
@@ -2027,7 +2032,6 @@
         };
 
         async function carregarPainelSuperadmin() {
-            // Carregar Clientes, Planos, Admins
             const [snapClientes, snapPlanos, snapAdmins] = await Promise.all([
                 get(ref(db, 'empresas_clientes')),
                 get(ref(db, 'sistema_planos')),
@@ -2038,7 +2042,6 @@
             const planos = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
             const admins = snapAdmins.val() || {};
 
-            // Popular select de planos nos modais
             const selectPlanoEmpresa = document.getElementById('superPlanoSelect');
             const selectNovoPlanoEmpresa = document.getElementById('selectNovoPlanoEmpresa');
             selectPlanoEmpresa.innerHTML = "";
@@ -2049,7 +2052,6 @@
                 selectNovoPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome}</option>`;
             });
 
-            // 1. Renderizar Tabela Clientes
             const tbodyClientes = document.getElementById('tabelaSuperClientes');
             tbodyClientes.innerHTML = "";
             let clientesCount = 0;
@@ -2075,7 +2077,6 @@
             });
             if (clientesCount === 0) tbodyClientes.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhuma empresa cliente cadastrada.</td></tr>`;
 
-            // 2. Renderizar Cards de Planos
             const containerPlanos = document.getElementById('listaCardsPlanosSuper');
             containerPlanos.innerHTML = "";
             Object.entries(planos).forEach(([pId, p]) => {
@@ -2091,7 +2092,6 @@
                 `;
             });
 
-            // 3. Renderizar Tabela Administradores
             const tbodyAdmins = document.getElementById('tabelaSuperAdmins');
             tbodyAdmins.innerHTML = "";
             let adminsCount = 0;
@@ -2111,7 +2111,6 @@
             });
             if (adminsCount === 0) tbodyAdmins.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum administrador extra cadastrado.</td></tr>`;
 
-            // 4. Renderizar Tabela Suporte (Impersonate & Logs)
             const tbodySuporte = document.getElementById('tabelaSuperSuporte');
             tbodySuporte.innerHTML = "";
             Object.entries(clientes).forEach(([id, c]) => {
@@ -2127,29 +2126,28 @@
                 `;
             });
 
-            // 5. Renderizar Tabela Assinaturas
             const tbodyAssinaturas = document.getElementById('tabelaSuperAssinaturas');
             tbodyAssinaturas.innerHTML = "";
             Object.entries(clientes).forEach(([id, c]) => {
-                const snapContratos = await get(ref(db, `empresas_clientes_dados/${id}/contratos`));
-                const qtdContratos = Object.keys(snapContratos.val() || {}).length;
-                const planoObj = planos[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
+                get(ref(db, `empresas_clientes_dados/${id}/contratos`)).then((snapContratos) => {
+                    const qtdContratos = Object.keys(snapContratos.val() || {}).length;
+                    const planoObj = planos[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
 
-                tbodyAssinaturas.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 font-bold text-blue-950">${c.razaoSocial}</td>
-                        <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planoObj.nome}</span></td>
-                        <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
-                        <td class="p-3"><b>${qtdContratos}</b> / ${planoObj.limiteContratos} contratos</td>
-                        <td class="p-3 text-center">
-                            <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${c.planoId}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
-                        </td>
-                    </tr>
-                `;
+                    tbodyAssinaturas.innerHTML += `
+                        <tr class="border-b hover:bg-slate-50">
+                            <td class="p-3 font-bold text-blue-950">${c.razaoSocial}</td>
+                            <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planoObj.nome}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
+                            <td class="p-3"><b>${qtdContratos}</b> / ${planoObj.limiteContratos} contratos</td>
+                            <td class="p-3 text-center">
+                                <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${c.planoId}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
+                            </td>
+                        </tr>
+                    `;
+                });
             });
         }
 
-        // --- Ações de Clientes ---
         window.abrirModalEmpresaCliente = async (id = null) => {
             document.getElementById('superEmpresaEditId').value = id || "";
             document.getElementById('tituloModalSuperEmpresa').innerText = id ? "Editar Empresa Cliente" : "Criar Nova Empresa Cliente";
@@ -2197,7 +2195,6 @@
             carregarPainelSuperadmin();
         };
 
-        // --- Ações de Planos ---
         window.abrirModalCriarPlano = async (pId = null) => {
             document.getElementById('superPlanoEditId').value = pId || "";
             document.getElementById('tituloModalSuperPlano').innerText = pId ? "Editar Plano SaaS" : "Criar Novo Plano SaaS";
@@ -2225,14 +2222,13 @@
             if (editId) {
                 await update(ref(db, `sistema_planos/${editId}`), pacote);
             } else {
-                await push(ref(db, 'sistema_planos'), pacote);
+                await push(ref(db, `sistema_planos`), pacote);
             }
             alert("Plano salvo com sucesso!");
             fecharModalSuperPlano();
             carregarPainelSuperadmin();
         };
 
-        // --- Ações de Administradores ---
         window.abrirModalCriarAdmin = () => {
             document.getElementById('superAdminNome').value = "";
             document.getElementById('superAdminEmail').value = "";
@@ -2271,7 +2267,6 @@
             carregarPainelSuperadmin();
         };
 
-        // --- Ações de Suporte (Impersonate & Logs) ---
         window.acessarComoSuporte = (clienteId, clienteNome) => {
             localStorage.setItem('connectpj_empresa_ativa', clienteId);
             localStorage.setItem('connectpj_empresa_nome', clienteNome);
@@ -2285,7 +2280,6 @@
             location.reload();
         };
 
-        // --- Ações de Assinaturas ---
         window.abrirModalAlterarPlanoEmpresa = (empresaId, planoAtualId) => {
             document.getElementById('alterarPlanoEmpresaId').value = empresaId;
             document.getElementById('selectNovoPlanoEmpresa').value = planoAtualId || "";
@@ -2302,6 +2296,102 @@
             carregarPainelSuperadmin();
         };
 
-        mudarSecao('dashboard');
+        // Outras funções de suporte e inicialização
+        let contratosLocais = {};
+        let folhasLocais = {};
+
+        onValue(ref(db, pathContratosDB), (snapshot) => {
+            contratosLocais = snapshot.val() || {};
+            const motorSelect = document.getElementById('motorContrato');
+            const relFiltroPrestador = document.getElementById('relFiltroPrestador');
+            const relFiltroCentroCusto = document.getElementById('relFiltroCentroCusto');
+            const docFiltroPrestador = document.getElementById('docFiltroPrestador');
+            
+            if(motorSelect) motorSelect.innerHTML = '<option value="">Selecione...</option>';
+            if(relFiltroPrestador) relFiltroPrestador.innerHTML = '<option value="todos">-- Todos os Prestadores --</option>';
+            if(relFiltroCentroCusto) relFiltroCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
+            if(docFiltroPrestador) docFiltroPrestador.innerHTML = '<option value="todos">-- Todos os Prestadores --</option>';
+            
+            const tbody = document.getElementById('listaContratos');
+            if(!tbody) return;
+            tbody.innerHTML = "";
+
+            const entradas = Object.entries(contratosLocais);
+            if (entradas.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="11" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>`;
+                return;
+            }
+
+            let centrosCustoSet = new Set();
+            let nomesPrestadoresSet = new Set();
+
+            entradas.forEach(([key, c]) => {
+                if (c.excluidoLogico) return;
+
+                const ehAdminGeral = (usuarioEmailLogado === EMAIL_MASTER_SISTEMA.toLowerCase() || perfilUsuarioLogado === 'Administrador');
+                if (!ehAdminGeral) {
+                    if ((c.email || c.emailCorp || "").toLowerCase() !== usuarioEmailLogado) return;
+                }
+
+                if (c.status === "Ativo") {
+                    let optA = document.createElement('option'); optA.value = key; optA.innerText = `${c.nome} (${c.razaoSocial || c.perfilTipo || "Membro"})`;
+                    if(motorSelect) motorSelect.appendChild(optA);
+                }
+
+                if (c.nome && c.nome.trim() !== "") nomesPrestadoresSet.add(c.nome.trim());
+                if (c.departamento && c.departamento.trim() !== "") centrosCustoSet.add(c.departamento.trim());
+
+                let badgeCor = "bg-slate-100 text-slate-800";
+                if (c.perfilTipo === "Administrador") badgeCor = "bg-purple-100 text-purple-800";
+                else if (c.perfilTipo === "RH") badgeCor = "bg-blue-100 text-blue-800";
+                else if (c.perfilTipo === "Financeiro") badgeCor = "bg-emerald-100 text-emerald-800";
+                else if (c.perfilTipo === "Gestor") badgeCor = "bg-amber-100 text-amber-800";
+                else if (c.perfilTipo === "Jurídico") badgeCor = "bg-indigo-100 text-indigo-800";
+
+                let fotoHtml = c.fotoBase64 ? `<img src="${c.fotoBase64}" class="w-10 h-10 rounded-full object-cover border">` : `<div class="w-10 h-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-xs text-slate-600">${(c.nome || 'P').substring(0,2).toUpperCase()}</div>`;
+                let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
+
+                let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : '---';
+                let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
+
+                tbody.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3">${fotoHtml}</td>
+                        <td class="p-3 font-semibold">${c.nome || '---'}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${badgeCor}">${c.perfilTipo || 'Prestador'}</span></td>
+                        <td class="p-3 text-slate-600">${c.email || c.emailCorp || '---'}<br><small>${c.telefone || ''}</small></td>
+                        <td class="p-3 text-slate-600"><b>${c.razaoSocial || '---'}</b><br><small>${c.cnpj || '---'}</small></td>
+                        <td class="p-3 text-slate-600">${vigenciaExibicao}</td>
+                        <td class="p-3 font-bold text-blue-950">${valorFormatado}</td>
+                        <td class="p-3 text-slate-600">${c.departamento || '---'}</td>
+                        <td class="p-3 text-center">${botaoAnexoContrato}</td>
+                        <td class="p-3"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+                        <td class="p-3 text-center space-x-1 flex justify-center items-center">
+                            <button onclick="reenviarConvitePrimeiroAcesso('${key}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-2 py-1 rounded text-xs font-bold" title="Reenviar Convite de Primeiro Acesso">📨 Convite</button>
+                            <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
+                            <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
+                            <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            nomesPrestadoresSet.forEach(nome => {
+                let optC = document.createElement('option'); optC.value = nome; optC.innerText = nome;
+                if(relFiltroPrestador) relFiltroPrestador.appendChild(optC);
+                let optDoc = document.createElement('option'); optDoc.value = nome; optDoc.innerText = nome;
+                if(docFiltroPrestador) docFiltroPrestador.appendChild(optDoc);
+            });
+            centrosCustoSet.forEach(cc => {
+                let optCC = document.createElement('option'); optCC.value = cc; optCC.innerText = cc;
+                if(relFiltroCentroCusto) relFiltroCentroCusto.appendChild(optCC);
+            });
+        });
+
+        onValue(ref(db, pathFolhasDB), (snapshot) => {
+            folhasLocais = snapshot.val() || {};
+        });
+
+        mostrarSecao('dashboard');
     </script>
 </body></html>
