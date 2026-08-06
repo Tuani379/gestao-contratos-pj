@@ -1096,7 +1096,7 @@
                 <thead>
                     <tr class="bg-slate-100 border-b font-extrabold text-slate-700">
                         <th class="p-3">Razão Social / Fantasia</th>
-                        <th class="p-3">CNPJ</th>
+                        <th class="p-3">CNPJ Principal & Filiais</th>
                         <th class="p-3">E-mail de Acesso</th>
                         <th class="p-3">Plano Ativo</th>
                         <th class="p-3 text-center">Status</th>
@@ -1159,7 +1159,7 @@
                 <thead>
                     <tr class="bg-slate-100 border-b font-extrabold text-slate-700">
                         <th class="p-3">Empresa Cliente</th>
-                        <th class="p-3">CNPJ</th>
+                        <th class="p-3">CNPJ & Filiais</th>
                         <th class="p-3 text-center">Ações de Suporte (Impersonate & Logs)</th>
                     </tr>
                 </thead>
@@ -1203,7 +1203,8 @@
         <div class="space-y-3 text-xs">
             <div><label class="block font-bold text-slate-700 mb-1">Razão Social</label><input type="text" id="superRazaoSocial" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">Nome Fantasia</label><input type="text" id="superNomeFantasia" class="w-full p-2.5 border rounded-lg bg-white"></div>
-            <div><label class="block font-bold text-slate-700 mb-1">CNPJ</label><input type="text" id="superCnpj" class="w-full p-2.5 border rounded-lg bg-white"></div>
+            <div><label class="block font-bold text-slate-700 mb-1">CNPJ Principal</label><input type="text" id="superCnpj" placeholder="00.000.000/0001-00" class="w-full p-2.5 border rounded-lg bg-white"></div>
+            <div><label class="block font-bold text-slate-700 mb-1">CNPJs Adicionais / Filiais (Vincular múltiplos)</label><input type="text" id="superCnpjsFiliais" placeholder="Ex: 00.000.000/0002-00, 00.000.000/0003-00" class="w-full p-2.5 border rounded-lg bg-white"><small class="text-slate-400">Separe os CNPJs adicionais por vírgula. Cada um poderá ter seu acesso ou visualização isolada.</small></div>
             <div><label class="block font-bold text-slate-700 mb-1">E-mail do Administrador (Para Início e Senha Provisória)</label><input type="email" id="superEmailAdmin" placeholder="cliente@empresa.com" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">Plano Inicial</label><select id="superPlanoSelect" class="w-full p-2.5 border rounded-lg bg-white font-bold text-blue-900"></select></div>
         </div>
@@ -2060,11 +2061,12 @@
             Object.entries(clientes).forEach(([id, c]) => {
                 clientesCount++;
                 let statusBadge = c.status === 'Suspenso' ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Suspenso</span>' : (c.status === 'Cancelado' ? '<span class="px-2 py-0.5 bg-red-100 text-red-800 rounded font-bold">Cancelado</span>' : '<span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Ativo</span>');
+                let cnpjsLista = c.cnpjFiliais ? `<br><small class="text-slate-500">Filiais: ${c.cnpjFiliais}</small>` : '';
                 
                 tbodyClientes.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-bold text-blue-950">${c.razaoSocial}<br><small class="text-slate-500">${c.nomeFantasia || ''}</small></td>
-                        <td class="p-3">${c.cnpj}</td>
+                        <td class="p-3"><b>${c.cnpj}</b>${cnpjsLista}</td>
                         <td class="p-3 text-slate-600">${c.emailAdmin || '---'}</td>
                         <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planos[c.planoId]?.nome || 'Padrão'}</span></td>
                         <td class="p-3 text-center">${statusBadge}</td>
@@ -2116,10 +2118,11 @@
             const tbodySuporte = document.getElementById('tabelaSuperSuporte');
             tbodySuporte.innerHTML = "";
             Object.entries(clientes).forEach(([id, c]) => {
+                let cnpjsLista = c.cnpjFiliais ? `<br><small class="text-slate-500">Filiais: ${c.cnpjFiliais}</small>` : '';
                 tbodySuporte.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-bold text-blue-950">${c.razaoSocial}</td>
-                        <td class="p-3">${c.cnpj}</td>
+                        <td class="p-3"><b>${c.cnpj}</b>${cnpjsLista}</td>
                         <td class="p-3 text-center space-x-2">
                             <button onclick="acessarComoSuporte('${id}', '${c.razaoSocial}')" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">🛠️ Acesso como Suporte (Impersonate)</button>
                             <button onclick="verLogsCliente('${id}')" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-bold text-xs transition">📋 Ver Logs</button>
@@ -2159,12 +2162,14 @@
                 document.getElementById('superRazaoSocial').value = data.razaoSocial || "";
                 document.getElementById('superNomeFantasia').value = data.nomeFantasia || "";
                 document.getElementById('superCnpj').value = data.cnpj || "";
+                document.getElementById('superCnpjsFiliais').value = data.cnpjFiliais || "";
                 document.getElementById('superEmailAdmin').value = data.emailAdmin || "";
                 document.getElementById('superPlanoSelect').value = data.planoId || "";
             } else {
                 document.getElementById('superRazaoSocial').value = "";
                 document.getElementById('superNomeFantasia').value = "";
                 document.getElementById('superCnpj').value = "";
+                document.getElementById('superCnpjsFiliais').value = "";
                 document.getElementById('superEmailAdmin').value = "";
             }
             document.getElementById('modalSuperEmpresa').classList.remove('hidden');
@@ -2176,11 +2181,13 @@
             const emailAdmin = document.getElementById('superEmailAdmin').value.trim().toLowerCase();
             const razaoSocial = document.getElementById('superRazaoSocial').value;
             const cnpj = document.getElementById('superCnpj').value;
+            const cnpjFiliais = document.getElementById('superCnpjsFiliais').value;
 
             const pacote = {
                 razaoSocial,
                 nomeFantasia: document.getElementById('superNomeFantasia').value,
                 cnpj,
+                cnpjFiliais,
                 emailAdmin,
                 planoId: document.getElementById('superPlanoSelect').value,
                 status: "Ativo"
@@ -2199,7 +2206,7 @@
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'), pacote);
                 const novaEmpresaId = novaEmpresaRef.key;
 
-                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
+                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma, com suporte a múltiplos CNPJs vinculados.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
                 alert(`Empresa criada com sucesso!\nE-mail de acesso: ${emailAdmin}\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
             }
             fecharModalSuperEmpresa();
