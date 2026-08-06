@@ -1097,13 +1097,14 @@
                     <tr class="bg-slate-100 border-b font-extrabold text-slate-700">
                         <th class="p-3">Razão Social / Fantasia</th>
                         <th class="p-3">CNPJ</th>
+                        <th class="p-3">E-mail de Acesso</th>
                         <th class="p-3">Plano Ativo</th>
                         <th class="p-3 text-center">Status</th>
                         <th class="p-3 text-center">Ações de Gestão</th>
                     </tr>
                 </thead>
                 <tbody id="tabelaSuperClientes">
-                    <tr><td colspan="5" class="p-4 text-center text-slate-400">Carregando clientes...</td></tr>
+                    <tr><td colspan="6" class="p-4 text-center text-slate-400">Carregando clientes...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -1203,6 +1204,7 @@
             <div><label class="block font-bold text-slate-700 mb-1">Razão Social</label><input type="text" id="superRazaoSocial" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">Nome Fantasia</label><input type="text" id="superNomeFantasia" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">CNPJ</label><input type="text" id="superCnpj" class="w-full p-2.5 border rounded-lg bg-white"></div>
+            <div><label class="block font-bold text-slate-700 mb-1">E-mail do Administrador (Para Início e Senha Provisória)</label><input type="email" id="superEmailAdmin" placeholder="cliente@empresa.com" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">Plano Inicial</label><select id="superPlanoSelect" class="w-full p-2.5 border rounded-lg bg-white font-bold text-blue-900"></select></div>
         </div>
         <div class="flex justify-end gap-2 pt-2 border-t">
@@ -1632,7 +1634,6 @@
             } catch (error) { alert("Erro ao entrar: " + error.message); }
         });
 
-        // Configuração segura e direta de Eventos para evitar travamentos de clique
         document.getElementById('btn-toggle-senha').addEventListener('click', () => {
             const inputSenha = document.getElementById('login-senha-saas');
             const iconeOlho = document.getElementById('icone-olho');
@@ -2064,6 +2065,7 @@
                     <tr class="border-b hover:bg-slate-50">
                         <td class="p-3 font-bold text-blue-950">${c.razaoSocial}<br><small class="text-slate-500">${c.nomeFantasia || ''}</small></td>
                         <td class="p-3">${c.cnpj}</td>
+                        <td class="p-3 text-slate-600">${c.emailAdmin || '---'}</td>
                         <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planos[c.planoId]?.nome || 'Padrão'}</span></td>
                         <td class="p-3 text-center">${statusBadge}</td>
                         <td class="p-3 text-center space-x-1">
@@ -2075,7 +2077,7 @@
                     </tr>
                 `;
             });
-            if (clientesCount === 0) tbodyClientes.innerHTML = `<tr><td colspan="5" class="p-4 text-center text-slate-400">Nenhuma empresa cliente cadastrada.</td></tr>`;
+            if (clientesCount === 0) tbodyClientes.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma empresa cliente cadastrada.</td></tr>`;
 
             const containerPlanos = document.getElementById('listaCardsPlanosSuper');
             containerPlanos.innerHTML = "";
@@ -2157,11 +2159,13 @@
                 document.getElementById('superRazaoSocial').value = data.razaoSocial || "";
                 document.getElementById('superNomeFantasia').value = data.nomeFantasia || "";
                 document.getElementById('superCnpj').value = data.cnpj || "";
+                document.getElementById('superEmailAdmin').value = data.emailAdmin || "";
                 document.getElementById('superPlanoSelect').value = data.planoId || "";
             } else {
                 document.getElementById('superRazaoSocial').value = "";
                 document.getElementById('superNomeFantasia').value = "";
                 document.getElementById('superCnpj').value = "";
+                document.getElementById('superEmailAdmin').value = "";
             }
             document.getElementById('modalSuperEmpresa').classList.remove('hidden');
         };
@@ -2169,21 +2173,34 @@
 
         window.salvarEmpresaClienteSuper = async () => {
             const editId = document.getElementById('superEmpresaEditId').value;
+            const emailAdmin = document.getElementById('superEmailAdmin').value.trim().toLowerCase();
+            const razaoSocial = document.getElementById('superRazaoSocial').value;
+            const cnpj = document.getElementById('superCnpj').value;
+
             const pacote = {
-                razaoSocial: document.getElementById('superRazaoSocial').value,
+                razaoSocial,
                 nomeFantasia: document.getElementById('superNomeFantasia').value,
-                cnpj: document.getElementById('superCnpj').value,
+                cnpj,
+                emailAdmin,
                 planoId: document.getElementById('superPlanoSelect').value,
                 status: "Ativo"
             };
-            if (!pacote.razaoSocial || !pacote.cnpj) { alert("Preencha a Razão Social e CNPJ!"); return; }
+            if (!razaoSocial || !cnpj || !emailAdmin) { alert("Preencha a Razão Social, o CNPJ e o E-mail do Administrador!"); return; }
 
             if (editId) {
                 await update(ref(db, `empresas_clientes/${editId}`), pacote);
                 alert("Empresa cliente atualizada com sucesso!");
             } else {
-                await push(ref(db, 'empresas_clientes'), pacote);
-                alert("Empresa cliente criada com sucesso!");
+                const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                try {
+                    await createUserWithEmailAndPassword(auth, emailAdmin, senhaProvisoria);
+                } catch(e) { console.warn(e); }
+
+                const novaEmpresaRef = push(ref(db, 'empresas_clientes'), pacote);
+                const novaEmpresaId = novaEmpresaRef.key;
+
+                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
+                alert(`Empresa criada com sucesso!\nE-mail de acesso: ${emailAdmin}\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
             }
             fecharModalSuperEmpresa();
             carregarPainelSuperadmin();
@@ -2296,7 +2313,6 @@
             carregarPainelSuperadmin();
         };
 
-        // Outras funções de suporte e inicialização
         let contratosLocais = {};
         let folhasLocais = {};
 
@@ -2369,7 +2385,7 @@
                         <td class="p-3 text-center space-x-1 flex justify-center items-center">
                             <button onclick="reenviarConvitePrimeiroAcesso('${key}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-2 py-1 rounded text-xs font-bold" title="Reenviar Convite de Primeiro Acesso">📨 Convite</button>
                             <button onclick="abrirModalEdicao('${key}')" class="bg-slate-100 hover:bg-slate-200 px-2 py-1 rounded text-xs font-bold">Editar</button>
-                            <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloquear' : 'Desbloquear'}</button>
+                            <button onclick="alternarBloqueioUsuario('${key}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded text-xs font-bold">${c.status === 'Ativo' ? 'Bloqueado' : 'Desbloquear'}</button>
                             <button onclick="exclusaoLogicaUsuario('${key}')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded text-xs font-bold">Excluir</button>
                         </td>
                     </tr>
