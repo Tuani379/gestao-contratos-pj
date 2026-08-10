@@ -401,7 +401,7 @@
                         <p class="text-xs text-slate-500">Visualize dados completos, vigências, aditivos, arquivos e alertas de vencimento.</p>
                     </div>
                     <div class="flex gap-2">
-                        <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">📊 Exportar Excel</button>
+                        <button id="btn-exportar-contratos-excel" onclick="exportarContratosExcel()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5 shadow-sm">📊 Exportar Excel</button>
                         <button id="btn-abrir-cadastro" onclick="abrirModalCadastro()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-sm">+ Novo Cadastro</button>
                     </div>
                 </div>
@@ -2460,7 +2460,6 @@
             document.getElementById('campoAdminEhPrestador').value = "nao";
             document.getElementById('bloco-admin-prestador').classList.add('hidden');
             
-            // Limpar campos
             ['campoNome', 'campoCpf', 'campoEmail', 'campoTelefone', 'campoContatoEmergencia', 'campoRazaoSocial', 'campoCNPJ', 'campoEmailCorp', 'campoInscricaoEstadual', 'campoInscricaoMunicipal', 'campoCep', 'campoLogradouro', 'campoNumero', 'campoBairro', 'campoCidade', 'campoEstado', 'campoVigenciaInicio', 'campoVigenciaFim', 'campoValorFixoMensal', 'campoMesAnoReajuste', 'campoCargo', 'campoDepartamento', 'campoGestorDireto', 'campoAditivos', 'campoHistoricoAlteracoes'].forEach(id => {
                 const el = document.getElementById(id);
                 if(el) el.value = "";
@@ -2611,7 +2610,6 @@
                 fecharModalCadastro();
             };
 
-            // Ler fotos e contratos
             let fotoB64 = null;
             let contratoB64 = null;
 
@@ -2706,6 +2704,22 @@
                 await update(ref(db, `${pathContratosDB}/${key}`), { excluidoLogico: true, status: "Inativo / Bloqueado" });
                 alert("Cadastro excluído com sucesso!");
                 registrarAuditoria("Contratos", "Exclusão de Cadastro", c.nome, "Ativo", "Excluído");
+            }
+        };
+
+        // EXPORTAR EXCEL DE CONTRATOS
+        window.exportarContratosExcel = () => {
+            const tabela = document.getElementById("tabela-contratos-export");
+            if (!tabela) {
+                alert("Tabela de contratos não encontrada!");
+                return;
+            }
+            try {
+                const livro = XLSX.utils.table_to_book(tabela, { sheet: "Equipe e Contratos" });
+                XLSX.writeFile(livro, `Equipe_e_Contratos_${empresaAtivaNome}.xlsx`);
+                registrarAuditoria("Contratos", "Exportação Excel", "Lista de Contratos", "-", "Arquivo Baixado");
+            } catch (err) {
+                alert("Erro ao exportar Excel: " + err.message);
             }
         };
 
