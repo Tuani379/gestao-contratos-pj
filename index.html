@@ -49,22 +49,18 @@
         </div>
     </div>
 
-    <!-- MODAL LIQUIDAR COM COMPROVANTE E AGENDAMENTO -->
-    <div id="modalLiquidar" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl border space-y-4">
-            <h3 class="text-lg font-bold text-blue-950">Liquidar Pagamento & Comprovante</h3>
-            <p class="text-xs text-slate-500">Informe a data do pagamento e anexe o comprovante bancário (TED/PIX).</p>
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Data Efetiva do Pagamento:</label>
-                <input type="date" id="inputDataEfetivaPagamento" class="w-full p-2.5 border rounded-lg text-xs bg-slate-50 font-bold">
+    <!-- MODAL VISUALIZAR ARQUIVO (PDF / IMAGEM) -->
+    <div id="modalVisualizarArquivo" class="hidden fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-[9999]">
+        <div class="bg-white rounded-2xl w-full max-w-3xl p-6 shadow-2xl border space-y-4 relative flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center border-b pb-2">
+                <h3 id="tituloModalVisualizarArquivo" class="text-lg font-bold text-blue-950">Visualizar Arquivo</h3>
+                <button onclick="fecharModalVisualizarArquivo()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-600 font-bold">✕</button>
             </div>
-            <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Anexar Comprovante (PDF ou Imagem):</label>
-                <input type="file" id="inputArquivoComprovante" accept=".pdf,image/*" class="w-full text-xs text-slate-500 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-600 file:text-white file:font-bold cursor-pointer">
+            <div id="conteudoVisualizacaoArquivo" class="flex-1 overflow-auto flex items-center justify-center bg-slate-100 rounded-xl p-4 min-h-[400px]">
+                <!-- Conteúdo dinâmico -->
             </div>
-            <div class="flex justify-end gap-2 pt-2 border-t">
-                <button onclick="fecharModalLiquidar()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
-                <button id="btnConfirmarLiquidar" onclick="executarLiquidacaoComprovante()" class="px-5 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-700">Confirmar Liquidação</button>
+            <div class="flex justify-end pt-2 border-t">
+                <button onclick="fecharModalVisualizarArquivo()" class="px-5 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold">Fechar</button>
             </div>
         </div>
     </div>
@@ -406,7 +402,7 @@
                     </div>
                     <div class="flex gap-2">
                         <button id="btn-exportar-contratos-excel" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition flex items-center gap-1.5">📊 Exportar Excel</button>
-                        <button id="btn-abrir-cadastro" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold text-sm">+ Novo Cadastro</button>
+                        <button id="btn-abrir-cadastro" onclick="abrirModalCadastro()" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-bold text-sm transition shadow-sm">+ Novo Cadastro</button>
                     </div>
                 </div>
 
@@ -437,11 +433,12 @@
                 <div id="modalCadastro" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
                     <div class="bg-white rounded-2xl w-full max-w-4xl p-8 overflow-y-auto max-h-[90vh] shadow-2xl space-y-6">
                         <h3 id="tituloModal" class="text-xl font-bold text-blue-950 border-b pb-3">Novo Cadastro / Contrato</h3>
+                        <input type="hidden" id="campoEditId">
                         
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/50 p-4 rounded-xl border border-blue-200">
                             <div>
                                 <label class="block text-xs font-extrabold text-blue-900 uppercase mb-1">Tipo de Contrato / Perfil:</label>
-                                <select id="campoPerfilTipo" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
+                                <select id="campoPerfilTipo" onchange="verificarPerfilAdminPrestador()" class="w-full p-2.5 border rounded-lg text-sm bg-white font-bold text-blue-950 outline-none">
                                     <option value="Administrador">Administrador</option>
                                     <option value="Financeiro">Financeiro</option>
                                     <option value="RH">RH</option>
@@ -560,8 +557,8 @@
                         </div>
 
                         <div class="flex justify-end gap-3 pt-4 border-t">
-                            <button id="btn-cancelar-cadastro" class="px-5 py-2.5 border rounded-xl text-xs font-semibold text-slate-600">Cancelar</button>
-                            <button id="btn-salvar-cadastro" class="px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-xs hover:bg-blue-800 transition shadow-md">Salvar Contrato</button>
+                            <button id="btn-cancelar-cadastro" onclick="fecharModalCadastro()" class="px-5 py-2.5 border rounded-xl text-xs font-semibold text-slate-600">Cancelar</button>
+                            <button id="btn-salvar-cadastro" onclick="salvarCadastro()" class="px-6 py-2.5 bg-blue-900 text-white rounded-xl font-bold text-xs hover:bg-blue-800 transition shadow-md">Salvar Contrato</button>
                         </div>
                     </div>
                 </div>
@@ -2153,7 +2150,6 @@
                     const snapContratosVal = snapContratos.val() || {};
                     const qtdContratos = Object.keys(snapContratosVal).length;
                     
-                    // Linha da Matriz / CNPJ Principal
                     const planoMatriz = cachePlanosSuper[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
                     tbodyAssinaturas.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
@@ -2167,7 +2163,6 @@
                         </tr>
                     `;
 
-                    // Linhas das Filiais se houver planos por filial salvos
                     if (c.planosFiliais && typeof c.planosFiliais === 'object') {
                         Object.entries(c.planosFiliais).forEach(([cnpjFilial, pFilialId]) => {
                             const planoFilialObj = cachePlanosSuper[pFilialId] || { nome: "Enterprise", limiteContratos: 50 };
@@ -2232,7 +2227,6 @@
             document.getElementById('superEmpresaEditId').value = id || "";
             document.getElementById('tituloModalSuperEmpresa').innerText = id ? "Editar Empresa Cliente" : "Criar Nova Empresa Cliente";
             
-            // Garantir que cachePlanosSuper esteja populado
             if (Object.keys(cachePlanosSuper).length === 0) {
                 const snapPlanos = await get(ref(db, 'sistema_planos'));
                 cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
@@ -2288,7 +2282,6 @@
             const cnpjFiliais = document.getElementById('superCnpjsFiliais').value;
             const planoIdMatriz = document.getElementById('superPlanoPrincipalSelect').value;
 
-            // Coletar planos específicos de cada filial
             let planosFiliaisObj = {};
             const selectsFiliais = document.querySelectorAll('.select-plano-filial');
             selectsFiliais.forEach(sel => {
@@ -2317,8 +2310,6 @@
                 } catch(e) { console.warn(e); }
 
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'), pacote);
-                const novaEmpresaId = novaEmpresaRef.key;
-
                 await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma, com suporte a múltiplos CNPJs vinculados e planos personalizados.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
                 alert(`Empresa criada com sucesso!\nE-mail de acesso: ${emailAdmin}\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
             }
@@ -2446,10 +2437,8 @@
             const dataCli = snapCli.val() || {};
 
             if (dataCli.cnpj === cnpjAlvo) {
-                // É a matriz
                 await update(ref(db, `empresas_clientes/${empId}`), { planoId: novoPlanoId });
             } else {
-                // É uma filial
                 let planosFiliaisObj = dataCli.planosFiliais || {};
                 planosFiliaisObj[cnpjAlvo] = novoPlanoId;
                 await update(ref(db, `empresas_clientes/${empId}`), { planosFiliais: planosFiliaisObj });
@@ -2458,6 +2447,294 @@
             alert("Plano alterado com sucesso para este CNPJ!");
             fecharModalAlterarPlanoEmpresa();
             carregarPainelSuperadmin();
+        };
+
+        // ==========================================
+        // GESTÃO DE CONTRATOS & CADASTROS
+        // ==========================================
+
+        window.abrirModalCadastro = () => {
+            document.getElementById('campoEditId').value = "";
+            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
+            document.getElementById('campoPerfilTipo').value = "Prestador";
+            document.getElementById('campoAdminEhPrestador').value = "nao";
+            document.getElementById('bloco-admin-prestador').classList.add('hidden');
+            
+            // Limpar campos
+            ['campoNome', 'campoCpf', 'campoEmail', 'campoTelefone', 'campoContatoEmergencia', 'campoRazaoSocial', 'campoCNPJ', 'campoEmailCorp', 'campoInscricaoEstadual', 'campoInscricaoMunicipal', 'campoCep', 'campoLogradouro', 'campoNumero', 'campoBairro', 'campoCidade', 'campoEstado', 'campoVigenciaInicio', 'campoVigenciaFim', 'campoValorFixoMensal', 'campoMesAnoReajuste', 'campoCargo', 'campoDepartamento', 'campoGestorDireto', 'campoAditivos', 'campoHistoricoAlteracoes'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
+            document.getElementById('campoStatus').value = "Ativo";
+            document.getElementById('campoFotoArquivo').value = "";
+            document.getElementById('campoArquivoContrato').value = "";
+            document.getElementById('campoDocsMultiplos').value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+            documentosComplianceTemporarios = [];
+            atualizarListaDocsCompliancePreview();
+            
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.fecharModalCadastro = () => {
+            document.getElementById('modalCadastro').classList.add('hidden');
+        };
+
+        window.verificarPerfilAdminPrestador = () => {
+            const perfil = document.getElementById('campoPerfilTipo').value;
+            const bloco = document.getElementById('bloco-admin-prestador');
+            if (perfil === 'Administrador') {
+                bloco.classList.remove('hidden');
+            } else {
+                bloco.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = "nao";
+            }
+        };
+
+        window.adicionarDocumentoComplianceLista = () => {
+            const inputFiles = document.getElementById('campoDocsMultiplos');
+            const validade = document.getElementById('campoValidadeDocsMultiplos').value;
+
+            if (inputFiles.files.length === 0) { alert("Selecione ao menos um arquivo!"); return; }
+
+            Array.from(inputFiles.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    documentosComplianceTemporarios.push({
+                        nomeArquivo: file.name,
+                        base64: reader.result,
+                        validade: validade || "Não informada",
+                        dataUpload: new Date().toISOString()
+                    });
+                    atualizarListaDocsCompliancePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+            inputFiles.value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+        };
+
+        function atualizarListaDocsCompliancePreview() {
+            const container = document.getElementById('lista-docs-compliance-preview');
+            if(!container) return;
+            if (documentosComplianceTemporarios.length === 0) {
+                container.innerHTML = `<span class="text-slate-400">Nenhum documento adicional anexado.</span>`;
+                return;
+            }
+            container.innerHTML = "";
+            documentosComplianceTemporarios.forEach((doc, idx) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border">
+                        <div><b>${doc.nomeArquivo}</b> <small class="text-slate-500">(Validade: ${doc.validade})</small></div>
+                        <button type="button" onclick="removerDocComplianceTemp(${idx})" class="text-red-600 font-bold hover:underline text-xs">Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.removerDocComplianceTemp = (idx) => {
+            documentosComplianceTemporarios.splice(idx, 1);
+            atualizarListaDocsCompliancePreview();
+        };
+
+        window.salvarCadastro = async () => {
+            const editId = document.getElementById('campoEditId').value;
+            const nome = document.getElementById('campoNome').value;
+            const email = document.getElementById('campoEmail').value.trim().toLowerCase();
+            const perfilTipo = document.getElementById('campoPerfilTipo').value;
+
+            if (!nome || !email) { alert("Nome e E-mail são obrigatórios!"); return; }
+
+            const fileFoto = document.getElementById('campoFotoArquivo');
+            const fileContrato = document.getElementById('campoArquivoContrato');
+
+            const processarSalvamento = async (fotoBase64 = null, contratoBase64 = null) => {
+                const pacote = {
+                    nome,
+                    cpf: document.getElementById('campoCpf').value,
+                    email,
+                    telefone: document.getElementById('campoTelefone').value,
+                    contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
+                    razaoSocial: document.getElementById('campoRazaoSocial').value,
+                    cnpj: document.getElementById('campoCNPJ').value,
+                    emailCorp: document.getElementById('campoEmailCorp').value,
+                    inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
+                    inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
+                    cep: document.getElementById('campoCep').value,
+                    logradouro: document.getElementById('campoLogradouro').value,
+                    numero: document.getElementById('campoNumero').value,
+                    bairro: document.getElementById('campoBairro').value,
+                    cidade: document.getElementById('campoCidade').value,
+                    estado: document.getElementById('campoEstado').value,
+                    vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
+                    vigenciaFim: document.getElementById('campoVigenciaFim').value,
+                    valorFixoMensal: parseFloat(document.getElementById('campoValorFixoMensal').value || 0),
+                    mesAnoReajuste: document.getElementById('campoMesAnoReajuste').value,
+                    indiceReajuste: document.getElementById('campoIndiceReajuste').value,
+                    cargo: document.getElementById('campoCargo').value,
+                    departamento: document.getElementById('campoDepartamento').value,
+                    gestorDireto: document.getElementById('campoGestorDireto').value,
+                    aditivos: document.getElementById('campoAditivos').value,
+                    status: document.getElementById('campoStatus').value,
+                    perfilTipo,
+                    adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
+                    historicoAlteracoes: document.getElementById('campoHistoricoAlteracoes').value,
+                    documentosCompliance: documentosComplianceTemporarios
+                };
+
+                if (fotoBase64) pacote.fotoBase64 = fotoBase64;
+                if (contratoBase64) pacote.arquivoContratoBase64 = contratoBase64;
+
+                if (editId) {
+                    const atual = contratosLocais[editId] || {};
+                    if (!pacote.fotoBase64 && atual.fotoBase64) pacote.fotoBase64 = atual.fotoBase64;
+                    if (!pacote.arquivoContratoBase64 && atual.arquivoContratoBase64) pacote.arquivoContratoBase64 = atual.arquivoContratoBase64;
+                    if (atual.documentosCompliance && documentosComplianceTemporarios.length === 0) {
+                        pacote.documentosCompliance = atual.documentosCompliance;
+                    }
+
+                    await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+                    await registrarAuditoria("Contratos", "Edição de Cadastro", nome, "-", "Atualizado");
+                    alert("Cadastro atualizado com sucesso!");
+                } else {
+                    pacote.senhaTemporaria = true;
+                    const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, senhaProvisoria);
+                    } catch(e) { console.warn(e); }
+
+                    await push(ref(db, pathContratosDB), pacote);
+                    await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá ${nome}, seu cadastro foi realizado na empresa ${empresaAtivaNome}.`, "sucesso", email, nome, senhaProvisoria);
+                    await registrarAuditoria("Contratos", "Novo Cadastro", nome, "-", "Criado");
+                    alert(`Prestador/Membro cadastrado com sucesso!\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
+                }
+                fecharModalCadastro();
+            };
+
+            // Ler fotos e contratos
+            let fotoB64 = null;
+            let contratoB64 = null;
+
+            const lerArquivoAsync = (file) => new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+
+            if (fileFoto.files.length > 0) {
+                fotoB64 = await lerArquivoAsync(fileFoto.files[0]);
+            }
+            if (fileContrato.files.length > 0) {
+                contratoB64 = await lerArquivoAsync(fileContrato.files[0]);
+            }
+
+            if (editId) {
+                const regAtual = contratosLocais[editId] || {};
+                processarSalvamento(fotoB64 || regAtual.fotoBase64, contratoB64 || regAtual.arquivoContratoBase64);
+            } else {
+                processarSalvamento(fotoB64, contratoB64);
+            }
+        };
+
+        window.abrirModalEdicao = (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+
+            document.getElementById('campoEditId').value = key;
+            document.getElementById('tituloModal').innerText = "Editar Cadastro / Contrato";
+            document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
+            document.getElementById('campoAdminEhPrestador').value = c.adminEhPrestador || 'nao';
+            verificarPerfilAdminPrestador();
+
+            document.getElementById('campoNome').value = c.nome || "";
+            document.getElementById('campoCpf').value = c.cpf || "";
+            document.getElementById('campoEmail').value = c.email || "";
+            document.getElementById('campoTelefone').value = c.telefone || "";
+            document.getElementById('campoContatoEmergencia').value = c.contatoEmergencia || "";
+            document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
+            document.getElementById('campoCNPJ').value = c.cnpj || "";
+            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
+            document.getElementById('campoInscricaoEstadual').value = c.inscricaoEstadual || "";
+            document.getElementById('campoInscricaoMunicipal').value = c.inscricaoMunicipal || "";
+            document.getElementById('campoCep').value = c.cep || "";
+            document.getElementById('campoLogradouro').value = c.logradouro || "";
+            document.getElementById('campoNumero').value = c.numero || "";
+            document.getElementById('campoBairro').value = c.bairro || "";
+            document.getElementById('campoCidade').value = c.cidade || "";
+            document.getElementById('campoEstado').value = c.estado || "";
+            document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
+            document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
+            document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+            document.getElementById('campoMesAnoReajuste').value = c.mesAnoReajuste || "";
+            document.getElementById('campoIndiceReajuste').value = c.indiceReajuste || "IPCA";
+            document.getElementById('campoCargo').value = c.cargo || "";
+            document.getElementById('campoDepartamento').value = c.departamento || "";
+            document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
+            document.getElementById('campoAditivos').value = c.aditivos || "";
+            document.getElementById('campoStatus').value = c.status || "Ativo";
+            document.getElementById('campoHistoricoAlteracoes').value = c.historicoAlteracoes || "";
+
+            documentosComplianceTemporarios = c.documentosCompliance || [];
+            atualizarListaDocsCompliancePreview();
+
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.reenviarConvitePrimeiroAcesso = async (key) => {
+            const c = contratosLocais[key];
+            if (!c || !c.email) { alert("E-mail não cadastrado para este registro!"); return; }
+            const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+            await update(ref(db, `${pathContratosDB}/${key}`), { senhaTemporaria: true });
+            await registrarNotificacao("Convite de Acesso", `Olá ${c.nome}, aqui está seu novo convite de acesso para o ConnectPJ.`, "sucesso", c.email, c.nome, senhaProvisoria);
+            alert(`Convite reenviado para ${c.email}!\nNova senha provisória: ${senhaProvisoria}`);
+            registrarAuditoria("Contratos", "Reenvio de Convite", c.nome, "-", c.email);
+        };
+
+        window.alternarBloqueioUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+            const novoStatus = c.status === 'Ativo' ? 'Inativo / Bloqueado' : 'Ativo';
+            await update(ref(db, `${pathContratosDB}/${key}`), { status: novoStatus });
+            alert(`Status de ${c.nome} alterado para: ${novoStatus}`);
+            registrarAuditoria("Contratos", "Alteração de Status", c.nome, c.status, novoStatus);
+        };
+
+        window.exclusaoLogicaUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+            if (confirm(`Deseja realmente excluir o cadastro de ${c.nome}?`)) {
+                await update(ref(db, `${pathContratosDB}/${key}`), { excluidoLogico: true, status: "Inativo / Bloqueado" });
+                alert("Cadastro excluído com sucesso!");
+                registrarAuditoria("Contratos", "Exclusão de Cadastro", c.nome, "Ativo", "Excluído");
+            }
+        };
+
+        // VISUALIZAÇÃO DE ARQUIVOS
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-view-arquivo-contrato');
+            if (btn) {
+                const key = btn.dataset.id;
+                const c = contratosLocais[key];
+                if (c && c.arquivoContratoBase64) {
+                    abrirModalVisualizarArquivo("Contrato - " + c.nome, c.arquivoContratoBase64);
+                }
+            }
+        });
+
+        window.abrirModalVisualizarArquivo = (titulo, base64Data) => {
+            document.getElementById('tituloModalVisualizarArquivo').innerText = titulo;
+            const container = document.getElementById('conteudoVisualizacaoArquivo');
+            
+            if (base64Data.startsWith('data:application/pdf')) {
+                container.innerHTML = `<iframe src="${base64Data}" class="w-full h-[500px] border rounded-lg"></iframe>`;
+            } else {
+                container.innerHTML = `<img src="${base64Data}" class="max-w-full max-h-[500px] object-contain rounded-lg">`;
+            }
+            document.getElementById('modalVisualizarArquivo').classList.remove('hidden');
+        };
+
+        window.fecharModalVisualizarArquivo = () => {
+            document.getElementById('modalVisualizarArquivo').classList.add('hidden');
         };
 
         let contratosLocais = {};
@@ -2515,7 +2792,7 @@
                 let valorFormatado = c.valorFixoMensal ? 'R$ ' + parseFloat(c.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '---';
 
                 let vigenciaExibicao = (c.vigenciaInicio && c.vigenciaFim) ? `${c.vigenciaInicio.split('-').reverse().join('/')} até ${c.vigenciaFim.split('-').reverse().join('/')}` : '---';
-                let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded text-[11px] font-bold" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
+                let botaoAnexoContrato = c.arquivoContratoBase64 ? `<button class="btn-view-arquivo-contrato bg-blue-50 text-blue-700 border border-blue-200 px-2.5 py-1 rounded text-[11px] font-bold shadow-sm" data-id="${key}">📄 Ver Arquivo</button>` : '<span class="text-slate-400">---</span>';
 
                 tbody.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
