@@ -290,7 +290,7 @@
                 </div>
 
                 <div class="flex justify-end gap-2 px-1">
-                    <button onclick="abrirModalGerarFolha()" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">🔄 Gerar / Atualizar Folha da Competência</button>
+                    <button id="btn-gerar-folha" class="bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold py-2.5 px-4 rounded-xl transition shadow-sm">🔄 Gerar / Atualizar Folha da Competência</button>
                 </div>
 
                 <!-- MODAL GERAR FOLHA -->
@@ -312,8 +312,8 @@
                             </table>
                         </div>
                         <div class="flex justify-end gap-2">
-                            <button onclick="fecharModalGerarFolha()" class="px-4 py-2 border rounded text-xs font-semibold">Cancelar</button>
-                            <button onclick="processarGeracaoFolha()" class="px-4 py-2 bg-blue-600 text-white rounded font-bold text-xs">Processar / Atualizar</button>
+                            <button id="btn-cancelar-gerar-folha" class="px-4 py-2 border rounded">Cancelar</button>
+                            <button id="btn-confirmar-gerar-folha" class="px-4 py-2 bg-blue-600 text-white rounded font-bold">Processar / Atualizar</button>
                         </div>
                     </div>
                 </div>
@@ -348,7 +348,7 @@
                             <label class="block text-xs font-bold text-slate-700 mb-1">Valor (R$)</label>
                             <input id="motorValor" type="number" placeholder="Ex: 1500" class="w-full p-2 border rounded text-sm">
                         </div>
-                        <button onclick="aplicarLancamentoMotor()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">Aplicar</button>
+                        <button id="btn-aplicar-motor" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">Aplicar</button>
                     </div>
                 </div>
 
@@ -1283,7 +1283,7 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-        import { getDatabase, ref, push, onValue, update, remove, get, set } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+        import { getDatabase, ref, push, onValue, update, remove, get } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
         import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged, updatePassword, sendPasswordResetEmail, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
         const EMAIL_MASTER_SISTEMA = "tuanicaraca@gmail.com";
@@ -1313,16 +1313,8 @@
             const opt3 = document.createElement('option'); opt3.value = valorCompetencia; opt3.innerText = `${nome} / ${anoAtualSistema}`;
             const opt4 = document.createElement('option'); opt4.value = valorCompetencia; opt4.innerText = `${nome} / ${anoAtualSistema}`;
             const opt5 = document.createElement('option'); opt5.value = valorCompetencia; opt5.innerText = `${nome} / ${anoAtualSistema}`;
-            if (numeroMes === "07") { opt1.selected = true; opt2.selected = true; opt3.selected = true; opt4.selected = true; } // Deixando Julho como padrão se desejado, ou ajustando para o mês atual
+            if (numeroMes === mesAtualSistema) { opt1.selected = true; opt2.selected = true; opt3.selected = true; opt4.selected = true; }
             filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2); relFiltroCompetencia.appendChild(opt3); docFiltroCompetencia.appendChild(opt4); auditoriaFiltroCompetencia.appendChild(opt5);
-        });
-
-        competenciaSelecionada = filtroCompetencia.value;
-
-        filtroCompetencia.addEventListener('change', (e) => {
-            competenciaSelecionada = e.target.value;
-            renderizarFolhaPagamento();
-            renderizarTabelasEstatísticas();
         });
 
         const EMAILJS_PUBLIC_KEY = "IKtFoPKIDR5XuJcXo"; 
@@ -1974,10 +1966,7 @@
                 }
             });
             if(id === 'relatorios') atualizarRelatoriosEtapa13();
-            if(id === 'dashboard') {
-                renderizarFolhaPagamento();
-                renderizarTabelasEstatísticas();
-            }
+            if(id === 'dashboard') renderizarTabelasEstatísticas();
             if(id === 'documentos') atualizarCentralDocumentos();
             if(id === 'auditoria') renderizarTabelaAuditoria();
         };
@@ -2036,759 +2025,734 @@
         };
 
         // ==========================================
-        // FOLHA DE PAGAMENTO E TESOURARIA
+        // 👑 FUNÇÕES DO PAINEL SUPERADMIN MASTER
         // ==========================================
 
-        window.abrirModalGerarFolha = () => {
-            const container = document.getElementById('listaContratosParaFolha');
-            container.innerHTML = "";
-            let count = 0;
-            Object.entries(contratosLocais).forEach(([key, c]) => {
-                if (c.excluidoLogico || c.status !== "Ativo") return;
-                count++;
-                container.innerHTML += `
-                    <tr class="border-b hover:bg-slate-50">
-                        <td class="p-2 text-center"><input type="checkbox" value="${key}" checked class="chk-contrato-folha w-4 h-4 rounded text-blue-600"></td>
-                        <td class="p-2 font-bold">${c.nome}</td>
-                        <td class="p-2 text-slate-600">${c.cnpj || '---'}</td>
-                        <td class="p-2 text-right font-bold">R$ ${parseFloat(c.valorFixoMensal || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                    </tr>
-                `;
-            });
-            if (count === 0) {
-                container.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum contrato ativo encontrado.</td></tr>`;
-            }
-            document.getElementById('modalGerarFolha').classList.remove('hidden');
-        };
-
-        window.fecharModalGerarFolha = () => {
-            document.getElementById('modalGerarFolha').classList.add('hidden');
-        };
-
-        window.processarGeracaoFolha = async () => {
-            const checkboxes = document.querySelectorAll('.chk-contrato-folha:checked');
-            if (checkboxes.length === 0) { alert("Selecione ao menos um contrato!"); return; }
-
-            const folhaAtualObj = folhasLocais[competenciaSelecionada] || { regular: {}, complementar: {} };
-            let regularObj = folhaAtualObj.regular || {};
-
-            checkboxes.forEach(chk => {
-                const contratoId = chk.value;
-                const c = contratosLocais[contratoId];
-                if (c && !regularObj[contratoId]) {
-                    regularObj[contratoId] = {
-                        contratoId,
-                        nome: c.nome,
-                        cnpj: c.cnpj || "---",
-                        valor: c.valorFixoMensal || 0,
-                        vencimento: "2026-" + competenciaSelecionada.split('-')[0] + "-10",
-                        status: "Pendente",
-                        nfBase64: null,
-                        nfNome: null
-                    };
+        window.mudarAbasSuperadmin = (aba) => {
+            const abas = ['clientes', 'planos', 'admins', 'suporte', 'assinaturas'];
+            abas.forEach(a => {
+                const btn = document.getElementById(`tab-super-${a}`);
+                const conteudo = document.getElementById(`super-conteudo-${a}`);
+                if (btn) {
+                    btn.className = (a === aba) ? "py-3 px-4 rounded-xl bg-blue-900 text-white transition text-center shadow-sm" : "py-3 px-4 rounded-xl text-slate-700 hover:bg-slate-100 transition text-center";
+                }
+                if (conteudo) {
+                    conteudo.classList.toggle('hidden', a !== aba);
                 }
             });
-
-            await set(ref(db, `${pathFolhasDB}/${competenciaSelecionada}`), {
-                regular: regularObj,
-                complementar: folhaAtualObj.complementar || {}
-            });
-
-            await registrarAuditoria("Folha", "Geração / Atualização de Folha", competenciaSelecionada, "-", "Processado com Sucesso");
-            alert("Folha da competência processada com sucesso!");
-            fecharModalGerarFolha();
-            renderizarFolhaPagamento();
+            carregarPainelSuperadmin();
         };
 
-        function renderizarFolhaPagamento() {
-            const tbodyRegular = document.getElementById('listaFolha');
-            const tbodyComp = document.getElementById('listaFolhaComplementar');
-            const containerComp = document.getElementById('containerFolhaComplementar');
-            if(!tbodyRegular) return;
+        let cachePlanosSuper = {};
 
-            tbodyRegular.innerHTML = "";
-            const dadosCompetencia = folhasLocais[competenciaSelecionada] || { regular: {}, complementar: {} };
-            const regular = dadosCompetencia.regular || {};
-            const complementar = dadosCompetencia.complementar || {};
+        async function carregarPainelSuperadmin() {
+            const [snapClientes, snapPlanos, snapAdmins] = await Promise.all([
+                get(ref(db, 'empresas_clientes')),
+                get(ref(db, 'sistema_planos')),
+                get(ref(db, 'sistema_admins'))
+            ]);
 
-            let countReg = 0;
-            Object.entries(regular).forEach(([itemKey, item]) => {
-                countReg++;
-                let statusBadge = `<span class="px-2 py-1 bg-amber-100 text-amber-800 rounded font-bold text-[10px]">Pendente</span>`;
-                if (item.status === "Aprovado") statusBadge = `<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">Aprovado</span>`;
-                else if (item.status === "Pago") statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-900 rounded font-bold text-[10px]">Pago ✔</span>`;
+            const clientes = snapClientes.val() || {};
+            cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            const admins = snapAdmins.val() || {};
 
-                let nfHtml = item.nfNome ? `<span class="text-blue-700 font-bold text-[11px]">${item.nfNome}</span>` : `<span class="text-slate-400">Não enviada</span>`;
-                let btnVerNf = item.nfBase64 ? `<button onclick="abrirModalVisualizarArquivo('Nota Fiscal - ${item.nome}', '${item.nfBase64}')" class="bg-blue-50 text-blue-700 border border-blue-200 px-2 py-1 rounded text-[11px] font-bold">📄 Ver NF</button>` : `<span class="text-slate-400">---</span>`;
+            const selectPlanoEmpresa = document.getElementById('superPlanoPrincipalSelect');
+            const selectNovoPlanoEmpresa = document.getElementById('selectNovoPlanoEmpresa');
+            selectPlanoEmpresa.innerHTML = "";
+            selectNovoPlanoEmpresa.innerHTML = "";
 
-                tbodyRegular.innerHTML += `
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                selectPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+                selectNovoPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome}</option>`;
+            });
+
+            const tbodyClientes = document.getElementById('tabelaSuperClientes');
+            tbodyClientes.innerHTML = "";
+            let clientesCount = 0;
+
+            Object.entries(clientes).forEach(([id, c]) => {
+                clientesCount++;
+                let statusBadge = c.status === 'Suspenso' ? '<span class="px-2 py-0.5 bg-amber-100 text-amber-800 rounded font-bold">Suspenso</span>' : (c.status === 'Cancelado' ? '<span class="px-2 py-0.5 bg-red-100 text-red-800 rounded font-bold">Cancelado</span>' : '<span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Ativo</span>');
+                let cnpjsLista = c.cnpjFiliais ? `<br><small class="text-slate-500">Filiais: ${c.cnpjFiliais}</small>` : '';
+                
+                tbodyClientes.innerHTML += `
                     <tr class="border-b hover:bg-slate-50">
-                        <td class="p-3 font-bold text-slate-900">${item.nome}</td>
-                        <td class="p-3 text-slate-600">${item.cnpj}</td>
-                        <td class="p-3 font-bold text-blue-950">R$ ${parseFloat(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3 text-center"><input type="date" value="${item.vencimento || ''}" onchange="atualizarVencimentoFolha('${competenciaSelecionada}', 'regular', '${itemKey}', this.value)" class="p-1 border rounded text-xs bg-white"></td>
-                        <td class="p-3 text-center">${nfHtml}</td>
-                        <td class="p-3 text-center">${btnVerNf}</td>
-                        <td class="p-3 text-center space-x-2">
-                            ${statusBadge}
-                            <select onchange="alterarStatusFolhaItem('${competenciaSelecionada}', 'regular', '${itemKey}', this.value)" class="p-1 border rounded text-xs bg-white font-bold text-slate-700">
-                                <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                <option value="Aprovado" ${item.status === 'Aprovado' ? 'selected' : ''}>Aprovar</option>
-                                <option value="Pago" ${item.status === 'Pago' ? 'selected' : ''}>Marcar Pago</option>
-                            </select>
+                        <td class="p-3 font-bold text-blue-950">${c.razaoSocial}<br><small class="text-slate-500">${c.nomeFantasia || ''}</small></td>
+                        <td class="p-3"><b>${c.cnpj}</b>${cnpjsLista}</td>
+                        <td class="p-3 text-slate-600">${c.emailAdmin || '---'}</td>
+                        <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${cachePlanosSuper[c.planoId]?.nome || 'Padrão'}</span></td>
+                        <td class="p-3 text-center">${statusBadge}</td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="abrirModalEmpresaCliente('${id}')" class="bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-bold text-xs">Editar</button>
+                            <button onclick="mudarStatusEmpresaCliente('${id}', 'Ativo')" class="bg-green-100 hover:bg-green-200 text-green-800 px-2 py-1 rounded font-bold text-xs">Ativar</button>
+                            <button onclick="mudarStatusEmpresaCliente('${id}', 'Suspenso')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2 py-1 rounded font-bold text-xs">Suspender</button>
+                            <button onclick="mudarStatusEmpresaCliente('${id}', 'Cancelado')" class="bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded font-bold text-xs">Cancelar</button>
                         </td>
                     </tr>
                 `;
             });
+            if (clientesCount === 0) tbodyClientes.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhuma empresa cliente cadastrada.</td></tr>`;
 
-            if (countReg === 0) {
-                tbodyRegular.innerHTML = `<tr><td colspan="7" class="p-4 text-center text-slate-400">Nenhum registro na folha regular desta competência. Clique em "Gerar / Atualizar Folha da Competência".</td></tr>`;
-            }
-
-            let countComp = 0;
-            tbodyComp.innerHTML = "";
-            Object.entries(complementar).forEach(([itemKey, item]) => {
-                countComp++;
-                let statusBadge = `<span class="px-2 py-1 bg-amber-100 text-amber-800 rounded font-bold text-[10px]">Pendente</span>`;
-                if (item.status === "Aprovado") statusBadge = `<span class="px-2 py-1 bg-emerald-100 text-emerald-800 rounded font-bold text-[10px]">Aprovado</span>`;
-                else if (item.status === "Pago") statusBadge = `<span class="px-2 py-1 bg-green-100 text-green-900 rounded font-bold text-[10px]">Pago ✔</span>`;
-
-                let nfHtml = item.nfNome ? `<span class="text-amber-900 font-bold text-[11px]">${item.nfNome}</span>` : `<span class="text-slate-400">Não enviada</span>`;
-                let btnVerNf = item.nfBase64 ? `<button onclick="abrirModalVisualizarArquivo('Nota Fiscal Comp. - ${item.nome}', '${item.nfBase64}')" class="bg-amber-50 text-amber-900 border border-amber-200 px-2 py-1 rounded text-[11px] font-bold">📄 Ver NF</button>` : `<span class="text-slate-400">---</span>`;
-
-                tbodyComp.innerHTML += `
-                    <tr class="border-b hover:bg-amber-50/20">
-                        <td class="p-3 font-bold text-amber-950">${item.nome} <br><small class="text-amber-700">${item.evento}</small></td>
-                        <td class="p-3 text-slate-600">${item.cnpj}</td>
-                        <td class="p-3 font-bold text-amber-900">R$ ${parseFloat(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3 text-center"><input type="date" value="${item.vencimento || ''}" onchange="atualizarVencimentoFolha('${competenciaSelecionada}', 'complementar', '${itemKey}', this.value)" class="p-1 border rounded text-xs bg-white"></td>
-                        <td class="p-3 text-center">${nfHtml}</td>
-                        <td class="p-3 text-center">${btnVerNf}</td>
-                        <td class="p-3 text-center space-x-2">
-                            ${statusBadge}
-                            <select onchange="alterarStatusFolhaItem('${competenciaSelecionada}', 'complementar', '${itemKey}', this.value)" class="p-1 border rounded text-xs bg-white font-bold text-slate-700">
-                                <option value="Pendente" ${item.status === 'Pendente' ? 'selected' : ''}>Pendente</option>
-                                <option value="Aprovado" ${item.status === 'Aprovado' ? 'selected' : ''}>Aprovar</option>
-                                <option value="Pago" ${item.status === 'Pago' ? 'selected' : ''}>Marcar Pago</option>
-                            </select>
-                        </td>
-                    </tr>
-                `;
-            });
-
-            if (countComp > 0) {
-                containerComp.classList.remove('hidden');
-            } else {
-                containerComp.classList.add('hidden');
-            }
-            renderizarTabelasEstatísticas();
-        }
-
-        window.aplicarLancamentoMotor = async () => {
-            const contratoId = document.getElementById('motorContrato').value;
-            const tipo = document.getElementById('motorTipo').value;
-            const evento = document.getElementById('motorEvento').value;
-            const valor = parseFloat(document.getElementById('motorValor').value || 0);
-
-            if (!contratoId || valor <= 0) { alert("Selecione o prestador e informe um valor válido!"); return; }
-            const c = contratosLocais[contratoId];
-            if (!c) return;
-
-            const folhaAtualObj = folhasLocais[competenciaSelecionada] || { regular: {}, complementar: {} };
-            
-            if (tipo === 'regular') {
-                if (!folhaAtualObj.regular[contratoId]) {
-                    folhaAtualObj.regular[contratoId] = { contratoId, nome: c.nome, cnpj: c.cnpj || "---", valor: c.valorFixoMensal || 0, vencimento: "", status: "Pendente" };
-                }
-                folhaAtualObj.regular[contratoId].valor = parseFloat(folhaAtualObj.regular[contratoId].valor || 0) + valor;
-            } else {
-                const compKey = push(ref(db, `${pathFolhasDB}/${competenciaSelecionada}/complementar`)).key;
-                if (!folhaAtualObj.complementar) folhaAtualObj.complementar = {};
-                folhaAtualObj.complementar[compKey] = {
-                    contratoId,
-                    nome: c.nome,
-                    cnpj: c.cnpj || "---",
-                    evento,
-                    valor,
-                    vencimento: "",
-                    status: "Pendente"
-                };
-            }
-
-            await set(ref(db, `${pathFolhasDB}/${competenciaSelecionada}`), folhaAtualObj);
-            await registrarAuditoria("Financeiro", "Lançamento Motor", c.nome, "R$ 0,00", `R$ ${valor} (${evento})`);
-            alert("Lançamento aplicado com sucesso!");
-            document.getElementById('motorValor').value = "";
-            renderizarFolhaPagamento();
-        };
-
-        window.alterarStatusFolhaItem = async (competencia, tipoFolha, itemKey, novoStatus) => {
-            await update(ref(db, `${pathFolhasDB}/${competencia}/${tipoFolha}/${itemKey}`), { status: novoStatus });
-            await registrarAuditoria("Financeiro", "Alteração Status Pagamento", itemKey, "-", novoStatus);
-            renderizarFolhaPagamento();
-        };
-
-        window.atualizarVencimentoFolha = async (competencia, tipoFolha, itemKey, novaData) => {
-            await update(ref(db, `${pathFolhasDB}/${competencia}/${tipoFolha}/${itemKey}`), { vencimento: novaData });
-        };
-
-        function renderizarTabelasEstatísticas() {
-            let prestAtivos = 0, prestInativos = 0;
-            let contAtivos = 0, contVencendo = 0, contEncerrados = 0, semContrato = 0;
-
-            const hoje = new Date();
-            Object.values(contratosLocais).forEach(c => {
-                if (c.excluidoLogico) return;
-                if (c.status === "Ativo") {
-                    prestAtivos++;
-                    contAtivos++;
-                } else {
-                    prestInativos++;
-                    contEncerrados++;
-                }
-
-                if (!c.arquivoContratoBase64) semContrato++;
-
-                if (c.vigenciaFim) {
-                    const fim = new Date(c.vigenciaFim);
-                    const diffDias = Math.ceil((fim - hoje) / (1000 * 60 * 60 * 24));
-                    if (diffDias >= 0 && diffDias <= 30) contVencendo++;
-                }
-            });
-
-            document.getElementById('kpi-prest-ativos').innerText = prestAtivos;
-            document.getElementById('kpi-prest-inativos').innerText = prestInativos;
-            document.getElementById('kpi-cont-ativos').innerText = contAtivos;
-            document.getElementById('kpi-cont-vencendo').innerText = contVencendo;
-            document.getElementById('kpi-cont-encerrados').innerText = contEncerrados;
-
-            const dadosComp = folhasLocais[competenciaSelecionada] || { regular: {}, complementar: {} };
-            let nfRecebidas = 0, nfPendentes = 0, nfAprovadas = 0;
-            let valorTotalMes = 0, valorPago = 0, valorPendente = 0;
-            let pagamentosHojeCount = 0;
-            let dataHojeStr = hoje.toISOString().split('T')[0];
-
-            const analisarItem = (item) => {
-                const val = parseFloat(item.valor || 0);
-                valorTotalMes += val;
-                if (item.status === "Pago") {
-                    valorPago += val;
-                    nfAprovadas++;
-                } else if (item.status === "Aprovado") {
-                    valorPendente += val;
-                    nfAprovadas++;
-                } else {
-                    valorPendente += val;
-                    nfPendentes++;
-                }
-                if (item.nfBase64) nfRecebidas++;
-                if (item.vencimento === dataHojeStr) pagamentosHojeCount++;
-            };
-
-            Object.values(dadosComp.regular || {}).forEach(analisarItem);
-            Object.values(dadosComp.complementar || {}).forEach(analisarItem);
-
-            document.getElementById('kpi-nf-recebidas').innerText = nfRecebidas;
-            document.getElementById('kpi-nf-pendentes').innerText = nfPendentes;
-            document.getElementById('kpi-nf-aprovadas').innerText = nfAprovadas;
-
-            document.getElementById('kpi-fin-total').innerText = 'R$ ' + valorTotalMes.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            document.getElementById('kpi-fin-pagos').innerText = 'R$ ' + valorPago.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            document.getElementById('kpi-fin-pendentes').innerText = 'R$ ' + valorPendente.toLocaleString('pt-BR', {minimumFractionDigits:2});
-
-            document.getElementById('badge-pend-notas').innerText = nfPendentes;
-            document.getElementById('badge-pend-contratos').innerText = contVencendo;
-            document.getElementById('badge-pend-pagamentos').innerText = pagamentosHojeCount;
-            document.getElementById('badge-pend-docs').innerText = "0";
-            document.getElementById('badge-pend-semcontrato').innerText = semContrato;
-        }
-
-        window.atalhoPendencia = (tipo) => {
-            if (tipo === 'notas' || tipo === 'pagamentos') mostrarSecao('dashboard');
-            else if (tipo === 'contratos' || tipo === 'sem-contrato') mostrarSecao('contratos');
-            else if (tipo === 'documentos') mostrarSecao('documentos');
-        };
-
-        window.exportarLoteFinanceiroExcel = () => {
-            const dadosComp = folhasLocais[competenciaSelecionada] || { regular: {}, complementar: {} };
-            let dadosExport = [];
-            Object.values(dadosComp.regular || {}).forEach(i => dadosExport.push({ Tipo: "Regular", Prestador: i.nome, CNPJ: i.cnpj, Valor: i.valor, Vencimento: i.vencimento, Status: i.status }));
-            Object.values(dadosComp.complementar || {}).forEach(i => dadosExport.push({ Tipo: "Complementar ("+i.evento+")", Prestador: i.nome, CNPJ: i.cnpj, Valor: i.valor, Vencimento: i.vencimento, Status: i.status }));
-
-            const worksheet = XLSX.utils.json_to_sheet(dadosExport);
-            const workbook = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(workbook, worksheet, "Financeiro");
-            XLSX.writeFile(workbook, `Lote_Financeiro_${competenciaSelecionada}_${empresaAtivaNome}.xlsx`);
-            registrarAuditoria("Financeiro", "Exportação Lote Excel", competenciaSelecionada, "-", "Arquivo Baixado");
-        };
-
-        // ==========================================
-        // PORTAL DO PRESTADOR & OUTRAS FUNÇÕES
-        // ==========================================
-
-        window.mudarSecaoPrestador = (secId) => {
-            ['sec-pj-enviar', 'sec-pj-contratos'].forEach(s => document.getElementById(s).classList.add('hidden'));
-            document.getElementById(secId).classList.remove('hidden');
-
-            document.getElementById('btn-pj-enviar').className = secId === 'sec-pj-enviar' ? "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition" : "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
-            document.getElementById('btn-pj-contratos').className = secId === 'sec-pj-contratos' ? "px-4 py-2 rounded-xl text-xs font-bold bg-blue-900 text-white transition" : "px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition";
-        };
-
-        let prestadorLogadoContratoKey = null;
-
-        function carregarDadosPortalPrestador() {
-            const compPJ = selectCompetenciaPJ.value || competenciaSelecionada;
-            const tbodyReg = document.getElementById('tabelaPrestadorRegular');
-            const tbodyComp = document.getElementById('tabelaPrestadorComplementar');
-            const containerComp = document.getElementById('containerPrestadorComp');
-            if(!tbodyReg) return;
-
-            tbodyReg.innerHTML = "";
-            let meuContrato = null;
-
-            Object.entries(contratosLocais).forEach(([key, c]) => {
-                if (((c.email || c.emailCorp || "").toLowerCase() === usuarioEmailLogado) && !c.excluidoLogico) {
-                    meuContrato = c;
-                    prestadorLogadoContratoKey = key;
-                }
-            });
-
-            if (!meuContrato) {
-                tbodyReg.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum contrato vinculado ao seu e-mail (${usuarioEmailLogado}).</td></tr>`;
-                return;
-            }
-
-            document.getElementById('pj-campo-nome').value = meuContrato.nome || "";
-            document.getElementById('pj-campo-cpf').value = meuContrato.cpf || "";
-            document.getElementById('pj-campo-email').value = meuContrato.email || "";
-            document.getElementById('pj-campo-telefone').value = meuContrato.telefone || "";
-            document.getElementById('pj-campo-emergencia').value = meuContrato.contatoEmergencia || "";
-            document.getElementById('pj-campo-razaosocial').value = meuContrato.razaoSocial || "";
-            document.getElementById('pj-campo-cnpj').value = meuContrato.cnpj || "";
-            document.getElementById('pj-campo-emailcorp').value = meuContrato.emailCorp || "";
-            document.getElementById('pj-campo-ie').value = meuContrato.inscricaoEstadual || "";
-            document.getElementById('pj-campo-im').value = meuContrato.inscricaoMunicipal || "";
-            document.getElementById('pj-campo-cep').value = meuContrato.cep || "";
-            document.getElementById('pj-campo-logradouro').value = meuContrato.logradouro || "";
-            document.getElementById('pj-campo-numero').value = meuContrato.numero || "";
-            document.getElementById('pj-campo-bairro').value = meuContrato.bairro || "";
-            document.getElementById('pj-campo-cidade').value = meuContrato.cidade || "";
-            document.getElementById('pj-campo-estado').value = meuContrato.estado || "";
-
-            document.getElementById('pj-view-vigencia-inicio').value = meuContrato.vigenciaInicio || "";
-            document.getElementById('pj-view-vigencia-fim').value = meuContrato.vigenciaFim || "";
-            document.getElementById('pj-view-valor-fixo').value = meuContrato.valorFixoMensal ? 'R$ ' + parseFloat(meuContrato.valorFixoMensal).toLocaleString('pt-BR', {minimumFractionDigits:2}) : '';
-            document.getElementById('pj-view-reajuste-mes').value = meuContrato.mesAnoReajuste || "";
-            document.getElementById('pj-view-reajuste-indice').value = meuContrato.indiceReajuste || "";
-            document.getElementById('pj-view-cargo').value = meuContrato.cargo || "";
-            document.getElementById('pj-view-departamento').value = meuContrato.departamento || "";
-            document.getElementById('pj-view-gestor').value = meuContrato.gestorDireto || "";
-            document.getElementById('pj-view-status').value = meuContrato.status || "";
-
-            const fotoContainer = document.getElementById('pj-preview-foto-container');
-            if (meuContrato.fotoBase64) {
-                fotoContainer.innerHTML = `<img src="${meuContrato.fotoBase64}" class="w-full h-full object-cover">`;
-            } else {
-                fotoContainer.innerText = (meuContrato.nome || 'P').substring(0,2).toUpperCase();
-            }
-
-            const blocoContrato = document.getElementById('pj-bloco-botao-contrato');
-            if (meuContrato.arquivoContratoBase64) {
-                blocoContrato.innerHTML = `<button onclick="abrirModalVisualizarArquivo('Meu Contrato', '${meuContrato.arquivoContratoBase64}')" class="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs transition shadow-sm">📄 Visualizar Meu Contrato Assinado</button>`;
-            } else {
-                blocoContrato.innerHTML = `<span class="text-xs text-slate-400">Contrato não anexado.</span>`;
-            }
-
-            const containerDocsPJ = document.getElementById('pj-lista-docs-compliance-container');
-            containerDocsPJ.innerHTML = "";
-            if (meuContrato.documentosCompliance && meuContrato.documentosCompliance.length > 0) {
-                meuContrato.documentosCompliance.forEach((doc, i) => {
-                    containerDocsPJ.innerHTML += `
-                        <div class="flex justify-between items-center bg-white p-2.5 rounded-xl border">
-                            <div><b>${doc.nomeArquivo}</b> <small class="text-slate-500">(Validade: ${doc.validade})</small></div>
-                            <button onclick="abrirModalVisualizarArquivo('${doc.nomeArquivo}', '${doc.base64}')" class="text-blue-600 font-bold hover:underline text-xs">Visualizar</button>
+            const containerPlanos = document.getElementById('listaCardsPlanosSuper');
+            containerPlanos.innerHTML = "";
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                containerPlanos.innerHTML += `
+                    <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-extrabold text-blue-950 text-base">${p.nome}</h4>
+                            <button onclick="abrirModalCriarPlano('${pId}')" class="text-xs text-blue-600 font-bold hover:underline">Editar</button>
                         </div>
-                    `;
-                });
-            } else {
-                containerDocsPJ.innerHTML = `<span class="text-slate-400 text-xs">Nenhum documento de compliance anexado.</span>`;
-            }
-
-            const dadosComp = folhasLocais[compPJ] || { regular: {}, complementar: {} };
-            let itemRegularKey = null;
-            let itemRegularData = null;
-
-            Object.entries(dadosComp.regular || {}).forEach(([k, item]) => {
-                if (item.contratoId === prestadorLogadoContratoKey || (item.nome && item.nome.toLowerCase() === meuContrato.nome.toLowerCase())) {
-                    itemRegularKey = k;
-                    itemRegularData = item;
-                }
+                        <p class="text-xs text-slate-600">Limite de Contratos: <b>${p.limiteContratos}</b></p>
+                        <div class="pt-2 border-t text-[11px] text-slate-500">Módulos: Completo SaaS</div>
+                    </div>
+                `;
             });
 
-            if (itemRegularData) {
-                let statusTxt = itemRegularData.status || "Pendente";
-                tbodyReg.innerHTML = `
-                    <tr class="border-b">
-                        <td class="p-3 font-bold">${meuContrato.nome} <br><small class="text-slate-500">${meuContrato.cnpj || ''}</small></td>
-                        <td class="p-3 font-bold text-blue-950">R$ ${parseFloat(itemRegularData.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                        <td class="p-3"><input type="file" id="arquivoNfRegularPortal" accept=".pdf,image/*" class="text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-blue-600 file:text-white file:font-bold"></td>
-                        <td class="p-3 font-bold text-blue-900">${statusTxt}</td>
+            const tbodyAdmins = document.getElementById('tabelaSuperAdmins');
+            tbodyAdmins.innerHTML = "";
+            let adminsCount = 0;
+            Object.entries(admins).forEach(([id, a]) => {
+                adminsCount++;
+                tbodyAdmins.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-bold">${a.nome}</td>
+                        <td class="p-3 text-slate-600">${a.email}</td>
+                        <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${a.status === 'Bloqueado' ? 'bg-red-100 text-red-800' : 'bg-green-100 text-green-800'}">${a.status || 'Ativo'}</span></td>
+                        <td class="p-3 text-center space-x-1">
+                            <button onclick="reenviarConviteAdmin('${a.email}', '${a.nome}')" class="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-2.5 py-1 rounded font-bold text-xs">📨 Enviar Convite</button>
+                            <button onclick="bloquearAdmin('${id}', '${a.status}')" class="bg-amber-100 hover:bg-amber-200 text-amber-800 px-2.5 py-1 rounded font-bold text-xs">${a.status === 'Bloqueado' ? 'Desbloquear' : 'Bloquear'}</button>
+                        </td>
                     </tr>
                 `;
-            } else {
-                tbodyReg.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">A folha desta competência ainda não foi gerada pelo RH/Administração.</td></tr>`;
-            }
+            });
+            if (adminsCount === 0) tbodyAdmins.innerHTML = `<tr><td colspan="4" class="p-4 text-center text-slate-400">Nenhum administrador extra cadastrado.</td></tr>`;
 
-            let compItens = [];
-            Object.entries(dadosComp.complementar || {}).forEach(([k, item]) => {
-                if (item.contratoId === prestadorLogadoContratoKey || (item.nome && item.nome.toLowerCase() === meuContrato.nome.toLowerCase())) {
-                    compItens.push({ key: k, ...item });
-                }
+            const tbodySuporte = document.getElementById('tabelaSuperSuporte');
+            tbodySuporte.innerHTML = "";
+            Object.entries(clientes).forEach(([id, c]) => {
+                let cnpjsLista = c.cnpjFiliais ? `<br><small class="text-slate-500">Filiais: ${c.cnpjFiliais}</small>` : '';
+                tbodySuporte.innerHTML += `
+                    <tr class="border-b hover:bg-slate-50">
+                        <td class="p-3 font-bold text-blue-950">${c.razaoSocial}</td>
+                        <td class="p-3"><b>${c.cnpj}</b>${cnpjsLista}</td>
+                        <td class="p-3 text-center space-x-2">
+                            <button onclick="acessarComoSuporte('${id}', '${c.razaoSocial}')" class="bg-blue-900 hover:bg-blue-800 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">🛠️ Acesso como Suporte (Impersonate)</button>
+                            <button onclick="verLogsCliente('${id}')" class="bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg font-bold text-xs transition">📋 Ver Logs</button>
+                        </td>
+                    </tr>
+                `;
             });
 
-            if (compItens.length > 0) {
-                containerComp.classList.remove('hidden');
-                tbodyComp.innerHTML = "";
-                compItens.forEach(item => {
-                    tbodyComp.innerHTML += `
-                        <tr class="border-b">
-                            <td class="p-3 font-bold text-amber-950">${item.nome} <br><small class="text-amber-700">${item.evento}</small></td>
-                            <td class="p-3 font-bold text-amber-900">R$ ${parseFloat(item.valor || 0).toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3"><input type="file" id="arquivoNfComp_${item.key}" accept=".pdf,image/*" class="text-xs text-slate-500 file:py-1 file:px-2 file:rounded file:border-0 file:bg-amber-600 file:text-white file:font-bold"></td>
-                            <td class="p-3 font-bold text-amber-900">${item.status || "Pendente"}</td>
-                        </tr>
-                    `;
-                });
-            } else {
-                containerComp.classList.add('hidden');
-            }
-
-            document.getElementById('btn-enviar-todas-notas-pj').onclick = async () => {
-                const compAtual = selectCompetenciaPJ.value || competenciaSelecionada;
-                let updates = {};
-
-                const fileReg = document.getElementById('arquivoNfRegularPortal');
-                if (fileReg && fileReg.files.length > 0 && itemRegularKey) {
-                    const b64 = await new Promise((res) => {
-                        const r = new FileReader();
-                        r.onloadend = () => res(r.result);
-                        r.readAsDataURL(fileReg.files[0]);
-                    });
-                    updates[`${pathFolhasDB}/${compAtual}/regular/${itemRegularKey}/nfBase64`] = b64;
-                    updates[`${pathFolhasDB}/${compAtual}/regular/${itemRegularKey}/nfNome`] = fileReg.files[0].name;
-                }
-
-                for (let item of compItens) {
-                    const fileComp = document.getElementById(`arquivoNfComp_${item.key}`);
-                    if (fileComp && fileComp.files.length > 0) {
-                        const b64 = await new Promise((res) => {
-                            const r = new FileReader();
-                            r.onloadend = () => res(r.result);
-                            r.readAsDataURL(fileComp.files[0]);
-                        });
-                        updates[`${pathFolhasDB}/${compAtual}/complementar/${item.key}/nfBase64`] = b64;
-                        updates[`${pathFolhasDB}/${compAtual}/complementar/${item.key}/nfNome`] = fileComp.files[0].name;
-                    }
-                }
-
-                if (Object.keys(updates).length > 0) {
-                    await update(ref(db), updates);
-                    await registrarNotificacao("Nova Nota Fiscal", `Prestador ${meuContrato.nome} enviou nota fiscal para a competência ${compAtual}.`, "alerta", "admin", "Financeiro");
-                    alert("Nota(s) fiscal(is) enviada(s) com sucesso!");
-                    carregarDadosPortalPrestador();
-                } else {
-                    alert("Selecione ao menos um arquivo de Nota Fiscal para enviar!");
-                }
-            };
-        }
-
-        window.salvarDadosPrestadorPortal = async () => {
-            if (!prestadorLogadoContratoKey) return;
-            const fileNovaFoto = document.getElementById('pjCampoNovaFoto');
-
-            const salvarNoDb = async (fotoB64 = null) => {
-                const pacote = {
-                    nome: document.getElementById('pj-campo-nome').value,
-                    cpf: document.getElementById('pj-campo-cpf').value,
-                    email: document.getElementById('pj-campo-email').value,
-                    telefone: document.getElementById('pj-campo-telefone').value,
-                    contatoEmergencia: document.getElementById('pj-campo-emergencia').value,
-                    razaoSocial: document.getElementById('pj-campo-razaosocial').value,
-                    cnpj: document.getElementById('pj-campo-cnpj').value,
-                    emailCorp: document.getElementById('pj-campo-emailcorp').value,
-                    inscricaoEstadual: document.getElementById('pj-campo-ie').value,
-                    inscricaoMunicipal: document.getElementById('pj-campo-im').value,
-                    cep: document.getElementById('pj-campo-cep').value,
-                    logradouro: document.getElementById('pj-campo-logradouro').value,
-                    numero: document.getElementById('pj-campo-numero').value,
-                    bairro: document.getElementById('pj-campo-bairro').value,
-                    cidade: document.getElementById('pj-campo-cidade').value,
-                    estado: document.getElementById('pj-campo-estado').value
-                };
-                if (fotoB64) pacote.fotoBase64 = fotoB64;
-
-                await update(ref(db, `${pathContratosDB}/${prestadorLogadoContratoKey}`), pacote);
-                await registrarAuditoria("Portal Prestador", "Atualização Cadastral", pacote.nome, "-", "Dados Atualizados");
-                alert("Dados cadastrais atualizados com sucesso!");
-                carregarIdentidadeVisualMenu(true);
-            };
-
-            if (fileNovaFoto.files.length > 0) {
-                const reader = new FileReader();
-                reader.onloadend = async () => { await salvarNoDb(reader.result); };
-                reader.readAsDataURL(fileNovaFoto.files[0]);
-            } else {
-                const atual = contratosLocais[prestadorLogadoContratoKey] || {};
-                await salvarNoDb(atual.fotoBase64);
-            }
-        };
-
-        window.adicionarDocumentoCompliancePrestadorPortal = async () => {
-            if (!prestadorLogadoContratoKey) return;
-            const inputFiles = document.getElementById('pj-campo-novo-doc-file');
-            const validade = document.getElementById('pj-campo-novo-doc-validade').value;
-
-            if (inputFiles.files.length === 0) { alert("Selecione ao menos um arquivo!"); return; }
-
-            const contratoAtual = contratosLocais[prestadorLogadoContratoKey] || {};
-            let docsExistentes = contratoAtual.documentosCompliance || [];
-
-            for (let file of Array.from(inputFiles.files)) {
-                const b64 = await new Promise((res) => {
-                    const r = new FileReader();
-                    r.onloadend = () => res(r.result);
-                    r.readAsDataURL(file);
-                });
-                docsExistentes.push({
-                    nomeArquivo: file.name,
-                    base64: b64,
-                    validade: validade || "Não informada",
-                    dataUpload: new Date().toISOString()
-                });
-            }
-
-            await update(ref(db, `${pathContratosDB}/${prestadorLogadoContratoKey}`), { documentosCompliance: docsExistentes });
-            alert("Documento(s) de compliance anexado(s) com sucesso!");
-            document.getElementById('pj-campo-novo-doc-file').value = "";
-            document.getElementById('pj-campo-novo-doc-validade').value = "";
-            carregarDadosPortalPrestador();
-        };
-
-        selectCompetenciaPJ.addEventListener('change', carregarDadosPortalPrestador);
-
-        // ==========================================
-        // RELATÓRIOS E CENTRAL DE DOCUMENTOS
-        // ==========================================
-
-        window.mudarTipoRelatorioEtapa13 = (tipo) => {
-            tipoRelatorioAtualEtapa13 = tipo;
-            ['prestadores', 'contratos', 'pagamentos', 'notas', 'documentos', 'financeiro'].forEach(t => {
-                const btn = document.getElementById(`tab-rel-${t}`);
-                if (btn) btn.className = (t === tipo) ? "py-2.5 px-3 rounded-xl bg-blue-900 text-white transition shadow-sm" : "py-2.5 px-3 rounded-xl text-slate-700 hover:bg-white transition";
-            });
-            atualizarRelatoriosEtapa13();
-        };
-
-        function atualizarRelatoriosEtapa13() {
-            const cabecalho = document.getElementById('relatorio-cabecalho-tabela');
-            const corpo = document.getElementById('tabelaRelatorioCorpo');
-            const lblTotal = document.getElementById('relatorio-coluna-total-label');
-            const valTotal = document.getElementById('relatorioTotalGeral');
-            if(!cabecalho) return;
-
-            corpo.innerHTML = "";
-            let htmlCab = "";
-            let totalGeralNum = 0;
-            let rowsCount = 0;
-
-            const compRef = document.getElementById('relFiltroCompetencia').value;
-            const dadosComp = folhasLocais[compRef] || { regular: {}, complementar: {} };
-
-            if (tipoRelatorioAtualEtapa13 === 'prestadores') {
-                htmlCab = `<th class="p-3">Nome</th><th class="p-3">CPF</th><th class="p-3">Razão Social</th><th class="p-3">CNPJ</th><th class="p-3">E-mail / Telefone</th><th class="p-3">Centro de Custo</th><th class="p-3 text-center">Status</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 6;
-                valTotal.innerText = "-";
-
-                Object.values(contratosLocais).forEach(c => {
-                    if (c.excluidoLogico) return;
-                    rowsCount++;
-                    corpo.innerHTML += `
+            const tbodyAssinaturas = document.getElementById('tabelaSuperAssinaturas');
+            tbodyAssinaturas.innerHTML = "";
+            Object.entries(clientes).forEach(([id, c]) => {
+                get(ref(db, `empresas_clientes_dados/${id}/contratos`)).then((snapContratos) => {
+                    const snapContratosVal = snapContratos.val() || {};
+                    const qtdContratos = Object.keys(snapContratosVal).length;
+                    
+                    const planoMatriz = cachePlanosSuper[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
+                    tbodyAssinaturas.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome || '---'}</td>
-                            <td class="p-3">${c.cpf || '---'}</td>
-                            <td class="p-3">${c.razaoSocial || '---'}</td>
-                            <td class="p-3 font-semibold">${c.cnpj || '---'}</td>
-                            <td class="p-3">${c.email || '---'}<br><small>${c.telefone || ''}</small></td>
-                            <td class="p-3">${c.departamento || '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+                            <td class="p-3 font-bold text-blue-950">${c.razaoSocial} <br><small class="text-slate-500">CNPJ (Matriz): ${c.cnpj}</small></td>
+                            <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planoMatriz.nome}</span></td>
+                            <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
+                            <td class="p-3"><b>${qtdContratos}</b> / ${planoMatriz.limiteContratos} contratos</td>
+                            <td class="p-3 text-center">
+                                <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${c.planoId}', '${c.cnpj}', 'Matriz')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
+                            </td>
                         </tr>
                     `;
-                });
-            } else if (tipoRelatorioAtualEtapa13 === 'contratos') {
-                htmlCab = `<th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Início Vigência</th><th class="p-3">Fim Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3 text-center">Status</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 4;
 
-                Object.values(contratosLocais).forEach(c => {
-                    if (c.excluidoLogico) return;
-                    rowsCount++;
-                    const val = parseFloat(c.valorFixoMensal || 0);
-                    totalGeralNum += val;
-                    corpo.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome || '---'}</td>
-                            <td class="p-3">${c.cnpj || '---'}</td>
-                            <td class="p-3">${c.vigenciaInicio ? c.vigenciaInicio.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3">${c.mesAnoReajuste || '---'} (${c.indiceReajuste || 'IPCA'})</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                        </tr>
-                    `;
-                });
-                valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            } else if (tipoRelatorioAtualEtapa13 === 'pagamentos' || tipoRelatorioAtualEtapa13 === 'notas' || tipoRelatorioAtualEtapa13 === 'financeiro') {
-                htmlCab = `<th class="p-3">Tipo / Evento</th><th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Competência</th><th class="p-3">Vencimento</th><th class="p-3">Valor</th><th class="p-3 text-center">Status / NF</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 5;
-
-                const processarItemRel = (tipoItem, item) => {
-                    rowsCount++;
-                    const val = parseFloat(item.valor || 0);
-                    totalGeralNum += val;
-                    corpo.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold text-blue-900">${tipoItem}</td>
-                            <td class="p-3 font-semibold">${item.nome}</td>
-                            <td class="p-3">${item.cnpj}</td>
-                            <td class="p-3">${compRef}</td>
-                            <td class="p-3">${item.vencimento ? item.vencimento.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-center font-bold text-slate-700">${item.status} ${item.nfNome ? '📁 (NF OK)' : ''}</td>
-                        </tr>
-                    `;
-                };
-
-                Object.values(dadosComp.regular || {}).forEach(i => processarItemRel("Regular", i));
-                Object.values(dadosComp.complementar || {}).forEach(i => processarItemRel("Comp. (" + (i.evento || 'Adicional') + ")", i));
-
-                valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
-                htmlCab = `<th class="p-3">Prestador</th><th class="p-3">Tipo de Documento</th><th class="p-3">Nome do Arquivo</th><th class="p-3 text-center">Validade / Vigência</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 3;
-                valTotal.innerText = "-";
-
-                Object.values(contratosLocais).forEach(c => {
-                    if (c.excluidoLogico) return;
-                    if (c.arquivoContratoBase64) {
-                        rowsCount++;
-                        corpo.innerHTML += `
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${c.nome}</td>
-                                <td class="p-3 text-blue-900 font-semibold">Contrato Social / Prestação</td>
-                                <td class="p-3">Contrato Principal.pdf</td>
-                                <td class="p-3 text-center">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                            </tr>
-                        `;
-                    }
-                    if (c.documentosCompliance && c.documentosCompliance.length > 0) {
-                        c.documentosCompliance.forEach(doc => {
-                            rowsCount++;
-                            corpo.innerHTML += `
-                                <tr class="border-b hover:bg-slate-50">
-                                    <td class="p-3 font-bold">${c.nome}</td>
-                                    <td class="p-3 text-emerald-800 font-semibold">Compliance / Certidão</td>
-                                    <td class="p-3">${doc.nomeArquivo}</td>
-                                    <td class="p-3 text-center">${doc.validade}</td>
+                    if (c.planosFiliais && typeof c.planosFiliais === 'object') {
+                        Object.entries(c.planosFiliais).forEach(([cnpjFilial, pFilialId]) => {
+                            const planoFilialObj = cachePlanosSuper[pFilialId] || { nome: "Enterprise", limiteContratos: 50 };
+                            tbodyAssinaturas.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50 bg-slate-50/50">
+                                    <td class="p-3 pl-6 text-slate-700">↳ Filial: <b>${c.razaoSocial}</b> <br><small class="text-slate-500">CNPJ: ${cnpjFilial}</small></td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-900 rounded font-bold">${planoFilialObj.nome}</span></td>
+                                    <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
+                                    <td class="p-3">- / ${planoFilialObj.limiteContratos} contratos</td>
+                                    <td class="p-3 text-center">
+                                        <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${pFilialId}', '${cnpjFilial}', 'Filial')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
+                                    </td>
                                 </tr>
                             `;
                         });
                     }
                 });
-            }
-
-            if (rowsCount === 0) {
-                corpo.innerHTML = `<tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado para este relatório.</td></tr>`;
-            }
+            });
         }
 
-        document.getElementById('btn-exportar-relatorio-etapa13').addEventListener('click', () => {
-            const tabela = document.querySelector('#relatorios table');
-            const livro = XLSX.utils.table_to_book(tabela, { sheet: "Relatorio_" + tipoRelatorioAtualEtapa13 });
-            XLSX.writeFile(livro, `Relatorio_${tipoRelatorioAtualEtapa13}_${empresaAtivaNome}.xlsx`);
-            registrarAuditoria("Relatórios", "Exportação Excel", tipoRelatorioAtualEtapa13, "-", "Arquivo Baixado");
-        });
+        window.gerarSelecaoPlanosFiliais = () => {
+            const inputCnpjs = document.getElementById('superCnpjsFiliais').value;
+            const container = document.getElementById('containerPlanosFiliais');
+            const listaDinamica = document.getElementById('listaDinamicaPlanosFiliais');
+            
+            if (!inputCnpjs || inputCnpjs.trim() === "") {
+                container.classList.add('hidden');
+                listaDinamica.innerHTML = "";
+                return;
+            }
 
-        function atualizarCentralDocumentos() {
-            const tbody = document.getElementById('tabelaDocumentosCorpo');
-            if(!tbody) return;
-            tbody.innerHTML = "";
-            let count = 0;
+            const cnpjs = inputCnpjs.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            if (cnpjs.length === 0) {
+                container.classList.add('hidden');
+                listaDinamica.innerHTML = "";
+                return;
+            }
 
-            const compRef = document.getElementById('docFiltroCompetencia').value;
-            const dadosComp = folhasLocais[compRef] || { regular: {}, complementar: {} };
+            container.classList.remove('hidden');
+            listaDinamica.innerHTML = "";
 
-            Object.values(contratosLocais).forEach(c => {
-                if (c.excluidoLogico) return;
-                if (c.arquivoContratoBase64) {
-                    count++;
-                    tbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome} <br><small class="text-slate-500">${c.cnpj || ''}</small></td>
-                            <td class="p-3 font-semibold text-blue-900">Contrato de Prestação</td>
-                            <td class="p-3">Competência Contínua</td>
-                            <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Vigente ✔</span></td>
-                            <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('Contrato - ${c.nome}', '${c.arquivoContratoBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
-                        </tr>
-                    `;
-                }
+            cnpjs.forEach((cnpj, index) => {
+                let opcoesHtml = "";
+                Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                    opcoesHtml += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+                });
 
-                if (c.documentosCompliance) {
-                    c.documentosCompliance.forEach(doc => {
-                        count++;
-                        tbody.innerHTML += `
-                            <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${c.nome} <br><small class="text-slate-500">${c.cnpj || ''}</small></td>
-                                <td class="p-3 font-semibold text-emerald-800">Compliance / Certidão</td>
-                                <td class="p-3">${doc.nomeArquivo}</td>
-                                <td class="p-3">${doc.validade}</td>
-                                <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular ✔</span></td>
-                                <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('${doc.nomeArquivo}', '${doc.base64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
-                            </tr>
-                        `;
-                    });
-                }
+                listaDinamica.innerHTML += `
+                    <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border">
+                        <div class="flex-1 font-bold text-slate-800">Filial CNPJ: ${cnpj}</div>
+                        <div class="w-1/2">
+                            <select id="planoFilial_${index}" data-cnpj="${cnpj}" class="w-full p-2 border rounded-lg bg-white font-bold text-blue-900 select-plano-filial">
+                                ${opcoesHtml}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
+        window.abrirModalEmpresaCliente = async (id = null) => {
+            document.getElementById('superEmpresaEditId').value = id || "";
+            document.getElementById('tituloModalSuperEmpresa').innerText = id ? "Editar Empresa Cliente" : "Criar Nova Empresa Cliente";
+            
+            if (Object.keys(cachePlanosSuper).length === 0) {
+                const snapPlanos = await get(ref(db, 'sistema_planos'));
+                cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            }
+
+            const selectPlanoEmpresa = document.getElementById('superPlanoPrincipalSelect');
+            selectPlanoEmpresa.innerHTML = "";
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                selectPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
             });
 
-            const analisarNfDoc = (item) => {
-                if (item.nfBase64) {
-                    count++;
-                    tbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${item.nome} <br><small class="text-slate-500">${item.cnpj}</small></td>
-                            <td class="p-3 font-semibold text-amber-900">Nota Fiscal (NF)</td>
-                            <td class="p-3">${item.nfNome || 'Nota_Fiscal.pdf'} (${compRef})</td>
-                            <td class="p-3">Venc: ${item.vencimento ? item.vencimento.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">${item.status}</span></td>
-                            <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('NF - ${item.nome}', '${item.nfBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
-                        </tr>
-                    `;
+            if (id) {
+                const snap = await get(ref(db, `empresas_clientes/${id}`));
+                const data = snap.val() || {};
+                document.getElementById('superRazaoSocial').value = data.razaoSocial || "";
+                document.getElementById('superNomeFantasia').value = data.nomeFantasia || "";
+                document.getElementById('superCnpj').value = data.cnpj || "";
+                document.getElementById('superCnpjsFiliais').value = data.cnpjFiliais || "";
+                document.getElementById('superEmailAdmin').value = data.emailAdmin || "";
+                document.getElementById('superPlanoPrincipalSelect').value = data.planoId || "";
+                
+                gerarSelecaoPlanosFiliais();
+                if (data.planosFiliais) {
+                    setTimeout(() => {
+                        Object.entries(data.planosFiliais).forEach(([cnpjFilial, planoIdFilial]) => {
+                            const selects = document.querySelectorAll('.select-plano-filial');
+                            selects.forEach(sel => {
+                                if (sel.dataset.cnpj === cnpjFilial) {
+                                    sel.value = planoIdFilial;
+                                }
+                            });
+                        });
+                    }, 50);
                 }
-            };
-
-            Object.values(dadosComp.regular || {}).forEach(analisarNfDoc);
-            Object.values(dadosComp.complementar || {}).forEach(analisarNfDoc);
-
-            if (count === 0) {
-                tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum documento encontrado na central.</td></tr>`;
+            } else {
+                document.getElementById('superRazaoSocial').value = "";
+                document.getElementById('superNomeFantasia').value = "";
+                document.getElementById('superCnpj').value = "";
+                document.getElementById('superCnpjsFiliais').value = "";
+                document.getElementById('superEmailAdmin').value = "";
+                document.getElementById('containerPlanosFiliais').classList.add('hidden');
+                document.getElementById('listaDinamicaPlanosFiliais').innerHTML = "";
             }
+            document.getElementById('modalSuperEmpresa').classList.remove('hidden');
+        };
+        window.fecharModalSuperEmpresa = () => { document.getElementById('modalSuperEmpresa').classList.add('hidden'); };
+
+        window.salvarEmpresaClienteSuper = async () => {
+            const editId = document.getElementById('superEmpresaEditId').value;
+            const emailAdmin = document.getElementById('superEmailAdmin').value.trim().toLowerCase();
+            const razaoSocial = document.getElementById('superRazaoSocial').value;
+            const cnpj = document.getElementById('superCnpj').value;
+            const cnpjFiliais = document.getElementById('superCnpjsFiliais').value;
+            const planoIdMatriz = document.getElementById('superPlanoPrincipalSelect').value;
+
+            let planosFiliaisObj = {};
+            const selectsFiliais = document.querySelectorAll('.select-plano-filial');
+            selectsFiliais.forEach(sel => {
+                planosFiliaisObj[sel.dataset.cnpj] = sel.value;
+            });
+
+            const pacote = {
+                razaoSocial,
+                nomeFantasia: document.getElementById('superNomeFantasia').value,
+                cnpj,
+                cnpjFiliais,
+                emailAdmin,
+                planoId: planoIdMatriz,
+                planosFiliais: planosFiliaisObj,
+                status: "Ativo"
+            };
+            if (!razaoSocial || !cnpj || !emailAdmin) { alert("Preencha a Razão Social, o CNPJ e o E-mail do Administrador!"); return; }
+
+            if (editId) {
+                await update(ref(db, `empresas_clientes/${editId}`), pacote);
+                alert("Empresa cliente atualizada com sucesso!");
+            } else {
+                const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                try {
+                    await createUserWithEmailAndPassword(auth, emailAdmin, senhaProvisoria);
+                } catch(e) { console.warn(e); }
+
+                const novaEmpresaRef = push(ref(db, 'empresas_clientes'), pacote);
+                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma, com suporte a múltiplos CNPJs vinculados e planos personalizados.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
+                alert(`Empresa criada com sucesso!\nE-mail de acesso: ${emailAdmin}\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
+            }
+            fecharModalSuperEmpresa();
+            carregarPainelSuperadmin();
+        };
+
+        window.mudarStatusEmpresaCliente = async (id, novoStatus) => {
+            await update(ref(db, `empresas_clientes/${id}`), { status: novoStatus });
+            alert(`Status alterado para: ${novoStatus}`);
+            carregarPainelSuperadmin();
+        };
+
+        window.abrirModalCriarPlano = async (pId = null) => {
+            document.getElementById('superPlanoEditId').value = pId || "";
+            document.getElementById('tituloModalSuperPlano').innerText = pId ? "Editar Plano SaaS" : "Criar Novo Plano SaaS";
+            if (pId) {
+                const snap = await get(ref(db, `sistema_planos/${pId}`));
+                const data = snap.val() || {};
+                document.getElementById('superNomePlano').value = data.nome || "";
+                document.getElementById('superLimiteContratos').value = data.limiteContratos || 50;
+            } else {
+                document.getElementById('superNomePlano').value = "";
+                document.getElementById('superLimiteContratos').value = 50;
+            }
+            document.getElementById('modalSuperPlano').classList.remove('hidden');
+        };
+        window.fecharModalSuperPlano = () => { document.getElementById('modalSuperPlano').classList.add('hidden'); };
+
+        window.salvarPlanoSuper = async () => {
+            const editId = document.getElementById('superPlanoEditId').value;
+            const pacote = {
+                nome: document.getElementById('superNomePlano').value,
+                limiteContratos: parseInt(document.getElementById('superLimiteContratos').value || 50)
+            };
+            if (!pacote.nome) { alert("Nome do plano obrigatório!"); return; }
+
+            if (editId) {
+                await update(ref(db, `sistema_planos/${editId}`), pacote);
+            } else {
+                await push(ref(db, `sistema_planos`), pacote);
+            }
+            alert("Plano salvo com sucesso!");
+            fecharModalSuperPlano();
+            carregarPainelSuperadmin();
+        };
+
+        window.abrirModalCriarAdmin = () => {
+            document.getElementById('superAdminNome').value = "";
+            document.getElementById('superAdminEmail').value = "";
+            document.getElementById('modalSuperAdmin').classList.remove('hidden');
+        };
+        window.fecharModalSuperAdmin = () => { document.getElementById('modalSuperAdmin').classList.add('hidden'); };
+
+        window.salvarAdminGlobalSuper = async () => {
+            const nome = document.getElementById('superAdminNome').value;
+            const email = document.getElementById('superAdminEmail').value.trim().toLowerCase();
+            if (!nome || !email) { alert("Preencha todos os campos!"); return; }
+
+            const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+            try {
+                await createUserWithEmailAndPassword(auth, email, senhaProvisoria);
+            } catch(e) { console.warn(e); }
+
+            await push(ref(db, 'sistema_admins'), { nome, email, status: 'Ativo', senhaTemporaria: true });
+            await registrarNotificacao("Convite Superadmin", `Olá ${nome}, você foi cadastrado como Administrador Global.`, "sucesso", email, nome, senhaProvisoria);
+            
+            alert(`Administrador criado com sucesso!\nSenha Provisória: ${senhaProvisoria}`);
+            fecharModalSuperAdmin();
+            carregarPainelSuperadmin();
+        };
+
+        window.reenviarConviteAdmin = async (email, nome) => {
+            const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+            await registrarNotificacao("Reenvio de Convite", `Novo convite para acesso Superadmin.`, "sucesso", email, nome, senhaProvisoria);
+            alert(`Convite reenviado para ${email}!\nNova senha provisória: ${senhaProvisoria}`);
+        };
+
+        window.bloquearAdmin = async (id, statusAtual) => {
+            const novo = statusAtual === 'Bloqueado' ? 'Ativo' : 'Bloqueado';
+            await update(ref(db, `sistema_admins/${id}`), { status: novo });
+            alert(`Status do administrador alterado para: ${novo}`);
+            carregarPainelSuperadmin();
+        };
+
+        window.acessarComoSuporte = (clienteId, clienteNome) => {
+            localStorage.setItem('connectpj_empresa_ativa', clienteId);
+            localStorage.setItem('connectpj_empresa_nome', clienteNome);
+            alert(`Entrando no modo suporte da empresa: ${clienteNome}`);
+            location.reload();
+        };
+
+        window.verLogsCliente = (clienteId) => {
+            localStorage.setItem('connectpj_empresa_ativa', clienteId);
+            alert("Redirecionando para a auditoria desta empresa...");
+            location.reload();
+        };
+
+        window.abrirModalAlterarPlanoEmpresa = async (empresaId, planoAtualId, cnpjAlvo, tipoUnidade) => {
+            document.getElementById('alterarPlanoEmpresaId').value = empresaId;
+            document.getElementById('alterarPlanoCnpjAlvo').value = cnpjAlvo;
+            document.getElementById('labelAlvoPlanoAlteracao').innerText = `Unidade (${tipoUnidade}) - CNPJ: ${cnpjAlvo}`;
+
+            if (Object.keys(cachePlanosSuper).length === 0) {
+                const snapPlanos = await get(ref(db, 'sistema_planos'));
+                cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            }
+
+            const selectNovoPlano = document.getElementById('selectNovoPlanoEmpresa');
+            selectNovoPlano.innerHTML = "";
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                selectNovoPlano.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+            });
+            selectNovoPlano.value = planoAtualId || "";
+            document.getElementById('modalAlterarPlanoEmpresa').classList.remove('hidden');
+        };
+        window.fecharModalAlterarPlanoEmpresa = () => { document.getElementById('modalAlterarPlanoEmpresa').classList.add('hidden'); };
+
+        window.executarAlterarPlanoEmpresa = async () => {
+            const empId = document.getElementById('alterarPlanoEmpresaId').value;
+            const cnpjAlvo = document.getElementById('alterarPlanoCnpjAlvo').value;
+            const novoPlanoId = document.getElementById('selectNovoPlanoEmpresa').value;
+
+            const snapCli = await get(ref(db, `empresas_clientes/${empId}`));
+            const dataCli = snapCli.val() || {};
+
+            if (dataCli.cnpj === cnpjAlvo) {
+                await update(ref(db, `empresas_clientes/${empId}`), { planoId: novoPlanoId });
+            } else {
+                let planosFiliaisObj = dataCli.planosFiliais || {};
+                planosFiliaisObj[cnpjAlvo] = novoPlanoId;
+                await update(ref(db, `empresas_clientes/${empId}`), { planosFiliais: planosFiliaisObj });
+            }
+
+            alert("Plano alterado com sucesso para este CNPJ!");
+            fecharModalAlterarPlanoEmpresa();
+            carregarPainelSuperadmin();
+        };
+
+        // ==========================================
+        // GESTÃO DE CONTRATOS & CADASTROS
+        // ==========================================
+
+        window.abrirModalCadastro = () => {
+            document.getElementById('campoEditId').value = "";
+            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
+            document.getElementById('campoPerfilTipo').value = "Prestador";
+            document.getElementById('campoAdminEhPrestador').value = "nao";
+            document.getElementById('bloco-admin-prestador').classList.add('hidden');
+            
+            ['campoNome', 'campoCpf', 'campoEmail', 'campoTelefone', 'campoContatoEmergencia', 'campoRazaoSocial', 'campoCNPJ', 'campoEmailCorp', 'campoInscricaoEstadual', 'campoInscricaoMunicipal', 'campoCep', 'campoLogradouro', 'campoNumero', 'campoBairro', 'campoCidade', 'campoEstado', 'campoVigenciaInicio', 'campoVigenciaFim', 'campoValorFixoMensal', 'campoMesAnoReajuste', 'campoCargo', 'campoDepartamento', 'campoGestorDireto', 'campoAditivos', 'campoHistoricoAlteracoes'].forEach(id => {
+                const el = document.getElementById(id);
+                if(el) el.value = "";
+            });
+            document.getElementById('campoStatus').value = "Ativo";
+            document.getElementById('campoFotoArquivo').value = "";
+            document.getElementById('campoArquivoContrato').value = "";
+            document.getElementById('campoDocsMultiplos').value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+            documentosComplianceTemporarios = [];
+            atualizarListaDocsCompliancePreview();
+            
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.fecharModalCadastro = () => {
+            document.getElementById('modalCadastro').classList.add('hidden');
+        };
+
+        window.verificarPerfilAdminPrestador = () => {
+            const perfil = document.getElementById('campoPerfilTipo').value;
+            const bloco = document.getElementById('bloco-admin-prestador');
+            if (perfil === 'Administrador') {
+                bloco.classList.remove('hidden');
+            } else {
+                bloco.classList.add('hidden');
+                document.getElementById('campoAdminEhPrestador').value = "nao";
+            }
+        };
+
+        window.adicionarDocumentoComplianceLista = () => {
+            const inputFiles = document.getElementById('campoDocsMultiplos');
+            const validade = document.getElementById('campoValidadeDocsMultiplos').value;
+
+            if (inputFiles.files.length === 0) { alert("Selecione ao menos um arquivo!"); return; }
+
+            Array.from(inputFiles.files).forEach(file => {
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    documentosComplianceTemporarios.push({
+                        nomeArquivo: file.name,
+                        base64: reader.result,
+                        validade: validade || "Não informada",
+                        dataUpload: new Date().toISOString()
+                    });
+                    atualizarListaDocsCompliancePreview();
+                };
+                reader.readAsDataURL(file);
+            });
+            inputFiles.value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+        };
+
+        function atualizarListaDocsCompliancePreview() {
+            const container = document.getElementById('lista-docs-compliance-preview');
+            if(!container) return;
+            if (documentosComplianceTemporarios.length === 0) {
+                container.innerHTML = `<span class="text-slate-400">Nenhum documento adicional anexado.</span>`;
+                return;
+            }
+            container.innerHTML = "";
+            documentosComplianceTemporarios.forEach((doc, idx) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border">
+                        <div><b>${doc.nomeArquivo}</b> <small class="text-slate-500">(Validade: ${doc.validade})</small></div>
+                        <button type="button" onclick="removerDocComplianceTemp(${idx})" class="text-red-600 font-bold hover:underline text-xs">Remover</button>
+                    </div>
+                `;
+            });
         }
 
-        document.getElementById('docFiltroCompetencia').addEventListener('change', atualizarCentralDocumentos);
-        document.getElementById('relFiltroCompetencia').addEventListener('change', atualizarRelatoriosEtapa13);
+        window.removerDocComplianceTemp = (idx) => {
+            documentosComplianceTemporarios.splice(idx, 1);
+            atualizarListaDocsCompliancePreview();
+        };
+
+        window.salvarCadastro = async () => {
+            const editId = document.getElementById('campoEditId').value;
+            const nome = document.getElementById('campoNome').value;
+            const email = document.getElementById('campoEmail').value.trim().toLowerCase();
+            const perfilTipo = document.getElementById('campoPerfilTipo').value;
+
+            if (!nome || !email) { alert("Nome e E-mail são obrigatórios!"); return; }
+
+            const fileFoto = document.getElementById('campoFotoArquivo');
+            const fileContrato = document.getElementById('campoArquivoContrato');
+
+            const processarSalvamento = async (fotoBase64 = null, contratoBase64 = null) => {
+                const pacote = {
+                    nome,
+                    cpf: document.getElementById('campoCpf').value,
+                    email,
+                    telefone: document.getElementById('campoTelefone').value,
+                    contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
+                    razaoSocial: document.getElementById('campoRazaoSocial').value,
+                    cnpj: document.getElementById('campoCNPJ').value,
+                    emailCorp: document.getElementById('campoEmailCorp').value,
+                    inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
+                    inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
+                    cep: document.getElementById('campoCep').value,
+                    logradouro: document.getElementById('campoLogradouro').value,
+                    numero: document.getElementById('campoNumero').value,
+                    bairro: document.getElementById('campoBairro').value,
+                    cidade: document.getElementById('campoCidade').value,
+                    estado: document.getElementById('campoEstado').value,
+                    vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
+                    vigenciaFim: document.getElementById('campoVigenciaFim').value,
+                    valorFixoMensal: parseFloat(document.getElementById('campoValorFixoMensal').value || 0),
+                    mesAnoReajuste: document.getElementById('campoMesAnoReajuste').value,
+                    indiceReajuste: document.getElementById('campoIndiceReajuste').value,
+                    cargo: document.getElementById('campoCargo').value,
+                    departamento: document.getElementById('campoDepartamento').value,
+                    gestorDireto: document.getElementById('campoGestorDireto').value,
+                    aditivos: document.getElementById('campoAditivos').value,
+                    status: document.getElementById('campoStatus').value,
+                    perfilTipo,
+                    adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
+                    historicoAlteracoes: document.getElementById('campoHistoricoAlteracoes').value,
+                    documentosCompliance: documentosComplianceTemporarios
+                };
+
+                if (fotoBase64) pacote.fotoBase64 = fotoBase64;
+                if (contratoBase64) pacote.arquivoContratoBase64 = contratoBase64;
+
+                if (editId) {
+                    const atual = contratosLocais[editId] || {};
+                    if (!pacote.fotoBase64 && atual.fotoBase64) pacote.fotoBase64 = atual.fotoBase64;
+                    if (!pacote.arquivoContratoBase64 && atual.arquivoContratoBase64) pacote.arquivoContratoBase64 = atual.arquivoContratoBase64;
+                    if (atual.documentosCompliance && documentosComplianceTemporarios.length === 0) {
+                        pacote.documentosCompliance = atual.documentosCompliance;
+                    }
+
+                    await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+                    await registrarAuditoria("Contratos", "Edição de Cadastro", nome, "-", "Atualizado");
+                    alert("Cadastro atualizado com sucesso!");
+                } else {
+                    pacote.senhaTemporaria = true;
+                    const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+                    try {
+                        await createUserWithEmailAndPassword(auth, email, senhaProvisoria);
+                    } catch(e) { console.warn(e); }
+
+                    await push(ref(db, pathContratosDB), pacote);
+                    await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá ${nome}, seu cadastro foi realizado na empresa ${empresaAtivaNome}.`, "sucesso", email, nome, senhaProvisoria);
+                    await registrarAuditoria("Contratos", "Novo Cadastro", nome, "-", "Criado");
+                    alert(`Prestador/Membro cadastrado com sucesso!\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
+                }
+                fecharModalCadastro();
+            };
+
+            let fotoB64 = null;
+            let contratoB64 = null;
+
+            const lerArquivoAsync = (file) => new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result);
+                reader.readAsDataURL(file);
+            });
+
+            if (fileFoto.files.length > 0) {
+                fotoB64 = await lerArquivoAsync(fileFoto.files[0]);
+            }
+            if (fileContrato.files.length > 0) {
+                contratoB64 = await lerArquivoAsync(fileContrato.files[0]);
+            }
+
+            if (editId) {
+                const regAtual = contratosLocais[editId] || {};
+                processarSalvamento(fotoB64 || regAtual.fotoBase64, contratoB64 || regAtual.arquivoContratoBase64);
+            } else {
+                processarSalvamento(fotoB64, contratoB64);
+            }
+        };
+
+        window.abrirModalEdicao = (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+
+            document.getElementById('campoEditId').value = key;
+            document.getElementById('tituloModal').innerText = "Editar Cadastro / Contrato";
+            document.getElementById('campoPerfilTipo').value = c.perfilTipo || 'Prestador';
+            document.getElementById('campoAdminEhPrestador').value = c.adminEhPrestador || 'nao';
+            verificarPerfilAdminPrestador();
+
+            document.getElementById('campoNome').value = c.nome || "";
+            document.getElementById('campoCpf').value = c.cpf || "";
+            document.getElementById('campoEmail').value = c.email || "";
+            document.getElementById('campoTelefone').value = c.telefone || "";
+            document.getElementById('campoContatoEmergencia').value = c.contatoEmergencia || "";
+            document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
+            document.getElementById('campoCNPJ').value = c.cnpj || "";
+            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
+            document.getElementById('campoInscricaoEstadual').value = c.inscricaoEstadual || "";
+            document.getElementById('campoInscricaoMunicipal').value = c.inscricaoMunicipal || "";
+            document.getElementById('campoCep').value = c.cep || "";
+            document.getElementById('campoLogradouro').value = c.logradouro || "";
+            document.getElementById('campoNumero').value = c.numero || "";
+            document.getElementById('campoBairro').value = c.bairro || "";
+            document.getElementById('campoCidade').value = c.cidade || "";
+            document.getElementById('campoEstado').value = c.estado || "";
+            document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
+            document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
+            document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+            document.getElementById('campoMesAnoReajuste').value = c.mesAnoReajuste || "";
+            document.getElementById('campoIndiceReajuste').value = c.indiceReajuste || "IPCA";
+            document.getElementById('campoCargo').value = c.cargo || "";
+            document.getElementById('campoDepartamento').value = c.departamento || "";
+            document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
+            document.getElementById('campoAditivos').value = c.aditivos || "";
+            document.getElementById('campoStatus').value = c.status || "Ativo";
+            document.getElementById('campoHistoricoAlteracoes').value = c.historicoAlteracoes || "";
+
+            documentosComplianceTemporarios = c.documentosCompliance || [];
+            atualizarListaDocsCompliancePreview();
+
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.reenviarConvitePrimeiroAcesso = async (key) => {
+            const c = contratosLocais[key];
+            if (!c || !c.email) { alert("E-mail não cadastrado para este registro!"); return; }
+            const senhaProvisoria = "Connect@" + Math.floor(1000 + Math.random() * 9000);
+            await update(ref(db, `${pathContratosDB}/${key}`), { senhaTemporaria: true });
+            await registrarNotificacao("Convite de Acesso", `Olá ${c.nome}, aqui está seu novo convite de acesso para o ConnectPJ.`, "sucesso", c.email, c.nome, senhaProvisoria);
+            alert(`Convite reenviado para ${c.email}!\nNova senha provisória: ${senhaProvisoria}`);
+            registrarAuditoria("Contratos", "Reenvio de Convite", c.nome, "-", c.email);
+        };
+
+        window.alternarBloqueioUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+            const novoStatus = c.status === 'Ativo' ? 'Inativo / Bloqueado' : 'Ativo';
+            await update(ref(db, `${pathContratosDB}/${key}`), { status: novoStatus });
+            alert(`Status de ${c.nome} alterado para: ${novoStatus}`);
+            registrarAuditoria("Contratos", "Alteração de Status", c.nome, c.status, novoStatus);
+        };
+
+        window.exclusaoLogicaUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if (!c) return;
+            if (confirm(`Deseja realmente excluir o cadastro de ${c.nome}?`)) {
+                await update(ref(db, `${pathContratosDB}/${key}`), { excluidoLogico: true, status: "Inativo / Bloqueado" });
+                alert("Cadastro excluído com sucesso!");
+                registrarAuditoria("Contratos", "Exclusão de Cadastro", c.nome, "Ativo", "Excluído");
+            }
+        };
+
+        // EXPORTAR EXCEL DE CONTRATOS
+        window.exportarContratosExcel = () => {
+            const tabela = document.getElementById("tabela-contratos-export");
+            if (!tabela) {
+                alert("Tabela de contratos não encontrada!");
+                return;
+            }
+            try {
+                const livro = XLSX.utils.table_to_book(tabela, { sheet: "Equipe e Contratos" });
+                XLSX.writeFile(livro, `Equipe_e_Contratos_${empresaAtivaNome}.xlsx`);
+                registrarAuditoria("Contratos", "Exportação Excel", "Lista de Contratos", "-", "Arquivo Baixado");
+            } catch (err) {
+                alert("Erro ao exportar Excel: " + err.message);
+            }
+        };
+
+        // VISUALIZAÇÃO DE ARQUIVOS
+        document.addEventListener('click', (e) => {
+            const btn = e.target.closest('.btn-view-arquivo-contrato');
+            if (btn) {
+                const key = btn.dataset.id;
+                const c = contratosLocais[key];
+                if (c && c.arquivoContratoBase64) {
+                    abrirModalVisualizarArquivo("Contrato - " + c.nome, c.arquivoContratoBase64);
+                }
+            }
+        });
+
+        window.abrirModalVisualizarArquivo = (titulo, base64Data) => {
+            document.getElementById('tituloModalVisualizarArquivo').innerText = titulo;
+            const container = document.getElementById('conteudoVisualizacaoArquivo');
+            
+            if (base64Data.startsWith('data:application/pdf')) {
+                container.innerHTML = `<iframe src="${base64Data}" class="w-full h-[500px] border rounded-lg"></iframe>`;
+            } else {
+                container.innerHTML = `<img src="${base64Data}" class="max-w-full max-h-[500px] object-contain rounded-lg">`;
+            }
+            document.getElementById('modalVisualizarArquivo').classList.remove('hidden');
+        };
+
+        window.fecharModalVisualizarArquivo = () => {
+            document.getElementById('modalVisualizarArquivo').classList.add('hidden');
+        };
+
+        let contratosLocais = {};
+        let folhasLocais = {};
 
         onValue(ref(db, pathContratosDB), (snapshot) => {
             contratosLocais = snapshot.val() || {};
@@ -2876,12 +2840,10 @@
                 let optCC = document.createElement('option'); optCC.value = cc; optCC.innerText = cc;
                 if(relFiltroCentroCusto) relFiltroCentroCusto.appendChild(optCC);
             });
-            renderizarFolhaPagamento();
         });
 
         onValue(ref(db, pathFolhasDB), (snapshot) => {
             folhasLocais = snapshot.val() || {};
-            renderizarFolhaPagamento();
         });
 
         mostrarSecao('dashboard');
