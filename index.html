@@ -1180,7 +1180,7 @@
             <table class="w-full text-left border-collapse text-xs">
                 <thead>
                     <tr class="bg-slate-100 border-b font-extrabold text-slate-700">
-                        <th class="p-3">Empresa Cliente</th>
+                        <th class="p-3">Empresa / CNPJ</th>
                         <th class="p-3">Plano</th>
                         <th class="p-3">Status Vigência</th>
                         <th class="p-3">Contratos (Uso / Limite)</th>
@@ -1197,16 +1197,27 @@
 
 <!-- MODAL CRIAR / EDITAR EMPRESA CLIENTE (SUPERADMIN) -->
 <div id="modalSuperEmpresa" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-    <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border space-y-4">
+    <div class="bg-white rounded-2xl w-full max-w-lg p-6 shadow-2xl border space-y-4 max-h-[90vh] overflow-y-auto">
         <h3 id="tituloModalSuperEmpresa" class="text-lg font-bold text-blue-950">Criar Nova Empresa Cliente</h3>
         <input type="hidden" id="superEmpresaEditId">
         <div class="space-y-3 text-xs">
             <div><label class="block font-bold text-slate-700 mb-1">Razão Social</label><input type="text" id="superRazaoSocial" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">Nome Fantasia</label><input type="text" id="superNomeFantasia" class="w-full p-2.5 border rounded-lg bg-white"></div>
             <div><label class="block font-bold text-slate-700 mb-1">CNPJ Principal</label><input type="text" id="superCnpj" placeholder="00.000.000/0001-00" class="w-full p-2.5 border rounded-lg bg-white"></div>
-            <div><label class="block font-bold text-slate-700 mb-1">CNPJs Adicionais / Filiais (Vincular múltiplos)</label><input type="text" id="superCnpjsFiliais" placeholder="Ex: 00.000.000/0002-00, 00.000.000/0003-00" class="w-full p-2.5 border rounded-lg bg-white"><small class="text-slate-400">Separe os CNPJs adicionais por vírgula. Cada um poderá ter seu acesso ou visualização isolada.</small></div>
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">Plano da Matriz (CNPJ Principal)</label>
+                <select id="superPlanoPrincipalSelect" class="w-full p-2.5 border rounded-lg bg-white font-bold text-blue-900"></select>
+            </div>
+            <div>
+                <label class="block font-bold text-slate-700 mb-1">CNPJs Adicionais / Filiais (Vincular múltiplos)</label>
+                <input type="text" id="superCnpjsFiliais" placeholder="Ex: 00.000.000/0002-00, 00.000.000/0003-00" class="w-full p-2.5 border rounded-lg bg-white" oninput="gerarSelecaoPlanosFiliais()"><small class="text-slate-400">Separe os CNPJs adicionais por vírgula. Cada um poderá ter seu plano e acesso isolado.</small>
+            </div>
+            <!-- CONTAINER DINÂMICO PARA DEFINIR PLANO DE CADA FILIAL -->
+            <div id="containerPlanosFiliais" class="space-y-2 pt-2 border-t hidden">
+                <label class="block font-extrabold text-blue-950 uppercase tracking-wider">Definir Plano por Filial (CNPJ Adicional):</label>
+                <div id="listaDinamicaPlanosFiliais" class="space-y-2"></div>
+            </div>
             <div><label class="block font-bold text-slate-700 mb-1">E-mail do Administrador (Para Início e Senha Provisória)</label><input type="email" id="superEmailAdmin" placeholder="cliente@empresa.com" class="w-full p-2.5 border rounded-lg bg-white"></div>
-            <div><label class="block font-bold text-slate-700 mb-1">Plano Inicial</label><select id="superPlanoSelect" class="w-full p-2.5 border rounded-lg bg-white font-bold text-blue-900"></select></div>
         </div>
         <div class="flex justify-end gap-2 pt-2 border-t">
             <button onclick="fecharModalSuperEmpresa()" class="px-4 py-2 border rounded-lg text-xs font-semibold text-slate-600">Cancelar</button>
@@ -1259,9 +1270,11 @@
 <!-- MODAL ALTERAR PLANO DE EMPRESA (SUPERADMIN) -->
 <div id="modalAlterarPlanoEmpresa" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border space-y-4">
-        <h3 class="text-lg font-bold text-blue-950">Alterar Plano do Cliente</h3>
+        <h3 class="text-lg font-bold text-blue-950">Alterar Plano do Cliente / CNPJ</h3>
         <input type="hidden" id="alterarPlanoEmpresaId">
+        <input type="hidden" id="alterarPlanoCnpjAlvo">
         <div class="space-y-3 text-xs">
+            <p id="labelAlvoPlanoAlteracao" class="font-bold text-slate-600"></p>
             <div><label class="block font-bold text-slate-700 mb-1">Novo Plano</label><select id="selectNovoPlanoEmpresa" class="w-full p-2.5 border rounded-lg bg-white font-bold text-blue-900"></select></div>
         </div>
         <div class="flex justify-end gap-2 pt-2 border-t">
@@ -2033,6 +2046,8 @@
             carregarPainelSuperadmin();
         };
 
+        let cachePlanosSuper = {};
+
         async function carregarPainelSuperadmin() {
             const [snapClientes, snapPlanos, snapAdmins] = await Promise.all([
                 get(ref(db, 'empresas_clientes')),
@@ -2041,15 +2056,15 @@
             ]);
 
             const clientes = snapClientes.val() || {};
-            const planos = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
             const admins = snapAdmins.val() || {};
 
-            const selectPlanoEmpresa = document.getElementById('superPlanoSelect');
+            const selectPlanoEmpresa = document.getElementById('superPlanoPrincipalSelect');
             const selectNovoPlanoEmpresa = document.getElementById('selectNovoPlanoEmpresa');
             selectPlanoEmpresa.innerHTML = "";
             selectNovoPlanoEmpresa.innerHTML = "";
 
-            Object.entries(planos).forEach(([pId, p]) => {
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
                 selectPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
                 selectNovoPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome}</option>`;
             });
@@ -2068,7 +2083,7 @@
                         <td class="p-3 font-bold text-blue-950">${c.razaoSocial}<br><small class="text-slate-500">${c.nomeFantasia || ''}</small></td>
                         <td class="p-3"><b>${c.cnpj}</b>${cnpjsLista}</td>
                         <td class="p-3 text-slate-600">${c.emailAdmin || '---'}</td>
-                        <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planos[c.planoId]?.nome || 'Padrão'}</span></td>
+                        <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${cachePlanosSuper[c.planoId]?.nome || 'Padrão'}</span></td>
                         <td class="p-3 text-center">${statusBadge}</td>
                         <td class="p-3 text-center space-x-1">
                             <button onclick="abrirModalEmpresaCliente('${id}')" class="bg-slate-100 hover:bg-slate-200 px-2.5 py-1 rounded font-bold text-xs">Editar</button>
@@ -2083,7 +2098,7 @@
 
             const containerPlanos = document.getElementById('listaCardsPlanosSuper');
             containerPlanos.innerHTML = "";
-            Object.entries(planos).forEach(([pId, p]) => {
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
                 containerPlanos.innerHTML += `
                     <div class="bg-white p-6 rounded-2xl border shadow-sm space-y-3">
                         <div class="flex justify-between items-start">
@@ -2135,27 +2150,100 @@
             tbodyAssinaturas.innerHTML = "";
             Object.entries(clientes).forEach(([id, c]) => {
                 get(ref(db, `empresas_clientes_dados/${id}/contratos`)).then((snapContratos) => {
-                    const qtdContratos = Object.keys(snapContratos.val() || {}).length;
-                    const planoObj = planos[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
-
+                    const snapContratosVal = snapContratos.val() || {};
+                    const qtdContratos = Object.keys(snapContratosVal).length;
+                    
+                    // Linha da Matriz / CNPJ Principal
+                    const planoMatriz = cachePlanosSuper[c.planoId] || { nome: "Enterprise", limiteContratos: 50 };
                     tbodyAssinaturas.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold text-blue-950">${c.razaoSocial}</td>
-                            <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planoObj.nome}</span></td>
+                            <td class="p-3 font-bold text-blue-950">${c.razaoSocial} <br><small class="text-slate-500">CNPJ (Matriz): ${c.cnpj}</small></td>
+                            <td class="p-3"><span class="px-2 py-1 bg-blue-50 text-blue-900 rounded font-bold">${planoMatriz.nome}</span></td>
                             <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
-                            <td class="p-3"><b>${qtdContratos}</b> / ${planoObj.limiteContratos} contratos</td>
+                            <td class="p-3"><b>${qtdContratos}</b> / ${planoMatriz.limiteContratos} contratos</td>
                             <td class="p-3 text-center">
-                                <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${c.planoId}')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
+                                <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${c.planoId}', '${c.cnpj}', 'Matriz')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
                             </td>
                         </tr>
                     `;
+
+                    // Linhas das Filiais se houver planos por filial salvos
+                    if (c.planosFiliais && typeof c.planosFiliais === 'object') {
+                        Object.entries(c.planosFiliais).forEach(([cnpjFilial, pFilialId]) => {
+                            const planoFilialObj = cachePlanosSuper[pFilialId] || { nome: "Enterprise", limiteContratos: 50 };
+                            tbodyAssinaturas.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50 bg-slate-50/50">
+                                    <td class="p-3 pl-6 text-slate-700">↳ Filial: <b>${c.razaoSocial}</b> <br><small class="text-slate-500">CNPJ: ${cnpjFilial}</small></td>
+                                    <td class="p-3"><span class="px-2 py-1 bg-amber-50 text-amber-900 rounded font-bold">${planoFilialObj.nome}</span></td>
+                                    <td class="p-3"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold">Vigente ✔</span></td>
+                                    <td class="p-3">- / ${planoFilialObj.limiteContratos} contratos</td>
+                                    <td class="p-3 text-center">
+                                        <button onclick="abrirModalAlterarPlanoEmpresa('${id}', '${pFilialId}', '${cnpjFilial}', 'Filial')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-3 py-1.5 rounded-lg font-bold text-xs transition shadow-sm">Alterar Plano</button>
+                                    </td>
+                                </tr>
+                            `;
+                        });
+                    }
                 });
             });
         }
 
+        window.gerarSelecaoPlanosFiliais = () => {
+            const inputCnpjs = document.getElementById('superCnpjsFiliais').value;
+            const container = document.getElementById('containerPlanosFiliais');
+            const listaDinamica = document.getElementById('listaDinamicaPlanosFiliais');
+            
+            if (!inputCnpjs || inputCnpjs.trim() === "") {
+                container.classList.add('hidden');
+                listaDinamica.innerHTML = "";
+                return;
+            }
+
+            const cnpjs = inputCnpjs.split(',').map(s => s.trim()).filter(s => s.length > 0);
+            if (cnpjs.length === 0) {
+                container.classList.add('hidden');
+                listaDinamica.innerHTML = "";
+                return;
+            }
+
+            container.classList.remove('hidden');
+            listaDinamica.innerHTML = "";
+
+            cnpjs.forEach((cnpj, index) => {
+                let opcoesHtml = "";
+                Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                    opcoesHtml += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+                });
+
+                listaDinamica.innerHTML += `
+                    <div class="flex items-center gap-2 bg-slate-50 p-2.5 rounded-xl border">
+                        <div class="flex-1 font-bold text-slate-800">Filial CNPJ: ${cnpj}</div>
+                        <div class="w-1/2">
+                            <select id="planoFilial_${index}" data-cnpj="${cnpj}" class="w-full p-2 border rounded-lg bg-white font-bold text-blue-900 select-plano-filial">
+                                ${opcoesHtml}
+                            </select>
+                        </div>
+                    </div>
+                `;
+            });
+        };
+
         window.abrirModalEmpresaCliente = async (id = null) => {
             document.getElementById('superEmpresaEditId').value = id || "";
             document.getElementById('tituloModalSuperEmpresa').innerText = id ? "Editar Empresa Cliente" : "Criar Nova Empresa Cliente";
+            
+            // Garantir que cachePlanosSuper esteja populado
+            if (Object.keys(cachePlanosSuper).length === 0) {
+                const snapPlanos = await get(ref(db, 'sistema_planos'));
+                cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            }
+
+            const selectPlanoEmpresa = document.getElementById('superPlanoPrincipalSelect');
+            selectPlanoEmpresa.innerHTML = "";
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                selectPlanoEmpresa.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+            });
+
             if (id) {
                 const snap = await get(ref(db, `empresas_clientes/${id}`));
                 const data = snap.val() || {};
@@ -2164,13 +2252,29 @@
                 document.getElementById('superCnpj').value = data.cnpj || "";
                 document.getElementById('superCnpjsFiliais').value = data.cnpjFiliais || "";
                 document.getElementById('superEmailAdmin').value = data.emailAdmin || "";
-                document.getElementById('superPlanoSelect').value = data.planoId || "";
+                document.getElementById('superPlanoPrincipalSelect').value = data.planoId || "";
+                
+                gerarSelecaoPlanosFiliais();
+                if (data.planosFiliais) {
+                    setTimeout(() => {
+                        Object.entries(data.planosFiliais).forEach(([cnpjFilial, planoIdFilial]) => {
+                            const selects = document.querySelectorAll('.select-plano-filial');
+                            selects.forEach(sel => {
+                                if (sel.dataset.cnpj === cnpjFilial) {
+                                    sel.value = planoIdFilial;
+                                }
+                            });
+                        });
+                    }, 50);
+                }
             } else {
                 document.getElementById('superRazaoSocial').value = "";
                 document.getElementById('superNomeFantasia').value = "";
                 document.getElementById('superCnpj').value = "";
                 document.getElementById('superCnpjsFiliais').value = "";
                 document.getElementById('superEmailAdmin').value = "";
+                document.getElementById('containerPlanosFiliais').classList.add('hidden');
+                document.getElementById('listaDinamicaPlanosFiliais').innerHTML = "";
             }
             document.getElementById('modalSuperEmpresa').classList.remove('hidden');
         };
@@ -2182,6 +2286,14 @@
             const razaoSocial = document.getElementById('superRazaoSocial').value;
             const cnpj = document.getElementById('superCnpj').value;
             const cnpjFiliais = document.getElementById('superCnpjsFiliais').value;
+            const planoIdMatriz = document.getElementById('superPlanoPrincipalSelect').value;
+
+            // Coletar planos específicos de cada filial
+            let planosFiliaisObj = {};
+            const selectsFiliais = document.querySelectorAll('.select-plano-filial');
+            selectsFiliais.forEach(sel => {
+                planosFiliaisObj[sel.dataset.cnpj] = sel.value;
+            });
 
             const pacote = {
                 razaoSocial,
@@ -2189,7 +2301,8 @@
                 cnpj,
                 cnpjFiliais,
                 emailAdmin,
-                planoId: document.getElementById('superPlanoSelect').value,
+                planoId: planoIdMatriz,
+                planosFiliais: planosFiliaisObj,
                 status: "Ativo"
             };
             if (!razaoSocial || !cnpj || !emailAdmin) { alert("Preencha a Razão Social, o CNPJ e o E-mail do Administrador!"); return; }
@@ -2206,7 +2319,7 @@
                 const novaEmpresaRef = push(ref(db, 'empresas_clientes'), pacote);
                 const novaEmpresaId = novaEmpresaRef.key;
 
-                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma, com suporte a múltiplos CNPJs vinculados.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
+                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá, sua empresa ${razaoSocial} foi cadastrada com sucesso na plataforma, com suporte a múltiplos CNPJs vinculados e planos personalizados.`, "sucesso", emailAdmin, razaoSocial, senhaProvisoria);
                 alert(`Empresa criada com sucesso!\nE-mail de acesso: ${emailAdmin}\nSenha Provisória enviada por e-mail: ${senhaProvisoria}`);
             }
             fecharModalSuperEmpresa();
@@ -2304,18 +2417,45 @@
             location.reload();
         };
 
-        window.abrirModalAlterarPlanoEmpresa = (empresaId, planoAtualId) => {
+        window.abrirModalAlterarPlanoEmpresa = async (empresaId, planoAtualId, cnpjAlvo, tipoUnidade) => {
             document.getElementById('alterarPlanoEmpresaId').value = empresaId;
-            document.getElementById('selectNovoPlanoEmpresa').value = planoAtualId || "";
+            document.getElementById('alterarPlanoCnpjAlvo').value = cnpjAlvo;
+            document.getElementById('labelAlvoPlanoAlteracao').innerText = `Unidade (${tipoUnidade}) - CNPJ: ${cnpjAlvo}`;
+
+            if (Object.keys(cachePlanosSuper).length === 0) {
+                const snapPlanos = await get(ref(db, 'sistema_planos'));
+                cachePlanosSuper = snapPlanos.val() || { "plano_padrao": { nome: "Enterprise", limiteContratos: 50 } };
+            }
+
+            const selectNovoPlano = document.getElementById('selectNovoPlanoEmpresa');
+            selectNovoPlano.innerHTML = "";
+            Object.entries(cachePlanosSuper).forEach(([pId, p]) => {
+                selectNovoPlano.innerHTML += `<option value="${pId}">${p.nome} (Limite: ${p.limiteContratos})</option>`;
+            });
+            selectNovoPlano.value = planoAtualId || "";
             document.getElementById('modalAlterarPlanoEmpresa').classList.remove('hidden');
         };
         window.fecharModalAlterarPlanoEmpresa = () => { document.getElementById('modalAlterarPlanoEmpresa').classList.add('hidden'); };
 
         window.executarAlterarPlanoEmpresa = async () => {
             const empId = document.getElementById('alterarPlanoEmpresaId').value;
+            const cnpjAlvo = document.getElementById('alterarPlanoCnpjAlvo').value;
             const novoPlanoId = document.getElementById('selectNovoPlanoEmpresa').value;
-            await update(ref(db, `empresas_clientes/${empId}`), { planoId: novoPlanoId });
-            alert("Plano da empresa alterado com sucesso!");
+
+            const snapCli = await get(ref(db, `empresas_clientes/${empId}`));
+            const dataCli = snapCli.val() || {};
+
+            if (dataCli.cnpj === cnpjAlvo) {
+                // É a matriz
+                await update(ref(db, `empresas_clientes/${empId}`), { planoId: novoPlanoId });
+            } else {
+                // É uma filial
+                let planosFiliaisObj = dataCli.planosFiliais || {};
+                planosFiliaisObj[cnpjAlvo] = novoPlanoId;
+                await update(ref(db, `empresas_clientes/${empId}`), { planosFiliais: planosFiliaisObj });
+            }
+
+            alert("Plano alterado com sucesso para este CNPJ!");
             fecharModalAlterarPlanoEmpresa();
             carregarPainelSuperadmin();
         };
