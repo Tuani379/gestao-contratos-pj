@@ -1362,6 +1362,28 @@
         const pathNotificacoesDB = empresaAtivaId === 'matriz' ? 'notificacoes_sistema' : `empresas_clientes_dados/${empresaAtivaId}/notificacoes_sistema`;
         const pathAuditoriaDB = empresaAtivaId === 'matriz' ? 'auditoria_logs' : `empresas_clientes_dados/${empresaAtivaId}/auditoria_logs`;
 
+        // ==========================================
+        // FUNÇÕES GLOBAIS DE VISUALIZAÇÃO DE ARQUIVOS
+        // ==========================================
+        window.abrirModalVisualizarArquivo = (titulo, base64Url) => {
+            document.getElementById('tituloModalVisualizarArquivo').innerText = titulo;
+            const container = document.getElementById('conteudoVisualizacaoArquivo');
+            
+            if (!base64Url || base64Url === "null" || base64Url === "undefined") {
+                container.innerHTML = `<p class="text-slate-500 font-semibold text-xs">Arquivo não disponível ou inválido.</p>`;
+            } else if (base64Url.startsWith('data:image/')) {
+                container.innerHTML = `<img src="${base64Url}" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow">`;
+            } else {
+                container.innerHTML = `<iframe src="${base64Url}" class="w-full h-[60vh] rounded-lg border bg-white"></iframe>`;
+            }
+            document.getElementById('modalVisualizarArquivo').classList.remove('hidden');
+        };
+
+        window.fecharModalVisualizarArquivo = () => {
+            document.getElementById('modalVisualizarArquivo').classList.add('hidden');
+            document.getElementById('conteudoVisualizacaoArquivo').innerHTML = "";
+        };
+
         async function registrarAuditoria(modulo, acao, registro, valorAnterior, valorNovo) {
             try {
                 await push(ref(db, pathAuditoriaDB), {
