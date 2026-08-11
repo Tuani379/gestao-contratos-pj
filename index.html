@@ -1384,6 +1384,251 @@
             document.getElementById('conteudoVisualizacaoArquivo').innerHTML = "";
         };
 
+        // ==========================================
+        // FUNÇÕES GLOBAIS DE GESTÃO DE CONTRATOS
+        // ==========================================
+        window.abrirModalCadastro = () => {
+            document.getElementById('tituloModal').innerText = "Novo Cadastro / Contrato";
+            document.getElementById('campoEditId').value = "";
+            document.getElementById('campoNome').value = "";
+            document.getElementById('campoCpf').value = "";
+            document.getElementById('campoEmail').value = "";
+            document.getElementById('campoTelefone').value = "";
+            document.getElementById('campoContatoEmergencia').value = "";
+            document.getElementById('campoRazaoSocial').value = "";
+            document.getElementById('campoCNPJ').value = "";
+            document.getElementById('campoEmailCorp').value = "";
+            document.getElementById('campoInscricaoEstadual').value = "";
+            document.getElementById('campoInscricaoMunicipal').value = "";
+            document.getElementById('campoCep').value = "";
+            document.getElementById('campoLogradouro').value = "";
+            document.getElementById('campoNumero').value = "";
+            document.getElementById('campoBairro').value = "";
+            document.getElementById('campoCidade').value = "";
+            document.getElementById('campoEstado').value = "";
+            document.getElementById('campoVigenciaInicio').value = "";
+            document.getElementById('campoVigenciaFim').value = "";
+            document.getElementById('campoValorFixoMensal').value = "";
+            document.getElementById('campoMesAnoReajuste').value = "";
+            document.getElementById('campoCargo').value = "";
+            document.getElementById('campoDepartamento').value = "";
+            document.getElementById('campoGestorDireto').value = "";
+            document.getElementById('campoAditivos').value = "";
+            document.getElementById('campoHistoricoAlteracoes').value = "";
+            document.getElementById('campoFotoArquivo').value = "";
+            document.getElementById('campoArquivoContrato').value = "";
+            document.getElementById('campoDocsMultiplos').value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+            documentosComplianceTemporarios = [];
+            document.getElementById('lista-docs-compliance-preview').innerHTML = `<span class="text-slate-400">Nenhum documento adicional anexado.</span>`;
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.fecharModalCadastro = () => {
+            document.getElementById('modalCadastro').classList.add('hidden');
+        };
+
+        window.exportarContratosExcel = () => {
+            const tabela = document.getElementById("tabela-contratos-export");
+            const livro = XLSX.utils.table_to_book(tabela, { sheet: "Equipe_Contratos" });
+            XLSX.writeFile(livro, `Equipe_Contratos_${empresaAtivaNome}.xlsx`);
+            registrarAuditoria("Equipe e Contratos", "Exportação Excel", "Relatório de Contratos", "-", "Arquivo Baixado");
+        };
+
+        window.alternarBloqueioUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if(!c) return;
+            const novoStatus = (c.status === "Ativo") ? "Inativo / Bloqueado" : "Ativo";
+            await update(ref(db, `${pathContratosDB}/${key}`), { status: novoStatus });
+            await registrarAuditoria("Equipe e Contratos", "Alteração Status", c.nome, c.status, novoStatus);
+        };
+
+        window.exclusaoLogicaUsuario = async (key) => {
+            const c = contratosLocais[key];
+            if(!c) return;
+            if(confirm(`Deseja realmente excluir o cadastro de ${c.nome}?`)) {
+                await update(ref(db, `${pathContratosDB}/${key}`), { excluidoLogico: true, status: "Inativo / Bloqueado" });
+                await registrarAuditoria("Equipe e Contratos", "Exclusão Logica", c.nome, "Ativo", "Excluído");
+            }
+        };
+
+        window.reenviarConvitePrimeiroAcesso = async (key) => {
+            const c = contratosLocais[key];
+            if(!c) return;
+            const emailDestino = c.email || c.emailCorp;
+            if(!emailDestino) { alert("Este prestador não possui e-mail cadastrado!"); return; }
+            await update(ref(db, `${pathContratosDB}/${key}`), { senhaTemporaria: true });
+            await registrarNotificacao("Convite de Acesso", `Olá ${c.nome}, seu acesso ao ConnectPJ foi configurado. Utilize seu e-mail para entrar.`, "sucesso", emailDestino, c.nome, "123456");
+            alert(`Convite de primeiro acesso reenviado para ${emailDestino} com senha provisória: 123456`);
+        };
+
+        window.abrirModalEdicao = (key) => {
+            const c = contratosLocais[key];
+            if(!c) return;
+            document.getElementById('tituloModal').innerText = "Editar Cadastro / Contrato";
+            document.getElementById('campoEditId').value = key;
+            document.getElementById('campoPerfilTipo').value = c.perfilTipo || "Prestador";
+            document.getElementById('campoNome').value = c.nome || "";
+            document.getElementById('campoCpf').value = c.cpf || "";
+            document.getElementById('campoEmail').value = c.email || "";
+            document.getElementById('campoTelefone').value = c.telefone || "";
+            document.getElementById('campoContatoEmergencia').value = c.contatoEmergencia || "";
+            document.getElementById('campoRazaoSocial').value = c.razaoSocial || "";
+            document.getElementById('campoCNPJ').value = c.cnpj || "";
+            document.getElementById('campoEmailCorp').value = c.emailCorp || "";
+            document.getElementById('campoInscricaoEstadual').value = c.inscricaoEstadual || "";
+            document.getElementById('campoInscricaoMunicipal').value = c.inscricaoMunicipal || "";
+            document.getElementById('campoCep').value = c.cep || "";
+            document.getElementById('campoLogradouro').value = c.logradouro || "";
+            document.getElementById('campoNumero').value = c.numero || "";
+            document.getElementById('campoBairro').value = c.bairro || "";
+            document.getElementById('campoCidade').value = c.cidade || "";
+            document.getElementById('campoEstado').value = c.estado || "";
+            document.getElementById('campoVigenciaInicio').value = c.vigenciaInicio || "";
+            document.getElementById('campoVigenciaFim').value = c.vigenciaFim || "";
+            document.getElementById('campoValorFixoMensal').value = c.valorFixoMensal || "";
+            document.getElementById('campoMesAnoReajuste').value = c.mesAnoReajuste || "";
+            document.getElementById('campoIndiceReajuste').value = c.indiceReajuste || "IPCA";
+            document.getElementById('campoCargo').value = c.cargo || "";
+            document.getElementById('campoDepartamento').value = c.departamento || "";
+            document.getElementById('campoGestorDireto').value = c.gestorDireto || "";
+            document.getElementById('campoAditivos').value = c.aditivos || "";
+            document.getElementById('campoStatus').value = c.status || "Ativo";
+            document.getElementById('campoHistoricoAlteracoes').value = c.historicoAlteracoes || "";
+            
+            documentosComplianceTemporarios = c.documentosCompliance || [];
+            renderizarPreviewDocsCompliance();
+            document.getElementById('modalCadastro').classList.remove('hidden');
+        };
+
+        window.adicionarDocumentoComplianceLista = async () => {
+            const inputFiles = document.getElementById('campoDocsMultiplos');
+            const validade = document.getElementById('campoValidadeDocsMultiplos').value;
+            if (inputFiles.files.length === 0) { alert("Selecione ao menos um arquivo!"); return; }
+            for (let file of Array.from(inputFiles.files)) {
+                const b64 = await new Promise((res) => {
+                    const r = new FileReader();
+                    r.onloadend = () => res(r.result);
+                    r.readAsDataURL(file);
+                });
+                documentosComplianceTemporarios.push({ nomeArquivo: file.name, base64: b64, validade: validade || "Não informada" });
+            }
+            renderizarPreviewDocsCompliance();
+            inputFiles.value = "";
+            document.getElementById('campoValidadeDocsMultiplos').value = "";
+        };
+
+        function renderizarPreviewDocsCompliance() {
+            const container = document.getElementById('lista-docs-compliance-preview');
+            if(!container) return;
+            container.innerHTML = "";
+            if(documentosComplianceTemporarios.length === 0) {
+                container.innerHTML = `<span class="text-slate-400">Nenhum documento adicional anexado.</span>`;
+                return;
+            }
+            documentosComplianceTemporarios.forEach((doc, idx) => {
+                container.innerHTML += `
+                    <div class="flex justify-between items-center bg-white p-2 rounded border">
+                        <span><b>${doc.nomeArquivo}</b> (Validade: ${doc.validade})</span>
+                        <button type="button" onclick="removerDocComplianceTemp(${idx})" class="text-red-600 font-bold hover:underline">Remover</button>
+                    </div>
+                `;
+            });
+        }
+
+        window.removerDocComplianceTemp = (idx) => {
+            documentosComplianceTemporarios.splice(idx, 1);
+            renderizarPreviewDocsCompliance();
+        };
+
+        window.salvarCadastro = async () => {
+            const editId = document.getElementById('campoEditId').value;
+            const nome = document.getElementById('campoNome').value;
+            if(!nome) { alert("O campo Nome Completo é obrigatório!"); return; }
+
+            const fileFoto = document.getElementById('campoFotoArquivo');
+            const fileContrato = document.getElementById('campoArquivoContrato');
+
+            let fotoBase64 = editId && contratosLocais[editId] ? contratosLocais[editId].fotoBase64 : null;
+            let contratoBase64 = editId && contratosLocais[editId] ? contratosLocais[editId].arquivoContratoBase64 : null;
+
+            if (fileFoto.files.length > 0) {
+                fotoBase64 = await new Promise(res => {
+                    const r = new FileReader();
+                    r.onloadend = () => res(r.result);
+                    r.readAsDataURL(fileFoto.files[0]);
+                });
+            }
+
+            if (fileContrato.files.length > 0) {
+                contratoBase64 = await new Promise(res => {
+                    const r = new FileReader();
+                    r.onloadend = () => res(r.result);
+                    r.readAsDataURL(fileContrato.files[0]);
+                });
+            }
+
+            const pacote = {
+                perfilTipo: document.getElementById('campoPerfilTipo').value,
+                adminEhPrestador: document.getElementById('campoAdminEhPrestador').value,
+                nome,
+                cpf: document.getElementById('campoCpf').value,
+                email: document.getElementById('campoEmail').value,
+                telefone: document.getElementById('campoTelefone').value,
+                contatoEmergencia: document.getElementById('campoContatoEmergencia').value,
+                razaoSocial: document.getElementById('campoRazaoSocial').value,
+                cnpj: document.getElementById('campoCNPJ').value,
+                emailCorp: document.getElementById('campoEmailCorp').value,
+                inscricaoEstadual: document.getElementById('campoInscricaoEstadual').value,
+                inscricaoMunicipal: document.getElementById('campoInscricaoMunicipal').value,
+                cep: document.getElementById('campoCep').value,
+                logradouro: document.getElementById('campoLogradouro').value,
+                numero: document.getElementById('campoNumero').value,
+                bairro: document.getElementById('campoBairro').value,
+                cidade: document.getElementById('campoCidade').value,
+                estado: document.getElementById('campoEstado').value,
+                vigenciaInicio: document.getElementById('campoVigenciaInicio').value,
+                vigenciaFim: document.getElementById('campoVigenciaFim').value,
+                valorFixoMensal: parseFloat(document.getElementById('campoValorFixoMensal').value || 0),
+                mesAnoReajuste: document.getElementById('campoMesAnoReajuste').value,
+                indiceReajuste: document.getElementById('campoIndiceReajuste').value,
+                cargo: document.getElementById('campoCargo').value,
+                departamento: document.getElementById('campoDepartamento').value,
+                gestorDireto: document.getElementById('campoGestorDireto').value,
+                aditivos: document.getElementById('campoAditivos').value,
+                status: document.getElementById('campoStatus').value,
+                historicoAlteracoes: document.getElementById('campoHistoricoAlteracoes').value,
+                documentosCompliance: documentosComplianceTemporarios
+            };
+
+            if (fotoBase64) pacote.fotoBase64 = fotoBase64;
+            if (contratoBase64) pacote.arquivoContratoBase64 = contratoBase64;
+
+            if (editId) {
+                await update(ref(db, `${pathContratosDB}/${editId}`), pacote);
+                await registrarAuditoria("Equipe e Contratos", "Edição Contrato", nome, "-", "Atualizado");
+            } else {
+                pacote.senhaTemporaria = true;
+                const novoRef = push(ref(db, pathContratosDB));
+                await set(novoRef, pacote);
+                await registrarNotificacao("Bem-vindo ao ConnectPJ", `Olá ${nome}, seu cadastro foi criado. Utilize seu e-mail corporativo para acessar o sistema.`, "sucesso", pacote.email || pacote.emailCorp, nome, "123456");
+                await registrarAuditoria("Equipe e Contratos", "Novo Cadastro", nome, "-", "Criado");
+            }
+
+            alert("Cadastro salvo com sucesso!");
+            fecharModalCadastro();
+        };
+
+        window.verificarPerfilAdminPrestador = () => {
+            const perfil = document.getElementById('campoPerfilTipo').value;
+            const bloco = document.getElementById('bloco-admin-prestador');
+            if (perfil === 'Administrador') {
+                bloco.classList.remove('hidden');
+            } else {
+                bloco.classList.add('hidden');
+            }
+        };
+
         async function registrarAuditoria(modulo, acao, registro, valorAnterior, valorNovo) {
             try {
                 await push(ref(db, pathAuditoriaDB), {
@@ -1432,6 +1677,17 @@
         document.addEventListener('click', () => {
             const dropdownNotif = document.getElementById('modal-notificacoes-dropdown');
             if(dropdownNotif) dropdownNotif.classList.add('hidden');
+        });
+
+        // Delegação global para os botões de ver arquivo na tabela de contratos
+        document.addEventListener('click', (e) => {
+            if (e.target && e.target.classList.contains('btn-view-arquivo-contrato')) {
+                const key = e.target.getAttribute('data-id');
+                const c = contratosLocais[key];
+                if (c && c.arquivoContratoBase64) {
+                    abrirModalVisualizarArquivo(`Contrato - ${c.nome}`, c.arquivoContratoBase64);
+                }
+            }
         });
 
         window.limparNotificacoes = async () => {
