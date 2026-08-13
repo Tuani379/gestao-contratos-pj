@@ -674,7 +674,7 @@
                             <tr><td colspan="8" class="p-4 text-center text-slate-400">Nenhum registro encontrado.</td></tr>
                         </tbody>
                         <tfoot>
-                            <tr class="bg-slate-100 border-t font-bold text-xs">
+                            <tr id="relatorio-linha-rodape" class="bg-slate-100 border-t font-bold text-xs">
                                 <td id="relatorio-coluna-total-label" colspan="7" class="p-3 text-right text-slate-700 uppercase tracking-wider">TOTAL CONSOLIDADO:</td>
                                 <td id="relatorioTotalGeral" class="p-3 text-right text-blue-950 text-sm">R$ 0,00</td>
                             </tr>
@@ -2869,12 +2869,35 @@
                 const btn = document.getElementById(`tab-rel-${t}`);
                 if (btn) btn.className = (t === tipo) ? "py-2.5 px-3 rounded-xl bg-blue-900 text-white transition shadow-sm" : "py-2.5 px-3 rounded-xl text-slate-700 hover:bg-white transition";
             });
+            
+            const labelFiltroEspecifico = document.getElementById('label-filtro-especifico');
+            const selectFiltroEspecifico = document.getElementById('relFiltroStatusEspecifico');
+            
+            if (tipo === 'prestadores') {
+                if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status";
+                if(selectFiltroEspecifico) {
+                    selectFiltroEspecifico.innerHTML = `
+                        <option value="todos">-- Todos --</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
+                    `;
+                }
+            } else {
+                if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status de Pagamento";
+                if(selectFiltroEspecifico) {
+                    selectFiltroEspecifico.innerHTML = `
+                        <option value="todos">-- Todos --</option>
+                    `;
+                }
+            }
+
             atualizarRelatoriosEtapa13();
         };
 
         function atualizarRelatoriosEtapa13() {
             const cabecalho = document.getElementById('relatorio-cabecalho-tabela');
             const corpo = document.getElementById('tabelaRelatorioCorpo');
+            const linhaRodape = document.getElementById('relatorio-linha-rodape');
             const lblTotal = document.getElementById('relatorio-coluna-total-label');
             const valTotal = document.getElementById('relatorioTotalGeral');
             if(!cabecalho) return;
@@ -2885,17 +2908,24 @@
             let rowsCount = 0;
 
             const compRef = document.getElementById('relFiltroCompetencia').value;
+            const centroCustoFiltro = document.getElementById('relFiltroCentroCusto').value;
+            const prestadorFiltro = document.getElementById('relFiltroPrestador').value;
+            const statusFiltro = document.getElementById('relFiltroStatusEspecifico').value;
             const dadosComp = folhasLocais[compRef] || { regular: {}, complementar: {} };
 
             if (tipoRelatorioAtualEtapa13 === 'prestadores') {
+                if(linhaRodape) linhaRodape.style.display = 'none';
                 htmlCab = `<th class="p-3">Nome</th><th class="p-3">CPF</th><th class="p-3">Razão Social</th><th class="p-3">CNPJ</th><th class="p-3">E-mail / Telefone</th><th class="p-3">Centro de Custo</th><th class="p-3 text-center">Status</th>`;
                 cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 6;
-                valTotal.innerText = "-";
 
                 Object.values(contratosLocais).forEach(c => {
                     if (c.excluidoLogico) return;
+                    if (centroCustoFiltro !== "todos" && c.departamento !== centroCustoFiltro) return;
+                    if (prestadorFiltro !== "todos" && c.nome !== prestadorFiltro) return;
+                    if (statusFiltro !== "todos" && c.status !== statusFiltro) return;
+
                     rowsCount++;
+                    let badgeStatus = c.status === 'Ativo' ? '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-green-100 text-green-800">Ativo</span>' : '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-800">Inativo / Bloqueado</span>';
                     corpo.innerHTML += `
                         <tr class="border-b hover:bg-slate-50">
                             <td class="p-3 font-bold">${c.nome || '---'}</td>
@@ -2904,92 +2934,102 @@
                             <td class="p-3 font-semibold">${c.cnpj || '---'}</td>
                             <td class="p-3">${c.email || '---'}<br><small>${c.telefone || ''}</small></td>
                             <td class="p-3">${c.departamento || '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+                            <td class="p-3 text-center">${badgeStatus}</td>
                         </tr>
                     `;
                 });
-            } else if (tipoRelatorioAtualEtapa13 === 'contratos') {
-                htmlCab = `<th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Início Vigência</th><th class="p-3">Fim Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3 text-center">Status</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 4;
+            } else {
+                if(linhaRodape) linhaRodape.style.display = 'table-row';
+                if (tipoRelatorioAtualEtapa13 === 'contratos') {
+                    htmlCab = `<th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Início Vigência</th><th class="p-3">Fim Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3 text-center">Status</th>`;
+                    cabecalho.innerHTML = htmlCab;
+                    lblTotal.colSpan = 4;
 
-                Object.values(contratosLocais).forEach(c => {
-                    if (c.excluidoLogico) return;
-                    rowsCount++;
-                    const val = parseFloat(c.valorFixoMensal || 0);
-                    totalGeralNum += val;
-                    corpo.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome || '---'}</td>
-                            <td class="p-3">${c.cnpj || '---'}</td>
-                            <td class="p-3">${c.vigenciaInicio ? c.vigenciaInicio.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3">${c.mesAnoReajuste || '---'} (${c.indiceReajuste || 'IPCA'})</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
-                        </tr>
-                    `;
-                });
-                valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            } else if (tipoRelatorioAtualEtapa13 === 'pagamentos' || tipoRelatorioAtualEtapa13 === 'notas' || tipoRelatorioAtualEtapa13 === 'financeiro') {
-                htmlCab = `<th class="p-3">Tipo / Evento</th><th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Competência</th><th class="p-3">Vencimento</th><th class="p-3">Valor</th><th class="p-3 text-center">Status / NF</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 5;
+                    Object.values(contratosLocais).forEach(c => {
+                        if (c.excluidoLogico) return;
+                        if (centroCustoFiltro !== "todos" && c.departamento !== centroCustoFiltro) return;
+                        if (prestadorFiltro !== "todos" && c.nome !== prestadorFiltro) return;
 
-                const processarItemRel = (tipoItem, item) => {
-                    rowsCount++;
-                    const val = parseFloat(item.valor || 0);
-                    totalGeralNum += val;
-                    corpo.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold text-blue-900">${tipoItem}</td>
-                            <td class="p-3 font-semibold">${item.nome}</td>
-                            <td class="p-3">${item.cnpj}</td>
-                            <td class="p-3">${compRef}</td>
-                            <td class="p-3">${item.vencimento ? item.vencimento.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
-                            <td class="p-3 text-center font-bold text-slate-700">${item.status} ${item.nfNome ? '📁 (NF OK)' : ''}</td>
-                        </tr>
-                    `;
-                };
-
-                Object.values(dadosComp.regular || {}).forEach(i => processarItemRel("Regular", i));
-                Object.values(dadosComp.complementar || {}).forEach(i => processarItemRel("Comp. (" + (i.evento || 'Adicional') + ")", i));
-
-                valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
-            } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
-                htmlCab = `<th class="p-3">Prestador</th><th class="p-3">Tipo de Documento</th><th class="p-3">Nome do Arquivo</th><th class="p-3 text-center">Validade / Vigência</th>`;
-                cabecalho.innerHTML = htmlCab;
-                lblTotal.colSpan = 3;
-                valTotal.innerText = "-";
-
-                Object.values(contratosLocais).forEach(c => {
-                    if (c.excluidoLogico) return;
-                    if (c.arquivoContratoBase64) {
                         rowsCount++;
+                        const val = parseFloat(c.valorFixoMensal || 0);
+                        totalGeralNum += val;
                         corpo.innerHTML += `
                             <tr class="border-b hover:bg-slate-50">
-                                <td class="p-3 font-bold">${c.nome}</td>
-                                <td class="p-3 text-blue-900 font-semibold">Contrato Social / Prestação</td>
-                                <td class="p-3">Contrato Principal.pdf</td>
-                                <td class="p-3 text-center">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                                <td class="p-3 font-bold">${c.nome || '---'}</td>
+                                <td class="p-3">${c.cnpj || '---'}</td>
+                                <td class="p-3">${c.vigenciaInicio ? c.vigenciaInicio.split('-').reverse().join('/') : '---'}</td>
+                                <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : '---'}</td>
+                                <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-3">${c.mesAnoReajuste || '---'} (${c.indiceReajuste || 'IPCA'})</td>
+                                <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
                             </tr>
                         `;
-                    }
-                    if (c.documentosCompliance && c.documentosCompliance.length > 0) {
-                        c.documentosCompliance.forEach(doc => {
+                    });
+                    valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                } else if (tipoRelatorioAtualEtapa13 === 'pagamentos' || tipoRelatorioAtualEtapa13 === 'notas' || tipoRelatorioAtualEtapa13 === 'financeiro') {
+                    htmlCab = `<th class="p-3">Tipo / Evento</th><th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Competência</th><th class="p-3">Vencimento</th><th class="p-3">Valor</th><th class="p-3 text-center">Status / NF</th>`;
+                    cabecalho.innerHTML = htmlCab;
+                    lblTotal.colSpan = 5;
+
+                    const processarItemRel = (tipoItem, item) => {
+                        if (prestadorFiltro !== "todos" && item.nome !== prestadorFiltro) return;
+                        rowsCount++;
+                        const val = parseFloat(item.valor || 0);
+                        totalGeralNum += val;
+                        corpo.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold text-blue-900">${tipoItem}</td>
+                                <td class="p-3 font-semibold">${item.nome}</td>
+                                <td class="p-3">${item.cnpj}</td>
+                                <td class="p-3">${compRef}</td>
+                                <td class="p-3">${item.vencimento ? item.vencimento.split('-').reverse().join('/') : '---'}</td>
+                                <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
+                                <td class="p-3 text-center font-bold text-slate-700">${item.status} ${item.nfNome ? '📁 (NF OK)' : ''}</td>
+                            </tr>
+                        `;
+                    };
+
+                    Object.values(dadosComp.regular || {}).forEach(i => processarItemRel("Regular", i));
+                    Object.values(dadosComp.complementar || {}).forEach(i => processarItemRel("Comp. (" + (i.evento || 'Adicional') + ")", i));
+
+                    valTotal.innerText = 'R$ ' + totalGeralNum.toLocaleString('pt-BR', {minimumFractionDigits:2});
+                } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
+                    htmlCab = `<th class="p-3">Prestador</th><th class="p-3">Tipo de Documento</th><th class="p-3">Nome do Arquivo</th><th class="p-3 text-center">Validade / Vigência</th>`;
+                    cabecalho.innerHTML = htmlCab;
+                    lblTotal.colSpan = 3;
+                    valTotal.innerText = "-";
+
+                    Object.values(contratosLocais).forEach(c => {
+                        if (c.excluidoLogico) return;
+                        if (prestadorFiltro !== "todos" && c.nome !== prestadorFiltro) return;
+                        if (centroCustoFiltro !== "todos" && c.departamento !== centroCustoFiltro) return;
+
+                        if (c.arquivoContratoBase64) {
                             rowsCount++;
                             corpo.innerHTML += `
                                 <tr class="border-b hover:bg-slate-50">
                                     <td class="p-3 font-bold">${c.nome}</td>
-                                    <td class="p-3 text-emerald-800 font-semibold">Compliance / Certidão</td>
-                                    <td class="p-3">${doc.nomeArquivo}</td>
-                                    <td class="p-3 text-center">${doc.validade}</td>
+                                    <td class="p-3 text-blue-900 font-semibold">Contrato Social / Prestação</td>
+                                    <td class="p-3">Contrato Principal.pdf</td>
+                                    <td class="p-3 text-center">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
                                 </tr>
                             `;
-                        });
-                    }
-                });
+                        }
+                        if (c.documentosCompliance && c.documentosCompliance.length > 0) {
+                            c.documentosCompliance.forEach(doc => {
+                                rowsCount++;
+                                corpo.innerHTML += `
+                                    <tr class="border-b hover:bg-slate-50">
+                                        <td class="p-3 font-bold">${c.nome}</td>
+                                        <td class="p-3 text-emerald-800 font-semibold">Compliance / Certidão</td>
+                                        <td class="p-3">${doc.nomeArquivo}</td>
+                                        <td class="p-3 text-center">${doc.validade}</td>
+                                    </tr>
+                                `;
+                            });
+                        }
+                    });
+                }
             }
 
             if (rowsCount === 0) {
@@ -3113,6 +3153,9 @@
         });
 
         document.getElementById('relFiltroCompetencia').addEventListener('change', atualizarRelatoriosEtapa13);
+        document.getElementById('relFiltroCentroCusto').addEventListener('change', atualizarRelatoriosEtapa13);
+        document.getElementById('relFiltroPrestador').addEventListener('change', atualizarRelatoriosEtapa13);
+        document.getElementById('relFiltroStatusEspecifico').addEventListener('change', atualizarRelatoriosEtapa13);
 
         onValue(ref(db, pathContratosDB), (snapshot) => {
             contratosLocais = snapshot.val() || {};
@@ -3202,6 +3245,7 @@
             });
             renderizarFolhaPagamento();
             atualizarCentralDocumentos();
+            atualizarRelatoriosEtapa13();
         });
 
         onValue(ref(db, pathFolhasDB), (snapshot) => {
