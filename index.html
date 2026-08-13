@@ -582,11 +582,17 @@
                             <option value="todos">-- Todos os Tipos --</option>
                             <option value="Contrato">Contrato Social / Prestação</option>
                             <option value="Nota Fiscal">Nota Fiscal (NF)</option>
+                            <option value="Compliance">Compliance / Certidão</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Competência (Notas)</label>
-                        <select id="docFiltroCompetencia" class="w-full p-2 border rounded text-xs bg-white"></select>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Vigência / Validade</label>
+                        <select id="docFiltroValidade" class="w-full p-2 border rounded text-xs bg-white">
+                            <option value="todos">-- Todas as Validades --</option>
+                            <option value="vigente">Vigente / Regular</option>
+                            <option value="vencendo">Vencendo em breve (30 dias)</option>
+                            <option value="vencido">Vencido ⚠️</option>
+                        </select>
                     </div>
                     <div class="flex items-end">
                         <button id="btn-exportar-documentos" class="w-full bg-emerald-700 hover:bg-emerald-800 text-white font-bold p-2 rounded text-xs transition shadow-sm flex items-center justify-center gap-1.5">📥 Exportar Relatório</button>
@@ -1267,7 +1273,6 @@
 <!-- MODAL ALTERAR PLANO DE EMPRESA (SUPERADMIN) -->
 <div id="modalAlterarPlanoEmpresa" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
     <div class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl border space-y-4">
-        <h3 class="text-lg font-bold text-blue-950">Alterar Plano do Cliente / CNPJ</h3>
         <input type="hidden" id="alterarPlanoEmpresaId">
         <input type="hidden" id="alterarPlanoCnpjAlvo">
         <div class="space-y-3 text-xs">
@@ -1296,10 +1301,9 @@
         const filtroCompetencia = document.getElementById('filtroCompetencia');
         const selectCompetenciaPJ = document.getElementById('selectCompetenciaPJ');
         const relFiltroCompetencia = document.getElementById('relFiltroCompetencia');
-        const docFiltroCompetencia = document.getElementById('docFiltroCompetencia');
         const auditoriaFiltroCompetencia = document.getElementById('auditoriaFiltroCompetencia');
         
-        filtroCompetencia.innerHTML = ''; selectCompetenciaPJ.innerHTML = ''; relFiltroCompetencia.innerHTML = ''; docFiltroCompetencia.innerHTML = ''; auditoriaFiltroCompetencia.innerHTML = '';
+        filtroCompetencia.innerHTML = ''; selectCompetenciaPJ.innerHTML = ''; relFiltroCompetencia.innerHTML = ''; auditoriaFiltroCompetencia.innerHTML = '';
         let competenciaSelecionada = `${mesAtualSistema}-${anoAtualSistema}`;
 
         const optTodasAuditoria = document.createElement('option'); optTodasAuditoria.value = "todos"; optTodasAuditoria.innerText = "-- Todas as Competências --";
@@ -1312,9 +1316,8 @@
             const opt2 = document.createElement('option'); opt2.value = valorCompetencia; opt2.innerText = `${nome} / ${anoAtualSistema}`;
             const opt3 = document.createElement('option'); opt3.value = valorCompetencia; opt3.innerText = `${nome} / ${anoAtualSistema}`;
             const opt4 = document.createElement('option'); opt4.value = valorCompetencia; opt4.innerText = `${nome} / ${anoAtualSistema}`;
-            const opt5 = document.createElement('option'); opt5.value = valorCompetencia; opt5.innerText = `${nome} / ${anoAtualSistema}`;
             if (numeroMes === "08" && anoAtualSistema === 2026) { opt1.selected = true; opt2.selected = true; opt3.selected = true; opt4.selected = true; }
-            filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2); relFiltroCompetencia.appendChild(opt3); docFiltroCompetencia.appendChild(opt4); auditoriaFiltroCompetencia.appendChild(opt5);
+            filtroCompetencia.appendChild(opt1); selectCompetenciaPJ.appendChild(opt2); relFiltroCompetencia.appendChild(opt3); auditoriaFiltroCompetencia.appendChild(opt4);
         });
 
         competenciaSelecionada = filtroCompetencia.value;
@@ -3009,9 +3012,20 @@
 
             const filtroPrestador = document.getElementById('docFiltroPrestador').value;
             const filtroTipo = document.getElementById('docFiltroTipo').value;
-            const compRef = document.getElementById('docFiltroCompetencia').value;
-            
-            const dadosComp = folhasLocais[compRef] || { regular: {}, complementar: {} };
+            const filtroValidade = document.getElementById('docFiltroValidade').value;
+            const hoje = new Date();
+
+            const checarValidadeFiltro = (dataValidadeStr) => {
+                if (filtroValidade === "todos") return true;
+                if (!dataValidadeStr || dataValidadeStr === "Indeterminada" || dataValidadeStr === "Não informada") return filtroValidade === "vigente";
+                const dt = new Date(dataValidadeStr);
+                if (isNaN(dt)) return true;
+                const diffDias = Math.ceil((dt - hoje) / (1000 * 60 * 60 * 24));
+                if (filtroValidade === "vencido") return diffDias < 0;
+                if (filtroValidade === "vencendo") return diffDias >= 0 && diffDias <= 30;
+                if (filtroValidade === "vigente") return diffDias > 30;
+                return true;
+            };
 
             Object.values(contratosLocais).forEach(c => {
                 if (c.excluidoLogico) return;
@@ -3019,57 +3033,68 @@
                 if (filtroPrestador !== "todos" && c.nome !== filtroPrestador) return;
 
                 if (c.arquivoContratoBase64 && (filtroTipo === "todos" || filtroTipo === "Contrato")) {
-                    count++;
-                    tbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${c.nome} <br><small class="text-slate-500">${c.cnpj || ''}</small></td>
-                            <td class="p-3 font-semibold text-blue-900">Contrato de Prestação</td>
-                            <td class="p-3">Competência Contínua</td>
-                            <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Vigente ✔</span></td>
-                            <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('Contrato - ${c.nome}', '${c.arquivoContratoBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
-                        </tr>
-                    `;
-                }
-
-                if (c.documentosCompliance && (filtroTipo === "todos" || filtroTipo === "Contrato")) {
-                    c.documentosCompliance.forEach(doc => {
+                    const vigFim = c.vigenciaFim || "Indeterminada";
+                    if (checarValidadeFiltro(vigFim)) {
                         count++;
                         tbody.innerHTML += `
                             <tr class="border-b hover:bg-slate-50">
                                 <td class="p-3 font-bold">${c.nome} <br><small class="text-slate-500">${c.cnpj || ''}</small></td>
-                                <td class="p-3 font-semibold text-emerald-800">Compliance / Certidão</td>
-                                <td class="p-3">${doc.nomeArquivo}</td>
-                                <td class="p-3">${doc.validade}</td>
-                                <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular ✔</span></td>
-                                <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('${doc.nomeArquivo}', '${doc.base64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
+                                <td class="p-3 font-semibold text-blue-900">Contrato de Prestação</td>
+                                <td class="p-3">Competência Contínua</td>
+                                <td class="p-3">${vigFim !== 'Indeterminada' ? vigFim.split('-').reverse().join('/') : 'Indeterminada'}</td>
+                                <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Vigente ✔</span></td>
+                                <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('Contrato - ${c.nome}', '${c.arquivoContratoBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
                             </tr>
                         `;
+                    }
+                }
+
+                if (c.documentosCompliance && (filtroTipo === "todos" || filtroTipo === "Compliance")) {
+                    c.documentosCompliance.forEach(doc => {
+                        const valDoc = doc.validade || "Não informada";
+                        if (checarValidadeFiltro(valDoc)) {
+                            count++;
+                            tbody.innerHTML += `
+                                <tr class="border-b hover:bg-slate-50">
+                                    <td class="p-3 font-bold">${c.nome} <br><small class="text-slate-500">${c.cnpj || ''}</small></td>
+                                    <td class="p-3 font-semibold text-emerald-800">Compliance / Certidão</td>
+                                    <td class="p-3">${doc.nomeArquivo}</td>
+                                    <td class="p-3">${valDoc}</td>
+                                    <td class="p-3 text-center"><span class="px-2 py-0.5 bg-green-100 text-green-800 rounded font-bold text-[10px]">Regular ✔</span></td>
+                                    <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('${doc.nomeArquivo}', '${doc.base64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
+                                </tr>
+                            `;
+                        }
                     });
                 }
             });
 
-            const analisarNfDoc = (item) => {
+            const analisarNfDoc = (item, compKey) => {
                 if (filtroPrestador !== "todos" && item.nome !== filtroPrestador) return;
                 if (filtroTipo !== "todos" && filtroTipo !== "Nota Fiscal") return;
 
-                if (item.nfBase64) {
-                    count++;
-                    tbody.innerHTML += `
-                        <tr class="border-b hover:bg-slate-50">
-                            <td class="p-3 font-bold">${item.nome} <br><small class="text-slate-500">${item.cnpj}</small></td>
-                            <td class="p-3 font-semibold text-amber-900">Nota Fiscal (NF)</td>
-                            <td class="p-3">${item.nfNome || 'Nota_Fiscal.pdf'} (${compRef})</td>
-                            <td class="p-3">Venc: ${item.vencimento ? item.vencimento.split('-').reverse().join('/') : '---'}</td>
-                            <td class="p-3 text-center"><span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">${item.status}</span></td>
-                            <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('NF - ${item.nome}', '${item.nfBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
-                        </tr>
-                    `;
+                const vencNf = item.vencimento || "";
+                if (checarValidadeFiltro(vencNf)) {
+                    if (item.nfBase64) {
+                        count++;
+                        tbody.innerHTML += `
+                            <tr class="border-b hover:bg-slate-50">
+                                <td class="p-3 font-bold">${item.nome} <br><small class="text-slate-500">${item.cnpj}</small></td>
+                                <td class="p-3 font-semibold text-amber-900">Nota Fiscal (NF)</td>
+                                <td class="p-3">${item.nfNome || 'Nota_Fiscal.pdf'} (${compKey})</td>
+                                <td class="p-3">${vencNf ? vencNf.split('-').reverse().join('/') : '---'}</td>
+                                <td class="p-3 text-center"><span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded font-bold text-[10px]">${item.status}</span></td>
+                                <td class="p-3 text-center"><button onclick="abrirModalVisualizarArquivo('NF - ${item.nome}', '${item.nfBase64}')" class="bg-blue-50 text-blue-700 border px-2.5 py-1 rounded font-bold text-xs">📄 Visualizar</button></td>
+                            </tr>
+                        `;
+                    }
                 }
             };
 
-            Object.values(dadosComp.regular || {}).forEach(analisarNfDoc);
-            Object.values(dadosComp.complementar || {}).forEach(analisarNfDoc);
+            Object.entries(folhasLocais).forEach(([compKey, dadosComp]) => {
+                Object.values(dadosComp.regular || {}).forEach(item => analisarNfDoc(item, compKey));
+                Object.values(dadosComp.complementar || {}).forEach(item => analisarNfDoc(item, compKey));
+            });
 
             if (count === 0) {
                 tbody.innerHTML = `<tr><td colspan="6" class="p-4 text-center text-slate-400">Nenhum documento encontrado com os filtros selecionados.</td></tr>`;
@@ -3078,7 +3103,7 @@
 
         document.getElementById('docFiltroPrestador').addEventListener('change', atualizarCentralDocumentos);
         document.getElementById('docFiltroTipo').addEventListener('change', atualizarCentralDocumentos);
-        document.getElementById('docFiltroCompetencia').addEventListener('change', atualizarCentralDocumentos);
+        document.getElementById('docFiltroValidade').addEventListener('change', atualizarCentralDocumentos);
 
         document.getElementById('btn-exportar-documentos').addEventListener('click', () => {
             const tabela = document.querySelector('#documentos table');
@@ -3087,7 +3112,6 @@
             registrarAuditoria("Central de Documentos", "Exportação Excel", "Relatório de Documentos", "-", "Arquivo Baixado");
         });
 
-        document.getElementById('docFiltroCompetencia').addEventListener('change', atualizarCentralDocumentos);
         document.getElementById('relFiltroCompetencia').addEventListener('change', atualizarRelatoriosEtapa13);
 
         onValue(ref(db, pathContratosDB), (snapshot) => {
