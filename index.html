@@ -653,7 +653,7 @@
                         <select id="relFiltroPrestador" class="w-full p-2 border rounded bg-white"><option value="todos">-- Todos os Prestadores --</option></select>
                     </div>
                     <div>
-                        <label id="label-filtro-especifico" class="block font-bold text-slate-700 mb-1">Status</label>
+                        <label id="label-filtro-especifico" class="block font-bold text-slate-700 mb-1">Status / NF</label>
                         <select id="relFiltroStatusEspecifico" class="w-full p-2 border rounded bg-white">
                             <option value="todos">-- Todos --</option>
                         </select>
@@ -2887,6 +2887,17 @@
                         <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                     `;
                 }
+                if(selectCentroCusto) {
+                    selectCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
+                    let centrosSet = new Set();
+                    Object.values(contratosLocais).forEach(c => {
+                        if (!c.excluidoLogico && c.departamento) centrosSet.add(c.departamento.trim());
+                    });
+                    centrosSet.forEach(cc => {
+                        let opt = document.createElement('option'); opt.value = cc; opt.innerText = cc;
+                        selectCentroCusto.appendChild(opt);
+                    });
+                }
             } else if (tipo === 'contratos') {
                 if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Fim de Vigência";
                 if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Reajuste";
@@ -2913,11 +2924,22 @@
             } else {
                 if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Competência Referência";
                 if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Centro de Custo";
-                if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status de Pagamento";
+                if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status / NF";
                 if(selectFiltroEspecifico) {
                     selectFiltroEspecifico.innerHTML = `
                         <option value="todos">-- Todos --</option>
                     `;
+                }
+                if(selectCentroCusto) {
+                    selectCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
+                    let centrosSet = new Set();
+                    Object.values(contratosLocais).forEach(c => {
+                        if (!c.excluidoLogico && c.departamento) centrosSet.add(c.departamento.trim());
+                    });
+                    centrosSet.forEach(cc => {
+                        let opt = document.createElement('option'); opt.value = cc; opt.innerText = cc;
+                        selectCentroCusto.appendChild(opt);
+                    });
                 }
             }
 
@@ -3024,6 +3046,10 @@
 
                     const processarItemRel = (tipoItem, item) => {
                         if (prestadorFiltro !== "todos" && item.nome !== prestadorFiltro) return;
+                        if (centroCustoFiltro !== "todos") {
+                            const contratoDoItem = contratosLocais[item.contratoId];
+                            if (!contratoDoItem || contratoDoItem.departamento !== centroCustoFiltro) return;
+                        }
                         rowsCount++;
                         const val = parseFloat(item.valor || 0);
                         totalGeralNum += val;
