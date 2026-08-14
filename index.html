@@ -653,7 +653,7 @@
                         <select id="relFiltroPrestador" class="w-full p-2 border rounded bg-white"><option value="todos">-- Todos os Prestadores --</option></select>
                     </div>
                     <div>
-                        <label id="label-filtro-especifico" class="block font-bold text-slate-700 mb-1">Status de Pagamento</label>
+                        <label id="label-filtro-especifico" class="block font-bold text-slate-700 mb-1">Status</label>
                         <select id="relFiltroStatusEspecifico" class="w-full p-2 border rounded bg-white">
                             <option value="todos">-- Todos --</option>
                         </select>
@@ -2888,7 +2888,7 @@
                     `;
                 }
             } else if (tipo === 'contratos') {
-                if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Vigência (Mês/Ano)";
+                if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Fim de Vigência";
                 if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Reajuste";
                 if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status";
                 if(selectFiltroEspecifico) {
@@ -2899,7 +2899,6 @@
                     `;
                 }
                 
-                // Popular opções de Reajuste dinamicamente
                 if(selectCentroCusto) {
                     selectCentroCusto.innerHTML = '<option value="todos">-- Todos os Reajustes --</option>';
                     let reajustesSet = new Set();
@@ -2972,9 +2971,11 @@
             } else {
                 if(linhaRodape) linhaRodape.style.display = 'table-row';
                 if (tipoRelatorioAtualEtapa13 === 'contratos') {
-                    htmlCab = `<th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Início Vigência</th><th class="p-3">Fim Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3 text-center">Status</th>`;
+                    htmlCab = `<th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Início Vigência</th><th class="p-3">Fim de Vigência</th><th class="p-3">Valor Fixo</th><th class="p-3">Reajuste</th><th class="p-3 text-center">Status</th>`;
                     cabecalho.innerHTML = htmlCab;
-                    lblTotal.colSpan = 4;
+                    if (cabecalho.children.length > 1) {
+                        lblTotal.colSpan = cabecalho.children.length - 1;
+                    }
 
                     Object.values(contratosLocais).forEach(c => {
                         if (c.excluidoLogico) return;
@@ -2982,7 +2983,6 @@
                         if (prestadorFiltro !== "todos" && c.nome !== prestadorFiltro) return;
                         if (statusFiltro !== "todos" && c.status !== statusFiltro) return;
 
-                        // Filtro de Vigência por Mês/Ano (compRef ex: "08-2026")
                         if (compRef && compRef !== "todos" && c.vigenciaInicio && c.vigenciaFim) {
                             const [mesFiltro, anoFiltro] = compRef.split('-');
                             const dtInicio = new Date(c.vigenciaInicio);
@@ -2991,10 +2991,7 @@
                             const anoInicio = dtInicio.getFullYear();
                             const mesFim = String(dtFim.getMonth() + 1).padStart(2, '0');
                             const anoFim = dtFim.getFullYear();
-                            const compInicio = `${mesInicio}-${anoInicio}`;
-                            const compFim = `${mesFim}-${anoFim}`;
                             
-                            // Verifica se o contrato abrange o mês/ano selecionado
                             const dataFiltroNum = parseInt(anoFiltro + mesFiltro);
                             const dataInicioNum = parseInt(anoInicio + mesInicio);
                             const dataFimNum = parseInt(anoFim + mesFim);
@@ -3021,7 +3018,9 @@
                 } else if (tipoRelatorioAtualEtapa13 === 'pagamentos' || tipoRelatorioAtualEtapa13 === 'notas' || tipoRelatorioAtualEtapa13 === 'financeiro') {
                     htmlCab = `<th class="p-3">Tipo / Evento</th><th class="p-3">Prestador</th><th class="p-3">CNPJ</th><th class="p-3">Competência</th><th class="p-3">Vencimento</th><th class="p-3">Valor</th><th class="p-3 text-center">Status / NF</th>`;
                     cabecalho.innerHTML = htmlCab;
-                    lblTotal.colSpan = 5;
+                    if (cabecalho.children.length > 1) {
+                        lblTotal.colSpan = cabecalho.children.length - 1;
+                    }
 
                     const processarItemRel = (tipoItem, item) => {
                         if (prestadorFiltro !== "todos" && item.nome !== prestadorFiltro) return;
@@ -3048,7 +3047,9 @@
                 } else if (tipoRelatorioAtualEtapa13 === 'documentos') {
                     htmlCab = `<th class="p-3">Prestador</th><th class="p-3">Tipo de Documento</th><th class="p-3">Nome do Arquivo</th><th class="p-3 text-center">Validade / Vigência</th>`;
                     cabecalho.innerHTML = htmlCab;
-                    lblTotal.colSpan = 3;
+                    if (cabecalho.children.length > 1) {
+                        lblTotal.colSpan = cabecalho.children.length - 1;
+                    }
                     valTotal.innerText = "-";
 
                     Object.values(contratosLocais).forEach(c => {
