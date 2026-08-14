@@ -641,7 +641,7 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 bg-slate-50 p-4 rounded-xl border text-xs">
                     <div id="bloco-filtro-competencia">
-                        <label class="block font-bold text-slate-700 mb-1">Competência Referência</label>
+                        <label id="label-filtro-competencia" class="block font-bold text-slate-700 mb-1">Competência Referência</label>
                         <select id="relFiltroCompetencia" class="w-full p-2 border rounded bg-white font-bold text-blue-900"></select>
                     </div>
                     <div id="bloco-filtro-centro-custo">
@@ -661,7 +661,7 @@
                 </div>
 
                 <!-- BARRA DE FILTROS DINÂMICOS ESPECÍFICOS (CONTRATOS E DOCUMENTOS) -->
-                <div id="bloco-filtros-dinamicos-extras" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-200 text-xs">
+                <div id="bloco-filtros-dinamicos-extras" class="grid grid-cols-1 md:grid-cols-3 gap-4 bg-blue-50/60 p-4 rounded-xl border border-blue-200 text-xs hidden">
                     <!-- Preenchido dinamicamente via JS conforme a aba ativa -->
                 </div>
 
@@ -2870,10 +2870,15 @@
                 if (btn) btn.className = (t === tipo) ? "py-2.5 px-3 rounded-xl bg-blue-900 text-white transition shadow-sm" : "py-2.5 px-3 rounded-xl text-slate-700 hover:bg-white transition";
             });
             
+            const labelFiltroCompetencia = document.getElementById('label-filtro-competencia');
+            const labelFiltroCentroCusto = document.getElementById('label-filtro-centro-custo');
             const labelFiltroEspecifico = document.getElementById('label-filtro-especifico');
             const selectFiltroEspecifico = document.getElementById('relFiltroStatusEspecifico');
+            const selectCentroCusto = document.getElementById('relFiltroCentroCusto');
             
             if (tipo === 'prestadores') {
+                if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Competência Referência";
+                if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Centro de Custo";
                 if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status";
                 if(selectFiltroEspecifico) {
                     selectFiltroEspecifico.innerHTML = `
@@ -2882,7 +2887,33 @@
                         <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
                     `;
                 }
+            } else if (tipo === 'contratos') {
+                if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Vigência (Mês/Ano)";
+                if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Reajuste";
+                if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status";
+                if(selectFiltroEspecifico) {
+                    selectFiltroEspecifico.innerHTML = `
+                        <option value="todos">-- Todos --</option>
+                        <option value="Ativo">Ativo</option>
+                        <option value="Inativo / Bloqueado">Inativo / Bloqueado</option>
+                    `;
+                }
+                
+                // Popular opções de Reajuste dinamicamente
+                if(selectCentroCusto) {
+                    selectCentroCusto.innerHTML = '<option value="todos">-- Todos os Reajustes --</option>';
+                    let reajustesSet = new Set();
+                    Object.values(contratosLocais).forEach(c => {
+                        if (!c.excluidoLogico && c.mesAnoReajuste) reajustesSet.add(c.mesAnoReajuste.trim());
+                    });
+                    reajustesSet.forEach(r => {
+                        let opt = document.createElement('option'); opt.value = r; opt.innerText = r;
+                        selectCentroCusto.appendChild(opt);
+                    });
+                }
             } else {
+                if(labelFiltroCompetencia) labelFiltroCompetencia.innerText = "Competência Referência";
+                if(labelFiltroCentroCusto) labelFiltroCentroCusto.innerText = "Centro de Custo";
                 if(labelFiltroEspecifico) labelFiltroEspecifico.innerText = "Status de Pagamento";
                 if(selectFiltroEspecifico) {
                     selectFiltroEspecifico.innerHTML = `
@@ -2947,12 +2978,33 @@
 
                     Object.values(contratosLocais).forEach(c => {
                         if (c.excluidoLogico) return;
-                        if (centroCustoFiltro !== "todos" && c.departamento !== centroCustoFiltro) return;
+                        if (centroCustoFiltro !== "todos" && c.mesAnoReajuste !== centroCustoFiltro) return;
                         if (prestadorFiltro !== "todos" && c.nome !== prestadorFiltro) return;
+                        if (statusFiltro !== "todos" && c.status !== statusFiltro) return;
+
+                        // Filtro de Vigência por Mês/Ano (compRef ex: "08-2026")
+                        if (compRef && compRef !== "todos" && c.vigenciaInicio && c.vigenciaFim) {
+                            const [mesFiltro, anoFiltro] = compRef.split('-');
+                            const dtInicio = new Date(c.vigenciaInicio);
+                            const dtFim = new Date(c.vigenciaFim);
+                            const mesInicio = String(dtInicio.getMonth() + 1).padStart(2, '0');
+                            const anoInicio = dtInicio.getFullYear();
+                            const mesFim = String(dtFim.getMonth() + 1).padStart(2, '0');
+                            const anoFim = dtFim.getFullYear();
+                            const compInicio = `${mesInicio}-${anoInicio}`;
+                            const compFim = `${mesFim}-${anoFim}`;
+                            
+                            // Verifica se o contrato abrange o mês/ano selecionado
+                            const dataFiltroNum = parseInt(anoFiltro + mesFiltro);
+                            const dataInicioNum = parseInt(anoInicio + mesInicio);
+                            const dataFimNum = parseInt(anoFim + mesFim);
+                            if (dataFiltroNum < dataInicioNum || dataFiltroNum > dataFimNum) return;
+                        }
 
                         rowsCount++;
                         const val = parseFloat(c.valorFixoMensal || 0);
                         totalGeralNum += val;
+                        let badgeStatus = c.status === 'Ativo' ? '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-green-100 text-green-800">Ativo</span>' : '<span class="px-2 py-0.5 rounded font-bold text-[10px] bg-red-100 text-red-800">Inativo / Bloqueado</span>';
                         corpo.innerHTML += `
                             <tr class="border-b hover:bg-slate-50">
                                 <td class="p-3 font-bold">${c.nome || '---'}</td>
@@ -2961,7 +3013,7 @@
                                 <td class="p-3">${c.vigenciaFim ? c.vigenciaFim.split('-').reverse().join('/') : '---'}</td>
                                 <td class="p-3 font-bold text-blue-950">R$ ${val.toLocaleString('pt-BR', {minimumFractionDigits:2})}</td>
                                 <td class="p-3">${c.mesAnoReajuste || '---'} (${c.indiceReajuste || 'IPCA'})</td>
-                                <td class="p-3 text-center"><span class="px-2 py-0.5 rounded font-bold text-[10px] ${c.status === 'Ativo' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}">${c.status}</span></td>
+                                <td class="p-3 text-center">${badgeStatus}</td>
                             </tr>
                         `;
                     });
@@ -3166,7 +3218,7 @@
             
             if(motorSelect) motorSelect.innerHTML = '<option value="">Selecione...</option>';
             if(relFiltroPrestador) relFiltroPrestador.innerHTML = '<option value="todos">-- Todos os Prestadores --</option>';
-            if(relFiltroCentroCusto) relFiltroCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
+            if(relFiltroCentroCusto && tipoRelatorioAtualEtapa13 !== 'contratos') relFiltroCentroCusto.innerHTML = '<option value="todos">-- Todos os Centros --</option>';
             if(docFiltroPrestador) docFiltroPrestador.innerHTML = '<option value="todos">-- Todos os Prestadores --</option>';
             
             const tbody = document.getElementById('listaContratos');
@@ -3241,7 +3293,7 @@
             });
             centrosCustoSet.forEach(cc => {
                 let optCC = document.createElement('option'); optCC.value = cc; optCC.innerText = cc;
-                if(relFiltroCentroCusto) relFiltroCentroCusto.appendChild(optCC);
+                if(relFiltroCentroCusto && tipoRelatorioAtualEtapa13 !== 'contratos') relFiltroCentroCusto.appendChild(optCC);
             });
             renderizarFolhaPagamento();
             atualizarCentralDocumentos();
